@@ -1,0 +1,2 @@
+gcloud compute copy-files ~/dev/gc/ttserve rozzie@teletype-1:~/godev/src/
+
