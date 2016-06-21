@@ -22,7 +22,7 @@ import (
 var appEui string
 var appAccessKey string
 
-var mqttClient *MQTT.Client
+var mqttClient MQTT.Client
 var upQ chan MQTT.Message
 
 type dnDevice struct {
@@ -70,11 +70,7 @@ func main() {
 
     // Subscribe to the topics
 
-    messageReceived := func(client *MQTT.Client, message MQTT.Message) {
-        upQ <- message
-    }
-
-    if token := mqttClient.Subscribe(appEui+"/devices/+/up", 1, messageReceived); token.Wait() && token.Error() != nil {
+    if token := mqttClient.Subscribe(appEui+"/devices/+/up", 1, onMessageReceived); token.Wait() && token.Error() != nil {
         fmt.Printf("Error subscribing to topic: %s\n", token.Error())
         return
     }
@@ -121,6 +117,10 @@ func main() {
 
     }
 
+}
+
+func onMessageReceived(client MQTT.Client, message MQTT.Message) {
+        upQ <- message
 }
 
 func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {

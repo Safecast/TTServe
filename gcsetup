@@ -1,0 +1,11 @@
+sudo apt-get update
+sudo apt-get install git --assume-yes
+sudo apt-get install golang --assume-yes
+
+add this to .bashrc:
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+mkdir ~/go
+mkdir ~/go/src
+gupdate
