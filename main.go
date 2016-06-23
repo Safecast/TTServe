@@ -8,6 +8,7 @@
 package main
 
 import (
+    "time"
     "bytes"
     "strings"
     "encoding/json"
@@ -21,6 +22,8 @@ import (
 
 var appEui string
 var appAccessKey string
+
+var fullyConnected bool = false;
 
 var mqttClient MQTT.Client
 var upQ chan MQTT.Message
@@ -56,8 +59,8 @@ type SafecastData struct {
 }
 
 func main() {
-
-    ourServerName := "Teletype Service"
+    var token MQTT.Token
+    var opts *MQTT.ClientOptions
 
     // From https://staging.thethingsnetwork.org/wiki/Backend/Connect/Application
     ttnServer := "tcp://staging.thethingsnetwork.org:1883"
@@ -69,41 +72,68 @@ func main() {
     // Set up our message queue.  We shouldn't need much buffering, but buffer just in case.
     upQ = make(chan MQTT.Message, 5)
 
-    // Set up connection options
+    // Spawn the TTN inbound message handler
+    go ttnInboundHandler()
 
-    type MqttConsumer struct {
-        client *MQTT.Client
+    // This is the main retry loop for connecting to the service.  We've found empirically that
+    // there are fields in the client options structure that are NOT just "options" but rather are
+    // actual state, so we need to reallocate it on each retry.
+
+    for {
+
+        // Allocate and set up the options
+        opts = MQTT.NewClientOptions()
+        opts.AddBroker(ttnServer)
+        opts.SetUsername(appEui)
+        opts.SetPassword(appAccessKey)
+        opts.SetAutoReconnect(true)
+        opts.SetConnectionLostHandler(onConnectionLost)
+
+        // Connect to the MQTT service
+
+        mqttClient = MQTT.NewClient(opts)
+
+        if token = mqttClient.Connect(); token.Wait() && token.Error() != nil {
+
+            fmt.Printf("Error connecting to service: %s\n", token.Error())
+            time.Sleep(15 * time.Second)
+
+        } else {
+
+            fmt.Printf("Connected to %s\n", ttnServer)
+
+            // Subscribe to the topic
+            topic := appEui+"/devices/+/up"
+            if token = mqttClient.Subscribe(topic, 0, onMessageReceived); token.Wait() && token.Error() != nil {
+                fmt.Printf("Error subscribing to topic %s\n", topic, token.Error())
+                return
+            }
+
+            // Signal that it's ok for the handlers to start processing inbound stuff
+            fmt.Printf("Subscribed to %s and now fully connected.\n", topic)
+            fullyConnected = true;
+
+        }
+
+        // Infinitely loop here
+        for fullyConnected {
+            time.Sleep(15 * 60 * time.Second)
+            fmt.Printf("%s Alive\n", time.Now().Format(time.RFC850))
+        }
+
+        fmt.Printf("Lost connection; reconnecting...\n")
+
     }
 
-    opts := MQTT.NewClientOptions()
-    opts.AddBroker(ttnServer)
-    opts.SetClientID(ourServerName)
-    opts.SetUsername(appEui)
-    opts.SetPassword(appAccessKey)
+}
 
-    // Connect to the MQTT service
-
-    mqttClient = MQTT.NewClient(opts)
-    if token := mqttClient.Connect(); token.Wait() && token.Error() != nil {
-        fmt.Printf("Error connecting to service: %s\n", token.Error())
-        return
-    }
-
-    fmt.Printf("Connected to %s\n", ttnServer)
-
-    // Subscribe to the topics
-
-    if token := mqttClient.Subscribe(appEui+"/devices/+/up", 1, onMessageReceived); token.Wait() && token.Error() != nil {
-        fmt.Printf("Error subscribing to topic: %s\n", token.Error())
-        return
-    }
-
-    fmt.Printf("Subscribed to uplinked message queue\n")
+func ttnInboundHandler() {
 
     // Dequeue and process the messages as they're enqueued
     for msg := range upQ {
         var AppReq DataUpAppReq
-        //        fmt.Printf("Received from topic %s:\n%s\n", msg.Topic(), msg.Payload())
+
+        fmt.Printf("Received from topic %s:\n%s\n", msg.Topic(), msg.Payload())
 
         // Unmarshal the payload and extract the base64 data
         err := json.Unmarshal(msg.Payload(), &AppReq)
@@ -142,7 +172,14 @@ func main() {
 
 }
 
+func onConnectionLost(client MQTT.Client, err error) {
+    fullyConnected = false
+	mqttClient = nil
+    fmt.Printf("OnConnectionLost: %v\n", err)
+}
+
 func onMessageReceived(client MQTT.Client, message MQTT.Message) {
+    fmt.Printf("\n%s Message Received\n", time.Now().Format(time.RFC850))
     upQ <- message
 }
 
@@ -175,8 +212,7 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
 func ProcessSafecastMessage(msg *teletype.Telecast, defaultTime string, defaultLat float32, defaultLon float32, defaultAlt int32) {
 
     // Debug
-    fmt.Printf("Received Safecast Message:\n")
-    fmt.Printf("%s\n", msg)
+    fmt.Printf("Safecast: %s\n", msg)
 
     // Generate the fields common to all uploads to safecast
     sc := &SafecastData{}
@@ -235,43 +271,43 @@ func ProcessSafecastMessage(msg *teletype.Telecast, defaultTime string, defaultL
     if (msg.EnvHumidity != nil) {
         sc1.envHumid = fmt.Sprintf("%.2f", msg.GetEnvHumidity())
     }
-	uploadToSafecast(sc1)
+    uploadToSafecast(sc1)
 
-	// The following uploads have individual values
-	
+    // The following uploads have individual values
+
     if (msg.BatteryVoltage != nil) {
         sc2 := sc
         sc2.Unit = "bat_voltage"
         sc2.Value = sc1.BatVoltage
-		uploadToSafecast(sc2)
+        uploadToSafecast(sc2)
     }
 
     if (msg.BatterySOC != nil) {
         sc3 := sc
         sc3.Unit = "bat_soc"
         sc3.Value = sc1.BatSOC
-		uploadToSafecast(sc3)
+        uploadToSafecast(sc3)
     }
 
     if (msg.WirelessSNR != nil) {
         sc4 := sc
         sc4.Unit = "wireless_snr"
         sc4.Value = sc1.WirelessSNR
-		uploadToSafecast(sc4)
+        uploadToSafecast(sc4)
     }
 
     if (msg.EnvTemperature != nil) {
         sc5 := sc
         sc5.Unit = "env_temp"
         sc5.Value = sc1.envTemp
-		uploadToSafecast(sc5)
+        uploadToSafecast(sc5)
     }
 
     if (msg.EnvHumidity != nil) {
         sc6 := sc
         sc6.Unit = "env_humid"
         sc6.Value = sc1.envHumid
-		uploadToSafecast(sc6)
+        uploadToSafecast(sc6)
     }
 
 }
@@ -340,7 +376,11 @@ func sendMessage(devEui string, message string) {
     }
 
     fmt.Printf("Send %s: %s\n", getDnTopic(devEui), jdata)
-    mqttClient.Publish(getDnTopic(devEui), 0, false, jdata)
+
+    // Only do MQTT operations if we're fully initialized
+    if (fullyConnected) {
+        mqttClient.Publish(getDnTopic(devEui), 0, false, jdata)
+    }
 
 }
 
