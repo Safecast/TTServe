@@ -12,21 +12,30 @@ import (
     "bytes"
     "strings"
     "encoding/json"
+    "io"
+    "io/ioutil"
     "fmt"
     MQTT "github.com/eclipse/paho.mqtt.golang"
+	"net"
     "net/http"
     "strconv"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
 )
 
-var appEui string
-var appAccessKey string
+
+// From https://staging.thethingsnetwork.org/wiki/Backend/Connect/Application
+var ttnServer string = "tcp://staging.thethingsnetwork.org:1883"
+// From "ttnctl applications", the AppEUI and its Access Key
+var appEui string = "70B3D57ED0000420"
+var appAccessKey string = "bgCzOOs/5K16cuwP3/sGP9sea/4jKFwFEdTbYHw2fRE="
 
 var fullyConnected bool = false;
+var logDateFormat string = "2006-01-02 15:04:05"
 
 var mqttClient MQTT.Client
 var upQ chan MQTT.Message
+var reqQ chan DataUpAppReq
 
 type dnDevice struct {
     devEui string
@@ -34,6 +43,16 @@ type dnDevice struct {
 }
 
 var dnDevices []dnDevice
+
+type IPInfoData struct {
+	IP           net.IP `json:"ip"`
+	HostName     string `json:"hostname"`
+	City         string `json:"city"`
+	Region       string `json:"region"`
+	Country      string `json:"country"`
+	Location     string `json:"loc"`
+	Organization string `json:"org"`
+}
 
 type SafecastData struct {
     CapturedAt   string `json:"captured_at,omitempty"`   // 2016-02-20T14:02:25Z
@@ -59,27 +78,67 @@ type SafecastData struct {
 }
 
 func main() {
-    var token MQTT.Token
-    var opts *MQTT.ClientOptions
-
-    // From https://staging.thethingsnetwork.org/wiki/Backend/Connect/Application
-    ttnServer := "tcp://staging.thethingsnetwork.org:1883"
-
-    // From "ttnctl applications", the AppEUI and its Access Key
-    appEui = "70B3D57ED0000420"
-    appAccessKey = "bgCzOOs/5K16cuwP3/sGP9sea/4jKFwFEdTbYHw2fRE="
 
     // Set up our message queue.  We shouldn't need much buffering, but buffer just in case.
     upQ = make(chan MQTT.Message, 5)
+    reqQ = make(chan DataUpAppReq, 5)
 
     // Spawn the TTN inbound message handler
     go ttnInboundHandler()
+
+    // Spawn the app request handler shared by both TTN and direct inbound server
+    go appRequestHandler()
+
+    // Init our inbound server
+    go ttnDirectServer()
+
+    // Handle the inboound subscriber.  (This never returns.)
+    ttnSubscriptionHandler()
+
+}
+
+func ttnDirectServer () {
+    http.HandleFunc("/", handleInboundTTNPosts)
+    http.ListenAndServe(":8080", nil)
+}
+
+func handleInboundTTNPosts(rw http.ResponseWriter, req *http.Request) {
+    io.WriteString(rw, "This is the teletype API endpoint.")
+
+    body, err := ioutil.ReadAll(req.Body)
+    if err != nil {
+        fmt.Printf("Error reading HTTP request body: \n%v\n", req)
+        return
+    }
+
+    var AppReq DataUpAppReq
+    err = json.Unmarshal(body, &AppReq)
+    if err != nil {
+		// Very common case where anyone comes to web page, such as google health check
+        return
+    }
+
+    // We now have a TTN-like message, constructed as follws:
+    //  1) the Payload came from the device itself
+    //  2) TTGATE filled in the lat/lon/alt metadata, just in case the payload doesn't have location
+    //  3) TTGATE filled in SNR if it had access to it
+    //  4) We'll add the server's time, in case the payload lacked CapturedAt
+    AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+
+    // Enqueue it for TTN-like processing
+    reqQ <- AppReq
+
+}
+
+func ttnSubscriptionHandler () {
 
     // This is the main retry loop for connecting to the service.  We've found empirically that
     // there are fields in the client options structure that are NOT just "options" but rather are
     // actual state, so we need to reallocate it on each retry.
 
     for {
+        var token MQTT.Token
+        var opts *MQTT.ClientOptions
 
         // Allocate and set up the options
         opts = MQTT.NewClientOptions()
@@ -124,7 +183,6 @@ func main() {
         fmt.Printf("Lost connection; reconnecting...\n")
 
     }
-
 }
 
 func ttnInboundHandler() {
@@ -140,46 +198,53 @@ func ttnInboundHandler() {
         if err != nil {
             fmt.Printf("*** Payload doesn't have TTN data ***\n")
         } else {
-            devEui := AppReq.DevEUI;
-            fmt.Printf("Received message from Device: %s\n", devEui)
-            metadata := AppReq.Metadata[0]
-            //            fmt.Printf("Unmarshaled as:\n%v\n", AppReq)
-
-            // Unmarshal the buffer into a golang object
-            msg := &teletype.Telecast{}
-            err := proto.Unmarshal(AppReq.Payload, msg)
-            if err != nil {
-                fmt.Printf("*** PB unmarshaling error: ", err);
-            } else {
-
-                // Do various things baed upon the message type
-                switch msg.GetDeviceType() {
-
-                    // Is it something we recognize as being from safecast?
-                case teletype.Telecast_BGEIGIE_NANO:
-                    fallthrough
-                case teletype.Telecast_SIMPLECAST:
-                    ProcessSafecastMessage(msg, metadata.ServerTime, metadata.Latitude, metadata.Longitude, metadata.Altitude)
-                    // Display what we got from a non-Safecast device
-                default:
-                    ProcessTelecastMessage(msg, devEui)
-                }
-            }
-
+            // Enqueue it for processing
+            reqQ <- AppReq
         }
 
     }
 
 }
 
+func appRequestHandler() {
+
+    // Dequeue and process the messages as they're enqueued
+    for AppReq := range reqQ {
+
+        devEui := AppReq.DevEUI;
+        fmt.Printf("\n%s Received message from Device: %s\n", time.Now().Format(logDateFormat), devEui)
+
+        msg := &teletype.Telecast{}
+        err := proto.Unmarshal(AppReq.Payload, msg)
+        if err != nil {
+            fmt.Printf("*** PB unmarshaling error: ", err);
+        } else {
+
+            // Do various things baed upon the message type
+            switch msg.GetDeviceType() {
+
+                // Is it something we recognize as being from safecast?
+            case teletype.Telecast_BGEIGIE_NANO:
+                fallthrough
+            case teletype.Telecast_SIMPLECAST:
+		        metadata := AppReq.Metadata[0]
+                ProcessSafecastMessage(msg, metadata.GatewayEUI, metadata.ServerTime, metadata.Latitude, metadata.Longitude, metadata.Altitude)
+                // Display what we got from a non-Safecast device
+            default:
+                ProcessTelecastMessage(msg, devEui)
+            }
+        }
+    }
+}
+
 func onConnectionLost(client MQTT.Client, err error) {
     fullyConnected = false
-	mqttClient = nil
+    mqttClient = nil
     fmt.Printf("OnConnectionLost: %v\n", err)
 }
 
 func onMessageReceived(client MQTT.Client, message MQTT.Message) {
-    fmt.Printf("\n%s Message Received\n", time.Now().Format(time.RFC850))
+    fmt.Printf("\n%s Message Received:\n", time.Now().Format(logDateFormat))
     upQ <- message
 }
 
@@ -209,11 +274,17 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
 
 }
 
-func ProcessSafecastMessage(msg *teletype.Telecast, defaultTime string, defaultLat float32, defaultLon float32, defaultAlt int32) {
+func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime string, defaultLat float32, defaultLon float32, defaultAlt int32) {
 
+	// Process IPINFO data
+	var info IPInfoData
+	if ipInfo != "" {
+		json.Unmarshal([]byte(ipInfo), &info)
+	}
+	
     // Debug
-    fmt.Printf("Safecast: %s\n", msg)
-
+    fmt.Printf("Safecast message from %s/%s/%s:\n%s\n", info.City, info.Region, info.Country, msg)
+	
     // Generate the fields common to all uploads to safecast
     sc := &SafecastData{}
     if (msg.DeviceIDString != nil) {
@@ -321,6 +392,7 @@ func uploadToSafecast(sc *SafecastData) {
 
     scJSON, _ := json.Marshal(sc)
 
+    fmt.Printf("About to upload to %s:\n%s\n", SafecastUploadURL, scJSON)
     req, err := http.NewRequest("POST", UploadURL, bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")

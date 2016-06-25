@@ -1,2 +1,3 @@
 gcloud compute copy-files *.go rozzie@teletype-1:~/go/src/ttserve
+gcloud compute copy-files gcrun rozzie@teletype-1:~/go/src/ttserve
 
