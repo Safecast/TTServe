@@ -50,8 +50,8 @@ type IPInfoData struct {
 	Country      string `json:"country"`
 	CountryCode  string `json:"countryCode"`
 	ISP			 string `json:"isp"`
-	Latitude	 string `json:"lat"`
-	Longitude	 string `json:"lon"`
+	Latitude	 float32 `json:"lat"`
+	Longitude	 float32 `json:"lon"`
 	Organization string `json:"org"`
 	IP           net.IP `json:"query"`
 	Region       string `json:"region"`
