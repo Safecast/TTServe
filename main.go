@@ -228,7 +228,7 @@ func appRequestHandler() {
                 fallthrough
             case teletype.Telecast_SIMPLECAST:
 		        metadata := AppReq.Metadata[0]
-                ProcessSafecastMessage(msg, metadata.GatewayEUI, metadata.ServerTime, metadata.Latitude, metadata.Longitude, metadata.Altitude)
+                ProcessSafecastMessage(msg, metadata.GatewayEUI, metadata.ServerTime, metadata.Lsnr, metadata.Latitude, metadata.Longitude, metadata.Altitude)
                 // Display what we got from a non-Safecast device
             default:
                 ProcessTelecastMessage(msg, devEui)
@@ -274,7 +274,9 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
 
 }
 
-func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime string, defaultLat float32, defaultLon float32, defaultAlt int32) {
+func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime string, snr float32, defaultLat float32, defaultLon float32, defaultAlt int32) {
+	var theSNR float32
+	var sentVoltage bool
 
 	// Process IPINFO data
 	var info IPInfoData
@@ -287,9 +289,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
 	
     // Generate the fields common to all uploads to safecast
     sc := &SafecastData{}
-    if (msg.DeviceIDString != nil) {
+    if msg.DeviceIDString != nil {
         sc.DeviceID = msg.GetDeviceIDString();
-    } else if (msg.DeviceIDNumber != nil) {
+    } else if msg.DeviceIDNumber != nil {
         sc.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber()), 10);
     } else {
         sc.DeviceID = "UNKNOWN";
@@ -317,64 +319,80 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
 
     // The first upload has everything
     sc1 := sc
-    if (msg.Unit == nil) {
+    if msg.Unit == nil {
         sc1.Unit = "cpm"
     } else {
         sc1.Unit = fmt.Sprintf("%s", msg.GetUnit())
     }
-    if (msg.Value == nil) {
+    if msg.Value == nil {
         sc1.Value = "?"
     } else {
         sc1.Value = fmt.Sprintf("%d", msg.GetValue())
     }
-    if (msg.BatteryVoltage != nil) {
+    if msg.BatteryVoltage != nil {
         sc1.BatVoltage = fmt.Sprintf("%.4f", msg.GetBatteryVoltage())
     }
-    if (msg.BatterySOC != nil) {
+    if msg.BatterySOC != nil {
         sc1.BatSOC = fmt.Sprintf("%.2f", msg.GetBatterySOC())
     }
-    if (msg.WirelessSNR != nil) {
-        sc1.WirelessSNR = fmt.Sprintf("%.1f", msg.GetWirelessSNR())
-    }
-    if (msg.EnvTemperature != nil) {
+
+    if msg.WirelessSNR != nil {
+		theSNR = msg.GetWirelessSNR()
+    } else {
+		// this could be 0.0 if it weren't present in the message,
+		// and so a check for theSNR == 0 will be our "is present" test.
+		theSNR = snr
+	}
+    sc1.WirelessSNR = fmt.Sprintf("%.1f", theSNR)
+
+    if msg.EnvTemperature != nil {
         sc1.envTemp = fmt.Sprintf("%.2f", msg.GetEnvTemperature())
     }
-    if (msg.EnvHumidity != nil) {
+    if msg.EnvHumidity != nil {
         sc1.envHumid = fmt.Sprintf("%.2f", msg.GetEnvHumidity())
     }
     uploadToSafecast(sc1)
 
     // The following uploads have individual values
 
-    if (msg.BatteryVoltage != nil) {
+    if msg.BatteryVoltage != nil {
         sc2 := sc
         sc2.Unit = "bat_voltage"
         sc2.Value = sc1.BatVoltage
         uploadToSafecast(sc2)
-    }
+		sentVoltage = true
+    } else {
+		sentVoltage = false
+	}
 
-    if (msg.BatterySOC != nil) {
+    if msg.BatterySOC != nil {
         sc3 := sc
         sc3.Unit = "bat_soc"
         sc3.Value = sc1.BatSOC
         uploadToSafecast(sc3)
     }
 
-    if (msg.WirelessSNR != nil) {
+	// Note that we suppress this to only happen when we also send the voltage.
+	// We do this because this is a very slowly-changing value, and since it is
+	// gateway-supplied it is unthrottled and present on every entry.
+	// Since the voltage is device-throttled (for the same reason of being too
+	// noisy), we use the fact that the voltage was uploaded as a way
+	// of throttling when we also upload the SNR.
+    if theSNR != 0  && sentVoltage {
         sc4 := sc
         sc4.Unit = "wireless_snr"
         sc4.Value = sc1.WirelessSNR
         uploadToSafecast(sc4)
     }
 
-    if (msg.EnvTemperature != nil) {
+    if msg.EnvTemperature != nil {
         sc5 := sc
         sc5.Unit = "env_temp"
         sc5.Value = sc1.envTemp
         uploadToSafecast(sc5)
     }
 
-    if (msg.EnvHumidity != nil) {
+    if msg.EnvHumidity != nil {
         sc6 := sc
         sc6.Unit = "env_humid"
         sc6.Value = sc1.envHumid
