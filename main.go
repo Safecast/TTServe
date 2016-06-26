@@ -45,13 +45,19 @@ type dnDevice struct {
 var dnDevices []dnDevice
 
 type IPInfoData struct {
-	IP           net.IP `json:"ip"`
-	HostName     string `json:"hostname"`
+	AS			 string `json:"as"`
 	City         string `json:"city"`
-	Region       string `json:"region"`
 	Country      string `json:"country"`
-	Location     string `json:"loc"`
+	CountryCode  string `json:"countryCode"`
+	ISP			 string `json:"isp"`
+	Latitude	 string `json:"lat"`
+	Longitude	 string `json:"lon"`
 	Organization string `json:"org"`
+	IP           net.IP `json:"query"`
+	Region       string `json:"region"`
+	RegionName   string `json:"regionName"`
+	Timezone     string `json:"timezone"`
+	Zip			 string `json:"zip"`
 }
 
 type SafecastData struct {
