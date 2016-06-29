@@ -589,13 +589,15 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
+    reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
     if (p.HeadCommit.Commit.Message != "m") {   // to cover 'git commit -mm' and 'git commit -amm' shortcuts
         sendToSlack(fmt.Sprintf("Restarting, because %s %s", p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
+	    reason = fmt.Sprintf("%s pushed %s's commit to GitHub", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name)
     }
-
-    reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
     fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n", reason)
+
     os.Exit(0)
+
 }
 
 // Slack webhook
@@ -724,17 +726,23 @@ func doDeviceSummary() {
 
     // Iterate over all devices
     devices := 0
-    message := ""
+    s := ""
     for i:=0; i<len(sortedDevices); i++ {
         devices++
         if (i > 0) {
-            message = fmt.Sprintf("%s\n", message)
+            s = fmt.Sprintf("%s\n", s)
         }
-		deviceIDString := fmt.Sprintf("<http://dev.safecast.org/en-US/measurements?device_id=%d|%10d>", sortedDevices[i].originalDeviceNo, sortedDevices[i].originalDeviceNo)
+		id := sortedDevices[i].originalDeviceNo
+		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d|%10d>", s, id, id)
+		s = fmt.Sprintf("%s <http://dev.safecast.org/en-US/measurements?device_id=%d&unit=bat_voltage|V", s, id)
+		s = fmt.Sprintf("%s <http://dev.safecast.org/en-US/measurements?device_id=%d&unit=bat_soc|%", s, id)
+		s = fmt.Sprintf("%s <http://dev.safecast.org/en-US/measurements?device_id=%d&unit=env_temp|T", s, id)
+		s = fmt.Sprintf("%s <http://dev.safecast.org/en-US/measurements?device_id=%d&unit=env_humid|H", s, id)
+		s = fmt.Sprintf("%s <http://dev.safecast.org/en-US/measurements?device_id=%d&unit=snr|S", s, id)
         if (sortedDevices[i].minutesAgo == 0) {
-            message = fmt.Sprintf("%s%s last seen just now", message, deviceIDString)
+            s = fmt.Sprintf("%s last seen just now", s)
         } else {
-            message = fmt.Sprintf("%s%s last seen %dm ago", message, deviceIDString, sortedDevices[i].minutesAgo)
+            s = fmt.Sprintf("%s last seen %dm ago", s, sortedDevices[i].minutesAgo)
         }
     }
 
@@ -743,7 +751,7 @@ func doDeviceSummary() {
     if (devices == 0) {
         sendToSlack("No devices yet.")
     } else {
-        sendToSlack(message)
+        sendToSlack(s)
     }
 
 }
