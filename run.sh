@@ -4,6 +4,6 @@ while [ : ]; do
     git pull
     echo "Rebuilding..."
     go build
-    echo "Starting...\n")
+    echo "Starting...\n"
     ./ttserve
 done
