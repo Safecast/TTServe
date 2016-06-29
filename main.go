@@ -543,6 +543,11 @@ func SlackHandler(rw http.ResponseWriter, req *http.Request) {
 	args := strings.Split(message, " ")
 	argsLC := strings.Split(strings.ToLower(message), " ")
 	
+	// If this is from ourselves, bail.
+	if (user == "slackbot") {
+		return
+	}
+	
 	// Process special queries
 
 	fmt.Printf("args: %v\n", args)
