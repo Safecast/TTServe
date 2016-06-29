@@ -734,7 +734,7 @@ func doDeviceSummary() {
         }
 		id := sortedDevices[i].originalDeviceNo
 
-		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d|%10d>", s, id, id)
+		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d|%010d>", s, id, id)
 
 		s = fmt.Sprintf("%s (", s)
 		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=bat_voltage|V>", s, id)
