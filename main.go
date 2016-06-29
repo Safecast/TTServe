@@ -591,7 +591,7 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
 
     reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
     if (p.HeadCommit.Commit.Message != "m") {   // to cover 'git commit -mm' and 'git commit -amm' shortcuts
-        sendToSlack(fmt.Sprintf("Restarting, because %s %s", p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
+        sendToSlack(fmt.Sprintf("** Restarting ** (%s: %s)", p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
 	    reason = fmt.Sprintf("%s pushed %s's commit to GitHub", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name)
     }
     fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n", reason)
