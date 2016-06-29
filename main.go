@@ -18,6 +18,7 @@ import (
     "fmt"
     MQTT "github.com/eclipse/paho.mqtt.golang"
     "net"
+	"net/url"
     "net/http"
     "strconv"
     "github.com/golang/protobuf/proto"
@@ -531,7 +532,7 @@ func SlackHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 	fmt.Printf("Body: \n%s\n%v\n", string(body), body)
-	urlParams := req.URL.Query()
+	urlParams, _ = url.ParseQuery(string(body)
 	fmt.Printf("URL Params: \n%v\n", urlParams)
 	name := urlParams["user_name"]
 	text := urlParams["text"]
