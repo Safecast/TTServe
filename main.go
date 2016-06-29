@@ -531,8 +531,10 @@ func SlackHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 	fmt.Printf("Body: \n%s\n%v\n", string(body), body)
-	name := req.PostFormValue("user_name")
-	text := req.PostFormValue("text")
+	urlParams := req.URL.Query()
+	fmt.Printf("URL Params: \n%v\n", urlParams)
+	name := urlParams["user_name"]
+	text := urlParams["text"]
 	fmt.Printf("FORM RESULT: user:'%s' text:'%s'\n", name, text)
 
 }
