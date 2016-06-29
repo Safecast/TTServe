@@ -4,8 +4,8 @@ while [ : ]; do
     git pull https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
     echo "Rebuilding..."
     go build
-    echo "Starting...\n"
+    echo "Starting..."
     ./teletype-ttserve
-    echo "Restarting...\n"
+    echo "Restarting..."
     sleep 2s
 done
