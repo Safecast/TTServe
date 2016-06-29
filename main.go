@@ -1,5 +1,5 @@
 /*
- * The Things Network to Safecast Message Publisher
+ * The Things Network to Safecast Message Publisher 
  *
  * Contributors:
  *    Ray Ozzie

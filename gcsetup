@@ -11,8 +11,7 @@ export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 mkdir ~/go
 mkdir ~/go/src
 cd ~/go/src
-git clone https://github.com/rayozzie/teletype-ttserve.git
-(username:ttserve pw:teletype123)
+git clone https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
 cd teletype-ttserve
 ./run.sh
 
