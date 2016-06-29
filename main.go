@@ -8,6 +8,7 @@
 package main
 
 import (
+	"os"
     "time"
     "bytes"
     "strings"
@@ -508,15 +509,14 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
         fmt.Printf("Github webhook: error reading body:", err)
         return
     }
-    fmt.Printf("\nReceived Github notification on HTTP\nBody:\n%s\n", string(body))
     var p PushPayload
     err = json.Unmarshal(body, &p)
     if err != nil {
         fmt.Printf("Github webhook: error unmarshaling body:", err)
         return
     }
-    fmt.Printf("Github Unmarshaled:\n%v\n", p)
-	fmt.Printf("\n\nHeadCommit: \n%v\n", p.HeadCommit)
-	fmt.Printf("Commit by '%s' because '%s'\n", p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
 
+	reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
+	fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n", reason)
+	os.Exit(0)
 }
