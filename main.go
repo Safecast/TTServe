@@ -519,7 +519,11 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-	reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
+	if (p.HeadCommit.Commit.Message != "m") {	// to cover 'git commit -mm' and 'git commit -amm' shortcuts
+		sendToSlack(fmt.Sprintf("Restarting, because %s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
+	}
+
+	reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s",)
 	fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n", reason)
 	os.Exit(0)
 }
@@ -551,7 +555,6 @@ func SlackHandler(rw http.ResponseWriter, req *http.Request) {
 	
 	// Process special queries
 
-	fmt.Printf("args: %v\n", args)
 	switch (argsLC[0]) {
 	case "hello":
 		if len(args) == 1 {
