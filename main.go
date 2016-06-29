@@ -31,7 +31,7 @@ import (
 //
 
 // Operational warning if devices aren't heard from in this period of time
-const deviceWarningAfterMinutes = 5
+const deviceWarningAfterMinutes = 8
 
 // From "ttnctl applications", the AppEUI and its Access Key
 const appEui string = "70B3D57ED0000420"
