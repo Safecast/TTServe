@@ -10,7 +10,11 @@ export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 // upload
 mkdir ~/go
 mkdir ~/go/src
-gupdate
+cd ~/go/src
+git clone https://github.com/rayozzie/teletype-ttserve.git
+(username:rayozzie pw:1)
+cd teletype-ttserve
+
 
 // Running in background
 //   create a new screen and switch to it
