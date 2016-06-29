@@ -730,10 +730,11 @@ func doDeviceSummary() {
         if (i > 0) {
             message = fmt.Sprintf("%s\n", message)
         }
+		deviceIDString := fmt.Sprintf("<http://dev.safecast.org/en-US/measurements?device_id=%d|%10d>", sortedDevices[i].originalDeviceNo, sortedDevices[i].originalDeviceNo)
         if (sortedDevices[i].minutesAgo == 0) {
-            message = fmt.Sprintf("%s%10d last seen just now", message, sortedDevices[i].originalDeviceNo)
+            message = fmt.Sprintf("%s%s last seen just now", message, deviceIDString)
         } else {
-            message = fmt.Sprintf("%s%10d last seen %dm ago", message, sortedDevices[i].originalDeviceNo, sortedDevices[i].minutesAgo)
+            message = fmt.Sprintf("%s%s last seen %dm ago", message, deviceIDString, sortedDevices[i].minutesAgo)
         }
     }
 
