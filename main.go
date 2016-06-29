@@ -532,7 +532,11 @@ func SlackHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 	fmt.Printf("Body: \n%s\n%v\n", string(body), body)
-	urlParams, _ = url.ParseQuery(string(body)
+	urlParams, err := url.ParseQuery(string(body))
+    if err != nil {
+        fmt.Printf("Slack webhook: error parsing body:", err)
+        return
+    }
 	fmt.Printf("URL Params: \n%v\n", urlParams)
 	name := urlParams["user_name"]
 	text := urlParams["text"]
