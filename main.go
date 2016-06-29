@@ -588,7 +588,7 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
         sendToSlack(fmt.Sprintf("Restarting, because %s %s", p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
     }
 
-    reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s",)
+    reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
     fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n", reason)
     os.Exit(0)
 }
@@ -726,9 +726,9 @@ func doDeviceSummary() {
             message = fmt.Sprintf("%s\n", message)
         }
         if (sortedDevices[i].minutesAgo == 0) {
-            message = fmt.Sprintf("%s%08d last seen just now", message)
+            message = fmt.Sprintf("%s%08d last seen just now", message, sortedDevices[i].originalDeviceNo)
         } else {
-            message = fmt.Sprintf("%s%08d last seen %dm ago", message, sortedDevices[i].minutesAgo)
+            message = fmt.Sprintf("%s%08d last seen %dm ago", message, sortedDevices[i].originalDeviceNo, sortedDevices[i].minutesAgo)
         }
     }
 
