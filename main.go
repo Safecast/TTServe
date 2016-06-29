@@ -541,8 +541,8 @@ func SlackHandler(rw http.ResponseWriter, req *http.Request) {
 	user := urlParams["user_name"][0]
 	message := urlParams["text"][0]
 	args := strings.Split(message, " ")
-	argsAfterFirst := args[1:]
 	argsLC := strings.Split(strings.ToLower(message), " ")
+	messageAfterFirstWord := strings.Join(args[1:], " ")
 	
 	// If this is from ourselves, bail.
 	if (user == "slackbot") {
@@ -557,7 +557,7 @@ func SlackHandler(rw http.ResponseWriter, req *http.Request) {
 		if len(args) == 1 {
 			sendToSlack(fmt.Sprintf("Hello back, %s.", user))
 		} else {
-			sendToSlack(fmt.Sprintf("Back at you: %s", user, argsAfterFirst))
+			sendToSlack(fmt.Sprintf("Back at you: %s", messageAfterFirstWord))
 		}
 	default:
 		// Default is to do nothing
