@@ -31,7 +31,7 @@ import (
 //
 
 // Operational warning if devices aren't heard from in this period of time
-const deviceWarningAfterMinutes = 8
+const deviceWarningAfterMinutes = 2
 
 // From "ttnctl applications", the AppEUI and its Access Key
 const appEui string = "70B3D57ED0000420"
@@ -120,7 +120,7 @@ func (a ByKey) Len() int           { return len(a) }
 func (a ByKey) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByKey) Less(i, j int) bool {
     // Primary:
-    // By capture time
+    // By capture time, most recent last (so that the most recent is nearest your attention, at the bottom in Slack)
     if a[i].seen.Before(a[j].seen) {
         return true
     } else if a[i].seen.After(a[j].seen) {
@@ -708,7 +708,7 @@ func checkForSeenDevices() {
         if (!seenDevices[i].notifiedAsUnseen) {
             if seenDevices[i].seen.Before(expiration) {
                 seenDevices[i].notifiedAsUnseen = true;
-                sendToSlack(fmt.Sprintf("Device %d hasn't been seen for %d minutes", seenDevices[i].originalDeviceNo, seenDevices[i].minutesAgo))
+                sendToSlack(fmt.Sprintf("** Warning**  %d hasn't been seen for %d minutes", seenDevices[i].originalDeviceNo, seenDevices[i].minutesAgo))
             }
         }
     }
