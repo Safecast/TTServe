@@ -16,7 +16,7 @@ import (
     "io/ioutil"
     "fmt"
     MQTT "github.com/eclipse/paho.mqtt.golang"
-	"net"
+    "net"
     "net/http"
     "strconv"
     "github.com/golang/protobuf/proto"
@@ -24,11 +24,18 @@ import (
 )
 
 
-// From https://staging.thethingsnetwork.org/wiki/Backend/Connect/Application
-var ttnServer string = "tcp://staging.thethingsnetwork.org:1883"
 // From "ttnctl applications", the AppEUI and its Access Key
 var appEui string = "70B3D57ED0000420"
 var appAccessKey string = "bgCzOOs/5K16cuwP3/sGP9sea/4jKFwFEdTbYHw2fRE="
+// From https://staging.thethingsnetwork.org/wiki/Backend/Connect/Application
+var ttnServer string = "tcp://staging.thethingsnetwork.org:1883"
+var ttnTopic string = appEui + "/devices/+/up"
+
+// Our HTTP server
+var ttServerPort string = ":8080"
+var ttServer string = "http://api.teletype.io"
+var ttServerURLSend string = "/send"
+var ttServerURLGithub string = "/github"
 
 var fullyConnected bool = false;
 var logDateFormat string = "2006-01-02 15:04:05"
@@ -45,19 +52,19 @@ type dnDevice struct {
 var dnDevices []dnDevice
 
 type IPInfoData struct {
-	AS			 string `json:"as"`
-	City         string `json:"city"`
-	Country      string `json:"country"`
-	CountryCode  string `json:"countryCode"`
-	ISP			 string `json:"isp"`
-	Latitude	 float32 `json:"lat"`
-	Longitude	 float32 `json:"lon"`
-	Organization string `json:"org"`
-	IP           net.IP `json:"query"`
-	Region       string `json:"region"`
-	RegionName   string `json:"regionName"`
-	Timezone     string `json:"timezone"`
-	Zip			 string `json:"zip"`
+    AS           string `json:"as"`
+    City         string `json:"city"`
+    Country      string `json:"country"`
+    CountryCode  string `json:"countryCode"`
+    ISP          string `json:"isp"`
+    Latitude     float32 `json:"lat"`
+    Longitude    float32 `json:"lon"`
+    Organization string `json:"org"`
+    IP           net.IP `json:"query"`
+    Region       string `json:"region"`
+    RegionName   string `json:"regionName"`
+    Timezone     string `json:"timezone"`
+    Zip          string `json:"zip"`
 }
 
 type SafecastData struct {
@@ -89,23 +96,26 @@ func main() {
     upQ = make(chan MQTT.Message, 5)
     reqQ = make(chan DataUpAppReq, 5)
 
-    // Spawn the TTN inbound message handler
-    go ttnInboundHandler()
-
     // Spawn the app request handler shared by both TTN and direct inbound server
     go appRequestHandler()
 
+    // Spawn the TTN inbound message handler
+    go ttnInboundHandler()
+
     // Init our inbound server
-    go ttnDirectServer()
+    go ttInboundHandler()
 
     // Handle the inboound subscriber.  (This never returns.)
     ttnSubscriptionHandler()
 
 }
 
-func ttnDirectServer () {
-    http.HandleFunc("/", handleInboundTTNPosts)
-    http.ListenAndServe(":8080", nil)
+func ttInboundHandler () {
+    http.HandleFunc(ttServerURLSend, handleInboundTTNPosts)
+    fmt.Printf("Now handling inbound on: %s%s%s\n", ttServer, ttServerPort, ttServerURLSend)
+    http.HandleFunc(ttServerURLGithub, GithubHandler)
+    fmt.Printf("Now handling inbound on: %s%s%s\n", ttServer, ttServerPort, ttServerURLGithub)
+    http.ListenAndServe(ttServerPort, nil)
 }
 
 func handleInboundTTNPosts(rw http.ResponseWriter, req *http.Request) {
@@ -120,9 +130,11 @@ func handleInboundTTNPosts(rw http.ResponseWriter, req *http.Request) {
     var AppReq DataUpAppReq
     err = json.Unmarshal(body, &AppReq)
     if err != nil {
-		// Very common case where anyone comes to web page, such as google health check
+        // Very common case where anyone comes to web page, such as google health check
         return
     }
+
+    fmt.Printf("\n%s Received %d-byte payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
 
     // We now have a TTN-like message, constructed as follws:
     //  1) the Payload came from the device itself
@@ -165,17 +177,14 @@ func ttnSubscriptionHandler () {
 
         } else {
 
-            fmt.Printf("Connected to %s\n", ttnServer)
-
             // Subscribe to the topic
-            topic := appEui+"/devices/+/up"
-            if token = mqttClient.Subscribe(topic, 0, onMessageReceived); token.Wait() && token.Error() != nil {
-                fmt.Printf("Error subscribing to topic %s\n", topic, token.Error())
+            if token = mqttClient.Subscribe(ttnTopic, 0, onMessageReceived); token.Wait() && token.Error() != nil {
+                fmt.Printf("Error subscribing to topic %s\n", ttnTopic, token.Error())
                 return
             }
 
             // Signal that it's ok for the handlers to start processing inbound stuff
-            fmt.Printf("Subscribed to %s and now fully connected.\n", topic)
+            fmt.Printf("Now handling inbound on: %s mqtt:%s\n", ttnServer, ttnTopic)
             fullyConnected = true;
 
         }
@@ -197,7 +206,7 @@ func ttnInboundHandler() {
     for msg := range upQ {
         var AppReq DataUpAppReq
 
-        fmt.Printf("Received from topic %s:\n%s\n", msg.Topic(), msg.Payload())
+        fmt.Printf("\n%s Received %d-byte payload from TTN:\n", time.Now().Format(logDateFormat), len(msg.Payload()))
 
         // Unmarshal the payload and extract the base64 data
         err := json.Unmarshal(msg.Payload(), &AppReq)
@@ -217,9 +226,6 @@ func appRequestHandler() {
     // Dequeue and process the messages as they're enqueued
     for AppReq := range reqQ {
 
-        devEui := AppReq.DevEUI;
-        fmt.Printf("\n%s Received message from Device: %s\n", time.Now().Format(logDateFormat), devEui)
-
         msg := &teletype.Telecast{}
         err := proto.Unmarshal(AppReq.Payload, msg)
         if err != nil {
@@ -233,11 +239,11 @@ func appRequestHandler() {
             case teletype.Telecast_BGEIGIE_NANO:
                 fallthrough
             case teletype.Telecast_SIMPLECAST:
-		        metadata := AppReq.Metadata[0]
+                metadata := AppReq.Metadata[0]
                 ProcessSafecastMessage(msg, metadata.GatewayEUI, metadata.ServerTime, metadata.Lsnr, metadata.Latitude, metadata.Longitude, metadata.Altitude)
                 // Display what we got from a non-Safecast device
             default:
-                ProcessTelecastMessage(msg, devEui)
+                ProcessTelecastMessage(msg, AppReq.DevEUI)
             }
         }
     }
@@ -267,34 +273,38 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
     case "/hello":
         fallthrough
     case "/hi":
+		fmt.Printf("/hello from %s\n", devEui)
         if (argRest == "") {
             sendMessage(devEui, "@ttserve: Hello.")
         } else {
             sendMessage(devEui, "@ttserve: "+argRest)
         }
     case "":
-        // Do nothing, because this is just an intentional "ping" to the server
+		fmt.Printf("Ping from %s\n", devEui)
     default:
+		fmt.Printf("Broadcast from %s: 'message'\n", devEui, message)
         broadcastMessage(message, devEui)
     }
 
 }
 
-func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime string, snr float32, defaultLat float32, defaultLon float32, defaultAlt int32) {
-	var theSNR float32
-	var sentVoltage bool
+func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime string, defaultSNR float32, defaultLat float32, defaultLon float32, defaultAlt int32) {
+    var theSNR float32
 
-	// Process IPINFO data
-	var info IPInfoData
-	if ipInfo != "" {
-		json.Unmarshal([]byte(ipInfo), &info)
-	}
-	
-    // Debug
+    // Process IPINFO data
+    var info IPInfoData
+    if ipInfo != "" {
+        json.Unmarshal([]byte(ipInfo), &info)
+    }
+
     fmt.Printf("Safecast message from %s/%s/%s:\n%s\n", info.City, info.Region, info.Country, msg)
-	
+
+    // Determine if the device itself happens to be suppressing "slowly-changing" metadata during this upload.
+    // If it is, we ourselves will use this as a hint not to spam the server with other slowly-changing data.
+    deviceIsSuppressingMetadata := msg.BatteryVoltage == nil && msg.BatterySOC == nil && msg.EnvTemperature == nil &&  msg.EnvHumidity == nil
+
     // Generate the fields common to all uploads to safecast
-    sc := &SafecastData{}
+    sc := SafecastData{}
     if msg.DeviceIDString != nil {
         sc.DeviceID = msg.GetDeviceIDString();
     } else if msg.DeviceIDNumber != nil {
@@ -307,21 +317,6 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
     } else {
         sc.CapturedAt = defaultTime
     }
-    if msg.Latitude != nil {
-        sc.Latitude = fmt.Sprintf("%f", msg.GetLatitude())
-    } else {
-        sc.Latitude = fmt.Sprintf("%f", defaultLat)
-    }
-    if msg.Longitude != nil {
-        sc.Longitude = fmt.Sprintf("%f", msg.GetLongitude())
-    } else {
-        sc.Longitude = fmt.Sprintf("%f", defaultLon)
-    }
-    if msg.Altitude != nil {
-        sc.Height = fmt.Sprintf("%d", msg.GetAltitude())
-    } else {
-        sc.Height = fmt.Sprintf("%d", defaultAlt)
-    }
 
     // The first upload has everything
     sc1 := sc
@@ -331,78 +326,89 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
         sc1.Unit = fmt.Sprintf("%s", msg.GetUnit())
     }
     if msg.Value == nil {
-        sc1.Value = "?"
+        sc1.Value = ""
     } else {
         sc1.Value = fmt.Sprintf("%d", msg.GetValue())
     }
-    if msg.BatteryVoltage != nil {
-        sc1.BatVoltage = fmt.Sprintf("%.4f", msg.GetBatteryVoltage())
-    }
-    if msg.BatterySOC != nil {
-        sc1.BatSOC = fmt.Sprintf("%.2f", msg.GetBatterySOC())
-    }
-
-    if msg.WirelessSNR != nil {
-		theSNR = msg.GetWirelessSNR()
+    if msg.Latitude != nil {
+        sc1.Latitude = fmt.Sprintf("%f", msg.GetLatitude())
     } else {
-		// this could be 0.0 if it weren't present in the message,
-		// and so a check for theSNR == 0 will be our "is present" test.
-		theSNR = snr
-	}
-    sc1.WirelessSNR = fmt.Sprintf("%.1f", theSNR)
-
-    if msg.EnvTemperature != nil {
-        sc1.envTemp = fmt.Sprintf("%.2f", msg.GetEnvTemperature())
+		if (defaultLat != 0.0) {
+	        sc1.Latitude = fmt.Sprintf("%f", defaultLat)
+		}
     }
-    if msg.EnvHumidity != nil {
-        sc1.envHumid = fmt.Sprintf("%.2f", msg.GetEnvHumidity())
-    }
-    uploadToSafecast(sc1)
-
-    // The following uploads have individual values
-
-    if msg.BatteryVoltage != nil {
-        sc2 := sc
-        sc2.Unit = "bat_voltage"
-        sc2.Value = sc1.BatVoltage
-        uploadToSafecast(sc2)
-		sentVoltage = true
+    if msg.Longitude != nil {
+        sc1.Longitude = fmt.Sprintf("%f", msg.GetLongitude())
     } else {
-		sentVoltage = false
-	}
-
-    if msg.BatterySOC != nil {
-        sc3 := sc
-        sc3.Unit = "bat_soc"
-        sc3.Value = sc1.BatSOC
-        uploadToSafecast(sc3)
+		if (defaultLon != 0.0) {
+	        sc1.Longitude = fmt.Sprintf("%f", defaultLon)
+		}
     }
-
-	// Note that we suppress this to only happen when we also send the voltage.
-	// We do this because this is a very slowly-changing value, and since it is
-	// gateway-supplied it is unthrottled and present on every entry.
-	// Since the voltage is device-throttled (for the same reason of being too
-	// noisy), we use the fact that the voltage was uploaded as a way
-	// of throttling when we also upload the SNR.
-    if theSNR != 0  && sentVoltage {
-        sc4 := sc
-        sc4.Unit = "wireless_snr"
-        sc4.Value = sc1.WirelessSNR
-        uploadToSafecast(sc4)
+    if msg.Altitude != nil {
+        sc1.Height = fmt.Sprintf("%d", msg.GetAltitude())
+    } else {
+		if (defaultAlt != 0.0) {
+	        sc1.Height = fmt.Sprintf("%d", defaultAlt)
+		}
     }
-
-    if msg.EnvTemperature != nil {
-        sc5 := sc
-        sc5.Unit = "env_temp"
-        sc5.Value = sc1.envTemp
-        uploadToSafecast(sc5)
+    if !deviceIsSuppressingMetadata {
+        if msg.BatteryVoltage != nil {
+            sc1.BatVoltage = fmt.Sprintf("%.4f", msg.GetBatteryVoltage())
+        }
+        if msg.BatterySOC != nil {
+            sc1.BatSOC = fmt.Sprintf("%.2f", msg.GetBatterySOC())
+        }
+        if msg.EnvTemperature != nil {
+            sc1.envTemp = fmt.Sprintf("%.2f", msg.GetEnvTemperature())
+        }
+        if msg.EnvHumidity != nil {
+            sc1.envHumid = fmt.Sprintf("%.2f", msg.GetEnvHumidity())
+        }
+        if msg.WirelessSNR != nil {
+            theSNR = msg.GetWirelessSNR()
+        } else {
+            theSNR = defaultSNR
+        }
+		if defaultSNR != 0.0 {
+	        sc1.WirelessSNR = fmt.Sprintf("%.1f", theSNR)
+		}
     }
+    uploadToSafecast(&sc1)
 
-    if msg.EnvHumidity != nil {
-        sc6 := sc
-        sc6.Unit = "env_humid"
-        sc6.Value = sc1.envHumid
-        uploadToSafecast(sc6)
+	// Due to Safecast API limitations, upload the metadata ase individual
+	// web uploads.  Once this API limitation is removed, this code should
+	// also be deleted.
+    if !deviceIsSuppressingMetadata {
+        if msg.BatteryVoltage != nil {
+            sc2 := sc
+            sc2.Unit = "bat_voltage"
+            sc2.Value = sc1.BatVoltage
+            uploadToSafecast(&sc2)
+        }
+        if msg.BatterySOC != nil {
+            sc3 := sc
+            sc3.Unit = "bat_soc"
+            sc3.Value = sc1.BatSOC
+            uploadToSafecast(&sc3)
+        }
+        if msg.EnvTemperature != nil {
+            sc4 := sc
+            sc4.Unit = "env_temp"
+            sc4.Value = sc1.envTemp
+            uploadToSafecast(&sc4)
+        }
+        if msg.EnvHumidity != nil {
+            sc5 := sc
+            sc5.Unit = "env_humid"
+            sc5.Value = sc1.envHumid
+            uploadToSafecast(&sc5)
+        }
+        if theSNR != 0.0 {
+            sc6 := sc
+            sc6.Unit = "wireless_snr"
+            sc6.Value = sc1.WirelessSNR
+            uploadToSafecast(&sc6)
+        }
     }
 
 }
@@ -492,4 +498,25 @@ func broadcastMessage(message string, skipDevEui string) {
             sendMessage(e.devEui, message)
         }
     }
+}
+
+// Github webhook
+type test_struct struct {
+    Test string
+}
+
+func GithubHandler(rw http.ResponseWriter, req *http.Request) {
+    body, err := ioutil.ReadAll(req.Body)
+    if err != nil {
+        fmt.Printf("Github webhook: error reading body:", err)
+        return
+    }
+    fmt.Printf("\nReceived Github notification on HTTP\nBody:\n%s\n", string(body))
+    var t test_struct
+    err = json.Unmarshal(body, &t)
+    if err != nil {
+        fmt.Printf("Github webhook: error unmarshaling body:", err)
+        return
+    }
+    fmt.Printf("Github Unmarshaled:\n%s\n", string(t.Test))
 }
