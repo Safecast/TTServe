@@ -517,6 +517,6 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
     }
     fmt.Printf("Github Unmarshaled:\n%v\n", p)
 	fmt.Printf("\n\nHeadCommit: \n%v\n", p.HeadCommit)
-	fmt.Printf("\n\nCommits[0]: \n%v\n", p.Commits[0])
+	fmt.Printf("Commit by '%s' because '%s'\n", p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
 
 }
