@@ -1,5 +1,5 @@
 /*
- * The Things Network to Safecast Message Publisher 
+ * The Things Network to Safecast Message Publisher
  *
  * Contributors:
  *    Ray Ozzie
@@ -8,51 +8,60 @@
 package main
 
 import (
-	"os"
+    "os"
     "time"
+    "sort"
     "bytes"
     "strings"
     "encoding/json"
     "io"
     "io/ioutil"
     "fmt"
-    MQTT "github.com/eclipse/paho.mqtt.golang"
     "net"
-	"net/url"
+    "net/url"
     "net/http"
     "strconv"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
+    MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
+//
+// Constants
+//
+
+// Operational warning if devices aren't heard from in this period of time
+const deviceWarningAfterMinutes = 5
 
 // From "ttnctl applications", the AppEUI and its Access Key
-var appEui string = "70B3D57ED0000420"
-var appAccessKey string = "bgCzOOs/5K16cuwP3/sGP9sea/4jKFwFEdTbYHw2fRE="
+const appEui string = "70B3D57ED0000420"
+const appAccessKey string = "bgCzOOs/5K16cuwP3/sGP9sea/4jKFwFEdTbYHw2fRE="
+
 // From https://staging.thethingsnetwork.org/wiki/Backend/Connect/Application
-var ttnServer string = "tcp://staging.thethingsnetwork.org:1883"
-var ttnTopic string = appEui + "/devices/+/up"
+const ttnServer string = "tcp://staging.thethingsnetwork.org:1883"
+const ttnTopic string = appEui + "/devices/+/up"
 
-// Our HTTP server
-var ttServerPort string = ":8080"
-var ttServer string = "http://api.teletype.io"
-var ttServerURLSend string = "/send"
-var ttServerURLGithub string = "/github"
-var ttServerURLSlack string = "/slack"
+// Slack
+const SlackOpsPostURL string = "https://hooks.slack.com/services/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"
 
-var fullyConnected bool = false;
-var logDateFormat string = "2006-01-02 15:04:05"
+// Safecast
+const SafecastUploadURL = "http://107.161.164.163/scripts/indextest.php?api_key=%s"
+const SafecastAppKey = "z3sHhgousVDDrCVXhzMT"
 
-var mqttClient MQTT.Client
-var upQ chan MQTT.Message
-var reqQ chan DataUpAppReq
+// This HTTP server
+const ttServerPort string = ":8080"
+const ttServer string = "http://api.teletype.io"
+const ttServerURLSend string = "/send"
+const ttServerURLGithub string = "/github"
+const ttServerURLSlack string = "/slack"
 
-type dnDevice struct {
-    devEui string
-    topic string
-}
+// Other
 
-var dnDevices []dnDevice
+const logDateFormat string = "2006-01-02 15:04:05"
+
+//
+// Structs
+//
 
 type IPInfoData struct {
     AS           string `json:"as"`
@@ -93,6 +102,51 @@ type SafecastData struct {
     envHumid     string `json:"env_humid,omitempty"`     // Percent RH
 }
 
+type seenDevice struct {
+    originalDeviceNo uint32
+    normalizedDeviceNo uint32
+    seen time.Time
+    notifiedAsUnseen bool
+    minutesAgo int64
+}
+
+type dnDevice struct {
+    devEui string
+    topic string
+}
+
+type ByKey []seenDevice
+func (a ByKey) Len() int           { return len(a) }
+func (a ByKey) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByKey) Less(i, j int) bool {
+    // Primary:
+    // By capture time
+    if a[i].seen.Before(a[j].seen) {
+        return true
+    } else if a[i].seen.After(a[j].seen) {
+        return false
+    }
+    // Secondary
+    // In an attempt to keep things reasonably deterministic, use device number
+    if (a[i].normalizedDeviceNo < a[j].normalizedDeviceNo) {
+        return true
+    } else if (a[i].normalizedDeviceNo > a[j].normalizedDeviceNo) {
+        return false
+    }
+    return false
+}
+
+//
+// Statics
+//
+
+var fullyConnected bool = false;
+var mqttClient MQTT.Client
+var upQ chan MQTT.Message
+var reqQ chan DataUpAppReq
+var dnDevices []dnDevice
+var seenDevices []seenDevice
+
 func main() {
 
     // Set up our message queue.  We shouldn't need much buffering, but buffer just in case.
@@ -108,9 +162,20 @@ func main() {
     // Init our inbound server
     go ttInboundHandler()
 
+    // Init our timer
+
+    go timer1m()
+
     // Handle the inboound subscriber.  (This never returns.)
     ttnSubscriptionHandler()
 
+}
+
+func timer1m() {
+    for {
+        time.Sleep(1 * 60 * time.Second)
+        checkForSeenDevices()
+    }
 }
 
 func ttInboundHandler () {
@@ -278,16 +343,16 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
     case "/hello":
         fallthrough
     case "/hi":
-		fmt.Printf("/hello from %s\n", devEui)
+        fmt.Printf("/hello from %s\n", devEui)
         if (argRest == "") {
             sendMessage(devEui, "@ttserve: Hello.")
         } else {
             sendMessage(devEui, "@ttserve: "+argRest)
         }
     case "":
-		fmt.Printf("Ping from %s\n", devEui)
+        fmt.Printf("Ping from %s\n", devEui)
     default:
-		fmt.Printf("Broadcast from %s: 'message'\n", devEui, message)
+        fmt.Printf("Broadcast from %s: 'message'\n", devEui, message)
         broadcastMessage(message, devEui)
     }
 
@@ -303,6 +368,11 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
     }
 
     fmt.Printf("Safecast message from %s/%s/%s:\n%s\n", info.City, info.Region, info.Country, msg)
+
+    // Log it
+    if (msg.DeviceIDNumber != nil) {
+        updateDevice(msg.GetDeviceIDNumber())
+    }
 
     // Determine if the device itself happens to be suppressing "slowly-changing" metadata during this upload.
     // If it is, we ourselves will use this as a hint not to spam the server with other slowly-changing data.
@@ -338,23 +408,23 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
     if msg.Latitude != nil {
         sc1.Latitude = fmt.Sprintf("%f", msg.GetLatitude())
     } else {
-		if (defaultLat != 0.0) {
-	        sc1.Latitude = fmt.Sprintf("%f", defaultLat)
-		}
+        if (defaultLat != 0.0) {
+            sc1.Latitude = fmt.Sprintf("%f", defaultLat)
+        }
     }
     if msg.Longitude != nil {
         sc1.Longitude = fmt.Sprintf("%f", msg.GetLongitude())
     } else {
-		if (defaultLon != 0.0) {
-	        sc1.Longitude = fmt.Sprintf("%f", defaultLon)
-		}
+        if (defaultLon != 0.0) {
+            sc1.Longitude = fmt.Sprintf("%f", defaultLon)
+        }
     }
     if msg.Altitude != nil {
         sc1.Height = fmt.Sprintf("%d", msg.GetAltitude())
     } else {
-		if (defaultAlt != 0.0) {
-	        sc1.Height = fmt.Sprintf("%d", defaultAlt)
-		}
+        if (defaultAlt != 0.0) {
+            sc1.Height = fmt.Sprintf("%d", defaultAlt)
+        }
     }
     if !deviceIsSuppressingMetadata {
         if msg.BatteryVoltage != nil {
@@ -374,15 +444,15 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
         } else {
             theSNR = defaultSNR
         }
-		if defaultSNR != 0.0 {
-	        sc1.WirelessSNR = fmt.Sprintf("%.1f", theSNR)
-		}
+        if defaultSNR != 0.0 {
+            sc1.WirelessSNR = fmt.Sprintf("%.1f", theSNR)
+        }
     }
     uploadToSafecast(&sc1)
 
-	// Due to Safecast API limitations, upload the metadata ase individual
-	// web uploads.  Once this API limitation is removed, this code should
-	// also be deleted.
+    // Due to Safecast API limitations, upload the metadata ase individual
+    // web uploads.  Once this API limitation is removed, this code should
+    // also be deleted.
     if !deviceIsSuppressingMetadata {
         if msg.BatteryVoltage != nil {
             sc2 := sc
@@ -421,14 +491,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
 // Upload the data structure to the Safecast service
 func uploadToSafecast(sc *SafecastData) {
 
-    SafecastUploadURL := "http://107.161.164.163/scripts/indextest.php?api_key=%s"
-    SafecastAppKey := "z3sHhgousVDDrCVXhzMT"
-    UploadURL := fmt.Sprintf(SafecastUploadURL, SafecastAppKey)
-
     scJSON, _ := json.Marshal(sc)
-
     fmt.Printf("About to upload to %s:\n%s\n", SafecastUploadURL, scJSON)
-    req, err := http.NewRequest("POST", UploadURL, bytes.NewBuffer(scJSON))
+    req, err := http.NewRequest("POST", fmt.Sprintf(SafecastUploadURL, SafecastAppKey), bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{}
@@ -519,13 +584,13 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-	if (p.HeadCommit.Commit.Message != "m") {	// to cover 'git commit -mm' and 'git commit -amm' shortcuts
-		sendToSlack(fmt.Sprintf("Restarting, because %s %s", p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
-	}
+    if (p.HeadCommit.Commit.Message != "m") {   // to cover 'git commit -mm' and 'git commit -amm' shortcuts
+        sendToSlack(fmt.Sprintf("Restarting, because %s %s", p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
+    }
 
-	reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s",)
-	fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n", reason)
-	os.Exit(0)
+    reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s",)
+    fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n", reason)
+    os.Exit(0)
 }
 
 // Slack webhook
@@ -535,49 +600,52 @@ func SlackHandler(rw http.ResponseWriter, req *http.Request) {
         fmt.Printf("Slack webhook: error reading body:", err)
         return
     }
-	urlParams, err := url.ParseQuery(string(body))
+    urlParams, err := url.ParseQuery(string(body))
     if err != nil {
         fmt.Printf("Slack webhook: error parsing body:", err)
         return
     }
 
-	// Extract useful information
-	user := urlParams["user_name"][0]
-	message := urlParams["text"][0]
-	args := strings.Split(message, " ")
-	argsLC := strings.Split(strings.ToLower(message), " ")
-	messageAfterFirstWord := strings.Join(args[1:], " ")
-	
-	// If this is from ourselves, bail.
-	if (user == "slackbot") {
-		return
-	}
-	
-	// Process special queries
+    // Extract useful information
+    user := urlParams["user_name"][0]
+    message := urlParams["text"][0]
+    args := strings.Split(message, " ")
+    argsLC := strings.Split(strings.ToLower(message), " ")
+    messageAfterFirstWord := strings.Join(args[1:], " ")
 
-	switch (argsLC[0]) {
-	case "hello":
-		if len(args) == 1 {
-			sendToSlack(fmt.Sprintf("Hello back, %s.", user))
-		} else {
-			sendToSlack(fmt.Sprintf("Back at you: %s", messageAfterFirstWord))
-		}
-	default:
-		// Default is to do nothing
-	}
+    // If this is from ourselves, bail.
+    if (user == "slackbot") {
+        return
+    }
+
+    // Process special queries
+
+    switch (argsLC[0]) {
+    case "status":
+        if (messageAfterFirstWord == "") {
+            doDeviceSummary()
+        }
+    case "hello":
+        if len(args) == 1 {
+            sendToSlack(fmt.Sprintf("Hello back, %s.", user))
+        } else {
+            sendToSlack(fmt.Sprintf("Back at you: %s", messageAfterFirstWord))
+        }
+    default:
+        // Default is to do nothing
+    }
 
 }
 
 func sendToSlack(msg string) {
-    SlackOpsPostURL := "https://hooks.slack.com/services/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"
 
-	type SlackData struct {
-		Message string `json:"text"`
-	}
+    type SlackData struct {
+        Message string `json:"text"`
+    }
 
     m := SlackData{}
-	m.Message = msg
-	
+    m.Message = msg
+
     mJSON, _ := json.Marshal(m)
     req, err := http.NewRequest("POST", SlackOpsPostURL, bytes.NewBuffer(mJSON))
     req.Header.Set("User-Agent", "TTSERVE")
@@ -589,6 +657,87 @@ func sendToSlack(msg string) {
         fmt.Printf("*** Error uploading %s to Slack  %s\n\n", msg, err)
     } else {
         resp.Body.Close()
+    }
+
+}
+
+func updateDevice(DeviceID uint32) {
+    var dev seenDevice
+
+    // For dual-sensor devices, collapse them to a single entry
+    dev.originalDeviceNo = DeviceID
+    dev.normalizedDeviceNo = dev.originalDeviceNo
+    if ((dev.normalizedDeviceNo & 0x01) != 0) {
+        dev.normalizedDeviceNo = dev.normalizedDeviceNo - 1
+    }
+
+    // Remember when we saw it
+
+    // Attempt to update the existing entry
+    found := false
+    for i:=0; i<len(seenDevices); i++ {
+        if dev.normalizedDeviceNo == seenDevices[i].normalizedDeviceNo {
+            seenDevices[i].seen = time.Now().UTC()
+            found = true
+            break
+        }
+    }
+
+    // Add a new array entry if necessary
+
+    if (!found) {
+        dev.seen = time.Now().UTC()
+        dev.notifiedAsUnseen = false
+        seenDevices = append(seenDevices, dev)
+    }
+
+}
+
+// Update message ages and notify
+func checkForSeenDevices() {
+    expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes)*time.Minute))
+    for i:=0; i<len(seenDevices); i++ {
+        seenDevices[i].minutesAgo = int64(time.Now().Sub(seenDevices[i].seen)/time.Minute)
+        if (!seenDevices[i].notifiedAsUnseen) {
+            if seenDevices[i].seen.Before(expiration) {
+                seenDevices[i].notifiedAsUnseen = true;
+                sendToSlack(fmt.Sprintf("Device %d hasn't been seen for %d minutes", seenDevices[i].originalDeviceNo, seenDevices[i].minutesAgo))
+            }
+        }
+    }
+}
+
+// Get a summary of devices that are older than this many minutes ago
+func doDeviceSummary() {
+
+    // First, age out the expired devices and recompute when last seen
+    checkForSeenDevices()
+
+    // Next sort the device list
+    sortedDevices := seenDevices
+    sort.Sort(ByKey(sortedDevices))
+
+    // Iterate over all devices
+    devices := 0
+    message := ""
+    for i:=0; i<len(sortedDevices); i++ {
+        devices++
+        if (i > 0) {
+            message = fmt.Sprintf("%s\n", message)
+        }
+        if (sortedDevices[i].minutesAgo == 0) {
+            message = fmt.Sprintf("%s%08d last seen just now", message)
+        } else {
+            message = fmt.Sprintf("%s%08d last seen %dm ago", message, sortedDevices[i].minutesAgo)
+        }
+    }
+
+    // Send it to Slack
+
+    if (devices == 0) {
+        sendToSlack("No devices yet.")
+    } else {
+        sendToSlack(message)
     }
 
 }
