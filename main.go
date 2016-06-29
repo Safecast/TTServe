@@ -31,7 +31,7 @@ import (
 //
 
 // Operational warning if devices aren't heard from in this period of time
-const deviceWarningAfterMinutes = 2
+const deviceWarningAfterMinutes = 30
 
 // From "ttnctl applications", the AppEUI and its Access Key
 const appEui string = "70B3D57ED0000420"
@@ -708,7 +708,7 @@ func checkForSeenDevices() {
         if (!seenDevices[i].notifiedAsUnseen) {
             if seenDevices[i].seen.Before(expiration) {
                 seenDevices[i].notifiedAsUnseen = true;
-                sendToSlack(fmt.Sprintf("** Warning**  %d hasn't been seen for %d minutes", seenDevices[i].originalDeviceNo, seenDevices[i].minutesAgo))
+                sendToSlack(fmt.Sprintf("** Warning**  Device %d hasn't been seen for %d minutes!", seenDevices[i].originalDeviceNo, seenDevices[i].minutesAgo))
             }
         }
     }
