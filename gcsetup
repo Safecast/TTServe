@@ -12,9 +12,9 @@ mkdir ~/go
 mkdir ~/go/src
 cd ~/go/src
 git clone https://github.com/rayozzie/teletype-ttserve.git
-(username:rayozzie pw:1)
+(username:ttserve pw:teletype123)
 cd teletype-ttserve
-
+./run.sh
 
 // Running in background
 //   create a new screen and switch to it
