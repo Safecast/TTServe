@@ -5,5 +5,7 @@ while [ : ]; do
     echo "Rebuilding..."
     go build
     echo "Starting...\n"
-    ./ttserve
+    ./teletype-ttserve
+    echo "Restarting...\n"
+    sleep 2s
 done
