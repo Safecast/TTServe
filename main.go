@@ -531,15 +531,55 @@ func SlackHandler(rw http.ResponseWriter, req *http.Request) {
         fmt.Printf("Slack webhook: error reading body:", err)
         return
     }
-	fmt.Printf("Body: \n%s\n%v\n", string(body), body)
 	urlParams, err := url.ParseQuery(string(body))
     if err != nil {
         fmt.Printf("Slack webhook: error parsing body:", err)
         return
     }
-	fmt.Printf("URL Params: \n%v\n", urlParams)
-	name := urlParams["user_name"][0]
-	text := urlParams["text"][0]
-	fmt.Printf("FORM RESULT: user:'%s' text:'%s'\n", name, text)
+
+	// Extract useful information
+	user := urlParams["user_name"][0]
+	message := urlParams["text"][0]
+	args := strings.Split(message, " ")
+	argsLC := strings.Split(strings.ToLower(message), " ")
+	
+	// Process special queries
+
+	fmt.Printf("args: %v\n", args)
+	switch (argsLC[0]) {
+	case "hello":
+		if len(args) == 1 {
+			sendToSlack(fmt.Sprintf("Hello back, %s.", user))
+		} else {
+			sendToSlack(fmt.Sprintf("Back at you, %s: %s", user, strings.Join(args, " ")))
+		}
+	default:
+		// Default is to do nothing
+	}
+
+}
+
+func sendToSlack(msg string) {
+    SlackOpsPostURL := "https://hooks.slack.com/services/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"
+
+	type SlackData struct {
+		Message string `json:"text"`
+	}
+
+    m := SlackData{}
+	m.Message = msg
+	
+    mJSON, _ := json.Marshal(m)
+    req, err := http.NewRequest("POST", SlackOpsPostURL, bytes.NewBuffer(mJSON))
+    req.Header.Set("User-Agent", "TTSERVE")
+    req.Header.Set("Content-Type", "application/json")
+
+    httpclient := &http.Client{}
+    resp, err := httpclient.Do(req)
+    if err != nil {
+        fmt.Printf("*** Error uploading %s to Slack  %s\n\n", msg, err)
+    } else {
+        resp.Body.Close()
+    }
 
 }
