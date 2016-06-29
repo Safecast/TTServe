@@ -501,9 +501,6 @@ func broadcastMessage(message string, skipDevEui string) {
 }
 
 // Github webhook
-type test_struct struct {
-    Test string
-}
 
 func GithubHandler(rw http.ResponseWriter, req *http.Request) {
     body, err := ioutil.ReadAll(req.Body)
@@ -512,11 +509,11 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
     fmt.Printf("\nReceived Github notification on HTTP\nBody:\n%s\n", string(body))
-    var t test_struct
-    err = json.Unmarshal(body, &t)
+    var p PushPayload
+    err = json.Unmarshal(body, &p)
     if err != nil {
         fmt.Printf("Github webhook: error unmarshaling body:", err)
         return
     }
-    fmt.Printf("Github Unmarshaled:\n%s\n", string(t.Test))
+    fmt.Printf("Github Unmarshaled:\n%v\n", p)
 }
