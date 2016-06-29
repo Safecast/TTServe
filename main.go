@@ -37,6 +37,7 @@ var ttServerPort string = ":8080"
 var ttServer string = "http://api.teletype.io"
 var ttServerURLSend string = "/send"
 var ttServerURLGithub string = "/github"
+var ttServerURLSlack string = "/slack"
 
 var fullyConnected bool = false;
 var logDateFormat string = "2006-01-02 15:04:05"
@@ -116,6 +117,8 @@ func ttInboundHandler () {
     fmt.Printf("Now handling inbound on: %s%s%s\n", ttServer, ttServerPort, ttServerURLSend)
     http.HandleFunc(ttServerURLGithub, GithubHandler)
     fmt.Printf("Now handling inbound on: %s%s%s\n", ttServer, ttServerPort, ttServerURLGithub)
+    http.HandleFunc(ttServerURLSlack, SlackHandler)
+    fmt.Printf("Now handling inbound on: %s%s%s\n", ttServer, ttServerPort, ttServerURLSlack)
     http.ListenAndServe(ttServerPort, nil)
 }
 
@@ -502,7 +505,6 @@ func broadcastMessage(message string, skipDevEui string) {
 }
 
 // Github webhook
-
 func GithubHandler(rw http.ResponseWriter, req *http.Request) {
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
@@ -519,4 +521,18 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
 	reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
 	fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n", reason)
 	os.Exit(0)
+}
+
+// Slack webhook
+func SlackHandler(rw http.ResponseWriter, req *http.Request) {
+    body, err := ioutil.ReadAll(req.Body)
+    if err != nil {
+        fmt.Printf("Slack webhook: error reading body:", err)
+        return
+    }
+	fmt.Printf("Body: \n%s\n%v\n", string(body), body)
+	name := req.PostFormValue("user_name")
+	text := req.PostFormValue("text")
+	fmt.Printf("FORM RESULT: user:'%s' text:'%s'\n", name, text)
+
 }
