@@ -556,7 +556,7 @@ func SlackHandler(rw http.ResponseWriter, req *http.Request) {
 		if len(args) == 1 {
 			sendToSlack(fmt.Sprintf("Hello back, %s.", user))
 		} else {
-			sendToSlack(fmt.Sprintf("Back at you, %s: %s", user, strings.Join(args, " ")))
+			sendToSlack(fmt.Sprintf("Back at you: %s", user, strings.Join(args[1:], " ")))
 		}
 	default:
 		// Default is to do nothing
