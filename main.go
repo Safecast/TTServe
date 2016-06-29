@@ -731,9 +731,9 @@ func doDeviceSummary() {
             message = fmt.Sprintf("%s\n", message)
         }
         if (sortedDevices[i].minutesAgo == 0) {
-            message = fmt.Sprintf("%s%08d last seen just now", message, sortedDevices[i].originalDeviceNo)
+            message = fmt.Sprintf("%s%10d last seen just now", message, sortedDevices[i].originalDeviceNo)
         } else {
-            message = fmt.Sprintf("%s%08d last seen %dm ago", message, sortedDevices[i].originalDeviceNo, sortedDevices[i].minutesAgo)
+            message = fmt.Sprintf("%s%10d last seen %dm ago", message, sortedDevices[i].originalDeviceNo, sortedDevices[i].minutesAgo)
         }
     }
 
