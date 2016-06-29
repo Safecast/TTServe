@@ -372,6 +372,11 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
     // Log it
     if (msg.DeviceIDNumber != nil) {
         updateDevice(msg.GetDeviceIDNumber())
+    } else if msg.DeviceIDString != nil {
+        i64, err := strconv.ParseInt(msg.GetDeviceIDString(), 10, 64)
+		if (err == nil) {
+	        updateDevice(uint32(i64))
+		}
     }
 
     // Determine if the device itself happens to be suppressing "slowly-changing" metadata during this upload.
