@@ -26,8 +26,6 @@ type StatusPayload struct {
 	State       string       `json:"state"`
 	Commit      StatusCommit `json:"commit"`
 	Branches    []Branch     `json:"branches"`
-	CreatedAt   string		 `json:"created_at"`
-	UpdatedAt   string	     `json:"updated_at"`
 	Repository  Repository   `json:"repository"`
 	Sender      Sender       `json:"sender"`
 }
@@ -232,9 +230,6 @@ type Repository struct {
 	NotificationsURL string    `json:"notifications_url"`
 	LabelsURL        string    `json:"labels_url"`
 	ReleasesURL      string    `json:"releases_url"`
-	CreatedAt        string `json:"created_at"`
-	UpdatedAt        string `json:"updated_at"`
-	PushedAt         string `json:"pushed_at"`
 	GitURL           string    `json:"git_url"`
 	SSHURL           string    `json:"ssh_url"`
 	CloneURL         string    `json:"clone_url"`
@@ -328,8 +323,6 @@ type Comment struct {
 	Line      int       `json:"line"`
 	Path      string    `json:"path"`
 	CommitID  string    `json:"commit_id"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
 	Body      string    `json:"body"`
 }
 
@@ -344,8 +337,6 @@ type Deployment struct {
 	Environment   string    `json:"environment"`
 	Description   string    `json:"description"`
 	Creator       Creator   `json:"creator"`
-	CreatedAt     string `json:"created_at"`
-	UpdatedAt     string `json:"updated_at"`
 	StatusesURL   string    `json:"statuses_url"`
 	RepositoryURL string    `json:"repository_url"`
 }
@@ -358,8 +349,6 @@ type DeploymentStatus struct {
 	Creator       Creator   `json:"creator"`
 	Description   string    `json:"description"`
 	TargetURL     string    `json:"target_url"`
-	CreatedAt     string `json:"created_at"`
-	UpdatedAt     string `json:"updated_at"`
 	DeploymentURL string    `json:"deployment_url"`
 	RepositoryURL string    `json:"repository_url"`
 }
@@ -404,9 +393,6 @@ type Issue struct {
 	Assignee    string    `json:"assignee"`
 	Milestone   string    `json:"milestone"`
 	Comments    int       `json:"comments"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
-	ClosedAt    string `json:"closed_at"`
 	Body        string    `json:"body"`
 }
 
@@ -446,8 +432,6 @@ type Build struct {
 	Pusher    Pusher    `json:"pusher"`
 	Commit    string    `json:"commit"`
 	Duration  int       `json:"duration"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
 }
 
 // PullRequestHREF contains GitHub's pull_request href information
@@ -484,8 +468,6 @@ type PullRequestComment struct {
 	OriginalCommitID string    `json:"original_commit_id"`
 	User             User      `json:"user"`
 	Body             string    `json:"body"`
-	CreatedAt        string `json:"created_at"`
-	UpdatedAt        string `json:"updated_at"`
 	HTMLURL          string    `json:"html_url"`
 	PullRequestURL   string    `json:"pull_request_url"`
 	Links            Links     `json:"links"`
@@ -561,10 +543,6 @@ type PullRequest struct {
 	Title             string           `json:"title"`
 	User              User             `json:"user"`
 	Body              string           `json:"body"`
-	CreatedAt         string        `json:"created_at"`
-	UpdatedAt         string        `json:"updated_at"`
-	ClosedAt          string        `json:"closed_at"`
-	MergedAt          string        `json:"merged_at"`
 	MergeCommitSHA    string           `json:"merge_commit_sha"`
 	Assignee          string           `json:"assignee"`
 	Milestone         string           `json:"milestone"`
@@ -611,7 +589,6 @@ type Commit struct {
 	ID        string          `json:"id"`
 	Distinct  bool            `json:"distinct"`
 	Message   string          `json:"message"`
-	Timestamp string       `json:"timestamp"`
 	URL       string          `json:"url"`
 	Author    CommitAuthor    `json:"author"`
 	Committer CommitCommitter `json:"committer"`
@@ -638,8 +615,6 @@ type Release struct {
 	Draft           bool      `json:"draft"`
 	Author          Author    `json:"author"`
 	Prelelease      bool      `json:"prerelease"`
-	CreatedAt       string `json:"created_at"`
-	PublishedAt     string `json:"published_at"`
 	Assets          []string  `json:"assets"`
 	TarballURL      string    `json:"tarball_url"`
 	ZipballURL      string    `json:"zipball_url"`
@@ -662,14 +637,12 @@ type Branch struct {
 type StatusCommitAuthor struct {
 	Name  string    `json:"name"`
 	Email string    `json:"email"`
-	Date  string `json:"date"`
 }
 
 // StatusCommitCommiter contains GitHub's status commit committer information
 type StatusCommitCommiter struct {
 	Name  string    `json:"name"`
 	Email string    `json:"email"`
-	Date  string `json:"date"`
 }
 
 // Tree contains GitHub's tree information
