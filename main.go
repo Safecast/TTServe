@@ -282,7 +282,16 @@ func ttnInboundHandler() {
             fmt.Printf("*** Payload doesn't have TTN data ***\n")
         } else {
 	        fmt.Printf("\n%s Received %d-byte payload from TTN:\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
-            // Enqueue it for processing
+			// Note that there is some missing code here.  Ideally, in the appreq
+			// we supply json-formatted IPINFO to ttserve.  TTGATE tunneled this through
+			// the GatewayEUI field of the DataUpAppReq, but in the TTN case we don't
+			// have such a luxury.  That said, the DataUpAppReq for TTN DOES have the
+			// Latitude/Longitude fields to work with.  Ideally we would then use
+			// TinyGeocoder (or Yahoo or Google) *here* and would then encode the results
+			// in the GatewayEUI field in a way that is compatible with TTGATE.
+			// I haven't written this code simply because this requires registering
+			// for a Yahoo/Google account, and potentially paying.  Since none of the
+			// code here is actually utilizing geo, we'll wait until then.
             reqQ <- AppReq
         }
 
@@ -364,9 +373,11 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
     var info IPInfoData
     if ipInfo != "" {
         json.Unmarshal([]byte(ipInfo), &info)
-    }
+	    fmt.Printf("Safecast message from %s/%s/%s:\n%s\n", info.City, info.Region, info.Country, msg)
+    } else {
+	    fmt.Printf("Safecast message:\n%s\n", msg)
+	}
 
-    fmt.Printf("Safecast message from %s/%s/%s:\n%s\n", info.City, info.Region, info.Country, msg)
 
     // Log it
     if (msg.DeviceIDNumber != nil) {
