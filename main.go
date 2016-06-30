@@ -276,13 +276,12 @@ func ttnInboundHandler() {
     for msg := range upQ {
         var AppReq DataUpAppReq
 
-        fmt.Printf("\n%s Received %d-byte payload from TTN:\n", time.Now().Format(logDateFormat), len(msg.Payload()))
-
         // Unmarshal the payload and extract the base64 data
         err := json.Unmarshal(msg.Payload(), &AppReq)
         if err != nil {
             fmt.Printf("*** Payload doesn't have TTN data ***\n")
         } else {
+	        fmt.Printf("\n%s Received %d-byte payload from TTN:\n", time.Now().Format(logDateFormat), len(AppReq.Payload()))
             // Enqueue it for processing
             reqQ <- AppReq
         }
