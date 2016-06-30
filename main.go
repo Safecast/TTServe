@@ -281,17 +281,17 @@ func ttnInboundHandler() {
         if err != nil {
             fmt.Printf("*** Payload doesn't have TTN data ***\n")
         } else {
-	        fmt.Printf("\n%s Received %d-byte payload from TTN:\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
-			// Note that there is some missing code here.  Ideally, in the appreq
-			// we supply json-formatted IPINFO to ttserve.  TTGATE tunneled this through
-			// the GatewayEUI field of the DataUpAppReq, but in the TTN case we don't
-			// have such a luxury.  That said, the DataUpAppReq for TTN DOES have the
-			// Latitude/Longitude fields to work with.  Ideally we would then use
-			// TinyGeocoder (or Yahoo or Google) *here* and would then encode the results
-			// in the GatewayEUI field in a way that is compatible with TTGATE.
-			// I haven't written this code simply because this requires registering
-			// for a Yahoo/Google account, and potentially paying.  Since none of the
-			// code here is actually utilizing geo, we'll wait until then.
+            fmt.Printf("\n%s Received %d-byte payload from TTN:\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+            // Note that there is some missing code here.  Ideally, in the appreq
+            // we supply json-formatted IPINFO to ttserve.  TTGATE tunneled this through
+            // the GatewayEUI field of the DataUpAppReq, but in the TTN case we don't
+            // have such a luxury.  That said, the DataUpAppReq for TTN DOES have the
+            // Latitude/Longitude fields to work with.  Ideally we would then use
+            // TinyGeocoder (or Yahoo or Google) *here* and would then encode the results
+            // in the GatewayEUI field in a way that is compatible with TTGATE.
+            // I haven't written this code simply because this requires registering
+            // for a Yahoo/Google account, and potentially paying.  Since none of the
+            // code here is actually utilizing geo, we'll wait until then.
             reqQ <- AppReq
         }
 
@@ -372,12 +372,16 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
     // Process IPINFO data
     var info IPInfoData
     if ipInfo != "" {
-        json.Unmarshal([]byte(ipInfo), &info)
-	    fmt.Printf("Safecast message from %s/%s/%s:\n%s\n", info.City, info.Region, info.Country, msg)
+        err := json.Unmarshal([]byte(ipInfo), &info)
+        if (err != nil) {
+            ipInfo = ""
+        }
+    }
+    if (ipInfo != "") {
+        fmt.Printf("Safecast message from %s/%s/%s:\n%s\n", info.City, info.Region, info.Country, msg)
     } else {
-	    fmt.Printf("Safecast message:\n%s\n", msg)
-	}
-
+        fmt.Printf("Safecast message:\n%s\n", msg)
+    }
 
     // Log it
     if (msg.DeviceIDNumber != nil) {
@@ -410,7 +414,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
 
     // You would think that lat/lon/alt would be optional for all the uploads after
     // the first all-encompassing upload, but you'd be wrong.  Empirically I've found
-	// that they are required fields for any record uploaded to the Safecast API.
+    // that they are required fields for any record uploaded to the Safecast API.
     if msg.Latitude != nil {
         sc.Latitude = fmt.Sprintf("%f", msg.GetLatitude())
     } else {
@@ -591,8 +595,8 @@ func broadcastMessage(message string, skipDevEui string) {
 
 // Github webhook
 func GithubHandler(rw http.ResponseWriter, req *http.Request) {
-	var reason string
-	
+    var reason string
+
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
         fmt.Printf("Github webhook: error reading body:", err)
@@ -605,13 +609,13 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    if (p.HeadCommit.Commit.Message != "m") {   
+    if (p.HeadCommit.Commit.Message != "m") {
         sendToSlack(fmt.Sprintf("** Restarting ** %s %s", p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
-	    reason = fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
-    } else {	
-		// Handle 'git commit -mm' and 'git commit -amm', used in dev intermediate builds, in a more aesthetically pleasing manner.
-	    reason = fmt.Sprintf("%s pushed %s's commit to GitHub", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name)
-	}
+        reason = fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
+    } else {
+        // Handle 'git commit -mm' and 'git commit -amm', used in dev intermediate builds, in a more aesthetically pleasing manner.
+        reason = fmt.Sprintf("%s pushed %s's commit to GitHub", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name)
+    }
     fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n", reason)
 
     os.Exit(0)
