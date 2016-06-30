@@ -591,6 +591,8 @@ func broadcastMessage(message string, skipDevEui string) {
 
 // Github webhook
 func GithubHandler(rw http.ResponseWriter, req *http.Request) {
+	var reason string
+	
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
         fmt.Printf("Github webhook: error reading body:", err)
@@ -603,11 +605,13 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
-    if (p.HeadCommit.Commit.Message != "m") {   // to cover 'git commit -mm' and 'git commit -amm' shortcuts
+    if (p.HeadCommit.Commit.Message != "m") {   
         sendToSlack(fmt.Sprintf("** Restarting ** %s %s", p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
-        reason = fmt.Sprintf("%s pushed %s's commit to GitHub", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name)
-    }
+	    reason = fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
+    } else {	
+		// Handle 'git commit -mm' and 'git commit -amm', used in dev intermediate builds, in a more aesthetically pleasing manner.
+	    reason = fmt.Sprintf("%s pushed %s's commit to GitHub", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name)
+	}
     fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n", reason)
 
     os.Exit(0)
