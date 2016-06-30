@@ -374,9 +374,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
         updateDevice(msg.GetDeviceIDNumber())
     } else if msg.DeviceIDString != nil {
         i64, err := strconv.ParseInt(msg.GetDeviceIDString(), 10, 64)
-		if (err == nil) {
-	        updateDevice(uint32(i64))
-		}
+        if (err == nil) {
+            updateDevice(uint32(i64))
+        }
     }
 
     // Determine if the device itself happens to be suppressing "slowly-changing" metadata during this upload.
@@ -398,6 +398,31 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
         sc.CapturedAt = defaultTime
     }
 
+    // You would think that lat/lon/alt would be optional for all the uploads after
+    // the first all-encompassing upload, but you'd be wrong.  Empirically I've found
+	// that they are required fields for any record uploaded to the Safecast API.
+    if msg.Latitude != nil {
+        sc.Latitude = fmt.Sprintf("%f", msg.GetLatitude())
+    } else {
+        if (defaultLat != 0.0) {
+            sc.Latitude = fmt.Sprintf("%f", defaultLat)
+        }
+    }
+    if msg.Longitude != nil {
+        sc.Longitude = fmt.Sprintf("%f", msg.GetLongitude())
+    } else {
+        if (defaultLon != 0.0) {
+            sc.Longitude = fmt.Sprintf("%f", defaultLon)
+        }
+    }
+    if msg.Altitude != nil {
+        sc.Height = fmt.Sprintf("%d", msg.GetAltitude())
+    } else {
+        if (defaultAlt != 0.0) {
+            sc.Height = fmt.Sprintf("%d", defaultAlt)
+        }
+    }
+
     // The first upload has everything
     sc1 := sc
     if msg.Unit == nil {
@@ -409,27 +434,6 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
         sc1.Value = ""
     } else {
         sc1.Value = fmt.Sprintf("%d", msg.GetValue())
-    }
-    if msg.Latitude != nil {
-        sc1.Latitude = fmt.Sprintf("%f", msg.GetLatitude())
-    } else {
-        if (defaultLat != 0.0) {
-            sc1.Latitude = fmt.Sprintf("%f", defaultLat)
-        }
-    }
-    if msg.Longitude != nil {
-        sc1.Longitude = fmt.Sprintf("%f", msg.GetLongitude())
-    } else {
-        if (defaultLon != 0.0) {
-            sc1.Longitude = fmt.Sprintf("%f", defaultLon)
-        }
-    }
-    if msg.Altitude != nil {
-        sc1.Height = fmt.Sprintf("%d", msg.GetAltitude())
-    } else {
-        if (defaultAlt != 0.0) {
-            sc1.Height = fmt.Sprintf("%d", defaultAlt)
-        }
     }
     if !deviceIsSuppressingMetadata {
         if msg.BatteryVoltage != nil {
@@ -592,7 +596,7 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
     reason := fmt.Sprintf("%s pushed %s's commit to GitHub: %s", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message)
     if (p.HeadCommit.Commit.Message != "m") {   // to cover 'git commit -mm' and 'git commit -amm' shortcuts
         sendToSlack(fmt.Sprintf("** Restarting ** %s %s", p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
-	    reason = fmt.Sprintf("%s pushed %s's commit to GitHub", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name)
+        reason = fmt.Sprintf("%s pushed %s's commit to GitHub", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name)
     }
     fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n", reason)
 
@@ -732,17 +736,17 @@ func doDeviceSummary() {
         if (i > 0) {
             s = fmt.Sprintf("%s\n", s)
         }
-		id := sortedDevices[i].originalDeviceNo
+        id := sortedDevices[i].originalDeviceNo
 
-		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d|%010d>", s, id, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d|%010d>", s, id, id)
 
-		s = fmt.Sprintf("%s (", s)
-		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=bat_voltage|V>", s, id)
-		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=bat_soc|%%>", s, id)
-		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=env_temp|T>", s, id)
-		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=env_humid|H>", s, id)
-		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=wireless_snr|S>", s, id)
-		s = fmt.Sprintf("%s)", s)
+        s = fmt.Sprintf("%s (", s)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=bat_voltage|V>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=bat_soc|%%>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=env_temp|T>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=env_humid|H>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=wireless_snr|S>", s, id)
+        s = fmt.Sprintf("%s)", s)
 
         if (sortedDevices[i].minutesAgo == 0) {
             s = fmt.Sprintf("%s last seen just now", s)
