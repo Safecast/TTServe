@@ -54,4 +54,3 @@ type ABPSubAppReq struct {
 	NwkSKey string `json:"nwkskey"`
 	AppSKey string `json:"appskey"`
 }
-
