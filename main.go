@@ -756,14 +756,14 @@ func doDeviceSummary() {
         }
         id := sortedDevices[i].originalDeviceNo
 
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d|%010d>", s, id, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements|%010d>", s, id, id)
 
         s = fmt.Sprintf("%s (", s)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=bat_voltage|V>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=bat_soc|%%>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=env_temp|T>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=env_humid|H>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/measurements?device_id=%d&unit=wireless_snr|S>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=bat_voltage|V>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=bat_soc|%%>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_temp|T>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_humid|H>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=wireless_snr|S>", s, id)
         s = fmt.Sprintf("%s)", s)
 
         if (sortedDevices[i].minutesAgo == 0) {
