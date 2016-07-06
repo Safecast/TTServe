@@ -1,9 +1,9 @@
-/*
- * The Things Network to Safecast Message Publisher
- *
- * Contributors:
- *    Ray Ozzie
- */
+//
+// The Things Network to Safecast Message Publisher
+//
+// Contributors:
+//    Ray Ozzie
+//
 
 package main
 
