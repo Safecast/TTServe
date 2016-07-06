@@ -105,6 +105,7 @@ type SafecastData struct {
 type seenDevice struct {
 	originalDeviceNo   uint32
 	normalizedDeviceNo uint32
+	dualSeen		   bool
 	seen               time.Time
 	notifiedAsUnseen   bool
 	minutesAgo         int64
@@ -708,6 +709,13 @@ func updateDevice(DeviceID uint32) {
 	for i := 0; i < len(seenDevices); i++ {
 		if dev.normalizedDeviceNo == seenDevices[i].normalizedDeviceNo {
 			seenDevices[i].seen = time.Now().UTC()
+			// Keep note of whether  we've seen both devices of a set of dual-tube updates
+			if (dev.originalDeviceNo != seenDevices[i].originalDeviceNo) {
+				seenDevices[i].dualSeen = true
+				if (seenDevices[i].originalDeviceNo == seenDevices[i].normalizedDeviceNo) {
+					seenDevices[i].originalDeviceNo = dev.originalDeviceNo
+				}
+			}
 			found = true
 			break
 		}
@@ -718,6 +726,7 @@ func updateDevice(DeviceID uint32) {
 	if !found {
 		dev.seen = time.Now().UTC()
 		dev.notifiedAsUnseen = false
+		dev.dualSeen = false
 		seenDevices = append(seenDevices, dev)
 	}
 
@@ -731,7 +740,7 @@ func checkForSeenDevices() {
 		if !seenDevices[i].notifiedAsUnseen {
 			if seenDevices[i].seen.Before(expiration) {
 				seenDevices[i].notifiedAsUnseen = true
-				sendToSlack(fmt.Sprintf("** Warning**  Device %d hasn't been seen for %d minutes!", seenDevices[i].originalDeviceNo, seenDevices[i].minutesAgo))
+				sendToSlack(fmt.Sprintf("** Warning**  Device %d hasn't been seen for %d minutes!", seenDevices[i].normalizedDeviceNo, seenDevices[i].minutesAgo))
 			}
 		}
 	}
@@ -755,9 +764,13 @@ func doDeviceSummary() {
 		if i > 0 {
 			s = fmt.Sprintf("%s\n", s)
 		}
-		id := sortedDevices[i].originalDeviceNo
+		id := sortedDevices[i].normalizedDeviceNo
 
 		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements|%010d>", s, id, id)
+
+		if (sortedDevices[i].dualSeen) {
+			s = fmt.Sprintf("%s <http://dev.safecast.org/en-US/devices/%d/measurements|%010d>", s, sortedDevices[i].originalDeviceNo, sortedDevices[i].originalDeviceNo)
+		}
 
 		s = fmt.Sprintf("%s (", s)
 		s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=bat_voltage|V>", s, id)
