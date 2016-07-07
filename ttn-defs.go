@@ -2,7 +2,7 @@
 // Use of this source code is governed by the MIT license found with the
 // source code from where this was derived:
 // https://github.com/TheThingsNetwork/ttn/blob/develop/core/definitions.go
-package ttn
+package main
 
 // DataUpAppReq represents the actual payloads sent to application on uplink
 type DataUpAppReq struct {

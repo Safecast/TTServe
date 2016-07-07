@@ -10,8 +10,6 @@ import (
     "strconv"
     "encoding/json"
     "github.com/rayozzie/teletype-proto/golang"
-    "./safecast"
-    "./ipapi"
 )
 
 // Describes every device that has sent us a message
@@ -56,7 +54,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     var theSNR float32
 
     // Process IPINFO data
-    var info ipapi.IPInfoData
+    var info IPInfoData
     if ipInfo != "" {
         err := json.Unmarshal([]byte(ipInfo), &info)
         if err != nil {
@@ -86,7 +84,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         msg.BatteryVoltage == nil && msg.BatterySOC == nil && msg.EnvTemperature == nil && msg.EnvHumidity == nil
 
     // Generate the fields common to all uploads to safecast
-    sc := safecast.SafecastData{}
+    sc := SafecastData{}
     if msg.DeviceIDString != nil {
         sc.DeviceID = msg.GetDeviceIDString()
     } else if msg.DeviceIDNumber != nil {
@@ -200,7 +198,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 }
 
 // Upload a Safecast data structure to the Safecast service
-func uploadToSafecast(sc *safecast.SafecastData) {
+func uploadToSafecast(sc *SafecastData) {
 
     scJSON, _ := json.Marshal(sc)
     fmt.Printf("About to upload to %s:\n%s\n", SafecastUploadURL, scJSON)

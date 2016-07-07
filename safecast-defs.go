@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Creative Commons Non-Commercial
 // license.  These definitions are derived from:
 // https://api.safecast.org/
-package safecast
+package main
 
 type SafecastData struct {
     CapturedAt   string `json:"captured_at,omitempty"`   // 2016-02-20T14:02:25Z

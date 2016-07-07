@@ -1,6 +1,6 @@
 // IP-API JSON format, derived from:
 // http://ip-api.com/docs/api:json
-package ipapi
+package main
 
 import (
     "net"

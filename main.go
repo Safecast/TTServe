@@ -12,7 +12,6 @@ import (
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
     MQTT "github.com/eclipse/paho.mqtt.golang"
-    "./ttn"
 )
 
 // Derived from "ttnctl applications", the AppEUI and its Access Key
@@ -44,14 +43,14 @@ const logDateFormat string = "2006-01-02 15:04:05"
 var fullyConnected bool = false
 var mqttClient MQTT.Client
 var upQ chan MQTT.Message
-var reqQ chan ttn.DataUpAppReq
+var reqQ chan DataUpAppReq
 
 // Main entry point for app
 func main() {
 
     // Set up our internal message queues
     upQ = make(chan MQTT.Message, 5)
-    reqQ = make(chan ttn.DataUpAppReq, 5)
+    reqQ = make(chan DataUpAppReq, 5)
 
     // Spawn the app request handler shared by both TTN and direct inbound server
     go commonRequestHandler()
@@ -103,7 +102,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    var AppReq ttn.DataUpAppReq
+    var AppReq DataUpAppReq
     err = json.Unmarshal(body, &AppReq)
     if err != nil {
         // Very common case where anyone comes to web page, such as google health check
@@ -188,7 +187,7 @@ func ttnSubscriptionMonitor() {
 // Send to a ttn device outbound
 func ttnOutboundPublish(devEui string, payload []byte) {
     if fullyConnected {
-        jmsg := &ttn.DataDownAppReq{}
+        jmsg := &DataDownAppReq{}
         jmsg.Payload = payload
         jmsg.FPort = 1
         jmsg.TTL = "1h"
@@ -207,7 +206,7 @@ func ttnInboundHandler() {
 
     // Dequeue and process the messages as they're enqueued
     for msg := range upQ {
-        var AppReq ttn.DataUpAppReq
+        var AppReq DataUpAppReq
 
         // Unmarshal the payload and extract the base64 data
         err := json.Unmarshal(msg.Payload(), &AppReq)

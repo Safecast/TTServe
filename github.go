@@ -7,7 +7,6 @@ import (
     "net/http"
     "io/ioutil"
     "encoding/json"
-    "./github"
 )
 
 // Github webhook
@@ -19,7 +18,7 @@ func inboundWebGithubHandler(rw http.ResponseWriter, req *http.Request) {
         fmt.Printf("Github webhook: error reading body:", err)
         return
     }
-    var p github.PushPayload
+    var p PushPayload
     err = json.Unmarshal(body, &p)
     if err != nil {
         fmt.Printf("Github webhook: error unmarshaling body:", err)
