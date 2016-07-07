@@ -260,6 +260,7 @@ func trackDevice(DeviceID uint32) {
 func sendExpiredSafecastDevicesToSlack() {
 
     // Compute an expiration time
+    const deviceWarningAfterMinutes = 30
     expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes) * time.Minute))
 
     // Sweep through all devices that we've seen
@@ -284,20 +285,20 @@ func sendExpiredSafecastDevicesToSlack() {
 func sendSafecastDeviceSummaryToSlack() {
 
     // First, age out the expired devices and recompute when last seen
-	sendExpiredSafecastDevicesToSlack()
+    sendExpiredSafecastDevicesToSlack()
 
     // Next sort the device list
     sortedDevices := seenDevices
     sort.Sort(ByKey(sortedDevices))
 
     // Finally, sweep over all these devices in sorted order,
-	// generating a single large text string to be sent as a Slack message
+    // generating a single large text string to be sent as a Slack message
     s := "No devices yet."
     for i := 0; i < len(sortedDevices); i++ {
         id := sortedDevices[i].normalizedDeviceNo
 
-		if i == 0 {
-			s = ""
+        if i == 0 {
+            s = ""
         } else {
             s = fmt.Sprintf("%s\n", s)
         }
@@ -306,7 +307,7 @@ func sendSafecastDeviceSummaryToSlack() {
 
         if (sortedDevices[i].dualSeen) {
             s = fmt.Sprintf("%s <http://dev.safecast.org/en-US/devices/%d/measurements|%010d>", s,
-				sortedDevices[i].originalDeviceNo, sortedDevices[i].originalDeviceNo)
+                sortedDevices[i].originalDeviceNo, sortedDevices[i].originalDeviceNo)
         }
 
         s = fmt.Sprintf("%s (", s)

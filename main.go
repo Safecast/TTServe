@@ -37,9 +37,8 @@ const ttServerURLSend string = "/send"
 const ttServerURLGithub string = "/github"
 const ttServerURLSlack string = "/slack"
 
-// Misc
+// Constants
 const logDateFormat string = "2006-01-02 15:04:05"
-const deviceWarningAfterMinutes = 30
 
 // Statics
 var fullyConnected bool = false
