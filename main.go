@@ -446,7 +446,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
     }
     if !deviceIsSuppressingMetadata {
         if msg.BatteryVoltage != nil {
-            sc1.BatVoltage = fmt.Sprintf("%.4f", msg.GetBatteryVoltage())
+            sc1.BatVoltage = fmt.Sprintf("%.2f", msg.GetBatteryVoltage())
         }
         if msg.BatterySOC != nil {
             sc1.BatSOC = fmt.Sprintf("%.2f", msg.GetBatterySOC())
