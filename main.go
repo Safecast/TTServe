@@ -143,9 +143,14 @@ func ttnSubscriptionMonitor() {
     // Handle lost connections
     onMqConnectionLost := func (client MQTT.Client, err error) {
         fullyConnected = false
-        fmt.Printf("Connection Lost: %v\n", err)
+        fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
     }
     opts.SetConnectionLostHandler(onMqConnectionLost)
+    onMqConnectionMade := func (client MQTT.Client) {
+        fullyConnected = true
+        fmt.Printf("\n%s *** TTN Connection Established\n\n", time.Now().Format(logDateFormat))
+    }
+    opts.SetOnConnectHandler(onMqConnectionMade)
 
     // Create the client session context, saving it
     // in a global so that it may also be used to Publish
@@ -158,7 +163,6 @@ func ttnSubscriptionMonitor() {
 
     // Subscribe to the upstream topic
     onMqMessageReceived := func(client MQTT.Client, message MQTT.Message) {
-        fullyConnected = true
         fmt.Printf("\n%s Message Received:\n", time.Now().Format(logDateFormat))
         upQ <- message
     }
@@ -172,9 +176,9 @@ func ttnSubscriptionMonitor() {
     for fullyConnected = true;; {
         time.Sleep(15 * 60 * time.Second)
         if fullyConnected {
-            fmt.Printf("%s Alive\n", time.Now().Format(time.RFC850))
+            fmt.Printf("\n%s Alive\n", time.Now().Format(time.RFC850))
         } else {
-            fmt.Printf("%s *** NO CONNECTION ***\n", time.Now().Format(time.RFC850))
+            fmt.Printf("\n%s *** TTN CONNECTION INACTIVE ***\n", time.Now().Format(time.RFC850))
         }
 
     }
