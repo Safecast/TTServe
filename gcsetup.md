@@ -1,0 +1,44 @@
+// Install
+sudo apt-get update
+sudo apt-get install git --assume-yes
+sudo apt-get install golang --assume-yes
+
+// Add this to .bashrc:
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+// upload
+mkdir ~/go
+mkdir ~/go/src
+cd ~/go/src
+git clone https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
+cd teletype-ttserve
+./run.sh
+
+// Running in background
+//   create a new screen and switch to it
+screen -S teletype
+//   list screens
+screen -ls
+//   delete the current screen and logout
+exit
+//   detach screen (leave and go back to main shell)
+screen -d
+//   detach screen when not at a command line
+^a d
+//   go back to the one other detached screen
+screen -R
+//   go back to detached screen
+screen -r <pid# or name>
+//   detach a specific attached screen
+screen -d  <pid# or name>
+//   go back to a specific attached screen
+screen -d -r <pid# or name>
+//   kill all screens and current window
+screen -X quit
+
+// Note for posterity that if the Github "pull" methodology
+// fails for whatever reason, that the method to push files
+// to gcloud is:
+gcloud compute copy-files *.go rozzie@teletype-1:~/go/src/ttserve
+gcloud compute copy-files *.sh rozzie@teletype-1:~/go/src/ttserve

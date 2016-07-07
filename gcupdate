@@ -1,3 +1,0 @@
-gcloud compute copy-files *.go rozzie@teletype-1:~/go/src/ttserve
-gcloud compute copy-files *.sh rozzie@teletype-1:~/go/src/ttserve
-

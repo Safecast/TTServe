@@ -1,64 +1,59 @@
-//
-// The Things Network to Safecast Message Publisher
-//
-// Contributors:
-//    Ray Ozzie
-//
-
+// Teletype Message Publishing Service
+// 2016-July Ray Ozzie
 package main
 
 import (
-    "bytes"
-    "encoding/json"
-    "fmt"
-    MQTT "github.com/eclipse/paho.mqtt.golang"
-    "github.com/golang/protobuf/proto"
-    "github.com/rayozzie/teletype-proto/golang"
+    "os"
     "io"
     "io/ioutil"
     "net"
-    "net/http"
     "net/url"
-    "math/rand"
-    "os"
+    "net/http"
+    "fmt"
+    "bytes"
     "sort"
+    "time"
     "strconv"
     "strings"
-    "time"
+    "math/rand"
+    "encoding/json"
+    "github.com/golang/protobuf/proto"
+    "github.com/rayozzie/teletype-proto/golang"
+    MQTT "github.com/eclipse/paho.mqtt.golang"
+	"./safecast"
+	"./github"
+	"./ttn"
 )
 
 //
 // Constants
 //
 
-// Operational warning if devices aren't heard from in this period of time
-const deviceWarningAfterMinutes = 30
-
-// From "ttnctl applications", the AppEUI and its Access Key
+// Derived from "ttnctl applications", the AppEUI and its Access Key
 const appEui string = "70B3D57ED0000420"
 const appAccessKey string = "bgCzOOs/5K16cuwP3/sGP9sea/4jKFwFEdTbYHw2fRE="
 
-// From https://staging.thethingsnetwork.org/wiki/Backend/Connect/Application
+// Derived from https://staging.thethingsnetwork.org/wiki/Backend/Connect/Application
 const ttnServer string = "tcp://staging.thethingsnetwork.org:1883"
 const ttnTopic string = appEui + "/devices/+/up"
 
-// Slack
+// Slack-related
 const SlackOpsPostURL string = "https://hooks.slack.com/services/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"
 
-// Safecast
+// Safecast-related
 const SafecastUploadURL = "http://107.161.164.163/scripts/indextest.php?api_key=%s"
 const SafecastAppKey = "z3sHhgousVDDrCVXhzMT"
 
-// This HTTP server
-const ttServerPort string = ":8080"
+// This HTTP server-related
 const ttServer string = "http://api.teletype.io"
+const ttServerPort string = ":8080"
 const ttServerURLSend string = "/send"
 const ttServerURLGithub string = "/github"
 const ttServerURLSlack string = "/slack"
 
-// Other
-
+// Misc
 const logDateFormat string = "2006-01-02 15:04:05"
+const deviceWarningAfterMinutes = 30
 
 //
 // Structs
@@ -78,29 +73,6 @@ type IPInfoData struct {
     RegionName   string  `json:"regionName"`
     Timezone     string  `json:"timezone"`
     Zip          string  `json:"zip"`
-}
-
-type SafecastData struct {
-    CapturedAt   string `json:"captured_at,omitempty"`   // 2016-02-20T14:02:25Z
-    ChannelID    string `json:"channel_id,omitempty"`    // nil
-    DeviceID     string `json:"device_id,omitempty"`     // 140
-    DeviceTypeID string `json:"devicetype_id,omitempty"` // nil
-    Height       string `json:"height,omitempty"`        // 123
-    ID           string `json:"id,omitempty"`            // 972298
-    LocationName string `json:"location_name,omitempty"` // nil
-    OriginalID   string `json:"original_id,omitempty"`   // 972298
-    SensorID     string `json:"sensor_id,omitempty"`     // nil
-    StationID    string `json:"station_id,omitempty"`    // nil
-    Unit         string `json:"unit,omitempty"`          // cpm
-    UserID       string `json:"user_id,omitempty"`       // 304
-    Value        string `json:"value,omitempty"`         // 36
-    Latitude     string `json:"latitude,omitempty"`      // 37.0105
-    Longitude    string `json:"longitude,omitempty"`     // 140.9253
-    BatVoltage   string `json:"bat_voltage,omitempty"`   // 0-N volts
-    BatSOC       string `json:"bat_soc,omitempty"`       // 0%-100%
-    WirelessSNR  string `json:"wireless_snr,omitempty"`  // -127db to +127db
-    envTemp      string `json:"env_temp,omitempty"`      // Degrees centigrade
-    envHumid     string `json:"env_humid,omitempty"`     // Percent RH
 }
 
 type seenDevice struct {
@@ -146,7 +118,7 @@ func (a ByKey) Less(i, j int) bool {
 var fullyConnected bool = false
 var mqttClient MQTT.Client
 var upQ chan MQTT.Message
-var reqQ chan DataUpAppReq
+var reqQ chan ttn.DataUpAppReq
 var dnDevices []dnDevice
 var seenDevices []seenDevice
 
@@ -154,7 +126,7 @@ func main() {
 
     // Set up our message queue.  We shouldn't need much buffering, but buffer just in case.
     upQ = make(chan MQTT.Message, 5)
-    reqQ = make(chan DataUpAppReq, 5)
+    reqQ = make(chan ttn.DataUpAppReq, 5)
 
     // Spawn the app request handler shared by both TTN and direct inbound server
     go appRequestHandler()
@@ -199,7 +171,7 @@ func handleInboundTTNPosts(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    var AppReq DataUpAppReq
+    var AppReq ttn.DataUpAppReq
     err = json.Unmarshal(body, &AppReq)
     if err != nil {
         // Very common case where anyone comes to web page, such as google health check
@@ -269,7 +241,7 @@ func ttnInboundHandler() {
 
     // Dequeue and process the messages as they're enqueued
     for msg := range upQ {
-        var AppReq DataUpAppReq
+        var AppReq ttn.DataUpAppReq
 
         // Unmarshal the payload and extract the base64 data
         err := json.Unmarshal(msg.Payload(), &AppReq)
@@ -393,7 +365,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
     deviceIsSuppressingMetadata := msg.BatteryVoltage == nil && msg.BatterySOC == nil && msg.EnvTemperature == nil && msg.EnvHumidity == nil
 
     // Generate the fields common to all uploads to safecast
-    sc := SafecastData{}
+    sc := safecast.SafecastData{}
     if msg.DeviceIDString != nil {
         sc.DeviceID = msg.GetDeviceIDString()
     } else if msg.DeviceIDNumber != nil {
@@ -452,10 +424,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
             sc1.BatSOC = fmt.Sprintf("%.2f", msg.GetBatterySOC())
         }
         if msg.EnvTemperature != nil {
-            sc1.envTemp = fmt.Sprintf("%.2f", msg.GetEnvTemperature())
+            sc1.EnvTemp = fmt.Sprintf("%.2f", msg.GetEnvTemperature())
         }
         if msg.EnvHumidity != nil {
-            sc1.envHumid = fmt.Sprintf("%.2f", msg.GetEnvHumidity())
+            sc1.EnvHumid = fmt.Sprintf("%.2f", msg.GetEnvHumidity())
         }
         if msg.WirelessSNR != nil {
             theSNR = msg.GetWirelessSNR()
@@ -487,13 +459,13 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
         if msg.EnvTemperature != nil {
             sc4 := sc
             sc4.Unit = "env_temp"
-            sc4.Value = sc1.envTemp
+            sc4.Value = sc1.EnvTemp
             uploadToSafecast(&sc4)
         }
         if msg.EnvHumidity != nil {
             sc5 := sc
             sc5.Unit = "env_humid"
-            sc5.Value = sc1.envHumid
+            sc5.Value = sc1.EnvHumid
             uploadToSafecast(&sc5)
         }
         if theSNR != 0.0 {
@@ -507,7 +479,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast, ipInfo string, defaultTime s
 }
 
 // Upload the data structure to the Safecast service
-func uploadToSafecast(sc *SafecastData) {
+func uploadToSafecast(sc *safecast.SafecastData) {
 
     scJSON, _ := json.Marshal(sc)
     fmt.Printf("About to upload to %s:\n%s\n", SafecastUploadURL, scJSON)
@@ -556,7 +528,7 @@ func sendMessage(devEui string, message string) {
         fmt.Printf("t marshaling error: ", terr)
     }
 
-    jmsg := &DataDownAppReq{}
+    jmsg := &ttn.DataDownAppReq{}
     jmsg.Payload = tdata
     jmsg.FPort = 1
     jmsg.TTL = "1h"
@@ -597,7 +569,7 @@ func GithubHandler(rw http.ResponseWriter, req *http.Request) {
         fmt.Printf("Github webhook: error reading body:", err)
         return
     }
-    var p PushPayload
+    var p github.PushPayload
     err = json.Unmarshal(body, &p)
     if err != nil {
         fmt.Printf("Github webhook: error unmarshaling body:", err)
