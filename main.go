@@ -40,6 +40,7 @@ const ttServerURLSlack string = "/slack"
 const logDateFormat string = "2006-01-02 15:04:05"
 
 // Statics
+var everConnected bool = false;
 var fullyConnected bool = false
 var mqttClient MQTT.Client
 var upQ chan MQTT.Message
@@ -149,6 +150,7 @@ func ttnSubscriptionMonitor() {
     onMqConnectionLost := func (client MQTT.Client, err error) {
         fullyConnected = false
         fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
+		sendToSlack(fmt.Sprintf("TTN connection lost: %v\n", err))
     }
     opts.SetConnectionLostHandler(onMqConnectionLost)
 
@@ -167,8 +169,15 @@ func ttnSubscriptionMonitor() {
             time.Sleep(15 * time.Second)
         }
 
+		if (everConnected) {
+			sendToSlack("TTN connection restored")
+	        fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))
+		} else {
+	        fmt.Printf("TTN Connection Established\n")
+		}
+	
         fullyConnected = true
-        fmt.Printf("\n%s *** TTN Connection Established\n\n", time.Now().Format(logDateFormat))
+		everConnected = true;
 
     }
     opts.SetOnConnectHandler(onMqConnectionMade)
