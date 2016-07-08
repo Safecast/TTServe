@@ -30,7 +30,7 @@ func inboundWebGithubHandler(rw http.ResponseWriter, req *http.Request) {
         fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n",
             fmt.Sprintf("%s pushed %s's commit to GitHub", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name))
     } else {
-        sendToSlack(fmt.Sprintf("** Restarting ** %s %s",
+        sendToSafecastOps(fmt.Sprintf("** Restarting ** %s %s",
             p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
         fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n",
             fmt.Sprintf("%s pushed %s's commit to GitHub: %s",

@@ -22,9 +22,6 @@ const appAccessKey string = "bgCzOOs/5K16cuwP3/sGP9sea/4jKFwFEdTbYHw2fRE="
 const ttnServer string = "tcp://staging.thethingsnetwork.org:1883"
 const ttnTopic string = appEui + "/devices/+/up"
 
-// Slack-related
-const SlackOpsPostURL string = "https://hooks.slack.com/services/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"
-
 // Safecast-related
 const SafecastUploadURL = "http://107.161.164.163/scripts/indextest.php?api_key=%s"
 const SafecastAppKey = "z3sHhgousVDDrCVXhzMT"
@@ -150,7 +147,8 @@ func ttnSubscriptionMonitor() {
     onMqConnectionLost := func (client MQTT.Client, err error) {
         fullyConnected = false
         fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
-		sendToSlack(fmt.Sprintf("TTN connection lost: %v\n", err))
+		sendToSafecastOps(fmt.Sprintf("connection lost: %v\n", err))
+		sendToTTNOps(fmt.Sprintf("Connection lost from api.teletype.io to %s: %v\n", ttnServer, err))
     }
     opts.SetConnectionLostHandler(onMqConnectionLost)
 
@@ -170,7 +168,8 @@ func ttnSubscriptionMonitor() {
         }
 
 		if (everConnected) {
-			sendToSlack("TTN connection restored")
+			sendToSafecastOps("TTN connection restored")
+			sendToTTNOps(fmt.Sprintf("Connection restored from api.teletype.io to %s\n", ttnServer))
 	        fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))
 		} else {
 	        fmt.Printf("TTN Connection Established\n")

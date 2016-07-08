@@ -46,9 +46,9 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         }
     case "hello":
         if len(args) == 1 {
-            sendToSlack(fmt.Sprintf("Hello back, %s.", user))
+            sendToSafecastOps(fmt.Sprintf("Hello back, %s.", user))
         } else {
-            sendToSlack(fmt.Sprintf("Back at you: %s", messageAfterFirstWord))
+            sendToSafecastOps(fmt.Sprintf("Back at you: %s", messageAfterFirstWord))
         }
     default:
         // Default is to do nothing
@@ -56,8 +56,18 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-// Send a string as a slack post
-func sendToSlack(msg string) {
+// Send a text string to the Safecast #ops channel
+func sendToSafecastOps(msg string) {
+	sendToOpsViaSlack(msg, "https://hooks.slack.com/services/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")
+}
+
+// Send a text string to the TTN  #ops channel
+func sendToTTNOps(msg string) {
+	// Do nothing for now
+}
+
+// Send a string as a slack post to the specified channel
+func sendToOpsViaSlack(msg string, SlackOpsPostURL string) {
 
     type SlackData struct {
         Message string `json:"text"`
