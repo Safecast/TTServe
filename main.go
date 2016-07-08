@@ -73,7 +73,7 @@ func main() {
 func timer1m() {
     for {
         time.Sleep(1 * 60 * time.Second)
-		sendExpiredSafecastDevicesToSlack()
+        sendExpiredSafecastDevicesToSlack()
     }
 }
 
@@ -132,12 +132,18 @@ func ttnSubscriptionMonitor() {
     opts.SetUsername(appEui)
     opts.SetPassword(appAccessKey)
 
-    // Automatically reconnect upon failure, restoring subscription
-    // and sending all missed messages with QoS > 0.  We are
-    // required to have a unique .lt. 23-char client ID for session name
-    opts.SetClientID(fmt.Sprintf("%d", rand.Int63()))
+    // Automatically reconnect upon failure
     opts.SetAutoReconnect(true)
-    opts.SetCleanSession(false)
+
+    // Client ID must be a unique .lt. 23-char string
+    opts.SetClientID(fmt.Sprintf("tt-%d", rand.Int63()))
+
+    // We MUST do this because it is essential for robustness.  If it
+    // is false, we are relying upon the service to be durable and to
+    // persistently maintain client context across its own reboots!
+    // For our own robustness we need to just ask for a clean session
+    // each and every time we talk to the TTN service.
+    opts.SetCleanSession(true)
 
     // Handle lost connections
     onMqConnectionLost := func (client MQTT.Client, err error) {
@@ -145,9 +151,25 @@ func ttnSubscriptionMonitor() {
         fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
     }
     opts.SetConnectionLostHandler(onMqConnectionLost)
+
+	// The "connect" handler subscribes to the topic, and subscribes with a receiver callback
     onMqConnectionMade := func (client MQTT.Client) {
+
+        // Function to process received messages
+        onMqMessageReceived := func(client MQTT.Client, message MQTT.Message) {
+            fmt.Printf("\n%s Message Received:\n", time.Now().Format(logDateFormat))
+            upQ <- message
+        }
+
+		// Subscribe to the upstream topic
+        for token := client.Subscribe(ttnTopic, 0, onMqMessageReceived); token.Wait() && token.Error() != nil; {
+            fmt.Printf("Error subscribing to topic %s\n", ttnTopic, token.Error())
+            time.Sleep(15 * time.Second)
+        }
+
         fullyConnected = true
         fmt.Printf("\n%s *** TTN Connection Established\n\n", time.Now().Format(logDateFormat))
+
     }
     opts.SetOnConnectHandler(onMqConnectionMade)
 
@@ -155,18 +177,9 @@ func ttnSubscriptionMonitor() {
     // in a global so that it may also be used to Publish
     mqttClient = MQTT.NewClient(opts)
 
+	// Connect to the service
     for token := mqttClient.Connect(); token.Wait() && token.Error() != nil; {
         fmt.Printf("Error connecting to service: %s\n", token.Error())
-        time.Sleep(15 * time.Second)
-    }
-
-    // Subscribe to the upstream topic
-    onMqMessageReceived := func(client MQTT.Client, message MQTT.Message) {
-        fmt.Printf("\n%s Message Received:\n", time.Now().Format(logDateFormat))
-        upQ <- message
-    }
-    for token := mqttClient.Subscribe(ttnTopic, 0, onMqMessageReceived); token.Wait() && token.Error() != nil; {
-        fmt.Printf("Error subscribing to topic %s\n", ttnTopic, token.Error())
         time.Sleep(15 * time.Second)
     }
 
@@ -195,10 +208,10 @@ func ttnOutboundPublish(devEui string, payload []byte) {
         if jerr != nil {
             fmt.Printf("j marshaling error: ", jerr)
         }
-		topic := appEui + "/devices/" + devEui + "/down"
+        topic := appEui + "/devices/" + devEui + "/down"
         fmt.Printf("Send %s: %s\n", topic, jdata)
         mqttClient.Publish(topic, 0, false, jdata)
-	}
+    }
 }
 
 // Handle inbound pulled from TTN's upstream mqtt message queue
@@ -263,4 +276,3 @@ func commonRequestHandler() {
         }
     }
 }
-
