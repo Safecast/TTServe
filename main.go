@@ -214,7 +214,6 @@ func ttnSubscriptionMonitor() {
 		// is buggy and cannot really recover.  In this case,
 		// release all resources and start from the top.
 
-		mqttClient.Disconnect(0)
 		mqttClient = nil
 		time.Sleep(1 * time.Second)
         fmt.Printf("\n%s *** Disconnected completely\n", time.Now().Format(time.RFC850))
