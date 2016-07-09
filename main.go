@@ -126,20 +126,14 @@ func ttnSubscriptionMonitor() {
     for {
 
         // Allocate and set up the options
-        opts := MQTT.NewClientOptions()
-        opts.AddBroker(ttnServer)
-        opts.SetUsername(appEui)
-        opts.SetPassword(appAccessKey)
+        mqttOpts := MQTT.NewClientOptions()
+        mqttOpts.AddBroker(ttnServer)
+        mqttOpts.SetUsername(appEui)
+        mqttOpts.SetPassword(appAccessKey)
 
-        // Automatically reconnect upon failure
-        opts.SetAutoReconnect(true)
-
-        // We MUST do this because it is essential for robustness.  If it
-        // is false, we are relying upon the service to be durable and to
-        // persistently maintain client context across its own reboots!
-        // For our own robustness we need to just ask for a clean session
-        // each and every time we talk to the TTN service.
-        opts.SetCleanSession(true)
+        // Do NOT automatically reconnect upon failure
+        mqttOpts.SetAutoReconnect(false)
+        mqttOpts.SetCleanSession(true)
 
         // Handle lost connections
         onMqConnectionLost := func (client MQTT.Client, err error) {
@@ -148,7 +142,7 @@ func ttnSubscriptionMonitor() {
             sendToSafecastOps(fmt.Sprintf("connection lost: %v\n", err))
             sendToTTNOps(fmt.Sprintf("Connection lost from api.teletype.io to %s: %v\n", ttnServer, err))
         }
-        opts.SetConnectionLostHandler(onMqConnectionLost)
+        mqttOpts.SetConnectionLostHandler(onMqConnectionLost)
 
         // The "connect" handler subscribes to the topic, and subscribes with a receiver callback
         onMqConnectionMade := func (client MQTT.Client) {
@@ -160,61 +154,55 @@ func ttnSubscriptionMonitor() {
             }
 
             // Subscribe to the upstream topic
-            for token := client.Subscribe(ttnTopic, 0, onMqMessageReceived); token.Wait() && token.Error() != nil; {
+            if token := client.Subscribe(ttnTopic, 0, onMqMessageReceived); token.Wait() && token.Error() != nil {
+				// Treat subscription failure as a connection failure
                 fmt.Printf("Error subscribing to topic %s\n", ttnTopic, token.Error())
-                time.Sleep(15 * time.Second)
-            }
-
-            if (everConnected) {
-                sendToSafecastOps("TTN connection restored")
-                sendToTTNOps(fmt.Sprintf("Connection restored from api.teletype.io to %s\n", ttnServer))
-                fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))
+                fullyConnected = false
             } else {
-                fmt.Printf("TTN Connection Established\n")
+				// Successful subscription
+                fullyConnected = true
+                if (everConnected) {
+                    sendToSafecastOps("TTN connection restored")
+                    sendToTTNOps(fmt.Sprintf("Connection restored from api.teletype.io to %s\n", ttnServer))
+                    fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))
+                } else {
+	                everConnected = true;
+                    fmt.Printf("TTN Connection Established\n")
+                }
             }
-
-            fullyConnected = true
-            everConnected = true;
 
         }
-        opts.SetOnConnectHandler(onMqConnectionMade)
+        mqttOpts.SetOnConnectHandler(onMqConnectionMade)
 
         // Create the client session context, saving it
         // in a global so that it may also be used to Publish
-        mqttClient = MQTT.NewClient(opts)
+        mqttClient = MQTT.NewClient(mqttOpts)
 
         // Connect to the service
-        for token := mqttClient.Connect(); token.Wait() && token.Error() != nil; {
+        if token := mqttClient.Connect(); token.Wait() && token.Error() != nil {
             fmt.Printf("Error connecting to service: %s\n", token.Error())
-            time.Sleep(15 * time.Second)
-        }
+        } else {
 
-        // Main loop, used to track major failures
-        fmt.Printf("Now handling inbound on: %s mqtt:%s\n", ttnServer, ttnTopic)
-		fullyConnected = true
-		consecutiveFailures := 0
-        for consecutiveFailures < 5 {
-            time.Sleep(60 * time.Second)
-            if fullyConnected {
-                fmt.Printf("\n%s Alive\n", time.Now().Format(time.RFC850))
-				consecutiveFailures = 0
-            } else {
-                fmt.Printf("\n%s *** TTN CONNECTION INACTIVE ***\n", time.Now().Format(time.RFC850))
-				consecutiveFailures += 1
+            fmt.Printf("Now handling inbound on: %s mqtt:%s\n", ttnServer, ttnTopic)
+            for consecutiveFailures := 0; consecutiveFailures < 3; {
+                time.Sleep(60 * time.Second)
+                if fullyConnected {
+                    fmt.Printf("\n%s Alive\n", time.Now().Format(time.RFC850))
+                    consecutiveFailures = 0
+                } else {
+                    fmt.Printf("\n%s *** TTN CONNECTION INACTIVE ***\n", time.Now().Format(time.RFC850))
+                    consecutiveFailures += 1
+                }
             }
+
         }
 
-		// If we get here it's because we've had a failure that
-		// hasn't restored itself for quite a while.  In this case,
-		// give up under the assumption that the client software
-		// is buggy and cannot really recover.  In this case,
-		// release all resources and start from the top.
+        // Failure
+        mqttOpts = nil
+        mqttClient = nil
+        time.Sleep(5 * time.Second)
+        fmt.Printf("\n%s *** Retrying with a fresh connection\n", time.Now().Format(time.RFC850))
 
-		opts = nil
-		mqttClient = nil
-		time.Sleep(1 * time.Second)
-        fmt.Printf("\n%s *** Disconnected completely\n", time.Now().Format(time.RFC850))
-		
     }
 }
 
