@@ -36,9 +36,11 @@ const ttServerURLSlack string = "/slack"
 const logDateFormat string = "2006-01-02 15:04:05"
 
 // Statics
-var everConnected bool = false;
+var everConnected bool = false
 var fullyConnected bool = false
 var mqttClient MQTT.Client
+var lastConnected string = "(never)"
+var lastDisconnected string = "(never)"
 var upQ chan MQTT.Message
 var reqQ chan DataUpAppReq
 
@@ -138,6 +140,7 @@ func ttnSubscriptionMonitor() {
         // Handle lost connections
         onMqConnectionLost := func (client MQTT.Client, err error) {
             fullyConnected = false
+			lastDisconnected = time.Now().Format(logDateFormat)
             fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
             sendToSafecastOps(fmt.Sprintf("connection lost: %v\n", err))
             sendToTTNOps(fmt.Sprintf("Connection lost from api.teletype.io to %s: %v\n", ttnServer, err))
@@ -161,6 +164,7 @@ func ttnSubscriptionMonitor() {
             } else {
 				// Successful subscription
                 fullyConnected = true
+				lastConnected = time.Now().Format(logDateFormat)
                 if (everConnected) {
                     sendToSafecastOps("TTN connection restored")
                     sendToTTNOps(fmt.Sprintf("Connection restored from api.teletype.io to %s\n", ttnServer))
@@ -187,10 +191,10 @@ func ttnSubscriptionMonitor() {
             for consecutiveFailures := 0; consecutiveFailures < 3; {
                 time.Sleep(60 * time.Second)
                 if fullyConnected {
-                    fmt.Printf("\n%s Alive\n", time.Now().Format(time.RFC850))
+                    fmt.Printf("\n%s TTN Alive\n", time.Now().Format(time.RFC850))
                     consecutiveFailures = 0
                 } else {
-                    fmt.Printf("\n%s *** TTN CONNECTION INACTIVE ***\n", time.Now().Format(time.RFC850))
+                    fmt.Printf("\n%s TTN *** UNREACHABLE ***\n", time.Now().Format(time.RFC850))
                     consecutiveFailures += 1
                 }
             }
@@ -201,7 +205,11 @@ func ttnSubscriptionMonitor() {
         mqttOpts = nil
         mqttClient = nil
         time.Sleep(5 * time.Second)
-        fmt.Printf("\n%s *** Retrying with a fresh connection\n", time.Now().Format(time.RFC850))
+		fmt.Printf("\n***\n")
+		fmt.Printf("*** Last time connection was successfully made: %s\n", lastConnected)
+		fmt.Printf("*** Last time connection was lost: %s\n", lastDisconnected)
+		fmt.Printf("*** Now attempting to reconnect: %s\n", time.Now().Format(time.RFC850))
+		fmt.Printf("***\n\n")
 
     }
 }
