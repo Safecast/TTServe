@@ -216,7 +216,8 @@ func ttnSubscriptionMonitor() {
 
 		mqttClient.Disconnect(0)
 		mqttClient = nil
-        fmt.Printf("\n%s *** Disconnecting completely\n", time.Now().Format(time.RFC850))
+		time.Sleep(1 * time.Second)
+        fmt.Printf("\n%s *** Disconnected completely\n", time.Now().Format(time.RFC850))
 		
     }
 }
