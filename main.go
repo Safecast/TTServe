@@ -7,7 +7,6 @@ import (
     "net/http"
     "fmt"
     "time"
-    "math/rand"
     "encoding/json"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
@@ -135,9 +134,6 @@ func ttnSubscriptionMonitor() {
         // Automatically reconnect upon failure
         opts.SetAutoReconnect(true)
 
-        // Client ID must be a unique .lt. 23-char string
-        opts.SetClientID(fmt.Sprintf("tt-%d", rand.Int63()))
-
         // We MUST do this because it is essential for robustness.  If it
         // is false, we are relying upon the service to be durable and to
         // persistently maintain client context across its own reboots!
@@ -214,6 +210,7 @@ func ttnSubscriptionMonitor() {
 		// is buggy and cannot really recover.  In this case,
 		// release all resources and start from the top.
 
+		opts = nil
 		mqttClient = nil
 		time.Sleep(1 * time.Second)
         fmt.Printf("\n%s *** Disconnected completely\n", time.Now().Format(time.RFC850))
