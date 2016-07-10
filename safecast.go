@@ -201,7 +201,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 func uploadToSafecast(sc *SafecastData) {
 
     scJSON, _ := json.Marshal(sc)
-    fmt.Printf("About to upload to %s:\n%s\n", SafecastUploadURL, scJSON)
+    fmt.Printf("*** About to upload to %s:\n%s\n", SafecastUploadURL, scJSON)
     req, err := http.NewRequest("POST", fmt.Sprintf(SafecastUploadURL, SafecastAppKey), bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
@@ -212,6 +212,7 @@ func uploadToSafecast(sc *SafecastData) {
         fmt.Printf("*** Error uploading %s to Safecast %s\n\n", sc.Unit, err)
     } else {
         resp.Body.Close()
+	    fmt.Printf("*** Done.\n");
     }
 
 }
