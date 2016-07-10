@@ -152,7 +152,6 @@ func ttnSubscriptionMonitor() {
 
             // Function to process received messages
             onMqMessageReceived := func(client MQTT.Client, message MQTT.Message) {
-                fmt.Printf("\n%s Message Received:\n", time.Now().Format(logDateFormat))
                 upQ <- message
             }
 
