@@ -45,8 +45,12 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
 
         // Handle an inbound upstream-only ping (blank message) by just ignoring it
     case "":
-        fmt.Printf("\n%s Ping from %s\n\n", time.Now().Format(logDateFormat), devEui)
-
+		if (devEui == "") {
+	        fmt.Printf("%s Ping from TTGATE device\n", time.Now().Format(logDateFormat))
+		} else {
+	        fmt.Printf("%s Ping from %s\n", time.Now().Format(logDateFormat), devEui)
+		}
+		
         // Anything else is broadcast to all OTHER known devices
     default:
         fmt.Printf("\n%s Broadcast from %s: 'message'\n\n", time.Now().Format(logDateFormat), devEui, message)
