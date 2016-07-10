@@ -207,12 +207,15 @@ func uploadToSafecast(sc *SafecastData) {
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{}
 
+	transactionBegan := time.Now()
     resp, err := httpclient.Do(req)
+	transactionSeconds := int64(time.Now().Sub(transactionBegan) / time.Second)
+
     if err != nil {
-        fmt.Printf("*** Error uploading %s to Safecast %s\n\n", sc.Unit, err)
+        fmt.Printf("*** After %d seconds, ERROR uploading %s to Safecast %s\n\n", transactionSeconds, sc.Unit, err)
     } else {
         resp.Body.Close()
-	    fmt.Printf("*** Done.\n");
+	    fmt.Printf("*** After %d seconds, completed successfully.\n", transactionSeconds);
     }
 
 }
