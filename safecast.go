@@ -219,11 +219,16 @@ func endTransaction(transaction int, errstr string) {
     httpTransactionsInProgress -= 1
     duration := int(time.Now().Sub(httpTransactionTimes[transaction]) / time.Second)
     httpTransactionDurations[transaction] = duration
+	fmt.Print("$$$$$$$$$ Ended trans[%d] = %d seconds\n", transaction, duration)
 
     if errstr != "" {
         fmt.Printf("*** After %d seconds, ERROR uploading to Safecast %s\n\n", duration, errstr)
     } else {
-        fmt.Printf("*** After %d seconds, completed successfully.\n", duration);
+		if (duration < 5) {
+	        fmt.Printf("*** Completed successfully.\n");
+		} else {
+	        fmt.Printf("*** After %d seconds, completed successfully.\n", duration);
+		}
     }
 
 	theMin := 99999
@@ -243,14 +248,24 @@ func endTransaction(transaction int, errstr string) {
     theMean := theTotal / theCount
 
     if (httpTransactionsInProgress > 0 || duration > 10) {
-        s := "*** Safecast HTTP Transaction Statistics"
-        s = fmt.Sprintf("\n%s*** %d total uploads since restart", s, httpTransactions)
+
+		// Console
+		fmt.Printf("Safecast HTTP Upload Statistics\n")
+        fmt.Printf("*** %d total uploads since restart\n", httpTransactions)
         if (httpTransactionsInProgress > 0) {
-            fmt.Sprintf("\n%s*** %d uploads still in progress")
+            fmt.Printf("%s*** %d uploads still in progress\n")
         }
-		s = fmt.Sprintf("\n%s*** Last %d: min=%ds, max=%ds, avg=%ds", s, theCount, theMin, theMax, theMean)
-		fmt.Printf("%s\n", s);
-    }
+		fmt.Printf("*** Last %d: min=%ds, max=%ds, avg=%ds\n", theCount, theMin, theMax, theMean)
+
+		// Slack
+//        s := "*** Safecast HTTP Transaction Statistics"
+//        s = fmt.Sprintf("\n%s*** %d total uploads since restart", s, httpTransactions)
+//        if (httpTransactionsInProgress > 0) {
+//            fmt.Sprintf("\n%s*** %d uploads still in progress")
+//		s = fmt.Sprintf("\n%s*** Last %d: min=%ds, max=%ds, avg=%ds", s, theCount, theMin, theMax, theMean)
+//		fmt.Printf("%s\n", s);
+
+	}
 
 }
 
