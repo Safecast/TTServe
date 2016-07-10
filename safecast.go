@@ -247,7 +247,7 @@ func endTransaction(transaction int, errstr string) {
     }
     theMean := theTotal / theCount
 
-    if (httpTransactionsInProgress > 0 || duration > 10) {
+    if (theMin > 10) {
 
 		// Console
 		fmt.Printf("Safecast HTTP Upload Statistics\n")
