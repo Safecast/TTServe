@@ -219,7 +219,7 @@ func endTransaction(transaction int, errstr string) {
     httpTransactionsInProgress -= 1
     duration := int(time.Now().Sub(httpTransactionTimes[transaction]) / time.Second)
     httpTransactionDurations[transaction] = duration
-	fmt.Print("$$$$$$$$$ Ended trans[%d] = %d seconds\n", transaction, duration)
+	fmt.Printf("$$$$$$$$$ Ended trans[%d] = %d seconds\n", transaction, duration)
 
     if errstr != "" {
         fmt.Printf("*** After %d seconds, ERROR uploading to Safecast %s\n\n", duration, errstr)
