@@ -3,6 +3,7 @@ package main
 
 import (
     "fmt"
+	"time"
     "strings"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
@@ -42,13 +43,13 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
             sendMessage(devEui, "@ttserve: "+argRest)
         }
 
-        // Handle an inbound ping (blank message) by just ignoring it
+        // Handle an inbound upstream-only ping (blank message) by just ignoring it
     case "":
-        fmt.Printf("Ping from %s\n", devEui)
+        fmt.Printf("\n%s Ping from %s\n\n", time.Now().Format(logDateFormat), devEui)
 
         // Anything else is broadcast to all OTHER known devices
     default:
-        fmt.Printf("Broadcast from %s: 'message'\n", devEui, message)
+        fmt.Printf("\n%s Broadcast from %s: 'message'\n\n", time.Now().Format(logDateFormat), devEui, message)
         broadcastMessage(message, devEui)
     }
 

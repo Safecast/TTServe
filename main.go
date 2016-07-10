@@ -191,10 +191,10 @@ func ttnSubscriptionMonitor() {
             for consecutiveFailures := 0; consecutiveFailures < 3; {
                 time.Sleep(60 * time.Second)
                 if fullyConnected {
-                    fmt.Printf("\n%s TTN Alive\n", time.Now().Format(time.RFC850))
+                    fmt.Printf("\n%s TTN Alive\n", time.Now().Format(logDateFormat))
                     consecutiveFailures = 0
                 } else {
-                    fmt.Printf("\n%s TTN *** UNREACHABLE ***\n", time.Now().Format(time.RFC850))
+                    fmt.Printf("\n%s TTN *** UNREACHABLE ***\n", time.Now().Format(logDateFormat))
                     consecutiveFailures += 1
                 }
             }
@@ -208,7 +208,7 @@ func ttnSubscriptionMonitor() {
 		fmt.Printf("\n***\n")
 		fmt.Printf("*** Last time connection was successfully made: %s\n", lastConnected)
 		fmt.Printf("*** Last time connection was lost: %s\n", lastDisconnected)
-		fmt.Printf("*** Now attempting to reconnect: %s\n", time.Now().Format(time.RFC850))
+		fmt.Printf("*** Now attempting to reconnect: %s\n", time.Now().Format(logDateFormat))
 		fmt.Printf("***\n\n")
 
     }
