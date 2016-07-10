@@ -12,6 +12,13 @@ import (
     "github.com/rayozzie/teletype-proto/golang"
 )
 
+// For dealing with transaction timeouts
+var httpTransactionsInProgress int = 0
+var httpTransactions = 0
+const httpTransactionsRecorded = 25
+var httpTransactionDurations[httpTransactionsRecorded] int
+var httpTransactionTimes[httpTransactionsRecorded] time.Time
+
 // Describes every device that has sent us a message
 type seenDevice struct {
     originalDeviceNo   uint32
@@ -157,7 +164,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             sc1.WirelessSNR = fmt.Sprintf("%.1f", theSNR)
         }
     }
-    uploadToSafecast(&sc1)
+    go uploadToSafecast(sc1)
 
     // Due to Safecast API design limitations, upload the metadata as
     // discrete web uploads.  Once this API limitation is removed,
@@ -167,56 +174,108 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             sc2 := sc
             sc2.Unit = "bat_voltage"
             sc2.Value = sc1.BatVoltage
-            uploadToSafecast(&sc2)
+            go uploadToSafecast(sc2)
         }
         if msg.BatterySOC != nil {
             sc3 := sc
             sc3.Unit = "bat_soc"
             sc3.Value = sc1.BatSOC
-            uploadToSafecast(&sc3)
+            go uploadToSafecast(sc3)
         }
         if msg.EnvTemperature != nil {
             sc4 := sc
             sc4.Unit = "env_temp"
             sc4.Value = sc1.EnvTemp
-            uploadToSafecast(&sc4)
+            go uploadToSafecast(sc4)
         }
         if msg.EnvHumidity != nil {
             sc5 := sc
             sc5.Unit = "env_humid"
             sc5.Value = sc1.EnvHumid
-            uploadToSafecast(&sc5)
+            go uploadToSafecast(sc5)
         }
         if theSNR != 0.0 {
             sc6 := sc
             sc6.Unit = "wireless_snr"
             sc6.Value = sc1.WirelessSNR
-            uploadToSafecast(&sc6)
+            go uploadToSafecast(sc6)
         }
 
     }
 }
 
+// Begin transaction and return the transaction ID
+func beginTransaction(url string) int {
+    httpTransactionsInProgress += 1
+    httpTransactions += 1
+    transaction := httpTransactions % httpTransactionsRecorded
+    httpTransactionTimes[transaction] = time.Now()
+    fmt.Printf("*** About to upload to Safecast %s\n", url)
+    return transaction
+}
+
+// End transaction and issue warnings
+func endTransaction(transaction int, errstr string) {
+    httpTransactionsInProgress -= 1
+    duration := int(time.Now().Sub(httpTransactionTimes[transaction]) / time.Second)
+    httpTransactionDurations[transaction] = duration
+
+    if errstr != "" {
+        fmt.Printf("*** After %d seconds, ERROR uploading to Safecast %s\n\n", duration, errstr)
+    } else {
+        fmt.Printf("*** After %d seconds, completed successfully.\n", duration);
+    }
+
+	theMin := 99999
+    theMax := 0
+    theTotal := 0
+    theCount := 0
+    for theCount < httpTransactions && theCount < httpTransactionsRecorded {
+        theTotal += httpTransactionDurations[theCount]
+        if httpTransactionDurations[theCount] < theMin {
+            theMin = httpTransactionDurations[theCount]
+        }
+        if httpTransactionDurations[theCount] > theMax {
+            theMax = httpTransactionDurations[theCount]
+        }
+        theCount += 1
+    }
+    theMean := theTotal / theCount
+
+    if (httpTransactionsInProgress > 0 || duration > 10) {
+        s := "*** Safecast HTTP Transaction Statistics"
+        s = fmt.Sprintf("\n%s*** %d total uploads since restart", s, httpTransactions)
+        if (httpTransactionsInProgress > 0) {
+            fmt.Sprintf("\n%s*** %d uploads still in progress")
+        }
+		s = fmt.Sprintf("\n%s*** Last %d: min=%ds, max=%ds, avg=%ds", s, theCount, theMin, theMax, theMean)
+		fmt.Printf("%s\n", s);
+    }
+
+}
+
 // Upload a Safecast data structure to the Safecast service
-func uploadToSafecast(sc *SafecastData) {
+func uploadToSafecast(sc SafecastData) {
+
+    transaction := beginTransaction(SafecastUploadURL)
 
     scJSON, _ := json.Marshal(sc)
-    fmt.Printf("*** About to upload to %s:\n%s\n", SafecastUploadURL, scJSON)
+    fmt.Printf("%s\n", scJSON)
+
     req, err := http.NewRequest("POST", fmt.Sprintf(SafecastUploadURL, SafecastAppKey), bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{}
-
-	transactionBegan := time.Now()
     resp, err := httpclient.Do(req)
-	transactionSeconds := int64(time.Now().Sub(transactionBegan) / time.Second)
 
-    if err != nil {
-        fmt.Printf("*** After %d seconds, ERROR uploading %s to Safecast %s\n\n", transactionSeconds, sc.Unit, err)
-    } else {
+	errString := ""
+    if (err == nil) {
         resp.Body.Close()
-	    fmt.Printf("*** After %d seconds, completed successfully.\n", transactionSeconds);
-    }
+    } else {
+		errString = fmt.Sprintf("%s", err)
+	}
+
+    endTransaction(transaction, errString)
 
 }
 
