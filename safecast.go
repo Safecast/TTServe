@@ -219,7 +219,6 @@ func endTransaction(transaction int, errstr string) {
     httpTransactionsInProgress -= 1
     duration := int(time.Now().Sub(httpTransactionTimes[transaction]) / time.Second)
     httpTransactionDurations[transaction] = duration
-	fmt.Printf("$$$$$$$$$ Ended trans[%d] = %d seconds\n", transaction, duration)
 
     if errstr != "" {
         fmt.Printf("*** After %d seconds, ERROR uploading to Safecast %s\n\n", duration, errstr)
@@ -247,9 +246,8 @@ func endTransaction(transaction int, errstr string) {
     }
     theMean := theTotal / theCount
 
+	// Output to console every time we are in a "slow mode"
     if (theMin > 10) {
-
-		// Console
 		fmt.Printf("Safecast HTTP Upload Statistics\n")
         fmt.Printf("*** %d total uploads since restart\n", httpTransactions)
         if (httpTransactionsInProgress > 0) {
@@ -257,14 +255,12 @@ func endTransaction(transaction int, errstr string) {
         }
 		fmt.Printf("*** Last %d: min=%ds, max=%ds, avg=%ds\n", theCount, theMin, theMax, theMean)
 
-		// Slack
-//        s := "*** Safecast HTTP Transaction Statistics"
-//        s = fmt.Sprintf("\n%s*** %d total uploads since restart", s, httpTransactions)
-//        if (httpTransactionsInProgress > 0) {
-//            fmt.Sprintf("\n%s*** %d uploads still in progress")
-//		s = fmt.Sprintf("\n%s*** Last %d: min=%ds, max=%ds, avg=%ds", s, theCount, theMin, theMax, theMean)
-//		fmt.Printf("%s\n", s);
+	}
 
+	// If there's a problem, output to Slack once every 25 transactions
+	if (theMin > 10 && transaction == 0) {
+		s := fmt.Sprintf("Safecast API: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", theCount, theMin, theMax, theMean)
+		sendToSafecastOps(s);
 	}
 
 }

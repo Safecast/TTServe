@@ -53,7 +53,7 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
 		
         // Anything else is broadcast to all OTHER known devices
     default:
-        fmt.Printf("\n%s Broadcast from %s: 'message'\n\n", time.Now().Format(logDateFormat), devEui, message)
+        fmt.Printf("\n%s Broadcast from %s: '%s'\n\n", time.Now().Format(logDateFormat), devEui, message)
         broadcastMessage(message, devEui)
     }
 
