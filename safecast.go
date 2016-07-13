@@ -158,6 +158,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 		// A text message
 		sc1.Unit = "message"
 		sc1.Value = msg.GetMessage()
+		// We also place it in here, because we want to retain the
+		// full message while Safecast seems to parse the value as
+		// a floating point number rather than a string.
+		sc1.LocationName = sc1.Value;
 		
 	}
 	
