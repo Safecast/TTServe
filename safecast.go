@@ -162,7 +162,8 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 		// full message while Safecast seems to parse the value as
 		// a floating point number rather than a string.
 		sc1.LocationName = sc1.Value;
-		
+		sc1.DeviceTypeID = sc1.Value;		
+
 	}
 	
     if !deviceIsSuppressingMetadata {
