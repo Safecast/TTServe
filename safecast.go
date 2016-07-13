@@ -132,16 +132,35 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     // our goal that someday this is the *only* upload,
     // after the Safecast service is upgraded.
     sc1 := sc
-    if msg.Unit == nil {
-        sc1.Unit = "cpm"
-    } else {
-        sc1.Unit = fmt.Sprintf("%s", msg.GetUnit())
-    }
-    if msg.Value == nil {
-        sc1.Value = ""
-    } else {
-        sc1.Value = fmt.Sprintf("%d", msg.GetValue())
-    }
+
+	// Note that if the telecast message header has a Message
+	// field, we will ignore the unit & value and
+	// instead override it with the message.  This is
+	// the way that we transmit a boot/version message
+	// to the Safecast service.
+	
+	if msg.Message == nil {
+		
+		// A safecast geiger upload
+		if msg.Unit == nil {
+			sc1.Unit = "cpm"
+		} else {
+			sc1.Unit = fmt.Sprintf("%s", msg.GetUnit())
+		}
+		if msg.Value == nil {
+			sc1.Value = ""
+		} else {
+			sc1.Value = fmt.Sprintf("%d", msg.GetValue())
+		}
+
+	} else {
+
+		// A text message
+		sc1.Unit = "message"
+		sc1.Value = msg.GetMessage()
+		
+	}
+	
     if !deviceIsSuppressingMetadata {
         if msg.BatteryVoltage != nil {
             sc1.BatVoltage = fmt.Sprintf("%.2f", msg.GetBatteryVoltage())
