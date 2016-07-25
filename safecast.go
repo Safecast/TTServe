@@ -21,17 +21,21 @@ var httpTransactionTimes[httpTransactionsRecorded] time.Time
 
 // Describes every device that has sent us a message
 type seenDevice struct {
-    originalDeviceNo   uint32
-    normalizedDeviceNo uint32
-    dualSeen           bool
-    seen               time.Time
-    notifiedAsUnseen   bool
-    minutesAgo         int64
+    originalDeviceNo	uint32
+    normalizedDeviceNo	uint32
+    dualSeen			bool
+    seen				time.Time
+    notifiedAsUnseen	bool
+    minutesAgo			int64
 }
 var seenDevices []seenDevice
 
 // Checksums of recently-processed messages
-var recentlyReceived [25]uint32
+type receivedMessage struct {
+	checksum			uint32
+    seen				time.Time
+}
+var recentlyReceived [25]receivedMessage
 
 // Class used to sort seen devices
 type ByKey []seenDevice
@@ -79,10 +83,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     }
 
 	// Discard it if it's a duplicate
-//	if isDuplicate(checksum) {
-//		fmt.Printf("*** Discarding duplicate message ***\n");
-//		return
-//	}
+	if isDuplicate(checksum) {
+		fmt.Printf("*** Discarding duplicate message ***\n");
+		return
+	}
 	
     // Log it
     if msg.DeviceIDNumber != nil {
@@ -326,10 +330,12 @@ func uploadToSafecast(sc SafecastData) {
 // Check to see if this is a duplicate of a message we've recently seen
 func isDuplicate(checksum uint32) bool {
 
-    // Sweep through all recent messages, looking for a duplicate
+    // Sweep through all recent messages, looking for a duplicate in the past minute
     for i := 0; i < len(recentlyReceived); i++ {
-		if recentlyReceived[i] == checksum {
-			return true
+		if recentlyReceived[i].checksum == checksum {
+	        if (int64(time.Now().Sub(recentlyReceived[i].seen) / time.Second) < 60) {
+				return true
+			}
 		}
 	}
 
@@ -339,7 +345,8 @@ func isDuplicate(checksum uint32) bool {
 	}
 
 	// Insert this new one
-	recentlyReceived[0] = checksum;
+	recentlyReceived[0].checksum = checksum;
+    recentlyReceived[0].seen = time.Now().UTC()
 	return false
 
 }
