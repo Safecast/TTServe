@@ -30,6 +30,9 @@ type seenDevice struct {
 }
 var seenDevices []seenDevice
 
+// Checksums of recently-processed messages
+var recentlyReceived [25]uint32
+
 // Class used to sort seen devices
 type ByKey []seenDevice
 func (a ByKey) Len() int      { return len(a) }
@@ -54,6 +57,7 @@ func (a ByKey) Less(i, j int) bool {
 
 // Process an inbound Safecast message
 func ProcessSafecastMessage(msg *teletype.Telecast,
+	checksum uint32,
     ipInfo string,
     defaultTime string,
     defaultSNR float32,
@@ -74,6 +78,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         fmt.Printf("Safecast message:\n%s\n", msg)
     }
 
+	// Discard it if it's a duplicate
+	if isDuplicate(checksum) {
+		fmt.Printf("*** Discarding duplicate message ***\n");
+		return
+	}
+	
     // Log it
     if msg.DeviceIDNumber != nil {
         trackDevice(msg.GetDeviceIDNumber())
@@ -310,6 +320,27 @@ func uploadToSafecast(sc SafecastData) {
 	}
 
     endTransaction(transaction, errString)
+
+}
+
+// Check to see if this is a duplicate of a message we've recently seen
+func isDuplicate(checksum uint32) bool {
+
+    // Sweep through all recent messages, looking for a duplicate
+    for i := 0; i < len(recentlyReceived); i++ {
+		if recentlyReceived[i] == checksum {
+			return true
+		}
+	}
+
+	// Shift them all down
+    for i := len(recentlyReceived)-1; i > 0; i-- {
+		recentlyReceived[i] = recentlyReceived[i-1]
+	}
+
+	// Insert this new one
+	recentlyReceived[0] = checksum;
+	return false
 
 }
 

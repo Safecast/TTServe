@@ -10,6 +10,7 @@ import (
     "encoding/json"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
+	"hash/crc32"
     MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -266,6 +267,10 @@ func commonRequestHandler() {
     // Dequeue and process the messages as they're enqueued
     for AppReq := range reqQ {
 
+		// Compute the CRC of the payload, for duplicate inbound message checking
+		checksum := crc32.ChecksumIEEE(AppReq.Payload)
+			
+		// Unmarshal the payload
         msg := &teletype.Telecast{}
         err := proto.Unmarshal(AppReq.Payload, msg)
         if err != nil {
@@ -280,7 +285,7 @@ func commonRequestHandler() {
                 fallthrough
             case teletype.Telecast_SIMPLECAST:
                 metadata := AppReq.Metadata[0]
-                ProcessSafecastMessage(msg, metadata.GatewayEUI,
+                ProcessSafecastMessage(msg, checksum, metadata.GatewayEUI,
                     metadata.ServerTime,
                     metadata.Lsnr,
                     metadata.Latitude, metadata.Longitude, metadata.Altitude)
