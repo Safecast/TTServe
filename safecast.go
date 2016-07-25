@@ -79,10 +79,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     }
 
 	// Discard it if it's a duplicate
-	if isDuplicate(checksum) {
-		fmt.Printf("*** Discarding duplicate message ***\n");
-		return
-	}
+//	if isDuplicate(checksum) {
+//		fmt.Printf("*** Discarding duplicate message ***\n");
+//		return
+//	}
 	
     // Log it
     if msg.DeviceIDNumber != nil {
