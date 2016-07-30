@@ -127,6 +127,7 @@ func udpInboundHandler() {
 			
 		    var AppReq DataUpAppReq
 			AppReq.Payload = buf[0:n]
+			AppReq.Metadata = make([]AppMetadata, 1)
             AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
             fmt.Printf("\n%s Received %d-byte payload on UDP from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), addr)
