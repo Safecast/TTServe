@@ -5,12 +5,13 @@ import (
     "io"
     "io/ioutil"
     "net/http"
+	"net"
     "fmt"
     "time"
     "encoding/json"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
-	"hash/crc32"
+    "hash/crc32"
     MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -29,6 +30,7 @@ const SafecastAppKey = "z3sHhgousVDDrCVXhzMT"
 // This HTTP server-related
 const ttServer string = "http://api.teletype.io"
 const ttServerPort string = ":8080"
+const ttServerPortUDP string = ":8081"
 const ttServerURLSend string = "/send"
 const ttServerURLGithub string = "/github"
 const ttServerURLSlack string = "/slack"
@@ -61,6 +63,9 @@ func main() {
     // Init our web request inbound server
     go webInboundHandler()
 
+    // Init our UDP request inbound server
+    go udpInboundHandler()
+
     // Init our housekeeping process
     go timer1m()
 
@@ -90,6 +95,48 @@ func webInboundHandler() {
     fmt.Printf("Now handling inbound on: %s%s%s\n", ttServer, ttServerPort, ttServerURLSlack)
 
     http.ListenAndServe(ttServerPort, nil)
+}
+
+// Kick off UDP server
+func udpInboundHandler() {
+
+    ServerAddr, err := net.ResolveUDPAddr("udp", ttServerPortUDP)
+    if err != nil {
+        fmt.Printf("Error resolving UDP port: \n%v\n", err)
+        return
+    }
+
+    ServerConn, err := net.ListenUDP("udp", ServerAddr)
+    if err != nil {
+        fmt.Printf("Error listening on UDP port: \n%v\n", err)
+        return
+    }
+    defer ServerConn.Close()
+
+    buf := make([]byte, 1024)
+    for {
+        n, addr, err := ServerConn.ReadFromUDP(buf)
+        if (err != nil) {
+            fmt.Printf("UDP read error: \n%v\n", err)
+        } else {
+
+            // Construct a TTN-like message
+            //  1) the Payload comes from UDP
+            //  2) We'll add the server's time, in case the payload lacked CapturedAt
+			//  3) Everything else is null
+			
+		    var AppReq DataUpAppReq
+			AppReq.Payload = buf[0:n]
+            AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+
+            fmt.Printf("\n%s Received %d-byte payload on UDP from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), addr)
+
+            // Enqueue it for TTN-like processing
+            reqQ <- AppReq
+
+        }
+    }
+
 }
 
 // Handle inbound HTTP requests from the Teletype Gateway
@@ -141,7 +188,7 @@ func ttnSubscriptionMonitor() {
         // Handle lost connections
         onMqConnectionLost := func (client MQTT.Client, err error) {
             fullyConnected = false
-			lastDisconnected = time.Now().Format(logDateFormat)
+            lastDisconnected = time.Now().Format(logDateFormat)
             fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
             sendToSafecastOps(fmt.Sprintf("connection lost: %v\n", err))
             sendToTTNOps(fmt.Sprintf("Connection lost from api.teletype.io to %s: %v\n", ttnServer, err))
@@ -158,19 +205,19 @@ func ttnSubscriptionMonitor() {
 
             // Subscribe to the upstream topic
             if token := client.Subscribe(ttnTopic, 0, onMqMessageReceived); token.Wait() && token.Error() != nil {
-				// Treat subscription failure as a connection failure
+                // Treat subscription failure as a connection failure
                 fmt.Printf("Error subscribing to topic %s\n", ttnTopic, token.Error())
                 fullyConnected = false
             } else {
-				// Successful subscription
+                // Successful subscription
                 fullyConnected = true
-				lastConnected = time.Now().Format(logDateFormat)
+                lastConnected = time.Now().Format(logDateFormat)
                 if (everConnected) {
                     sendToSafecastOps("TTN connection restored")
                     sendToTTNOps(fmt.Sprintf("Connection restored from api.teletype.io to %s\n", ttnServer))
                     fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))
                 } else {
-	                everConnected = true;
+                    everConnected = true;
                     fmt.Printf("TTN Connection Established\n")
                 }
             }
@@ -205,11 +252,11 @@ func ttnSubscriptionMonitor() {
         mqttOpts = nil
         mqttClient = nil
         time.Sleep(5 * time.Second)
-		fmt.Printf("\n***\n")
-		fmt.Printf("*** Last time connection was successfully made: %s\n", lastConnected)
-		fmt.Printf("*** Last time connection was lost: %s\n", lastDisconnected)
-		fmt.Printf("*** Now attempting to reconnect: %s\n", time.Now().Format(logDateFormat))
-		fmt.Printf("***\n\n")
+        fmt.Printf("\n***\n")
+        fmt.Printf("*** Last time connection was successfully made: %s\n", lastConnected)
+        fmt.Printf("*** Last time connection was lost: %s\n", lastDisconnected)
+        fmt.Printf("*** Now attempting to reconnect: %s\n", time.Now().Format(logDateFormat))
+        fmt.Printf("***\n\n")
 
     }
 }
@@ -267,10 +314,10 @@ func commonRequestHandler() {
     // Dequeue and process the messages as they're enqueued
     for AppReq := range reqQ {
 
-		// Compute the CRC of the payload, for duplicate inbound message checking
-		checksum := crc32.ChecksumIEEE(AppReq.Payload)
-			
-		// Unmarshal the payload
+        // Compute the CRC of the payload, for duplicate inbound message checking
+        checksum := crc32.ChecksumIEEE(AppReq.Payload)
+
+        // Unmarshal the payload
         msg := &teletype.Telecast{}
         err := proto.Unmarshal(AppReq.Payload, msg)
         if err != nil {
