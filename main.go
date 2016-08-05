@@ -143,7 +143,6 @@ func udpInboundHandler() {
 
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
-    io.WriteString(rw, "This is the teletype API endpoint.")
 
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
@@ -154,6 +153,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
     var AppReq DataUpAppReq
     err = json.Unmarshal(body, &AppReq)
     if err != nil {
+	    io.WriteString(rw, "This is the teletype API endpoint.")
         // Very common case where anyone comes to web page, such as google health check
         return
     }
