@@ -5,10 +5,11 @@ import (
     "io"
     "io/ioutil"
     "net/http"
-	"net"
+    "net"
     "fmt"
     "time"
     "encoding/json"
+	"encoding/hex"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
     "hash/crc32"
@@ -123,11 +124,11 @@ func udpInboundHandler() {
             // Construct a TTN-like message
             //  1) the Payload comes from UDP
             //  2) We'll add the server's time, in case the payload lacked CapturedAt
-			//  3) Everything else is null
-			
-		    var AppReq DataUpAppReq
-			AppReq.Payload = buf[0:n]
-			AppReq.Metadata = make([]AppMetadata, 1)
+            //  3) Everything else is null
+
+            var AppReq DataUpAppReq
+            AppReq.Payload = buf[0:n]
+            AppReq.Metadata = make([]AppMetadata, 1)
             AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
             fmt.Printf("\n%s Received %d-byte payload on UDP from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), addr)
@@ -168,6 +169,15 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Enqueue it for TTN-like processing
     reqQ <- AppReq
+
+    // See if there's an outbound message waiting for this app.  If so, send it now because we
+    // know that there's a narrow receive window open.
+    isAvailable, Payload := getOutboundPayload(AppReq)
+    if isAvailable {
+		hexPayload := hex.EncodeToString(Payload)
+		io.WriteString(rw, hexPayload)
+		fmt.Printf("HTTP Reply payload: %s\n", hexPayload);
+    }
 
 }
 
@@ -303,9 +313,31 @@ func ttnInboundHandler() {
             // for a Yahoo/Google account, and potentially paying.  Since none of the
             // code here is actually utilizing geo, we'll wait until then.
             reqQ <- AppReq
+
+            // See if there's an outbound message waiting for this app.  If so, send it now because we
+            // know that there's a narrow receive window open.
+            isAvailable, Payload := getOutboundPayload(AppReq)
+            if isAvailable {
+                ttnOutboundPublish(AppReq.DevEUI, Payload)
+            }
         }
 
     }
+
+}
+
+// Get any outbound payload waiting for the node who sent us an AppReq
+func getOutboundPayload(appReq DataUpAppReq) (isAvailable bool, payload []byte) {
+
+    // Extract the telecast message from the AppReq
+    msg := &teletype.Telecast{}
+    err := proto.Unmarshal(appReq.Payload, msg)
+    if err != nil {
+        return false, nil
+    }
+
+    // Ask telecast to retrieve any pending outbound message
+    return TelecastOutboundPayload(msg)
 
 }
 
