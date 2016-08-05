@@ -131,7 +131,7 @@ func udpInboundHandler() {
             AppReq.Metadata = make([]AppMetadata, 1)
             AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
-            fmt.Printf("\n%s Received %d-byte payload on UDP from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), addr)
+            fmt.Printf("\n%s Received %d-byte UDP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), addr)
 
             // Enqueue it for TTN-like processing
             reqQ <- AppReq
@@ -158,7 +158,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    fmt.Printf("\n%s Received %d-byte payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+    fmt.Printf("\n%s Received %d-byte Web payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
 
     // We now have a TTN-like message, constructed as follws:
     //  1) the Payload came from the device itself
@@ -301,7 +301,7 @@ func ttnInboundHandler() {
         if err != nil {
             fmt.Printf("*** Payload doesn't have TTN data ***\n")
         } else {
-            fmt.Printf("\n%s Received %d-byte payload from TTN:\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+            fmt.Printf("\n%s Received %d-byte TTN payload:\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
             // Note that there is some missing code here.  Ideally, in the appreq
             // we supply json-formatted IPINFO to ttserve.  TTGATE tunneled this through
             // the GatewayEUI field of the DataUpAppReq, but in the TTN case we don't

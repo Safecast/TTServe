@@ -56,7 +56,7 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
     case "/hello":
         fallthrough
     case "/hi":
-        fmt.Printf("/hello from %s\n", deviceID)
+        fmt.Printf("/hello from %d\n", deviceID)
         if argRest == "" {
             sendMessage(deviceID, "@ttserve: Hello.")
         } else {
@@ -98,6 +98,7 @@ func sendMessage(deviceID uint32, message string) {
 				ttnOutboundPublish(knownDevices[i].devEui, tdata)
 			} else {
 				knownDevices[i].messageToDevice = tdata
+				fmt.Printf("Enqueued %d-byte message for device %d\n", len(tdata), deviceID)
 			}
 		break;
 		}
@@ -115,6 +116,7 @@ func TelecastOutboundPayload(msg *teletype.Telecast) (isAvailable bool, payload 
 			if (knownDevices[i].messageToDevice != nil) {
 				messageToDevice := knownDevices[i].messageToDevice
 				knownDevices[i].messageToDevice = nil
+				fmt.Printf("Dequeued %d-byte message for device %d\n", len(messageToDevice), deviceID)
 				return true, messageToDevice
 			}
 		break;
