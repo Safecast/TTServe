@@ -170,6 +170,12 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
     // Enqueue it for TTN-like processing
     reqQ <- AppReq
 
+	// Delay to see if we can pick up a reply for this request.  This is certainly
+	// controversial because it slows down the incoming message processing, however there
+	// is a trivial fix:  Create many instances of this goroutine on the service instead
+	// of just one.
+    time.Sleep(5 * time.Second)
+	
     // See if there's an outbound message waiting for this app.  If so, send it now because we
     // know that there's a narrow receive window open.
     isAvailable, Payload := getOutboundPayload(AppReq)
