@@ -5,6 +5,7 @@ import (
     "fmt"
     "bytes"
     "strings"
+	"strconv"
     "net/url"
     "net/http"
     "io/ioutil"
@@ -32,6 +33,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     args := strings.Split(message, " ")
     argsLC := strings.Split(strings.ToLower(message), " ")
     messageAfterFirstWord := strings.Join(args[1:], " ")
+    messageAfterSecondWord := strings.Join(args[2:], " ")
 
     // If this is a recursive echoing of our own post, bail.
     if user == "slackbot" {
@@ -40,16 +42,39 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Process queries
     switch argsLC[0] {
+
     case "status":
         if messageAfterFirstWord == "" {
 			sendSafecastDeviceSummaryToSlack()
         }
+
+	case "send":
+		if len(args) < 3 {
+				sendToSafecastOps("Command format: send <deviceID> <message>")
+			} else {
+				i64, err := strconv.ParseUint(args[1], 10, 32)
+				deviceID := int32(i64)
+				if err != nil {
+					sendToSafecastOps("Command format: send <deviceID> <message>")
+				} else {
+					sendToSafecastOps(fmt.Sprintf("Sending to %d: %s", deviceID, messageAfterSecondWord))
+					}
+		}
+
+	case "broadcast":
+			if len(args) < 2 {
+				sendToSafecastOps("Command format: broadcast <message>")
+			} else {
+				sendToSafecastOps(fmt.Sprintf("Broadcasting: %s", messageAfterFirstWord))
+			}
+		
     case "hello":
         if len(args) == 1 {
             sendToSafecastOps(fmt.Sprintf("Hello back, %s.", user))
         } else {
             sendToSafecastOps(fmt.Sprintf("Back at you: %s", messageAfterFirstWord))
         }
+
     default:
         // Default is to do nothing
     }
