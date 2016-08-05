@@ -174,7 +174,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 	// controversial because it slows down the incoming message processing, however there
 	// is a trivial fix:  Create many instances of this goroutine on the service instead
 	// of just one.
-    time.Sleep(5 * time.Second)
+    time.Sleep(1 * time.Second)
 	
     // See if there's an outbound message waiting for this app.  If so, send it now because we
     // know that there's a narrow receive window open.
