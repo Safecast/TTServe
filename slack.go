@@ -32,13 +32,21 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     message := urlParams["text"][0]
     args := strings.Split(message, " ")
     argsLC := strings.Split(strings.ToLower(message), " ")
-    messageAfterFirstWord := strings.Join(args[1:], " ")
-    messageAfterSecondWord := strings.Join(args[2:], " ")
 
+	messageAfterFirstWord := ""
+	if len(args) > 1 {
+	    messageAfterFirstWord = strings.Join(args[1:], " ")
+	}
+	messageAfterSecondWord := ""
+	if len(args) > 2 {
+	    messageAfterSecondWord = strings.Join(args[2:], " ")
+	}
+	
     // If this is a recursive echoing of our own post, bail.
     if user == "slackbot" {
         return
     }
+
 
     // Process queries
     switch argsLC[0] {
