@@ -61,11 +61,12 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 				sendToSafecastOps("Command format: send <deviceID> <message>")
 			} else {
 				i64, err := strconv.ParseUint(args[1], 10, 32)
-				deviceID := int32(i64)
+				deviceID := uint32(i64)
 				if err != nil {
 					sendToSafecastOps("Command format: send <deviceID> <message>")
 				} else {
 					sendToSafecastOps(fmt.Sprintf("Sending to %d: %s", deviceID, messageAfterSecondWord))
+					sendMessage(deviceID, messageAfterSecondWord)
 					}
 		}
 
@@ -74,6 +75,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 				sendToSafecastOps("Command format: broadcast <message>")
 			} else {
 				sendToSafecastOps(fmt.Sprintf("Broadcasting: %s", messageAfterFirstWord))
+				broadcastMessage(messageAfterFirstWord, 0)
 			}
 		
     case "hello":
