@@ -2,6 +2,7 @@
 package main
 
 import (
+	"os"
     "fmt"
     "bytes"
     "strings"
@@ -55,6 +56,11 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         if messageAfterFirstWord == "" {
 			sendSafecastDeviceSummaryToSlack()
         }
+
+    case "restart":
+        sendToSafecastOps(fmt.Sprintf("** Restarting **"))
+        fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart' command\n***\n***\n\n")
+	    os.Exit(0)
 
 	case "send":
 		if len(args) < 3 {
