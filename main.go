@@ -9,7 +9,7 @@ import (
     "fmt"
     "time"
     "encoding/json"
-	"encoding/hex"
+    "encoding/hex"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
     "hash/crc32"
@@ -143,49 +143,71 @@ func udpInboundHandler() {
 
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
+	var inboundPayload []byte
 
-	userAgent := req.UserAgent()
-	fmt.Printf("$$$$$$ User Agent: '%s'\n", userAgent)
-	
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
         fmt.Printf("Error reading HTTP request body: \n%v\n", req)
         return
     }
 
-    var AppReq DataUpAppReq
-    err = json.Unmarshal(body, &AppReq)
-    if err != nil {
-	    io.WriteString(rw, "This is the teletype API endpoint.")
-        // Very common case where anyone comes to web page, such as google health check
-        return
+    switch (req.UserAgent()) {
+
+    case "TTGATE": {
+
+        var AppReq DataUpAppReq
+        err = json.Unmarshal(body, &AppReq)
+        if err != nil {
+            io.WriteString(rw, "This is the teletype API endpoint.")
+            // Very common case where anyone comes to web page, such as google health check
+            return
+        }
+
+		inboundPayload = AppReq.Payload;
+        fmt.Printf("\n%s Received %d-byte Web payload from TTGATE\n", time.Now().Format(logDateFormat), len(inboundPayload))
+
+        // We now have a TTN-like message, constructed as follws:
+        //  1) the Payload came from the device itself
+        //  2) TTGATE filled in the lat/lon/alt metadata, just in case the payload doesn't have location
+        //  3) TTGATE filled in SNR if it had access to it
+        //  4) We'll add the server's time, in case the payload lacked CapturedAt
+        AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+
+        // Enqueue it for TTN-like processing
+        reqQ <- AppReq
     }
 
-    fmt.Printf("\n%s Received %d-byte Web payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+    case "TTRELAY": {
 
-    // We now have a TTN-like message, constructed as follws:
-    //  1) the Payload came from the device itself
-    //  2) TTGATE filled in the lat/lon/alt metadata, just in case the payload doesn't have location
-    //  3) TTGATE filled in SNR if it had access to it
-    //  4) We'll add the server's time, in case the payload lacked CapturedAt
-    AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+		inboundPayload = body;
+        fmt.Printf("\n%s Received %d-byte Web payload from TTRELAY\n", time.Now().Format(logDateFormat), len(inboundPayload))
 
-    // Enqueue it for TTN-like processing
-    reqQ <- AppReq
+		fmt.Printf("%s\n", inboundPayload);
 
-	// Delay to see if we can pick up a reply for this request.  This is certainly
-	// controversial because it slows down the incoming message processing, however there
-	// is a trivial fix:  Create many instances of this goroutine on the service instead
-	// of just one.
+    }
+
+	default: {
+
+		// A web crawler, etc.
+		return;
+		
+	}
+
+    }
+
+    // Delay to see if we can pick up a reply for this request.  This is certainly
+    // controversial because it slows down the incoming message processing, however there
+    // is a trivial fix:  Create many instances of this goroutine on the service instead
+    // of just one.
     time.Sleep(1 * time.Second)
-	
+
     // See if there's an outbound message waiting for this app.  If so, send it now because we
     // know that there's a narrow receive window open.
-    isAvailable, Payload := getOutboundPayload(AppReq)
+    isAvailable, outboundPayload := getOutboundPayload(inboundPayload)
     if isAvailable {
-		hexPayload := hex.EncodeToString(Payload)
-		io.WriteString(rw, hexPayload)
-		fmt.Printf("HTTP Reply payload: %s\n", hexPayload);
+        hexPayload := hex.EncodeToString(outboundPayload)
+        io.WriteString(rw, hexPayload)
+        fmt.Printf("HTTP Reply payload: %s\n", hexPayload);
     }
 
 }
@@ -325,7 +347,7 @@ func ttnInboundHandler() {
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.
-            isAvailable, Payload := getOutboundPayload(AppReq)
+            isAvailable, Payload := getOutboundPayload(AppReq.Payload)
             if isAvailable {
                 ttnOutboundPublish(AppReq.DevEUI, Payload)
             }
@@ -336,11 +358,11 @@ func ttnInboundHandler() {
 }
 
 // Get any outbound payload waiting for the node who sent us an AppReq
-func getOutboundPayload(appReq DataUpAppReq) (isAvailable bool, payload []byte) {
+func getOutboundPayload(inboundPayload []byte) (isAvailable bool, outboundPayload []byte) {
 
     // Extract the telecast message from the AppReq
     msg := &teletype.Telecast{}
-    err := proto.Unmarshal(appReq.Payload, msg)
+    err := proto.Unmarshal(inboundPayload, msg)
     if err != nil {
         return false, nil
     }
