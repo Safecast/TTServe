@@ -144,6 +144,9 @@ func udpInboundHandler() {
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
+	userAgent := req.UserAgent()
+	fmt.Printf("$$$$$$ User Agent: '%s'\n", userAgent)
+	
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
         fmt.Printf("Error reading HTTP request body: \n%v\n", req)
