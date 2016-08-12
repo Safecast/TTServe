@@ -143,7 +143,7 @@ func udpInboundHandler() {
 
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
-	var inboundPayload []byte
+    var AppReq DataUpAppReq
 
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
@@ -155,7 +155,6 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
     case "TTGATE": {
 
-        var AppReq DataUpAppReq
         err = json.Unmarshal(body, &AppReq)
         if err != nil {
             io.WriteString(rw, "This is the teletype API endpoint.")
@@ -163,26 +162,32 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
             return
         }
 
-		inboundPayload = AppReq.Payload;
-        fmt.Printf("\n%s Received %d-byte Web payload from TTGATE\n", time.Now().Format(logDateFormat), len(inboundPayload))
+        fmt.Printf("\n%s Received %d-byte Web payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
 
-        // We now have a TTN-like message, constructed as follws:
+        // We now have a TTN-like message, constructed as follows:
         //  1) the Payload came from the device itself
         //  2) TTGATE filled in the lat/lon/alt metadata, just in case the payload doesn't have location
         //  3) TTGATE filled in SNR if it had access to it
         //  4) We'll add the server's time, in case the payload lacked CapturedAt
         AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
-        // Enqueue it for TTN-like processing
-        reqQ <- AppReq
     }
 
     case "TTRELAY": {
 
-		inboundPayload = body;
-        fmt.Printf("\n%s Received %d-byte Web payload from TTRELAY\n", time.Now().Format(logDateFormat), len(inboundPayload))
+		inboundPayload, err := hex.DecodeString(string(body))
+        if err != nil {
+            fmt.Printf("Hex decoding error: ", err)
+			return;
+        }
 
-		fmt.Printf("%s\n", inboundPayload);
+		AppReq.Payload = inboundPayload;
+        fmt.Printf("\n%s Received %d-byte Web payload from TTRELAY\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+
+        // We now have a TTN-like message, constructed as follws:
+        //  1) the Payload came from the device itself
+        //  2) We'll add the server's time, in case the payload lacked CapturedAt
+        AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
     }
 
@@ -195,6 +200,9 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
     }
 
+    // Enqueue AppReq for TTN-like processing
+    reqQ <- AppReq
+
     // Delay to see if we can pick up a reply for this request.  This is certainly
     // controversial because it slows down the incoming message processing, however there
     // is a trivial fix:  Create many instances of this goroutine on the service instead
@@ -203,7 +211,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
     // See if there's an outbound message waiting for this app.  If so, send it now because we
     // know that there's a narrow receive window open.
-    isAvailable, outboundPayload := getOutboundPayload(inboundPayload)
+    isAvailable, outboundPayload := getOutboundPayload(AppReq.Payload)
     if isAvailable {
         hexPayload := hex.EncodeToString(outboundPayload)
         io.WriteString(rw, hexPayload)
