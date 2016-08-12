@@ -118,14 +118,18 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     } else {
         if defaultLat != 0.0 {
             sc.Latitude = fmt.Sprintf("%f", defaultLat)
-        }
+        } else {
+			sc.Latitude = "1.23"
+		}
     }
     if msg.Longitude != nil {
         sc.Longitude = fmt.Sprintf("%f", msg.GetLongitude())
     } else {
         if defaultLon != 0.0 {
             sc.Longitude = fmt.Sprintf("%f", defaultLon)
-        }
+        } else {
+			sc.Longitude = "1.23"
+		}
     }
     if msg.Altitude != nil {
         sc.Height = fmt.Sprintf("%d", msg.GetAltitude())
