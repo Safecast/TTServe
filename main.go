@@ -187,6 +187,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
         // We now have a TTN-like message, constructed as follws:
         //  1) the Payload came from the device itself
         //  2) We'll add the server's time, in case the payload lacked CapturedAt
+        AppReq.Metadata = make([]AppMetadata, 1)
         AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
     }
