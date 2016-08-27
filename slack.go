@@ -102,6 +102,11 @@ func sendToSafecastOps(msg string) {
 	sendToOpsViaSlack(msg, "https://hooks.slack.com/services/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")
 }
 
+// Send a text string to the Safecast #api channel
+func sendToSafecastApi(msg string) {
+	sendToOpsViaSlack(msg, "https://hooks.slack.com/services/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")
+}
+
 // Send a text string to the TTN  #ops channel
 func sendToTTNOps(msg string) {
 	// Do nothing for now
