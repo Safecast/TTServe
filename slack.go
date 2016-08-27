@@ -4,6 +4,7 @@ package main
 import (
 	"os"
     "fmt"
+	"time"
     "bytes"
     "strings"
 	"strconv"
@@ -134,5 +135,8 @@ func sendToOpsViaSlack(msg string, SlackOpsPostURL string) {
     } else {
         resp.Body.Close()
     }
+
+	// Wait for it to complete, because we seem to lose it on os.Exit();
+    time.Sleep(5 * time.Second)
 
 }
