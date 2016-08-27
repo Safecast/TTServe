@@ -293,7 +293,13 @@ func endTransaction(transaction int, errstr string) {
 
 	// If there's a problem, output to Slack once every 25 transactions
 	if (theMin > 10 && transaction == 0) {
-		s := fmt.Sprintf("Safecast API: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", theCount, theMin, theMax, theMean)
+		// If all of them have the same timeout value, the server must be down.
+		s := ""
+		if (theMin == theMax && theMin == theMean) {
+			s = fmt.Sprintf("Safecast API %s: all of the most recent  %d uploads failed. Please check the service.", SafecastUploadIP, theCount)
+		} else {
+			s = fmt.Sprintf("Safecast API %s: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", SafecastUploadIP, theCount, theMin, theMax, theMean)
+		}
 		sendToSafecastOps(s);
 	}
 
