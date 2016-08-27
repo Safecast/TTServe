@@ -409,7 +409,7 @@ func sendExpiredSafecastDevicesToSlack() {
         if !seenDevices[i].notifiedAsUnseen {
             if seenDevices[i].seen.Before(expiration) {
                 seenDevices[i].notifiedAsUnseen = true
-                sendToSafecastOps(fmt.Sprintf("** Warning**  Device %d hasn't been seen for %d minutes!",
+                sendToSafecastOps(fmt.Sprintf("** Warning**  Device %d hasn't been seen for %d minutes",
                     seenDevices[i].normalizedDeviceNo,
                     seenDevices[i].minutesAgo))
             }
