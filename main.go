@@ -106,6 +106,8 @@ func webInboundHandler() {
 // Kick off UDP server
 func udpInboundHandler() {
 
+    fmt.Printf("Now handling inbound UDP on: %d\n", ttServerPortUDP)
+
     ServerAddr, err := net.ResolveUDPAddr("udp", ttServerPortUDP)
     if err != nil {
         fmt.Printf("Error resolving UDP port: \n%v\n", err)
@@ -148,6 +150,8 @@ func udpInboundHandler() {
 
 // Kick off TCP server
 func tcpInboundHandler() {
+
+    fmt.Printf("Now handling inbound TCP on: %d\n", ttServerPortTCP)
 
     ServerAddr, err := net.ResolveTCPAddr("tcp", ttServerPortTCP)
     if err != nil {
