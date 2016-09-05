@@ -166,7 +166,7 @@ func tcpInboundHandler() {
         buf := make([]byte, 1024)
 
         conn, err := ServerConn.AcceptTCP()
-		if err != nil {
+        if err != nil {
             fmt.Printf("Error accepting TCP session: \n%v\n", err)
             continue;
         }
@@ -188,13 +188,26 @@ func tcpInboundHandler() {
         AppReq.Metadata = make([]AppMetadata, 1)
         AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
-        fmt.Printf("\n%s Received %d-byte TCP payload\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+        fmt.Printf("\n%s Received %d-byte TCP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), conn.RemoteAddr().String())
 
         // Enqueue it for TTN-like processing
         reqQ <- AppReq
 
+        // Delay to see if we can pick up a reply for this request.  This is certainly
+        // controversial because it slows down the incoming message processing, however there
+        // is a trivial fix:  Create many instances of this goroutine on the service instead
+        // of just one.
+        time.Sleep(1 * time.Second)
+
+        // See if there's an outbound message waiting for this app.  If so, send it now because we
+        // know that there's a narrow receive window open.
+        isAvailable, outboundPayload := getOutboundPayload(AppReq.Payload)
+        if isAvailable {
+			conn.Write(outboundPayload)
+        }
+
         // Close the connection
-        ServerConn.Close()
+        conn.Close()
     }
 
 }
