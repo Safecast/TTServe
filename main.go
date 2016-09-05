@@ -92,13 +92,13 @@ func timer1m() {
 func webInboundHandler() {
 
     http.HandleFunc(ttServerURLSend, inboundWebTTGateHandler)
-    fmt.Printf("Now handling inbound on: %s%s%s\n", ttServer, ttServerPort, ttServerURLSend)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", ttServer, ttServerPort, ttServerURLSend)
 
     http.HandleFunc(ttServerURLGithub, inboundWebGithubHandler)
-    fmt.Printf("Now handling inbound on: %s%s%s\n", ttServer, ttServerPort, ttServerURLGithub)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", ttServer, ttServerPort, ttServerURLGithub)
 
     http.HandleFunc(ttServerURLSlack, inboundWebSlackHandler)
-    fmt.Printf("Now handling inbound on: %s%s%s\n", ttServer, ttServerPort, ttServerURLSlack)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", ttServer, ttServerPort, ttServerURLSlack)
 
     http.ListenAndServe(ttServerPort, nil)
 }
@@ -360,7 +360,7 @@ func ttnSubscriptionMonitor() {
             fmt.Printf("Error connecting to service: %s\n", token.Error())
         } else {
 
-            fmt.Printf("Now handling inbound on: %s mqtt:%s\n", ttnServer, ttnTopic)
+            fmt.Printf("Now handling inbound MQTT on: %s mqtt:%s\n", ttnServer, ttnTopic)
             for consecutiveFailures := 0; consecutiveFailures < 3; {
                 time.Sleep(60 * time.Second)
                 if fullyConnected {
