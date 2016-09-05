@@ -33,6 +33,7 @@ const SafecastAppKey = "z3sHhgousVDDrCVXhzMT"
 const ttServer string = "http://api.teletype.io"
 const ttServerPort string = ":8080"
 const ttServerPortUDP string = ":8081"
+const ttServerPortTCP string = ":8082"
 const ttServerURLSend string = "/send"
 const ttServerURLGithub string = "/github"
 const ttServerURLSlack string = "/slack"
@@ -67,6 +68,9 @@ func main() {
 
     // Init our UDP request inbound server
     go udpInboundHandler()
+
+    // Init our UDP request inbound server
+    go tcpInboundHandler()
 
     // Init our housekeeping process
     go timer1m()
@@ -142,6 +146,59 @@ func udpInboundHandler() {
 
 }
 
+// Kick off TCP server
+func tcpInboundHandler() {
+
+    ServerAddr, err := net.ResolveTCPAddr("tcp", ttServerPortTCP)
+    if err != nil {
+        fmt.Printf("Error resolving TCP port: \n%v\n", err)
+        return
+    }
+
+    ServerConn, err := net.ListenTCP("tcp", ServerAddr)
+    if err != nil {
+        fmt.Printf("Error listening on TCP port: \n%v\n", err)
+        return
+    }
+    defer ServerConn.Close()
+
+    for {
+        buf := make([]byte, 1024)
+
+        conn, err := ServerConn.AcceptTCP()
+		if err != nil {
+            fmt.Printf("Error accepting TCP session: \n%v\n", err)
+            continue;
+        }
+
+        n, err := conn.Read(buf)
+        if err != nil {
+            fmt.Printf("TCP read error: \n%v\n", err)
+            ServerConn.Close()
+            continue;
+        }
+
+        // Construct a TTN-like message
+        //  1) the Payload comes from UDP
+        //  2) We'll add the server's time, in case the payload lacked CapturedAt
+        //  3) Everything else is null
+
+        var AppReq DataUpAppReq
+        AppReq.Payload = buf[0:n]
+        AppReq.Metadata = make([]AppMetadata, 1)
+        AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+
+        fmt.Printf("\n%s Received %d-byte TCP payload\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+
+        // Enqueue it for TTN-like processing
+        reqQ <- AppReq
+
+        // Close the connection
+        ServerConn.Close()
+    }
+
+}
+
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
     var AppReq DataUpAppReq
@@ -176,13 +233,13 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
     case "TTRELAY": {
 
-		inboundPayload, err := hex.DecodeString(string(body))
+        inboundPayload, err := hex.DecodeString(string(body))
         if err != nil {
             fmt.Printf("Hex decoding error: ", err)
-			return;
+            return;
         }
 
-		AppReq.Payload = inboundPayload;
+        AppReq.Payload = inboundPayload;
         fmt.Printf("\n%s Received %d-byte Web payload from TTRELAY\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
 
         // We now have a TTN-like message, constructed as follws:
@@ -193,12 +250,12 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
     }
 
-	default: {
+    default: {
 
-		// A web crawler, etc.
-		return;
-		
-	}
+        // A web crawler, etc.
+        return;
+
+    }
 
     }
 
