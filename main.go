@@ -472,21 +472,21 @@ func commonRequestHandler() {
 
         // Display info about the received message
         deviceID := TelecastDeviceID(msg)
-        fmt.Printf("%s From Device ID %d\n", time.Now().Format(logDateFormat), deviceID)
-        if (msg.GetRelayDevice1 != nil) {
-            fmt.Printf("%s RELAYED via hop #1 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice1)
+        fmt.Printf("%s Originated at Device ID %d\n", time.Now().Format(logDateFormat), deviceID)
+        if (msg.RelayDevice1 != nil) {
+            fmt.Printf("%s RELAYED via hop #1 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice1())
         }
-        if (msg.GetRelayDevice2 != nil) {
-            fmt.Printf("%s RELAYED via hop #2 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice2)
+        if (msg.RelayDevice2 != nil) {
+            fmt.Printf("%s RELAYED via hop #2 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice2())
         }
-        if (msg.GetRelayDevice3 != nil) {
-            fmt.Printf("%s RELAYED via hop #3 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice3)
+        if (msg.RelayDevice3 != nil) {
+            fmt.Printf("%s RELAYED via hop #3 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice3())
         }
-        if (msg.GetRelayDevice4 != nil) {
-            fmt.Printf("%s RELAYED via hop #4 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice4)
+        if (msg.RelayDevice4 != nil) {
+            fmt.Printf("%s RELAYED via hop #4 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice4())
         }
-        if (msg.GetRelayDevice5 != nil) {
-            fmt.Printf("%s RELAYED via hop #5 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice5)
+        if (msg.RelayDevice5 != nil) {
+            fmt.Printf("%s RELAYED via hop #5 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice5())
         }
 
         // Compute the checksum on a payload normalized by removing all the relay information
