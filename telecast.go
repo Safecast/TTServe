@@ -56,7 +56,7 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
     case "/hello":
         fallthrough
     case "/hi":
-        fmt.Printf("/hello from %d\n", deviceID)
+        fmt.Printf("%s Telecast \"Hello\" message\n", time.Now().Format(logDateFormat))
         if argRest == "" {
             sendMessage(deviceID, "@ttserve: Hello.")
         } else {
@@ -65,11 +65,11 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
 
         // Handle an inbound upstream-only ping (blank message) by just ignoring it
     case "":
-		fmt.Printf("%s Ping from %d\n", time.Now().Format(logDateFormat), deviceID)
+		fmt.Printf("%s Telecast \"Ping\" message\n", time.Now().Format(logDateFormat))
 		
         // Anything else is broadcast to all OTHER known devices
     default:
-        fmt.Printf("\n%s Broadcast from %d: '%s'\n\n", time.Now().Format(logDateFormat), deviceID, message)
+        fmt.Printf("\n%s \"Broadcast\" message: '%s'\n\n", time.Now().Format(logDateFormat), message)
         broadcastMessage(message, deviceID)
     }
 

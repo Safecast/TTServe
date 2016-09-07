@@ -77,14 +77,14 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         }
     }
     if ipInfo != "" {
-        fmt.Printf("Safecast message from %s/%s/%s:\n%s\n", info.City, info.Region, info.Country, msg)
+        fmt.Printf("%s Safecast message from %s/%s/%s:\n%s\n", time.Now().Format(logDateFormat), info.City, info.Region, info.Country, msg)
     } else {
-        fmt.Printf("Safecast message:\n%s\n", msg)
+        fmt.Printf("%s Safecast message:\n%s\n", time.Now().Format(logDateFormat), msg)
     }
 
 	// Discard it if it's a duplicate
 	if isDuplicate(checksum) {
-		fmt.Printf("*** Discarding duplicate message ***\n");
+		fmt.Printf("%s *** Discarding duplicate message ***\n", time.Now().Format(logDateFormat));
 		return
 	}
 	
@@ -244,7 +244,7 @@ func beginTransaction(url string) int {
     httpTransactions += 1
     transaction := httpTransactions % httpTransactionsRecorded
     httpTransactionTimes[transaction] = time.Now()
-    fmt.Printf("*** [%d] About to upload to Safecast %s\n", transaction, url)
+    fmt.Printf("%s *** [%d] *** About to upload to Safecast\n", time.Now().Format(logDateFormat), transaction)
     return transaction
 }
 
@@ -255,12 +255,12 @@ func endTransaction(transaction int, errstr string) {
     httpTransactionDurations[transaction] = duration
 
     if errstr != "" {
-        fmt.Printf("*** [%d] After %d seconds, ERROR uploading to Safecast %s\n\n", transaction, duration, errstr)
+        fmt.Printf("%s *** [%d] *** After %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
     } else {
 		if (duration < 5) {
-	        fmt.Printf("*** [%d] Completed successfully.\n", transaction);
+	        fmt.Printf("%s *** [%d] *** Completed successfully.\n", time.Now().Format(logDateFormat), transaction);
 		} else {
-	        fmt.Printf("*** [%d] After %d seconds, completed successfully.\n", transaction, duration);
+	        fmt.Printf("%s *** [%d] *** After %d seconds, completed successfully.\n", time.Now().Format(logDateFormat), transaction, duration);
 		}
     }
 
@@ -282,12 +282,12 @@ func endTransaction(transaction int, errstr string) {
 
 	// Output to console every time we are in a "slow mode"
     if (theMin > 10) {
-		fmt.Printf("Safecast HTTP Upload Statistics\n")
-        fmt.Printf("*** %d total uploads since restart\n", httpTransactions)
+		fmt.Printf("%s Safecast HTTP Upload Statistics\n", time.Now().Format(logDateFormat))
+        fmt.Printf("%s *** %d total uploads since restart\n", time.Now().Format(logDateFormat), httpTransactions)
         if (httpTransactionsInProgress > 0) {
-            fmt.Printf("%s*** %d uploads still in progress\n")
+            fmt.Printf("%s *** %d uploads still in progress\n", time.Now().Format(logDateFormat), httpTransactionsInProgress)
         }
-		fmt.Printf("*** Last %d: min=%ds, max=%ds, avg=%ds\n", theCount, theMin, theMax, theMean)
+		fmt.Printf("%s *** Last %d: min=%ds, max=%ds, avg=%ds\n", time.Now().Format(logDateFormat), theCount, theMin, theMax, theMean)
 
 	}
 

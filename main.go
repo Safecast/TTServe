@@ -172,14 +172,14 @@ func tcpInboundHandler() {
         conn, err := ServerConn.AcceptTCP()
         if err != nil {
             fmt.Printf("Error accepting TCP session: \n%v\n", err)
-            continue;
+            continue
         }
 
         n, err := conn.Read(buf)
         if err != nil {
             fmt.Printf("TCP read error: \n%v\n", err)
             ServerConn.Close()
-            continue;
+            continue
         }
 
         // Construct a TTN-like message
@@ -207,7 +207,7 @@ func tcpInboundHandler() {
         // know that there's a narrow receive window open.
         isAvailable, outboundPayload := getOutboundPayload(AppReq.Payload)
         if isAvailable {
-			conn.Write(outboundPayload)
+            conn.Write(outboundPayload)
         }
 
         // Close the connection
@@ -253,10 +253,10 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
         inboundPayload, err := hex.DecodeString(string(body))
         if err != nil {
             fmt.Printf("Hex decoding error: ", err)
-            return;
+            return
         }
 
-        AppReq.Payload = inboundPayload;
+        AppReq.Payload = inboundPayload
         fmt.Printf("\n%s Received %d-byte Web payload from TTRELAY\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
 
         // We now have a TTN-like message, constructed as follws:
@@ -270,7 +270,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
     default: {
 
         // A web crawler, etc.
-        return;
+        return
 
     }
 
@@ -291,7 +291,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
     if isAvailable {
         hexPayload := hex.EncodeToString(outboundPayload)
         io.WriteString(rw, hexPayload)
-        fmt.Printf("HTTP Reply payload: %s\n", hexPayload);
+        fmt.Printf("HTTP Reply payload: %s\n", hexPayload)
     }
 
 }
@@ -343,7 +343,7 @@ func ttnSubscriptionMonitor() {
                     sendToTTNOps(fmt.Sprintf("Connection restored from api.teletype.io to %s\n", ttnServer))
                     fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))
                 } else {
-                    everConnected = true;
+                    everConnected = true
                     fmt.Printf("TTN Connection Established\n")
                 }
             }
@@ -462,33 +462,63 @@ func commonRequestHandler() {
     // Dequeue and process the messages as they're enqueued
     for AppReq := range reqQ {
 
-        // Compute the CRC of the payload, for duplicate inbound message checking
-        checksum := crc32.ChecksumIEEE(AppReq.Payload)
-
-        // Unmarshal the payload
+        // Unmarshal the message
         msg := &teletype.Telecast{}
         err := proto.Unmarshal(AppReq.Payload, msg)
         if err != nil {
             fmt.Printf("*** PB unmarshaling error: ", err)
-        } else {
+            continue
+        }
 
-            // Do various things baed upon the message type
-            switch msg.GetDeviceType() {
+        // Display info about the received message
+        deviceID := TelecastDeviceID(msg)
+        fmt.Printf("%s From Device ID %d\n", time.Now().Format(logDateFormat), deviceID)
+        if (msg.GetRelayDevice1 != nil) {
+            fmt.Printf("%s RELAYED via hop #1 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice1)
+        }
+        if (msg.GetRelayDevice2 != nil) {
+            fmt.Printf("%s RELAYED via hop #2 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice2)
+        }
+        if (msg.GetRelayDevice3 != nil) {
+            fmt.Printf("%s RELAYED via hop #3 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice3)
+        }
+        if (msg.GetRelayDevice4 != nil) {
+            fmt.Printf("%s RELAYED via hop #4 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice4)
+        }
+        if (msg.GetRelayDevice5 != nil) {
+            fmt.Printf("%s RELAYED via hop #5 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice5)
+        }
 
-                // Is it something we recognize as being from safecast?
-            case teletype.Telecast_BGEIGIE_NANO:
-                fallthrough
-            case teletype.Telecast_SIMPLECAST:
-                metadata := AppReq.Metadata[0]
-                ProcessSafecastMessage(msg, checksum, metadata.GatewayEUI,
-                    metadata.ServerTime,
-                    metadata.Lsnr,
-                    metadata.Latitude, metadata.Longitude, metadata.Altitude)
+        // Compute the checksum on a payload normalized by removing all the relay information
+        var nullDeviceID uint32 = 0
+        msg.RelayDevice1 = &nullDeviceID
+        msg.RelayDevice2 = &nullDeviceID
+        msg.RelayDevice3 = &nullDeviceID
+        msg.RelayDevice4 = &nullDeviceID
+        msg.RelayDevice5 = &nullDeviceID
+        normalizedPayload, err := proto.Marshal(msg)
+        if err != nil {
+            fmt.Printf("*** PB marshaling error: ", err)
+            continue
+        }
+        checksum := crc32.ChecksumIEEE(normalizedPayload)
 
-                // Handle messages from non-safecast devices
-            default:
-                ProcessTelecastMessage(msg, AppReq.DevEUI)
-            }
+        // Do various things based upon the message type
+        switch msg.GetDeviceType() {
+
+            // Is it something we recognize as being from safecast?
+        case teletype.Telecast_BGEIGIE_NANO:
+            fallthrough
+        case teletype.Telecast_SIMPLECAST:
+            metadata := AppReq.Metadata[0]
+            ProcessSafecastMessage(msg, checksum, metadata.GatewayEUI,
+                metadata.ServerTime,
+                metadata.Lsnr,
+                metadata.Latitude, metadata.Longitude, metadata.Altitude)
+
+            // Handle messages from non-safecast devices
+        default:
+            ProcessTelecastMessage(msg, AppReq.DevEUI)
         }
     }
 }
