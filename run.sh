@@ -4,6 +4,7 @@ while [ : ]; do
     echo "Updating from GitHub..."
     git pull https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
     echo "Rebuilding..."
+    go get
     go build
     echo "Starting..."
     ./teletype-ttserve
