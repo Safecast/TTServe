@@ -70,7 +70,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
 	// Discard it if it's a duplicate
 	if isDuplicate(checksum) {
-		fmt.Printf("% DISCARDING duplicate message\n", time.Now().Format(logDateFormat));
+		fmt.Printf("%s DISCARDING duplicate message\n", time.Now().Format(logDateFormat));
 		return
 	}
 
