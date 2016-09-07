@@ -68,6 +68,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     defaultLat float32, defaultLon float32, defaultAlt int32) {
     var theSNR float32
 
+	// Discard it if it's a duplicate
+	if isDuplicate(checksum) {
+		fmt.Printf("% DISCARDING duplicate message\n", time.Now().Format(logDateFormat));
+		return
+	}
+
     // Process IPINFO data
     var info IPInfoData
     if ipInfo != "" {
@@ -81,12 +87,6 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     } else {
         fmt.Printf("%s Safecast message:\n%s\n", time.Now().Format(logDateFormat), msg)
     }
-
-	// Discard it if it's a duplicate
-	if isDuplicate(checksum) {
-		fmt.Printf("%s *** Discarding duplicate message ***\n", time.Now().Format(logDateFormat));
-		return
-	}
 	
     // Log it
 	trackDevice(TelecastDeviceID(msg))
