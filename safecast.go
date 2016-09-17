@@ -21,19 +21,19 @@ var httpTransactionTimes[httpTransactionsRecorded] time.Time
 
 // Describes every device that has sent us a message
 type seenDevice struct {
-    originalDeviceNo	uint32
-    normalizedDeviceNo	uint32
-    dualSeen			bool
-    seen				time.Time
-    notifiedAsUnseen	bool
-    minutesAgo			int64
+    originalDeviceNo    uint32
+    normalizedDeviceNo  uint32
+    dualSeen            bool
+    seen                time.Time
+    notifiedAsUnseen    bool
+    minutesAgo          int64
 }
 var seenDevices []seenDevice
 
 // Checksums of recently-processed messages
 type receivedMessage struct {
-	checksum			uint32
-    seen				time.Time
+    checksum            uint32
+    seen                time.Time
 }
 var recentlyReceived [25]receivedMessage
 
@@ -61,18 +61,18 @@ func (a ByKey) Less(i, j int) bool {
 
 // Process an inbound Safecast message
 func ProcessSafecastMessage(msg *teletype.Telecast,
-	checksum uint32,
+    checksum uint32,
     ipInfo string,
     defaultTime string,
     defaultSNR float32,
     defaultLat float32, defaultLon float32, defaultAlt int32) {
     var theSNR float32
 
-	// Discard it if it's a duplicate
-	if isDuplicate(checksum) {
-		fmt.Printf("%s DISCARDING duplicate message\n", time.Now().Format(logDateFormat));
-		return
-	}
+    // Discard it if it's a duplicate
+    if isDuplicate(checksum) {
+        fmt.Printf("%s DISCARDING duplicate message\n", time.Now().Format(logDateFormat));
+        return
+    }
 
     // Process IPINFO data
     var info IPInfoData
@@ -87,10 +87,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     } else {
         fmt.Printf("%s Safecast message\n", time.Now().Format(logDateFormat))
     }
-	
+
     // Log it
-	trackDevice(TelecastDeviceID(msg))
-	
+    trackDevice(TelecastDeviceID(msg))
+
     // Determine if the device itself happens to be suppressing "slowly-changing" metadata during this upload.
     // If it is, we ourselves will use this as a signal not to spam the server with other data that we know
     // is also slowly-changing.
@@ -119,8 +119,8 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         if defaultLat != 0.0 {
             sc.Latitude = fmt.Sprintf("%f", defaultLat)
         } else {
-			sc.Latitude = "1.23"
-		}
+            sc.Latitude = "1.23"
+        }
     }
     if msg.Longitude != nil {
         sc.Longitude = fmt.Sprintf("%f", msg.GetLongitude())
@@ -128,8 +128,8 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         if defaultLon != 0.0 {
             sc.Longitude = fmt.Sprintf("%f", defaultLon)
         } else {
-			sc.Longitude = "1.23"
-		}
+            sc.Longitude = "1.23"
+        }
     }
     if msg.Altitude != nil {
         sc.Height = fmt.Sprintf("%d", msg.GetAltitude())
@@ -144,51 +144,54 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     // after the Safecast service is upgraded.
     sc1 := sc
 
-	// Note that if the telecast message header has a Message
-	// field, we will ignore the unit & value and
-	// instead override it with the message.  This is
-	// the way that we transmit a boot/version message
-	// to the Safecast service.
-	
-	if msg.Message == nil {
-		
-		// A safecast geiger upload
-		if msg.Unit == nil {
-			sc1.Unit = "cpm"
-		} else {
-			sc1.Unit = fmt.Sprintf("%s", msg.GetUnit())
-		}
-		if msg.Value == nil {
-			sc1.Value = ""
-		} else {
-			sc1.Value = fmt.Sprintf("%d", msg.GetValue())
-		}
+    // Note that if the telecast message header has a Message
+    // field, we will ignore the unit & value and
+    // instead override it with the message.  This is
+    // the way that we transmit a boot/version message
+    // to the Safecast service.
 
-	} else {
+    if msg.Message == nil {
 
-		// A text message
-		sc1.Unit = "message"
-		sc1.Value = msg.GetMessage()
-		// We also place it in this field, because we want to retain the
-		// full message while Safecast seems to parse the value as
-		// a floating point number rather than a string.
-		sc1.DeviceTypeID = msg.GetMessage();
+        // A safecast geiger upload
+        if msg.Unit == nil {
+            sc1.Unit = "cpm"
+        } else {
+            sc1.Unit = fmt.Sprintf("%s", msg.GetUnit())
+        }
+        if msg.Value == nil {
+            sc1.Value = ""
+        } else {
+            sc1.Value = fmt.Sprintf("%d", msg.GetValue())
+        }
 
-	}
-	
+    } else {
+
+        // A text message
+        sc1.Unit = "message"
+        sc1.Value = msg.GetMessage()
+        // We also place it in this field, because we want to retain the
+        // full message while Safecast seems to parse the value as
+        // a floating point number rather than a string.
+        sc1.DeviceTypeID = msg.GetMessage();
+
+    }
+
     if !deviceIsSuppressingMetadata {
+
         if msg.BatteryVoltage != nil {
             sc1.BatVoltage = fmt.Sprintf("%.2f", msg.GetBatteryVoltage())
         }
         if msg.BatterySOC != nil {
             sc1.BatSOC = fmt.Sprintf("%.2f", msg.GetBatterySOC())
         }
+
         if msg.EnvTemperature != nil {
             sc1.EnvTemp = fmt.Sprintf("%.2f", msg.GetEnvTemperature())
         }
         if msg.EnvHumidity != nil {
             sc1.EnvHumid = fmt.Sprintf("%.2f", msg.GetEnvHumidity())
         }
+
         if msg.WirelessSNR != nil {
             theSNR = msg.GetWirelessSNR()
         } else {
@@ -196,6 +199,45 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         }
         if defaultSNR != 0.0 {
             sc1.WirelessSNR = fmt.Sprintf("%.1f", theSNR)
+        }
+
+        if msg.PmsTsi_01_0 != nil {
+            sc1.PmsTsi_01_0 = fmt.Sprintf("%d", msg.GetPmsTsi_01_0())
+        }
+        if msg.PmsTsi_02_5 != nil {
+            sc1.PmsTsi_02_5 = fmt.Sprintf("%d", msg.GetPmsTsi_02_5())
+        }
+        if msg.PmsTsi_10_0 != nil {
+            sc1.PmsTsi_10_0 = fmt.Sprintf("%d", msg.GetPmsTsi_10_0())
+        }
+
+        if msg.PmsStd_01_0 != nil {
+            sc1.PmsStd_01_0 = fmt.Sprintf("%d", msg.GetPmsStd_01_0())
+        }
+        if msg.PmsStd_02_5 != nil {
+            sc1.PmsStd_02_5 = fmt.Sprintf("%d", msg.GetPmsStd_02_5())
+        }
+        if msg.PmsStd_10_0 != nil {
+            sc1.PmsStd_10_0 = fmt.Sprintf("%d", msg.GetPmsStd_10_0())
+        }
+
+        if msg.PmsCount_00_3 != nil {
+            sc1.PmsCount_00_3 = fmt.Sprintf("%d", msg.GetPmsCount_00_3())
+        }
+        if msg.PmsCount_00_5 != nil {
+            sc1.PmsCount_00_5 = fmt.Sprintf("%d", msg.GetPmsCount_00_5())
+        }
+        if msg.PmsCount_01_0 != nil {
+            sc1.PmsCount_01_0 = fmt.Sprintf("%d", msg.GetPmsCount_01_0())
+        }
+        if msg.PmsCount_02_5 != nil {
+            sc1.PmsCount_02_5 = fmt.Sprintf("%d", msg.GetPmsCount_02_5())
+        }
+        if msg.PmsCount_05_0 != nil {
+            sc1.PmsCount_05_0 = fmt.Sprintf("%d", msg.GetPmsCount_05_0())
+        }
+        if msg.PmsCount_10_0 != nil {
+            sc1.PmsCount_10_0 = fmt.Sprintf("%d", msg.GetPmsCount_10_0())
         }
     }
     go uploadToSafecast(sc1)
@@ -211,28 +253,100 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             go uploadToSafecast(sc2)
         }
         if msg.BatterySOC != nil {
-            sc3 := sc
-            sc3.Unit = "bat_soc"
-            sc3.Value = sc1.BatSOC
-            go uploadToSafecast(sc3)
+            sc2 := sc
+            sc2.Unit = "bat_soc"
+            sc2.Value = sc1.BatSOC
+            go uploadToSafecast(sc2)
         }
         if msg.EnvTemperature != nil {
-            sc4 := sc
-            sc4.Unit = "env_temp"
-            sc4.Value = sc1.EnvTemp
-            go uploadToSafecast(sc4)
+            sc2 := sc
+            sc2.Unit = "env_temp"
+            sc2.Value = sc1.EnvTemp
+            go uploadToSafecast(sc2)
         }
         if msg.EnvHumidity != nil {
-            sc5 := sc
-            sc5.Unit = "env_humid"
-            sc5.Value = sc1.EnvHumid
-            go uploadToSafecast(sc5)
+            sc2 := sc
+            sc2.Unit = "env_humid"
+            sc2.Value = sc1.EnvHumid
+            go uploadToSafecast(sc2)
         }
         if theSNR != 0.0 {
-            sc6 := sc
-            sc6.Unit = "wireless_snr"
-            sc6.Value = sc1.WirelessSNR
-            go uploadToSafecast(sc6)
+            sc2 := sc
+            sc2.Unit = "wireless_snr"
+            sc2.Value = sc1.WirelessSNR
+            go uploadToSafecast(sc2)
+        }
+        if msg.PmsTsi_01_0 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_tsi_01_0"
+	        sc2.Value = sc1.PmsTsi_01_0
+			go uploadToSafecast(sc2)
+        }
+        if msg.PmsTsi_02_5 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_tsi_02_5"
+	        sc2.Value = sc1.PmsTsi_02_5
+			go uploadToSafecast(sc2)
+        }
+        if msg.PmsTsi_10_0 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_tsi_10_0"
+	        sc2.Value = sc1.PmsTsi_10_0
+			go uploadToSafecast(sc2)
+        }
+        if msg.PmsStd_01_0 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_std_01_0"
+	        sc2.Value = sc1.PmsStd_01_0
+			go uploadToSafecast(sc2)
+        }
+        if msg.PmsStd_02_5 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_std_02_5"
+	        sc2.Value = sc1.PmsStd_02_5
+			go uploadToSafecast(sc2)
+        }
+        if msg.PmsStd_10_0 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_std_10_0"
+	        sc2.Value = sc1.PmsStd_10_0
+			go uploadToSafecast(sc2)
+        }
+        if msg.PmsCount_00_3 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_count_00_3"
+	        sc2.Value = sc1.PmsCount_00_3
+			go uploadToSafecast(sc2)
+        }
+        if msg.PmsCount_00_5 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_count_00_5"
+	        sc2.Value = sc1.PmsCount_00_5
+			go uploadToSafecast(sc2)
+        }
+        if msg.PmsCount_01_0 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_count_01_0"
+	        sc2.Value = sc1.PmsCount_01_0
+			go uploadToSafecast(sc2)
+        }
+        if msg.PmsCount_02_5 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_count_02_5"
+	        sc2.Value = sc1.PmsCount_02_5
+			go uploadToSafecast(sc2)
+        }
+        if msg.PmsCount_05_0 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_count_05_0"
+	        sc2.Value = sc1.PmsCount_05_0
+			go uploadToSafecast(sc2)
+        }
+        if msg.PmsCount_10_0 != nil {
+			sc2 := sc
+			sc2.Unit = "pms_count_10_0"
+	        sc2.Value = sc1.PmsCount_10_0
+			go uploadToSafecast(sc2)
         }
 
     }
@@ -257,14 +371,14 @@ func endTransaction(transaction int, errstr string) {
     if errstr != "" {
         fmt.Printf("%s *** [%d] *** After %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
     } else {
-		if (duration < 5) {
-	        fmt.Printf("%s *** [%d] *** Completed successfully.\n", time.Now().Format(logDateFormat), transaction);
-		} else {
-	        fmt.Printf("%s *** [%d] *** After %d seconds, completed successfully.\n", time.Now().Format(logDateFormat), transaction, duration);
-		}
+        if (duration < 5) {
+            fmt.Printf("%s *** [%d] *** Completed successfully.\n", time.Now().Format(logDateFormat), transaction);
+        } else {
+            fmt.Printf("%s *** [%d] *** After %d seconds, completed successfully.\n", time.Now().Format(logDateFormat), transaction, duration);
+        }
     }
 
-	theMin := 99999
+    theMin := 99999
     theMax := 0
     theTotal := 0
     theCount := 0
@@ -280,28 +394,28 @@ func endTransaction(transaction int, errstr string) {
     }
     theMean := theTotal / theCount
 
-	// Output to console every time we are in a "slow mode"
+    // Output to console every time we are in a "slow mode"
     if (theMin > 10) {
-		fmt.Printf("%s Safecast HTTP Upload Statistics\n", time.Now().Format(logDateFormat))
+        fmt.Printf("%s Safecast HTTP Upload Statistics\n", time.Now().Format(logDateFormat))
         fmt.Printf("%s *** %d total uploads since restart\n", time.Now().Format(logDateFormat), httpTransactions)
         if (httpTransactionsInProgress > 0) {
             fmt.Printf("%s *** %d uploads still in progress\n", time.Now().Format(logDateFormat), httpTransactionsInProgress)
         }
-		fmt.Printf("%s *** Last %d: min=%ds, max=%ds, avg=%ds\n", time.Now().Format(logDateFormat), theCount, theMin, theMax, theMean)
+        fmt.Printf("%s *** Last %d: min=%ds, max=%ds, avg=%ds\n", time.Now().Format(logDateFormat), theCount, theMin, theMax, theMean)
 
-	}
+    }
 
-	// If there's a problem, output to Slack once every 25 transactions
-	if (theMin > 10 && transaction == 0) {
-		// If all of them have the same timeout value, the server must be down.
-		s := ""
-		if (theMin == theMax && theMin == theMean) {
-			s = fmt.Sprintf("Safecast API on %s: all of the most recent %d uploads failed. Please check the service.", SafecastUploadIP, theCount)
-		} else {
-			s = fmt.Sprintf("Safecast API on %s: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", SafecastUploadIP, theCount, theMin, theMax, theMean)
-		}
-		sendToSafecastApi(s);
-	}
+    // If there's a problem, output to Slack once every 25 transactions
+    if (theMin > 10 && transaction == 0) {
+        // If all of them have the same timeout value, the server must be down.
+        s := ""
+        if (theMin == theMax && theMin == theMean) {
+            s = fmt.Sprintf("Safecast API on %s: all of the most recent %d uploads failed. Please check the service.", SafecastUploadIP, theCount)
+        } else {
+            s = fmt.Sprintf("Safecast API on %s: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", SafecastUploadIP, theCount, theMin, theMax, theMean)
+        }
+        sendToSafecastApi(s);
+    }
 
 }
 
@@ -319,12 +433,12 @@ func uploadToSafecast(sc SafecastData) {
     httpclient := &http.Client{}
     resp, err := httpclient.Do(req)
 
-	errString := ""
+    errString := ""
     if (err == nil) {
         resp.Body.Close()
     } else {
-		errString = fmt.Sprintf("%s", err)
-	}
+        errString = fmt.Sprintf("%s", err)
+    }
 
     endTransaction(transaction, errString)
 
@@ -335,22 +449,22 @@ func isDuplicate(checksum uint32) bool {
 
     // Sweep through all recent messages, looking for a duplicate in the past minute
     for i := 0; i < len(recentlyReceived); i++ {
-		if recentlyReceived[i].checksum == checksum {
-	        if (int64(time.Now().Sub(recentlyReceived[i].seen) / time.Second) < 60) {
-				return true
-			}
-		}
-	}
+        if recentlyReceived[i].checksum == checksum {
+            if (int64(time.Now().Sub(recentlyReceived[i].seen) / time.Second) < 60) {
+                return true
+            }
+        }
+    }
 
-	// Shift them all down
+    // Shift them all down
     for i := len(recentlyReceived)-1; i > 0; i-- {
-		recentlyReceived[i] = recentlyReceived[i-1]
-	}
+        recentlyReceived[i] = recentlyReceived[i-1]
+    }
 
-	// Insert this new one
-	recentlyReceived[0].checksum = checksum;
+    // Insert this new one
+    recentlyReceived[0].checksum = checksum;
     recentlyReceived[0].seen = time.Now().UTC()
-	return false
+    return false
 
 }
 

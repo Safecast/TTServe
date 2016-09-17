@@ -25,4 +25,16 @@ type SafecastData struct {
     WirelessSNR  string `json:"wireless_snr,omitempty"`  // -127db to +127db
     EnvTemp      string `json:"env_temp,omitempty"`      // Degrees centigrade
     EnvHumid     string `json:"env_humid,omitempty"`     // Percent RH
+    PmsTsi_01_0        string    `json:"pms_tsi_01_0"`
+    PmsTsi_02_5        string    `json:"pms_tsi_02_5"`
+    PmsTsi_10_0        string    `json:"pms_tsi_10_0"`
+    PmsStd_01_0        string    `json:"pms_std_01_0"`
+    PmsStd_02_5        string    `json:"pms_std_02_5"`
+    PmsStd_10_0        string    `json:"pms_std_10_0"`
+    PmsCount_00_3      string    `json:"pms_count_00_3"`
+    PmsCount_00_5      string    `json:"pms_count_00_5"`
+    PmsCount_01_0      string    `json:"pms_count_01_0"`
+    PmsCount_02_5      string    `json:"pms_count_02_5"`
+    PmsCount_05_0      string    `json:"pms_count_05_0"`
+    PmsCount_10_0      string    `json:"pms_count_10_0"`
 }
