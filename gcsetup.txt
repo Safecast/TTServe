@@ -1,18 +1,28 @@
-// Install
+// Install (assuming UBUNTU)
 sudo apt-get update
 sudo apt-get install git --assume-yes
-sudo apt-get install golang --assume-yes
 
-// Add this to .bashrc:
-export GOPATH=$HOME/go
-export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+// Install golang in a way appropriate for the OS.  Do NOT use apt-get because
+// it installs an old version!
+// https://www.digitalocean.com/community/tutorials/how-to-install-go-1-6-on-ubuntu-14-04
 
-// upload
-mkdir ~/go
-mkdir ~/go/src
-cd ~/go/src
+// Create our app workspace
+mkdir $HOME/godev
+// Add it to .profile, so that this is what should be at the end
+export PATH=$PATH:/usr/local/go/bin
+export GOPATH=$HOME/godev
+
+// bring down our stuff
+cd ~/godev
+mkdir src
+cd src
+mkdir github.com
+cd github.com
+mkdir rayozzie
+cd rayozzie
 git clone https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
 cd teletype-ttserve
+go get
 ./run.sh
 
 // Running in background

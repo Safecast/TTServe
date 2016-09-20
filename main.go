@@ -10,6 +10,7 @@ import (
     "time"
     "encoding/json"
     "encoding/hex"
+	"github.com/rdegges/go-ipify"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
     "hash/crc32"
@@ -30,13 +31,15 @@ const SafecastUploadURL = "http://" + SafecastUploadIP + "/scripts/indextest.php
 const SafecastAppKey = "z3sHhgousVDDrCVXhzMT"
 
 // This HTTP server-related
-const ttServer string = "http://api.teletype.io"
 const ttServerPort string = ":8080"
 const ttServerPortUDP string = ":8081"
 const ttServerPortTCP string = ":8082"
 const ttServerURLSend string = "/send"
 const ttServerURLGithub string = "/github"
 const ttServerURLSlack string = "/slack"
+
+// Our server
+var ttServer string
 
 // Constants
 const logDateFormat string = "2006-01-02 15:04:05"
@@ -53,6 +56,14 @@ var reqQ chan DataUpAppReq
 // Main entry point for app
 func main() {
 
+	// Get our external IP address
+    ip, err := ipify.GetIp()
+	if err != nil {
+		ttServer = "http://api.teletype.io"
+	} else {
+		ttServer = "http://" + ip
+	}
+	
     // Set up our internal message queues
     upQ = make(chan MQTT.Message, 5)
     reqQ = make(chan DataUpAppReq, 5)
@@ -317,7 +328,7 @@ func ttnSubscriptionMonitor() {
             lastDisconnected = time.Now().Format(logDateFormat)
             fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
             sendToSafecastOps(fmt.Sprintf("connection lost: %v\n", err))
-            sendToTTNOps(fmt.Sprintf("Connection lost from api.teletype.io to %s: %v\n", ttnServer, err))
+            sendToTTNOps(fmt.Sprintf("Connection lost from this server to %s: %v\n", ttnServer, err))
         }
         mqttOpts.SetConnectionLostHandler(onMqConnectionLost)
 
@@ -340,7 +351,7 @@ func ttnSubscriptionMonitor() {
                 lastConnected = time.Now().Format(logDateFormat)
                 if (everConnected) {
                     sendToSafecastOps("TTN connection restored")
-                    sendToTTNOps(fmt.Sprintf("Connection restored from api.teletype.io to %s\n", ttnServer))
+                    sendToTTNOps(fmt.Sprintf("Connection restored from this server to %s\n", ttnServer))
                     fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))
                 } else {
                     everConnected = true
