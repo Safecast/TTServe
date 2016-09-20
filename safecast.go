@@ -181,6 +181,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     }
 
 	//////////
+    fmt.Printf("$$$$$ Writing %d bytes $$$$$\n", testLength*10)
 	test := ""
 	for i := 0; i < testLength; i++ {
 		test = test + "123456789 "
