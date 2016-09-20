@@ -1,4 +1,4 @@
-// Slack #ops channel handling, both inbound & outbound
+// Slack #ops channel handling, both inbound and outbound
 package main
 
 import (
