@@ -19,6 +19,10 @@ const httpTransactionsRecorded = 25
 var httpTransactionDurations[httpTransactionsRecorded] int
 var httpTransactionTimes[httpTransactionsRecorded] time.Time
 
+//////
+var testLength = 1
+//////
+
 // Describes every device that has sent us a message
 type seenDevice struct {
     originalDeviceNo    uint32
@@ -176,6 +180,15 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
     }
 
+	//////////
+	test := ""
+	for i := 0; i < testLength; i++ {
+		test = test + "123456789 "
+	}
+	testLength++
+    sc1.DeviceTypeID = test
+	//////////
+	
     if !deviceIsSuppressingMetadata {
 
         if msg.BatteryVoltage != nil {
