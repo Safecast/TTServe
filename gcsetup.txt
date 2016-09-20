@@ -1,4 +1,18 @@
-// Install (assuming UBUNTU)
+// 1. Create the instance of UBUNTU
+// 2. Make sure it has a public IP address
+
+// On Google Compute
+// .. In VM Instances
+// .. Click the name to go into an instance
+// .. Scroll down and click the Network (usually "default")
+// ..Add an "allow-8080" firewall rule for tcp:8080 that applies to all targets
+// ..Add an "allow-8081" firewall rule for udp:8081 that applies to all targets
+// ..Add an "allow-8082" firewall rule for tcp:8082 that applies to all targets
+
+// On Amazon
+// In Network & Security / Security Groups
+// Create or Edit the rules of the security group attached to the instance
+// 
 sudo apt-get update
 sudo apt-get install git --assume-yes
 

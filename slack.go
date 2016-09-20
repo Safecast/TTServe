@@ -30,8 +30,20 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Extract useful information
-    user := urlParams["user_name"][0]
-    message := urlParams["text"][0]
+    u, present := urlParams["user_name"]
+	if !present {
+		fmt.Printf("Slack user_name not present\n");
+		return
+	}
+	user := u[0]
+
+    m, present := urlParams["text"]
+	if !present {
+		fmt.Printf("Slack message not present\n");
+		return
+	}
+	message := m[0]
+	
     args := strings.Split(message, " ")
     argsLC := strings.Split(strings.ToLower(message), " ")
 
