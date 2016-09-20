@@ -156,29 +156,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     sc1 := sc
 
     // Process the most basic message types
-
-	var uptime uint32 = 7925
-	var ver string = "1.2.166"
-	var cfg string = "0.0.0.31.0"
-	var xmt uint32 = 69518
-	var rcv uint32 = 14
-	var rst uint32 = 1
-	var one uint32 = 1
-	msg.StatsUptimeMinutes = &uptime
-	msg.StatsAppVersion = &ver
-	msg.StatsDeviceParams = &cfg
-	msg.StatsTransmittedBytes = &xmt
-	msg.StatsReceivedBytes = &rcv
-	msg.StatsCommsResets = &rst
-	msg.StatsOneshots = &one
-
     if msg.StatsUptimeMinutes != nil {
 
-		// A stats message.
+		// A stats message
 		sc1.Unit = "stats"
 		sc1.Value = fmt.Sprintf("%d", msg.GetStatsUptimeMinutes())
 
-		// Create the special data structure to contain stats
 		var scStats safecastStats
 		scStats.StatsUptimeMinutes = msg.GetStatsUptimeMinutes()
 		if (msg.StatsAppVersion != nil) {
@@ -199,8 +182,8 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 		if (msg.StatsOneshots != nil) {
 			scStats.StatsOneshots = msg.GetStatsOneshots()
 		}
+
 	    scsJSON, _ := json.Marshal(scStats)
-	    fmt.Printf("%s\n", scsJSON)
         sc1.DeviceTypeID = string(scsJSON)
 		
     } else if msg.Message != nil {
@@ -616,7 +599,7 @@ func sendSafecastDeviceSummaryToSlack() {
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_temp|T>", s, id)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_humid|H>", s, id)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=wireless_snr|S>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=message|M>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=stats|X>", s, id)
         s = fmt.Sprintf("%s)", s)
 
         if sortedDevices[i].minutesAgo == 0 {
