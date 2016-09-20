@@ -157,6 +157,16 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
     // Process the most basic message types
 
+	var v1 uint32 = 1234
+	var v2 string = "teststr"
+	msg.StatsUptimeMinutes = &v1
+	msg.StatsAppVersion = &v2
+	msg.StatsDeviceParams = &v2
+	msg.StatsTransmittedBytes = &v1
+	msg.StatsReceivedBytes = &v1
+	msg.StatsCommsResets = &v1
+	msg.StatsOneshots = &v1
+
     if msg.StatsUptimeMinutes != nil {
 
 		// A stats message.
