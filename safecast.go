@@ -37,6 +37,17 @@ type receivedMessage struct {
 }
 var recentlyReceived [25]receivedMessage
 
+// Safecast stats
+type safecastStats struct {
+	StatsUptimeMinutes    uint32 `json:"uptime_min,omitempty"`
+	StatsAppVersion       string `json:"version,omitempty"`
+	StatsDeviceParams     string `json:"config,omitempty"`
+	StatsTransmittedBytes uint32 `json:"transmitted_bytes,omitempty"`
+	StatsReceivedBytes    uint32 `json:"received_bytes,omitempty"`
+	StatsCommsResets      uint32 `json:"comms_resets,omitempty"`
+	StatsOneshots         uint32 `json:"oneshots,omitempty"`
+}
+
 // Class used to sort seen devices
 type ByKey []seenDevice
 func (a ByKey) Len() int      { return len(a) }
@@ -144,13 +155,47 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     // after the Safecast service is upgraded.
     sc1 := sc
 
-    // Note that if the telecast message header has a Message
-    // field, we will ignore the unit & value and
-    // instead override it with the message.  This is
-    // the way that we transmit a boot/version message
-    // to the Safecast service.
+    // Process the most basic message types
 
-    if msg.Message == nil {
+    if msg.StatsUptimeMinutes != nil {
+
+		// A stats message.
+		sc1.Unit = "stats"
+		sc1.Value = fmt.Sprintf("%d", msg.GetStatsUptimeMinutes())
+
+		// Create the special data structure to contain stats
+		var scStats safecastStats
+		scStats.StatsUptimeMinutes = msg.GetStatsUptimeMinutes()
+		if (msg.StatsAppVersion != nil) {
+			scStats.StatsAppVersion = msg.GetStatsAppVersion()
+		}
+		if (msg.StatsDeviceParams != nil) {
+			scStats.StatsDeviceParams = msg.GetStatsDeviceParams()
+		}
+		if (msg.StatsTransmittedBytes != nil) {
+			scStats.StatsTransmittedBytes = msg.GetStatsTransmittedBytes()
+		}
+		if (msg.StatsReceivedBytes != nil) {
+			scStats.StatsReceivedBytes = msg.GetStatsReceivedBytes()
+		}
+		if (msg.StatsCommsResets != nil) {
+			scStats.StatsCommsResets = msg.GetStatsCommsResets()
+		}
+		if (msg.StatsOneshots != nil) {
+			scStats.StatsOneshots = msg.GetStatsOneshots()
+		}
+	    scsJSON, _ := json.Marshal(scStats)
+	    fmt.Printf("%s\n", scsJSON)
+        sc1.DeviceTypeID = string(scsJSON)
+		
+    } else if msg.Message != nil {
+
+        // A text message.  Since the Value in safecast
+		// must be a number, we use a different text field instead.
+        sc1.Unit = "message"
+        sc1.DeviceTypeID = msg.GetMessage()
+
+    } else {
 
         // A safecast geiger upload
         if msg.Unit == nil {
@@ -164,17 +209,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             sc1.Value = fmt.Sprintf("%d", msg.GetValue())
         }
 
-    } else {
-
-        // A text message
-        sc1.Unit = "message"
-        sc1.Value = msg.GetMessage()
-        // We also place it in this field, because we want to retain the
-        // full message while Safecast seems to parse the value as
-        // a floating point number rather than a string.
-        sc1.DeviceTypeID = msg.GetMessage();
-
-    }
+	}
 
     if !deviceIsSuppressingMetadata {
 
