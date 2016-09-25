@@ -311,73 +311,73 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         }
         if msg.PmsTsi_01_0 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_tsi_01_0"
+			sc2.Unit = "pmst01_0"
 	        sc2.Value = sc1.PmsTsi_01_0
 			go uploadToSafecast(sc2)
         }
         if msg.PmsTsi_02_5 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_tsi_02_5"
+			sc2.Unit = "pmst02_5"
 	        sc2.Value = sc1.PmsTsi_02_5
 			go uploadToSafecast(sc2)
         }
         if msg.PmsTsi_10_0 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_tsi_10_0"
+			sc2.Unit = "pmst10_0"
 	        sc2.Value = sc1.PmsTsi_10_0
 			go uploadToSafecast(sc2)
         }
         if msg.PmsStd_01_0 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_std_01_0"
+			sc2.Unit = "pmss01_0"
 	        sc2.Value = sc1.PmsStd_01_0
 			go uploadToSafecast(sc2)
         }
         if msg.PmsStd_02_5 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_std_02_5"
+			sc2.Unit = "pmss02_5"
 	        sc2.Value = sc1.PmsStd_02_5
 			go uploadToSafecast(sc2)
         }
         if msg.PmsStd_10_0 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_std_10_0"
+			sc2.Unit = "pmss10_0"
 	        sc2.Value = sc1.PmsStd_10_0
 			go uploadToSafecast(sc2)
         }
         if msg.PmsCount_00_3 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_count_00_3"
+			sc2.Unit = "pmsc00_3"
 	        sc2.Value = sc1.PmsCount_00_3
 			go uploadToSafecast(sc2)
         }
         if msg.PmsCount_00_5 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_count_00_5"
+			sc2.Unit = "pmsc00_5"
 	        sc2.Value = sc1.PmsCount_00_5
 			go uploadToSafecast(sc2)
         }
         if msg.PmsCount_01_0 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_count_01_0"
+			sc2.Unit = "pmsc01_0"
 	        sc2.Value = sc1.PmsCount_01_0
 			go uploadToSafecast(sc2)
         }
         if msg.PmsCount_02_5 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_count_02_5"
+			sc2.Unit = "pmsc02_5"
 	        sc2.Value = sc1.PmsCount_02_5
 			go uploadToSafecast(sc2)
         }
         if msg.PmsCount_05_0 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_count_05_0"
+			sc2.Unit = "pmsc05_0"
 	        sc2.Value = sc1.PmsCount_05_0
 			go uploadToSafecast(sc2)
         }
         if msg.PmsCount_10_0 != nil {
 			sc2 := sc
-			sc2.Unit = "pms_count_10_0"
+			sc2.Unit = "pmsc10_0"
 	        sc2.Value = sc1.PmsCount_10_0
 			go uploadToSafecast(sc2)
         }
