@@ -1,4 +1,4 @@
-// Safecast inbound message handling & publishing
+// Safecast inbound message handling and publishing
 package main
 
 import (

@@ -25,16 +25,16 @@ type SafecastData struct {
     WirelessSNR		string `json:"wireless_snr,omitempty"`  // -127db to +127db
     EnvTemp			string `json:"env_temp,omitempty"`      // Degrees centigrade
     EnvHumid		string `json:"env_humid,omitempty"`     // Percent RH
-    PmsTsi_01_0     string `json:"pms_tsi_01_0,omitempty"`
-    PmsTsi_02_5     string `json:"pms_tsi_02_5,omitempty"`
-    PmsTsi_10_0     string `json:"pms_tsi_10_0,omitempty"`
-    PmsStd_01_0     string `json:"pms_std_01_0,omitempty"`
-    PmsStd_02_5     string `json:"pms_std_02_5,omitempty"`
-    PmsStd_10_0     string `json:"pms_std_10_0,omitempty"`
-    PmsCount_00_3   string `json:"pms_count_00_3,omitempty"`
-    PmsCount_00_5   string `json:"pms_count_00_5,omitempty"`
-    PmsCount_01_0   string `json:"pms_count_01_0,omitempty"`
-    PmsCount_02_5   string `json:"pms_count_02_5,omitempty"`
-    PmsCount_05_0   string `json:"pms_count_05_0,omitempty"`
-    PmsCount_10_0   string `json:"pms_count_10_0,omitempty"`
+    PmsTsi_01_0     string `json:"pmst01_0,omitempty"`
+    PmsTsi_02_5     string `json:"pmst02_5,omitempty"`
+    PmsTsi_10_0     string `json:"pmst10_0,omitempty"`
+    PmsStd_01_0     string `json:"pmss01_0,omitempty"`
+    PmsStd_02_5     string `json:"pmss02_5,omitempty"`
+    PmsStd_10_0     string `json:"pmss10_0,omitempty"`
+    PmsCount_00_3   string `json:"pmsc00_3,omitempty"`
+    PmsCount_00_5   string `json:"pmsc00_5,omitempty"`
+    PmsCount_01_0   string `json:"pmsc01_0,omitempty"`
+    PmsCount_02_5   string `json:"pmsc02_5,omitempty"`
+    PmsCount_05_0   string `json:"pmsc05_0,omitempty"`
+    PmsCount_10_0   string `json:"pmsc10_0,omitempty"`
 }
