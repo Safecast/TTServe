@@ -273,7 +273,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             sc1.PmsCount_10_0 = fmt.Sprintf("%d", msg.GetPmsCount_10_0())
         }
     }
-    go uploadToSafecast(sc1)
+    uploadToSafecast(sc1)
 
     // Due to Safecast API design limitations, upload the metadata as
     // discrete web uploads.  Once this API limitation is removed,
@@ -283,103 +283,103 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             sc2 := sc
             sc2.Unit = "bat_voltage"
             sc2.Value = sc1.BatVoltage
-            go uploadToSafecast(sc2)
+            uploadToSafecast(sc2)
         }
         if msg.BatterySOC != nil {
             sc2 := sc
             sc2.Unit = "bat_soc"
             sc2.Value = sc1.BatSOC
-            go uploadToSafecast(sc2)
+            uploadToSafecast(sc2)
         }
         if msg.EnvTemperature != nil {
             sc2 := sc
             sc2.Unit = "env_temp"
             sc2.Value = sc1.EnvTemp
-            go uploadToSafecast(sc2)
+            uploadToSafecast(sc2)
         }
         if msg.EnvHumidity != nil {
             sc2 := sc
             sc2.Unit = "env_humid"
             sc2.Value = sc1.EnvHumid
-            go uploadToSafecast(sc2)
+            uploadToSafecast(sc2)
         }
         if theSNR != 0.0 {
             sc2 := sc
             sc2.Unit = "wireless_snr"
             sc2.Value = sc1.WirelessSNR
-            go uploadToSafecast(sc2)
+            uploadToSafecast(sc2)
         }
         if msg.PmsTsi_01_0 != nil {
 			sc2 := sc
 			sc2.Unit = "pmst01_0"
 	        sc2.Value = sc1.PmsTsi_01_0
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
         if msg.PmsTsi_02_5 != nil {
 			sc2 := sc
 			sc2.Unit = "pmst02_5"
 	        sc2.Value = sc1.PmsTsi_02_5
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
         if msg.PmsTsi_10_0 != nil {
 			sc2 := sc
 			sc2.Unit = "pmst10_0"
 	        sc2.Value = sc1.PmsTsi_10_0
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
         if msg.PmsStd_01_0 != nil {
 			sc2 := sc
 			sc2.Unit = "pmss01_0"
 	        sc2.Value = sc1.PmsStd_01_0
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
         if msg.PmsStd_02_5 != nil {
 			sc2 := sc
 			sc2.Unit = "pmss02_5"
 	        sc2.Value = sc1.PmsStd_02_5
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
         if msg.PmsStd_10_0 != nil {
 			sc2 := sc
 			sc2.Unit = "pmss10_0"
 	        sc2.Value = sc1.PmsStd_10_0
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
         if msg.PmsCount_00_3 != nil {
 			sc2 := sc
 			sc2.Unit = "pmsc00_3"
 	        sc2.Value = sc1.PmsCount_00_3
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
         if msg.PmsCount_00_5 != nil {
 			sc2 := sc
 			sc2.Unit = "pmsc00_5"
 	        sc2.Value = sc1.PmsCount_00_5
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
         if msg.PmsCount_01_0 != nil {
 			sc2 := sc
 			sc2.Unit = "pmsc01_0"
 	        sc2.Value = sc1.PmsCount_01_0
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
         if msg.PmsCount_02_5 != nil {
 			sc2 := sc
 			sc2.Unit = "pmsc02_5"
 	        sc2.Value = sc1.PmsCount_02_5
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
         if msg.PmsCount_05_0 != nil {
 			sc2 := sc
 			sc2.Unit = "pmsc05_0"
 	        sc2.Value = sc1.PmsCount_05_0
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
         if msg.PmsCount_10_0 != nil {
 			sc2 := sc
 			sc2.Unit = "pmsc10_0"
 	        sc2.Value = sc1.PmsCount_10_0
-			go uploadToSafecast(sc2)
+			uploadToSafecast(sc2)
         }
 
     }
@@ -474,6 +474,9 @@ func uploadToSafecast(sc SafecastData) {
     }
 
     endTransaction(transaction, errString)
+
+	// The service gets overloaded if we jam it too quickly
+    time.Sleep(2 * time.Second)
 
 }
 
