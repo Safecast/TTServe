@@ -481,6 +481,8 @@ func commonRequestHandler() {
             continue
         }
 
+		fmt.Printf("\nDEBUG!!!!!\n%v\n\n", msg);
+		
         // Display info about the received message
         deviceID := TelecastDeviceID(msg)
         fmt.Printf("%s Sent by %d\n", time.Now().Format(logDateFormat), deviceID)
