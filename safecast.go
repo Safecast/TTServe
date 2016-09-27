@@ -235,43 +235,54 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         }
 
         if msg.PmsTsi_01_0 != nil {
-            sc1.PmsTsi_01_0 = fmt.Sprintf("%d", msg.GetPmsTsi_01_0())
+            sc1.PmsTsi_01_0 = fmt.Sprintf("%.2f", msg.GetPmsTsi_01_0())
         }
         if msg.PmsTsi_02_5 != nil {
-            sc1.PmsTsi_02_5 = fmt.Sprintf("%d", msg.GetPmsTsi_02_5())
+            sc1.PmsTsi_02_5 = fmt.Sprintf("%.2f", msg.GetPmsTsi_02_5())
         }
         if msg.PmsTsi_10_0 != nil {
-            sc1.PmsTsi_10_0 = fmt.Sprintf("%d", msg.GetPmsTsi_10_0())
+            sc1.PmsTsi_10_0 = fmt.Sprintf("%.2f", msg.GetPmsTsi_10_0())
         }
 
         if msg.PmsStd_01_0 != nil {
-            sc1.PmsStd_01_0 = fmt.Sprintf("%d", msg.GetPmsStd_01_0())
+            sc1.PmsStd_01_0 = fmt.Sprintf("%.2f", msg.GetPmsStd_01_0())
         }
         if msg.PmsStd_02_5 != nil {
-            sc1.PmsStd_02_5 = fmt.Sprintf("%d", msg.GetPmsStd_02_5())
+            sc1.PmsStd_02_5 = fmt.Sprintf("%.2f", msg.GetPmsStd_02_5())
         }
         if msg.PmsStd_10_0 != nil {
-            sc1.PmsStd_10_0 = fmt.Sprintf("%d", msg.GetPmsStd_10_0())
+            sc1.PmsStd_10_0 = fmt.Sprintf("%.2f", msg.GetPmsStd_10_0())
         }
 
         if msg.PmsCount_00_3 != nil {
-            sc1.PmsCount_00_3 = fmt.Sprintf("%d", msg.GetPmsCount_00_3())
+            sc1.PmsCount_00_3 = fmt.Sprintf("%.2f", msg.GetPmsCount_00_3())
         }
         if msg.PmsCount_00_5 != nil {
-            sc1.PmsCount_00_5 = fmt.Sprintf("%d", msg.GetPmsCount_00_5())
+            sc1.PmsCount_00_5 = fmt.Sprintf("%.2f", msg.GetPmsCount_00_5())
         }
         if msg.PmsCount_01_0 != nil {
-            sc1.PmsCount_01_0 = fmt.Sprintf("%d", msg.GetPmsCount_01_0())
+            sc1.PmsCount_01_0 = fmt.Sprintf("%.2f", msg.GetPmsCount_01_0())
         }
         if msg.PmsCount_02_5 != nil {
-            sc1.PmsCount_02_5 = fmt.Sprintf("%d", msg.GetPmsCount_02_5())
+            sc1.PmsCount_02_5 = fmt.Sprintf("%.2f", msg.GetPmsCount_02_5())
         }
         if msg.PmsCount_05_0 != nil {
-            sc1.PmsCount_05_0 = fmt.Sprintf("%d", msg.GetPmsCount_05_0())
+            sc1.PmsCount_05_0 = fmt.Sprintf("%.2f", msg.GetPmsCount_05_0())
         }
         if msg.PmsCount_10_0 != nil {
-            sc1.PmsCount_10_0 = fmt.Sprintf("%d", msg.GetPmsCount_10_0())
+            sc1.PmsCount_10_0 = fmt.Sprintf("%.2f", msg.GetPmsCount_10_0())
         }
+
+        if msg.Opc_01_0 != nil {
+            sc1.Opc_01_0 = fmt.Sprintf("%.2f", msg.GetOpc_01_0())
+        }
+        if msg.Opc_02_5 != nil {
+            sc1.Opc_02_5 = fmt.Sprintf("%.2f", msg.GetOpc_02_5())
+        }
+        if msg.Opc_10_0 != nil {
+            sc1.Opc_10_0 = fmt.Sprintf("%.2f", msg.GetOpc_10_0())
+        }
+
     }
     uploadToSafecast(sc1)
 
@@ -379,6 +390,24 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 			sc2 := sc
 			sc2.Unit = "pmsc10_0"
 	        sc2.Value = sc1.PmsCount_10_0
+			uploadToSafecast(sc2)
+        }
+        if msg.Opc_01_0 != nil {
+			sc2 := sc
+			sc2.Unit = "opc01_0"
+	        sc2.Value = sc1.Opc_01_0
+			uploadToSafecast(sc2)
+        }
+        if msg.Opc_02_5 != nil {
+			sc2 := sc
+			sc2.Unit = "opc02_5"
+	        sc2.Value = sc1.Opc_02_5
+			uploadToSafecast(sc2)
+        }
+        if msg.Opc_10_0 != nil {
+			sc2 := sc
+			sc2.Unit = "opc10_0"
+	        sc2.Value = sc1.Opc_10_0
 			uploadToSafecast(sc2)
         }
 

@@ -37,4 +37,7 @@ type SafecastData struct {
     PmsCount_02_5   string `json:"pmsc02_5,omitempty"`
     PmsCount_05_0   string `json:"pmsc05_0,omitempty"`
     PmsCount_10_0   string `json:"pmsc10_0,omitempty"`
+    Opc_01_0        string `json:"opc01_0,omitempty"`
+    Opc_02_5        string `json:"opc02_5,omitempty"`
+    Opc_10_0        string `json:"opc10_0,omitempty"`
 }
