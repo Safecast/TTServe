@@ -189,15 +189,15 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
     } else {
 
-        // A safecast geiger upload
-        if msg.Unit == nil {
-            sc1.Unit = "cpm"
-        } else {
-            sc1.Unit = fmt.Sprintf("%s", msg.GetUnit())
-        }
-        if msg.Value == nil {
-            sc1.Value = ""
-        } else {
+        // A safecast geiger upload.  If it's lacking
+		// a value, don't add a unit.  This means that
+		// it was a metadata-only upload
+        if msg.Value != nil {
+            if msg.Unit == nil {
+                sc1.Unit = "cpm"
+            } else {
+                sc1.Unit = fmt.Sprintf("%s", msg.GetUnit())
+            }
             sc1.Value = fmt.Sprintf("%d", msg.GetValue())
         }
 
