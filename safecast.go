@@ -189,9 +189,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
     } else {
 
-        // A safecast geiger upload.  If it's lacking
-		// a value, don't add a unit.  This means that
-		// it was a metadata-only upload
+        // An old-style safecast geiger upload.  If it's lacking
+        // a value, don't add a unit.  This means that
+        // it was a metadata-only upload, or a new style upload
+        // which only has cpm0/cpm1 fields.
         if msg.Value != nil {
             if msg.Unit == nil {
                 sc1.Unit = "cpm"
@@ -275,7 +276,33 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         sc1.Opc_10_0 = fmt.Sprintf("%.2f", msg.GetOpc_10_0())
     }
 
-    uploadToSafecast(sc1)
+    // Upload differently based on how CPM is represented
+    if msg.Cpm0 == nil && msg.Cpm1 == nil {
+
+		// Either an old-style upload, and the kind used by bGeigies,
+		// or an upload of metadata without any kind of CPM
+        uploadToSafecast(sc1)
+
+    } else if msg.DeviceIDNumber != nil {
+
+		// A new style upload has "cpm0" or "cpm1" values, and
+		// must have a numeric device ID
+        if msg.Cpm0 != nil {
+            sc2 := sc
+			sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() & 0xfffffffe), 10)
+            sc2.Unit = "cpm"
+            sc2.Value = fmt.Sprintf("%d", msg.GetCpm0())
+            uploadToSafecast(sc2)
+        }
+        if msg.Cpm1 != nil {
+            sc2 := sc
+			sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() | 0x00000001), 10)
+            sc2.Unit = "cpm"
+            sc2.Value = fmt.Sprintf("%d", msg.GetCpm1())
+            uploadToSafecast(sc2)
+        }
+
+    }
 
     // Due to Safecast API design limitations, upload the metadata as
     // discrete web uploads.  Once this API limitation is removed,
