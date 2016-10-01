@@ -267,13 +267,13 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     }
 
     if msg.Opc_01_0 != nil {
-        sc1.Opc_01_0 = fmt.Sprintf("%.2f", msg.GetOpc_01_0())
+        sc1.Opc_01_0 = fmt.Sprintf("%f", msg.GetOpc_01_0())
     }
     if msg.Opc_02_5 != nil {
-        sc1.Opc_02_5 = fmt.Sprintf("%.2f", msg.GetOpc_02_5())
+        sc1.Opc_02_5 = fmt.Sprintf("%f", msg.GetOpc_02_5())
     }
     if msg.Opc_10_0 != nil {
-        sc1.Opc_10_0 = fmt.Sprintf("%.2f", msg.GetOpc_10_0())
+        sc1.Opc_10_0 = fmt.Sprintf("%f", msg.GetOpc_10_0())
     }
 
     // Upload differently based on how CPM is represented
