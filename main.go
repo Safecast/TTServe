@@ -478,6 +478,7 @@ func commonRequestHandler() {
         err := proto.Unmarshal(AppReq.Payload, msg)
         if err != nil {
             fmt.Printf("*** PB unmarshaling error: ", err)
+			fmt.Printf("*** %v\n", AppReq.Payload);
             continue
         }
 
