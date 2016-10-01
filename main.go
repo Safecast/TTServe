@@ -481,6 +481,11 @@ func commonRequestHandler() {
             continue
         }
 
+		// When debugging, display the actual unmarshaled value
+		if true {
+			fmt.Printf("%s Unmarshaled payload:\n%v\n", time.Now().Format(logDateFormat), msg);
+		}
+
         // Display info about the received message
         deviceID := TelecastDeviceID(msg)
         fmt.Printf("%s Sent by %d\n", time.Now().Format(logDateFormat), deviceID)
