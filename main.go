@@ -132,8 +132,9 @@ func udpInboundHandler() {
     }
     defer ServerConn.Close()
 
-    buf := make([]byte, 1024)
     for {
+	    buf := make([]byte, 1024)
+
         n, addr, err := ServerConn.ReadFromUDP(buf)
         if (err != nil) {
             fmt.Printf("UDP read error: \n%v\n", err)
