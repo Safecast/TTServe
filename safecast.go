@@ -339,19 +339,19 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     }
     if msg.PmsTsi_01_0 != nil {
         sc2 := sc
-        sc2.Unit = "pmst01_0"
+        sc2.Unit = "pms01_0"
         sc2.Value = sc1.PmsTsi_01_0
         uploadToSafecast(sc2)
     }
     if msg.PmsTsi_02_5 != nil {
         sc2 := sc
-        sc2.Unit = "pmst02_5"
+        sc2.Unit = "pms02_5"
         sc2.Value = sc1.PmsTsi_02_5
         uploadToSafecast(sc2)
     }
     if msg.PmsTsi_10_0 != nil {
         sc2 := sc
-        sc2.Unit = "pmst10_0"
+        sc2.Unit = "pms10_0"
         sc2.Value = sc1.PmsTsi_10_0
         uploadToSafecast(sc2)
     }
