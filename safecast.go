@@ -565,6 +565,11 @@ func trackDevice(DeviceID uint32) {
     for i := 0; i < len(seenDevices); i++ {
         if dev.normalizedDeviceNo == seenDevices[i].normalizedDeviceNo {
             seenDevices[i].seen = time.Now().UTC()
+			// Notify when the device comes back
+	        if seenDevices[i].notifiedAsUnseen {
+				seenDevices[i].notifiedAsUnseen = false;
+                sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned!", seenDevices[i].normalizedDeviceNo))
+            }
             // Keep note of whether  we've seen both devices of a set of dual-tube updates
             if (dev.originalDeviceNo != seenDevices[i].originalDeviceNo) {
                 seenDevices[i].dualSeen = true
