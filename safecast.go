@@ -564,12 +564,14 @@ func trackDevice(DeviceID uint32) {
     found := false
     for i := 0; i < len(seenDevices); i++ {
         if dev.normalizedDeviceNo == seenDevices[i].normalizedDeviceNo {
-            seenDevices[i].seen = time.Now().UTC()
 			// Notify when the device comes back
 	        if seenDevices[i].notifiedAsUnseen {
+		        minutesAgo := int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
 				seenDevices[i].notifiedAsUnseen = false;
-                sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned!", seenDevices[i].normalizedDeviceNo))
+                sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after away for %d minutes", seenDevices[i].normalizedDeviceNo, minutesAgo))
             }
+			// Mark as seen
+            seenDevices[i].seen = time.Now().UTC()
             // Keep note of whether  we've seen both devices of a set of dual-tube updates
             if (dev.originalDeviceNo != seenDevices[i].originalDeviceNo) {
                 seenDevices[i].dualSeen = true
@@ -609,7 +611,7 @@ func sendExpiredSafecastDevicesToSlack() {
         if !seenDevices[i].notifiedAsUnseen {
             if seenDevices[i].seen.Before(expiration) {
                 seenDevices[i].notifiedAsUnseen = true
-                sendToSafecastOps(fmt.Sprintf("** Warning**  Device %d hasn't been seen for %d minutes",
+                sendToSafecastOps(fmt.Sprintf("** Warning **  Device %d hasn't been seen for %d minutes",
                     seenDevices[i].normalizedDeviceNo,
                     seenDevices[i].minutesAgo))
             }
@@ -639,7 +641,7 @@ func sendSafecastDeviceSummaryToSlack() {
             s = fmt.Sprintf("%s\n", s)
         }
 
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements|%010d>", s, id, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc|%010d>", s, id, id)
 
         if (sortedDevices[i].dualSeen) {
             s = fmt.Sprintf("%s <http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc|%010d>", s,
