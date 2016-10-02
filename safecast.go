@@ -642,7 +642,7 @@ func sendSafecastDeviceSummaryToSlack() {
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements|%010d>", s, id, id)
 
         if (sortedDevices[i].dualSeen) {
-            s = fmt.Sprintf("%s <http://dev.safecast.org/en-US/devices/%d/measurements|%010d>", s,
+            s = fmt.Sprintf("%s <http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc|%010d>", s,
                 sortedDevices[i].originalDeviceNo, sortedDevices[i].originalDeviceNo)
         }
 
