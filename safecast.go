@@ -153,7 +153,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     if msg.StatsUptimeMinutes != nil {
 
         // A stats message
-        sc1.Unit = "stats"
+        sc1.Unit = UnitStats
         sc1.Value = fmt.Sprintf("%d", msg.GetStatsUptimeMinutes())
 
         var scStats safecastStats
@@ -184,7 +184,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
         // A text message.  Since the Value in safecast
         // must be a number, we use a different text field instead.
-        sc1.Unit = "message"
+        sc1.Unit = UnitMessage
         sc1.DeviceTypeID = msg.GetMessage()
 
     } else {
@@ -195,7 +195,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         // which only has cpm0/cpm1 fields.
         if msg.Value != nil {
             if msg.Unit == nil {
-                sc1.Unit = "cpm"
+                sc1.Unit = UnitCPM
             } else {
                 sc1.Unit = fmt.Sprintf("%s", msg.GetUnit())
             }
@@ -227,53 +227,66 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         sc1.WirelessSNR = fmt.Sprintf("%.1f", theSNR)
     }
 
-    if msg.PmsTsi_01_0 != nil {
-        sc1.PmsTsi_01_0 = fmt.Sprintf("%d", msg.GetPmsTsi_01_0())
+    if msg.PmsPm01_0 != nil {
+        sc1.PmsPm01_0 = fmt.Sprintf("%d", msg.GetPmsPm01_0())
     }
-    if msg.PmsTsi_02_5 != nil {
-        sc1.PmsTsi_02_5 = fmt.Sprintf("%d", msg.GetPmsTsi_02_5())
+    if msg.PmsPm02_5 != nil {
+        sc1.PmsPm02_5 = fmt.Sprintf("%d", msg.GetPmsPm02_5())
     }
-    if msg.PmsTsi_10_0 != nil {
-        sc1.PmsTsi_10_0 = fmt.Sprintf("%d", msg.GetPmsTsi_10_0())
+    if msg.PmsPm10_0 != nil {
+        sc1.PmsPm10_0 = fmt.Sprintf("%d", msg.GetPmsPm10_0())
     }
-
-    if msg.PmsStd_01_0 != nil {
-        sc1.PmsStd_01_0 = fmt.Sprintf("%d", msg.GetPmsStd_01_0())
+    if msg.PmsC00_30 != nil {
+        sc1.PmsC00_30 = fmt.Sprintf("%d", msg.GetPmsC00_30())
     }
-    if msg.PmsStd_02_5 != nil {
-        sc1.PmsStd_02_5 = fmt.Sprintf("%d", msg.GetPmsStd_02_5())
+    if msg.PmsC00_50 != nil {
+        sc1.PmsC00_50 = fmt.Sprintf("%d", msg.GetPmsC00_50())
     }
-    if msg.PmsStd_10_0 != nil {
-        sc1.PmsStd_10_0 = fmt.Sprintf("%d", msg.GetPmsStd_10_0())
+    if msg.PmsC01_00 != nil {
+        sc1.PmsC01_00 = fmt.Sprintf("%d", msg.GetPmsC01_00())
     }
-
-    if msg.PmsCount_00_3 != nil {
-        sc1.PmsCount_00_3 = fmt.Sprintf("%d", msg.GetPmsCount_00_3())
+    if msg.PmsC02_50 != nil {
+        sc1.PmsC02_50 = fmt.Sprintf("%d", msg.GetPmsC02_50())
     }
-    if msg.PmsCount_00_5 != nil {
-        sc1.PmsCount_00_5 = fmt.Sprintf("%d", msg.GetPmsCount_00_5())
+    if msg.PmsC05_00 != nil {
+        sc1.PmsC05_00 = fmt.Sprintf("%d", msg.GetPmsC05_00())
     }
-    if msg.PmsCount_01_0 != nil {
-        sc1.PmsCount_01_0 = fmt.Sprintf("%d", msg.GetPmsCount_01_0())
+    if msg.PmsC10_00 != nil {
+        sc1.PmsC10_00 = fmt.Sprintf("%d", msg.GetPmsC10_00())
     }
-    if msg.PmsCount_02_5 != nil {
-        sc1.PmsCount_02_5 = fmt.Sprintf("%d", msg.GetPmsCount_02_5())
-    }
-    if msg.PmsCount_05_0 != nil {
-        sc1.PmsCount_05_0 = fmt.Sprintf("%d", msg.GetPmsCount_05_0())
-    }
-    if msg.PmsCount_10_0 != nil {
-        sc1.PmsCount_10_0 = fmt.Sprintf("%d", msg.GetPmsCount_10_0())
+    if msg.PmsCsecs != nil {
+        sc1.PmsCsecs = fmt.Sprintf("%d", msg.GetPmsCsecs())
     }
 
-    if msg.Opc_01_0 != nil {
-        sc1.Opc_01_0 = fmt.Sprintf("%f", msg.GetOpc_01_0())
+    if msg.OpcPm01_0 != nil {
+        sc1.OpcPm01_0 = fmt.Sprintf("%f", msg.GetOpcPm01_0())
     }
-    if msg.Opc_02_5 != nil {
-        sc1.Opc_02_5 = fmt.Sprintf("%f", msg.GetOpc_02_5())
+    if msg.OpcPm02_5 != nil {
+        sc1.OpcPm02_5 = fmt.Sprintf("%f", msg.GetOpcPm02_5())
     }
-    if msg.Opc_10_0 != nil {
-        sc1.Opc_10_0 = fmt.Sprintf("%f", msg.GetOpc_10_0())
+    if msg.OpcPm10_0 != nil {
+        sc1.OpcPm10_0 = fmt.Sprintf("%f", msg.GetOpcPm10_0())
+    }
+    if msg.OpcC00_38 != nil {
+        sc1.OpcC00_38 = fmt.Sprintf("%d", msg.GetOpcC00_38())
+    }
+    if msg.OpcC00_54 != nil {
+        sc1.OpcC00_54 = fmt.Sprintf("%d", msg.GetOpcC00_54())
+    }
+    if msg.OpcC01_00 != nil {
+        sc1.OpcC01_00 = fmt.Sprintf("%d", msg.GetOpcC01_00())
+    }
+    if msg.OpcC02_10 != nil {
+        sc1.OpcC02_10 = fmt.Sprintf("%d", msg.GetOpcC02_10())
+    }
+    if msg.OpcC05_00 != nil {
+        sc1.OpcC05_00 = fmt.Sprintf("%d", msg.GetOpcC05_00())
+    }
+    if msg.OpcC10_00 != nil {
+        sc1.OpcC10_00 = fmt.Sprintf("%d", msg.GetOpcC10_00())
+    }
+    if msg.OpcCsecs != nil {
+        sc1.OpcCsecs = fmt.Sprintf("%d", msg.GetOpcCsecs())
     }
 
     // Upload differently based on how CPM is represented
@@ -290,14 +303,14 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         if msg.Cpm0 != nil {
             sc2 := sc
 			sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() & 0xfffffffe), 10)
-            sc2.Unit = "cpm"
+            sc2.Unit = UnitCPM
             sc2.Value = fmt.Sprintf("%d", msg.GetCpm0())
             uploadToSafecast(sc2)
         }
         if msg.Cpm1 != nil {
             sc2 := sc
 			sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() | 0x00000001), 10)
-            sc2.Unit = "cpm"
+            sc2.Unit = UnitCPM
             sc2.Value = fmt.Sprintf("%d", msg.GetCpm1())
             uploadToSafecast(sc2)
         }
@@ -309,122 +322,154 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     // this code should be deleted.
     if msg.BatteryVoltage != nil {
         sc2 := sc
-        sc2.Unit = "bat_voltage"
+        sc2.Unit = UnitBatVoltage
         sc2.Value = sc1.BatVoltage
         uploadToSafecast(sc2)
     }
     if msg.BatterySOC != nil {
         sc2 := sc
-        sc2.Unit = "bat_soc"
+        sc2.Unit = UnitBatSOC
         sc2.Value = sc1.BatSOC
         uploadToSafecast(sc2)
     }
     if msg.EnvTemperature != nil {
         sc2 := sc
-        sc2.Unit = "env_temp"
+        sc2.Unit = UnitEnvTemp
         sc2.Value = sc1.EnvTemp
         uploadToSafecast(sc2)
     }
     if msg.EnvHumidity != nil {
         sc2 := sc
-        sc2.Unit = "env_humid"
+        sc2.Unit = UnitEnvHumid
         sc2.Value = sc1.EnvHumid
         uploadToSafecast(sc2)
     }
     if theSNR != 0.0 {
         sc2 := sc
-        sc2.Unit = "wireless_snr"
+        sc2.Unit = UnitWirelessSNR
         sc2.Value = sc1.WirelessSNR
         uploadToSafecast(sc2)
     }
-    if msg.PmsTsi_01_0 != nil {
+
+    if msg.PmsPm01_0 != nil {
         sc2 := sc
-        sc2.Unit = "pms01_0"
-        sc2.Value = sc1.PmsTsi_01_0
+        sc2.Unit = UnitPmsPm01_0
+        sc2.Value = sc1.PmsPm01_0
         uploadToSafecast(sc2)
     }
-    if msg.PmsTsi_02_5 != nil {
+    if msg.PmsPm02_5 != nil {
         sc2 := sc
-        sc2.Unit = "pms02_5"
-        sc2.Value = sc1.PmsTsi_02_5
+        sc2.Unit = UnitPmsPm02_5
+        sc2.Value = sc1.PmsPm02_5
         uploadToSafecast(sc2)
     }
-    if msg.PmsTsi_10_0 != nil {
+    if msg.PmsPm10_0 != nil {
         sc2 := sc
-        sc2.Unit = "pms10_0"
-        sc2.Value = sc1.PmsTsi_10_0
+        sc2.Unit = UnitPmsPm10_0
+        sc2.Value = sc1.PmsPm10_0
         uploadToSafecast(sc2)
     }
-    if msg.PmsStd_01_0 != nil {
+    if msg.PmsC00_30 != nil {
         sc2 := sc
-        sc2.Unit = "pmss01_0"
-        sc2.Value = sc1.PmsStd_01_0
+        sc2.Unit = UnitPmsC00_30
+        sc2.Value = sc1.PmsC00_30
         uploadToSafecast(sc2)
     }
-    if msg.PmsStd_02_5 != nil {
+    if msg.PmsC00_50 != nil {
         sc2 := sc
-        sc2.Unit = "pmss02_5"
-        sc2.Value = sc1.PmsStd_02_5
+        sc2.Unit = UnitPmsC00_50
+        sc2.Value = sc1.PmsC00_50
         uploadToSafecast(sc2)
     }
-    if msg.PmsStd_10_0 != nil {
+    if msg.PmsC01_00 != nil {
         sc2 := sc
-        sc2.Unit = "pmss10_0"
-        sc2.Value = sc1.PmsStd_10_0
+        sc2.Unit = UnitPmsC01_00
+        sc2.Value = sc1.PmsC01_00
         uploadToSafecast(sc2)
     }
-    if msg.PmsCount_00_3 != nil {
+    if msg.PmsC02_50 != nil {
         sc2 := sc
-        sc2.Unit = "pmsc00_3"
-        sc2.Value = sc1.PmsCount_00_3
+        sc2.Unit = UnitPmsC02_50
+        sc2.Value = sc1.PmsC02_50
         uploadToSafecast(sc2)
     }
-    if msg.PmsCount_00_5 != nil {
+    if msg.PmsC05_00 != nil {
         sc2 := sc
-        sc2.Unit = "pmsc00_5"
-        sc2.Value = sc1.PmsCount_00_5
+        sc2.Unit = UnitPmsC05_00
+        sc2.Value = sc1.PmsC05_00
         uploadToSafecast(sc2)
     }
-    if msg.PmsCount_01_0 != nil {
+    if msg.PmsC10_00 != nil {
         sc2 := sc
-        sc2.Unit = "pmsc01_0"
-        sc2.Value = sc1.PmsCount_01_0
+        sc2.Unit = UnitPmsC10_00
+        sc2.Value = sc1.PmsC10_00
         uploadToSafecast(sc2)
     }
-    if msg.PmsCount_02_5 != nil {
+    if msg.PmsCsecs != nil {
         sc2 := sc
-        sc2.Unit = "pmsc02_5"
-        sc2.Value = sc1.PmsCount_02_5
+        sc2.Unit = UnitPmsCsecs
+        sc2.Value = sc1.PmsCsecs
         uploadToSafecast(sc2)
     }
-    if msg.PmsCount_05_0 != nil {
+
+    if msg.OpcPm01_0 != nil {
         sc2 := sc
-        sc2.Unit = "pmsc05_0"
-        sc2.Value = sc1.PmsCount_05_0
+        sc2.Unit = UnitOpcPm01_0
+        sc2.Value = sc1.OpcPm01_0
         uploadToSafecast(sc2)
     }
-    if msg.PmsCount_10_0 != nil {
+    if msg.OpcPm02_5 != nil {
         sc2 := sc
-        sc2.Unit = "pmsc10_0"
-        sc2.Value = sc1.PmsCount_10_0
+        sc2.Unit = UnitOpcPm02_5
+        sc2.Value = sc1.OpcPm02_5
         uploadToSafecast(sc2)
     }
-    if msg.Opc_01_0 != nil {
+    if msg.OpcPm10_0 != nil {
         sc2 := sc
-        sc2.Unit = "opc01_0"
-        sc2.Value = sc1.Opc_01_0
+        sc2.Unit = UnitOpcPm10_0
+        sc2.Value = sc1.OpcPm10_0
         uploadToSafecast(sc2)
     }
-    if msg.Opc_02_5 != nil {
+    if msg.OpcC00_38 != nil {
         sc2 := sc
-        sc2.Unit = "opc02_5"
-        sc2.Value = sc1.Opc_02_5
+        sc2.Unit = UnitOpcC00_38
+        sc2.Value = sc1.OpcC00_38
         uploadToSafecast(sc2)
     }
-    if msg.Opc_10_0 != nil {
+    if msg.OpcC00_54 != nil {
         sc2 := sc
-        sc2.Unit = "opc10_0"
-        sc2.Value = sc1.Opc_10_0
+        sc2.Unit = UnitOpcC00_54
+        sc2.Value = sc1.OpcC00_54
+        uploadToSafecast(sc2)
+    }
+    if msg.OpcC01_00 != nil {
+        sc2 := sc
+        sc2.Unit = UnitOpcC01_00
+        sc2.Value = sc1.OpcC01_00
+        uploadToSafecast(sc2)
+    }
+    if msg.OpcC02_10 != nil {
+        sc2 := sc
+        sc2.Unit = UnitOpcC02_10
+        sc2.Value = sc1.OpcC02_10
+        uploadToSafecast(sc2)
+    }
+    if msg.OpcC05_00 != nil {
+        sc2 := sc
+        sc2.Unit = UnitOpcC05_00
+        sc2.Value = sc1.OpcC05_00
+        uploadToSafecast(sc2)
+    }
+    if msg.OpcC10_00 != nil {
+        sc2 := sc
+        sc2.Unit = UnitOpcC10_00
+        sc2.Value = sc1.OpcC10_00
+        uploadToSafecast(sc2)
+    }
+    if msg.OpcCsecs != nil {
+        sc2 := sc
+        sc2.Unit = UnitOpcCsecs
+        sc2.Value = sc1.OpcCsecs
         uploadToSafecast(sc2)
     }
 
