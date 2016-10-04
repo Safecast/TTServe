@@ -376,7 +376,9 @@ func ttnSubscriptionMonitor() {
             for consecutiveFailures := 0; consecutiveFailures < 3; {
                 time.Sleep(60 * time.Second)
                 if fullyConnected {
-                    fmt.Printf("\n%s TTN Alive\n", time.Now().Format(logDateFormat))
+					if false {
+	                    fmt.Printf("\n%s TTN Alive\n", time.Now().Format(logDateFormat))
+					}
                     consecutiveFailures = 0
                 } else {
                     fmt.Printf("\n%s TTN *** UNREACHABLE ***\n", time.Now().Format(logDateFormat))
