@@ -484,7 +484,7 @@ func beginTransaction(url string, message string) int {
     httpTransactions += 1
     transaction := httpTransactions % httpTransactionsRecorded
     httpTransactionTimes[transaction] = time.Now()
-    fmt.Printf("%s *** [%d] %s\n", time.Now().Format(logDateFormat), transaction, message)
+    fmt.Printf("%s >>> [%d] %s\n", time.Now().Format(logDateFormat), transaction, message)
     return transaction
 }
 
@@ -495,12 +495,12 @@ func endTransaction(transaction int, errstr string) {
     httpTransactionDurations[transaction] = duration
 
     if errstr != "" {
-        fmt.Printf("%s *** [%d] *** after %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
+        fmt.Printf("%s <<< [%d] *** after %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
     } else {
         if (duration < 5) {
-            fmt.Printf("%s *** [%d] *** completed\n", time.Now().Format(logDateFormat), transaction);
+            fmt.Printf("%s <<< [%d]\n", time.Now().Format(logDateFormat), transaction);
         } else {
-            fmt.Printf("%s *** [%d] *** after %d seconds, completed\n", time.Now().Format(logDateFormat), transaction, duration);
+            fmt.Printf("%s <<< [%d] completed after %d seconds\n", time.Now().Format(logDateFormat), transaction, duration);
         }
     }
 
