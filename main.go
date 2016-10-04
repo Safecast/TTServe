@@ -249,7 +249,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
             return
         }
 
-        fmt.Printf("\n%s Received %d-byte Web payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+        fmt.Printf("\n%s Received %d-byte HTTP payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
 
         // We now have a TTN-like message, constructed as follows:
         //  1) the Payload came from the device itself
@@ -269,7 +269,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         AppReq.Payload = inboundPayload
-        fmt.Printf("\n%s Received %d-byte Web payload from TTRELAY\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+        fmt.Printf("\n%s Received %d-byte HTTP payload from DEVICE\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
 
         // We now have a TTN-like message, constructed as follws:
         //  1) the Payload came from the device itself
