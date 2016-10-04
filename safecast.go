@@ -481,12 +481,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 }
 
 // Begin transaction and return the transaction ID
-func beginTransaction(url string) int {
+func beginTransaction(url string, message string) int {
     httpTransactionsInProgress += 1
     httpTransactions += 1
     transaction := httpTransactions % httpTransactionsRecorded
     httpTransactionTimes[transaction] = time.Now()
-    fmt.Printf("%s *** [%d] *** About to upload to Safecast\n", time.Now().Format(logDateFormat), transaction)
+    fmt.Printf("%s *** [%d] %s\n", time.Now().Format(logDateFormat), transaction, message)
     return transaction
 }
 
@@ -497,12 +497,12 @@ func endTransaction(transaction int, errstr string) {
     httpTransactionDurations[transaction] = duration
 
     if errstr != "" {
-        fmt.Printf("%s *** [%d] *** After %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
+        fmt.Printf("%s *** [%d] *** after %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
     } else {
         if (duration < 5) {
-            fmt.Printf("%s *** [%d] *** Completed successfully.\n", time.Now().Format(logDateFormat), transaction);
+            fmt.Printf("%s *** [%d] *** completed\n", time.Now().Format(logDateFormat), transaction);
         } else {
-            fmt.Printf("%s *** [%d] *** After %d seconds, completed successfully.\n", time.Now().Format(logDateFormat), transaction, duration);
+            fmt.Printf("%s *** [%d] *** after %d seconds, completed\n", time.Now().Format(logDateFormat), transaction, duration);
         }
     }
 
@@ -550,10 +550,13 @@ func endTransaction(transaction int, errstr string) {
 // Upload a Safecast data structure to the Safecast service
 func uploadToSafecast(sc SafecastData) {
 
-    transaction := beginTransaction(SafecastUploadURL)
+    transaction := beginTransaction(SafecastUploadURL, sc.Unit)
 
     scJSON, _ := json.Marshal(sc)
-    fmt.Printf("%s\n", scJSON)
+
+	if false {
+	    fmt.Printf("%s\n", scJSON)
+	}
 
     req, err := http.NewRequest("POST", fmt.Sprintf(SafecastUploadURL, SafecastAppKey), bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
