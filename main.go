@@ -428,7 +428,7 @@ func ttnInboundHandler() {
         if err != nil {
             fmt.Printf("*** Payload doesn't have TTN data ***\n")
         } else {
-            fmt.Printf("\n%s Received %d-byte TTN payload:\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+            fmt.Printf("\n%s Received %d-byte payload from TTN\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
             // Note that there is some missing code here.  Ideally, in the appreq
             // we supply json-formatted IPINFO to ttserve.  TTGATE tunneled this through
             // the GatewayEUI field of the DataUpAppReq, but in the TTN case we don't
@@ -488,11 +488,11 @@ func commonRequestHandler() {
         }
 
 		// Display the actual unmarshaled value received in the payload
-		fmt.Printf("%s Payload:\n%v\n", time.Now().Format(logDateFormat), msg);
+		fmt.Printf("%v\n", msg);
 
         // Display info about the received message
         deviceID := TelecastDeviceID(msg)
-        fmt.Printf("%s Sent by %d\n", time.Now().Format(logDateFormat), deviceID)
+        fmt.Printf("%s sent by %d\n", time.Now().Format(logDateFormat), deviceID)
         if (msg.RelayDevice1 != nil) {
             fmt.Printf("%s RELAYED thru hop #1 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice1())
         }
