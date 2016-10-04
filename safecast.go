@@ -344,7 +344,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         sc2.Value = sc1.EnvHumid
         uploadToSafecast(sc2)
     }
-    if theSNR != 0.0 {
+
+	// Only bother uploading a SNR value if it coincides with another
+	// really low-occurrance feature, because the device just doesn't
+	// move that much and so its SNR should remain reasonably constant
+	// except for rain.
+    if theSNR != 0.0 && msg.BatteryVoltage != nil {
         sc2 := sc
         sc2.Unit = UnitWirelessSNR
         sc2.Value = sc1.WirelessSNR
