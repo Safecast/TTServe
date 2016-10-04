@@ -94,9 +94,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         }
     }
     if ipInfo != "" {
-        fmt.Printf("%s Safecast message from %s/%s/%s\nn", time.Now().Format(logDateFormat), info.City, info.Region, info.Country)
-    } else {
-        fmt.Printf("%s Safecast message\n", time.Now().Format(logDateFormat))
+        fmt.Printf("%s From %s/%s/%s\n", time.Now().Format(logDateFormat), info.City, info.Region, info.Country)
     }
 
     // Log it
