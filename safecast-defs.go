@@ -23,6 +23,7 @@ type SafecastData struct {
     WirelessSNR		string `json:"wireless_snr,omitempty"`  // -127db to +127db
     EnvTemp			string `json:"env_temp,omitempty"`      // Degrees centigrade
     EnvHumid		string `json:"env_humid,omitempty"`     // Percent RH
+    EnvPress		string `json:"env_press,omitempty"`     // Pascals
     PmsPm01_0		string `json:"pms_pm01_0,omitempty"`
     PmsPm02_5		string `json:"pms_pm02_5,omitempty"`
     PmsPm10_0		string `json:"pms_pm10_0,omitempty"`
@@ -54,6 +55,7 @@ const UnitBatVoltage string = "bat_voltage"
 const UnitBatSOC string = "bat_soc"
 const UnitEnvTemp string = "env_temp"
 const UnitEnvHumid string = "env_humid"
+const UnitEnvPress string = "env_press"
 const UnitWirelessSNR string = "wireless_snr"
 const UnitPmsPm01_0 string = "pms_pm01_0"
 const UnitPmsPm02_5 string = "pms_pm02_5"

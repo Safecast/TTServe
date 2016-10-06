@@ -215,6 +215,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     if msg.EnvHumidity != nil {
         sc1.EnvHumid = fmt.Sprintf("%.2f", msg.GetEnvHumidity())
     }
+    if msg.EnvPressure != nil {
+        sc1.EnvPress = fmt.Sprintf("%.2f", msg.GetEnvPressure())
+    }
 
     if msg.WirelessSNR != nil {
         theSNR = msg.GetWirelessSNR()
@@ -340,6 +343,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         sc2 := sc
         sc2.Unit = UnitEnvHumid
         sc2.Value = sc1.EnvHumid
+        uploadToSafecast(sc2)
+    }
+    if msg.EnvPressure != nil {
+        sc2 := sc
+        sc2.Unit = UnitEnvPress
+        sc2.Value = sc1.EnvPress
         uploadToSafecast(sc2)
     }
 
@@ -704,6 +713,7 @@ func sendSafecastDeviceSummaryToSlack() {
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=bat_soc|%%>", s, id)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_temp|T>", s, id)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_humid|H>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_press|P>", s, id)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=wireless_snr|S>", s, id)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=stats|X>", s, id)
         s = fmt.Sprintf("%s)", s)
