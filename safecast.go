@@ -296,24 +296,24 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     // Upload differently based on how CPM is represented
     if msg.Cpm0 == nil && msg.Cpm1 == nil {
 
-		// Either an old-style upload, and the kind used by bGeigies,
-		// or an upload of metadata without any kind of CPM
+        // Either an old-style upload, and the kind used by bGeigies,
+        // or an upload of metadata without any kind of CPM
         uploadToSafecast(sc1)
 
     } else if msg.DeviceIDNumber != nil {
 
-		// A new style upload has "cpm0" or "cpm1" values, and
-		// must have a numeric device ID
+        // A new style upload has "cpm0" or "cpm1" values, and
+        // must have a numeric device ID
         if msg.Cpm0 != nil {
             sc2 := sc
-			sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() & 0xfffffffe), 10)
+            sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() & 0xfffffffe), 10)
             sc2.Unit = UnitCPM
             sc2.Value = fmt.Sprintf("%d", msg.GetCpm0())
             uploadToSafecast(sc2)
         }
         if msg.Cpm1 != nil {
             sc2 := sc
-			sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() | 0x00000001), 10)
+            sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() | 0x00000001), 10)
             sc2.Unit = UnitCPM
             sc2.Value = fmt.Sprintf("%d", msg.GetCpm1())
             uploadToSafecast(sc2)
@@ -355,10 +355,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         uploadToSafecast(sc2)
     }
 
-	// Only bother uploading a SNR value if it coincides with another
-	// really low-occurrance feature, because the device just doesn't
-	// move that much and so its SNR should remain reasonably constant
-	// except for rain.
+    // Only bother uploading a SNR value if it coincides with another
+    // really low-occurrance feature, because the device just doesn't
+    // move that much and so its SNR should remain reasonably constant
+    // except for rain.
     if theSNR != 0.0 && msg.BatteryVoltage != nil {
         sc2 := sc
         sc2.Unit = UnitWirelessSNR
@@ -507,11 +507,11 @@ func endTransaction(transaction int, errstr string) {
     httpTransactionDurations[transaction] = duration
 
     if errstr != "" {
-		httpTransactionErrors = httpTransactionErrors + 1
-		if (httpTransactionErrorFirst) {
-			httpTransactionErrorTime = time.Now().UTC()
-			httpTransactionErrorFirst = false
-		}
+        httpTransactionErrors = httpTransactionErrors + 1
+        if (httpTransactionErrorFirst) {
+            httpTransactionErrorTime = time.Now().UTC()
+            httpTransactionErrorFirst = false
+        }
         fmt.Printf("%s <<< [%d] *** after %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
     } else {
         if (duration < 5) {
@@ -569,9 +569,9 @@ func uploadToSafecast(sc SafecastData) {
 
     scJSON, _ := json.Marshal(sc)
 
-	if false {
-	    fmt.Printf("%s\n", scJSON)
-	}
+    if false {
+        fmt.Printf("%s\n", scJSON)
+    }
 
     req, err := http.NewRequest("POST", fmt.Sprintf(SafecastUploadURL, SafecastAppKey), bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
@@ -632,13 +632,13 @@ func trackDevice(DeviceID uint32) {
     found := false
     for i := 0; i < len(seenDevices); i++ {
         if dev.normalizedDeviceNo == seenDevices[i].normalizedDeviceNo {
-			// Notify when the device comes back
-	        if seenDevices[i].notifiedAsUnseen {
-		        minutesAgo := int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
-				seenDevices[i].notifiedAsUnseen = false;
+            // Notify when the device comes back
+            if seenDevices[i].notifiedAsUnseen {
+                minutesAgo := int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
+                seenDevices[i].notifiedAsUnseen = false;
                 sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after away for %d minutes", seenDevices[i].normalizedDeviceNo, minutesAgo))
             }
-			// Mark as seen
+            // Mark as seen
             seenDevices[i].seen = time.Now().UTC()
             // Keep note of whether  we've seen both devices of a set of dual-tube updates
             if (dev.originalDeviceNo != seenDevices[i].originalDeviceNo) {
@@ -664,10 +664,12 @@ func trackDevice(DeviceID uint32) {
 
 // Update message ages and notify
 func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
-    sendToSafecastOps(fmt.Sprintf("** Warning **  At %s, for %d minutes, there were %d errors uploading to Safecast",
-		httpTransactionErrorTime.Format(logDateFormat), PeriodMinutes, httpTransactionErrors));
-	httpTransactionErrors = 0
-	httpTransactionErrorFirst = true;
+    if (httpTransactionErrors != 0) {
+        sendToSafecastOps(fmt.Sprintf("** Warning **  At %s, for %d minutes, there were %d errors uploading to Safecast",
+            httpTransactionErrorTime.Format(logDateFormat), PeriodMinutes, httpTransactionErrors));
+        httpTransactionErrors = 0
+        httpTransactionErrorFirst = true;
+    }
 }
 
 // Update message ages and notify
