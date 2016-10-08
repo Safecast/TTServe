@@ -18,6 +18,9 @@ var httpTransactions = 0
 const httpTransactionsRecorded = 25
 var httpTransactionDurations[httpTransactionsRecorded] int
 var httpTransactionTimes[httpTransactionsRecorded] time.Time
+var httpTransactionErrorTime time.Time
+var httpTransactionErrors = 0
+var httpTransactionErrorFirst bool = false
 
 // Describes every device that has sent us a message
 type seenDevice struct {
@@ -504,6 +507,11 @@ func endTransaction(transaction int, errstr string) {
     httpTransactionDurations[transaction] = duration
 
     if errstr != "" {
+		httpTransactionErrors = httpTransactionErrors + 1
+		if (httpTransactionErrorFirst) {
+			httpTransactionErrorTime = time.Now().UTC()
+			httpTransactionErrorFirst = false
+		}
         fmt.Printf("%s <<< [%d] *** after %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
     } else {
         if (duration < 5) {
@@ -652,6 +660,14 @@ func trackDevice(DeviceID uint32) {
         seenDevices = append(seenDevices, dev)
     }
 
+}
+
+// Update message ages and notify
+func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
+    sendToSafecastOps(fmt.Sprintf("** Warning **  At %s, for %d minutes, there were %d errors uploading to Safecast",
+		httpTransactionErrorTime.Format(logDateFormat), PeriodMinutes, httpTransactionErrors));
+	httpTransactionErrors = 0
+	httpTransactionErrorFirst = true;
 }
 
 // Update message ages and notify

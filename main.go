@@ -86,6 +86,9 @@ func main() {
     // Init our housekeeping process
     go timer1m()
 
+    // Init our housekeeping process
+    go timer15m()
+
     // Handle the inboound subscriber.  (This never returns.)
     ttnSubscriptionMonitor()
 
@@ -96,6 +99,14 @@ func timer1m() {
     for {
         time.Sleep(1 * 60 * time.Second)
         sendExpiredSafecastDevicesToSlack()
+    }
+}
+
+// General periodic housekeeping
+func timer15m() {
+    for {
+        time.Sleep(15 * 60 * time.Second)
+        sendSafecastCommsErrorsToSlack(15)
     }
 }
 
