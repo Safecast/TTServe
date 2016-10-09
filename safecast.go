@@ -2,8 +2,8 @@
 package main
 
 import (
-	"os"
-	"os/user"
+    "os"
+    "os/user"
     "net/http"
     "fmt"
     "bytes"
@@ -303,12 +303,18 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         // or an upload of metadata without any kind of CPM
         uploadToSafecast(sc1)
 
-		// Write it to the log with the cpm value modified
-		sc2 := sc1
-		sc2.Cpm0 = sc1.Value
-		sc2.Unit = ""
-		sc2.Value = ""
-		writeToLog(sc2)
+        // Write a new-style entry to the log
+        sc2 := sc1
+        did := uint64(msg.GetDeviceIDNumber())
+        if ((did & 0x01) == 0) {
+            sc2.Cpm0 = sc1.Value
+        } else {
+            sc2.DeviceID = strconv.FormatUint(did & 0xfffffffe, 10)
+            sc2.Cpm1 = sc1.Value
+        }
+        sc2.Unit = ""
+        sc2.Value = ""
+        writeToLog(sc2)
 
     } else if msg.DeviceIDNumber != nil {
 
@@ -329,8 +335,8 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             uploadToSafecast(sc2)
         }
 
-		// Write it to the log
-		writeToLog(sc1)
+        // Write it to the log
+        writeToLog(sc1)
 
     }
 
@@ -766,35 +772,72 @@ func sendSafecastDeviceSummaryToSlack() {
 // Write the value to the log
 func writeToLog(sc SafecastData) {
 
-	// The file pathname on the server
-	usr, _ := user.Current()
-	directory := usr.HomeDir
-	directory = directory + "/safecast/"
+    // The file pathname on the server
+    usr, _ := user.Current()
+    directory := usr.HomeDir
+    directory = directory + "/safecast/"
 
-	// Extract the device number and form a filename
-	file := directory + "/" + sc.DeviceID + ".csv"
-	fmt.Printf("%s\n", file)
-	
-	// Open it
-	fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
-	if (err != nil) {
+    // Extract the device number and form a filename
+    file := directory + "/" + sc.DeviceID + ".csv"
+    fmt.Printf("%s\n", file)
 
-		// Attempt to create the file if it doesn't already exist
-		fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
-		if (err != nil) {
-			fmt.Printf("Logging: error creating file %s: %s\n", file, err);
-			return;
-		}
+    // Open it
+    fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
+    if (err != nil) {
 
-		// Write the header
-		fd.WriteString("Captured,Device ID,Unit,Value,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OP # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
-		
-	}
+        // Attempt to create the file if it doesn't already exist
+        fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+        if (err != nil) {
+            fmt.Printf("Logging: error creating file %s: %s\n", file, err);
+            return;
+        }
 
-	// Write the stuff
-	fd.WriteString("hi there\n");
-	
-	// Close and exit
-	fd.Close();
+        // Write the header
+        fd.WriteString("Captured,Device ID,Unit,Value,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OP # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
+
+    }
+
+    // Write the stuff
+    s := fmt.Sprintf("%s", sc.CapturedAt)
+    s = s + fmt.Sprintf(",%s", sc.DeviceID)
+    s = s + fmt.Sprintf(",%s", sc.Unit)
+    s = s + fmt.Sprintf(",%s", sc.Value)
+    s = s + fmt.Sprintf(",%s", sc.Cpm0)
+    s = s + fmt.Sprintf(",%s", sc.Cpm1)
+    s = s + fmt.Sprintf(",%s", sc.Latitude)
+    s = s + fmt.Sprintf(",%s", sc.Longitude)
+    s = s + fmt.Sprintf(",%s", sc.Height)
+    s = s + fmt.Sprintf(",%s", sc.BatVoltage)
+    s = s + fmt.Sprintf(",%s", sc.BatSOC)
+    s = s + fmt.Sprintf(",%s", sc.WirelessSNR)
+    s = s + fmt.Sprintf(",%s", sc.EnvTemp)
+    s = s + fmt.Sprintf(",%s", sc.EnvHumid)
+    s = s + fmt.Sprintf(",%s", sc.EnvPress)
+    s = s + fmt.Sprintf(",%s", sc.PmsPm01_0)
+    s = s + fmt.Sprintf(",%s", sc.PmsPm02_5)
+    s = s + fmt.Sprintf(",%s", sc.PmsPm10_0)
+    s = s + fmt.Sprintf(",%s", sc.PmsC00_30)
+    s = s + fmt.Sprintf(",%s", sc.PmsC00_50)
+    s = s + fmt.Sprintf(",%s", sc.PmsC01_00)
+    s = s + fmt.Sprintf(",%s", sc.PmsC02_50)
+    s = s + fmt.Sprintf(",%s", sc.PmsC05_00)
+    s = s + fmt.Sprintf(",%s", sc.PmsC10_00)
+    s = s + fmt.Sprintf(",%s", sc.PmsCsecs)
+    s = s + fmt.Sprintf(",%s", sc.OpcPm01_0)
+    s = s + fmt.Sprintf(",%s", sc.OpcPm02_5)
+    s = s + fmt.Sprintf(",%s", sc.OpcPm10_0)
+    s = s + fmt.Sprintf(",%s", sc.OpcC00_38)
+    s = s + fmt.Sprintf(",%s", sc.OpcC00_54)
+    s = s + fmt.Sprintf(",%s", sc.OpcC01_00)
+    s = s + fmt.Sprintf(",%s", sc.OpcC02_10)
+    s = s + fmt.Sprintf(",%s", sc.OpcC05_00)
+    s = s + fmt.Sprintf(",%s", sc.OpcC10_00)
+    s = s + fmt.Sprintf(",%s", sc.OpcCsecs)
+    s = s + "\r\n"
+
+    fd.WriteString(s);
+
+    // Close and exit
+    fd.Close();
 
 }
