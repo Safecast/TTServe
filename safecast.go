@@ -2,6 +2,7 @@
 package main
 
 import (
+	"os"
     "net/http"
     "fmt"
     "bytes"
@@ -301,6 +302,13 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         // or an upload of metadata without any kind of CPM
         uploadToSafecast(sc1)
 
+		// Write it to the log with the cpm value modified
+		sc2 := sc1
+		sc2.Cpm0 = sc1.Value
+		sc2.Unit = ""
+		sc2.Value = ""
+		writeToLog(sc2)
+
     } else if msg.DeviceIDNumber != nil {
 
         // A new style upload has "cpm0" or "cpm1" values, and
@@ -319,6 +327,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             sc2.Value = fmt.Sprintf("%d", msg.GetCpm1())
             uploadToSafecast(sc2)
         }
+
+		// Write it to the log
+		writeToLog(sc1)
 
     }
 
@@ -637,11 +648,11 @@ func trackDevice(DeviceID uint32) {
             // Notify when the device comes back
             if seenDevices[i].notifiedAsUnseen {
                 minutesAgo := int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
-                seenDevices[i].notifiedAsUnseen = false;
                 sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after away for %d minutes", seenDevices[i].normalizedDeviceNo, minutesAgo))
             }
             // Mark as seen
             seenDevices[i].seen = time.Now().UTC()
+            seenDevices[i].notifiedAsUnseen = false;
             // Keep note of whether  we've seen both devices of a set of dual-tube updates
             if (dev.originalDeviceNo != seenDevices[i].originalDeviceNo) {
                 seenDevices[i].dualSeen = true
@@ -748,5 +759,38 @@ func sendSafecastDeviceSummaryToSlack() {
 
     // Send it to Slack
     sendToSafecastOps(s)
+
+}
+
+// Write the value to the log
+func writeToLog(sc SafecastData) {
+
+	// The file pathname on the server
+	directory := "~"
+
+	// Extract the device number and form a filename
+	file := directory + "/" + sc.DeviceID + ".csv"
+
+	// Open it
+	fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
+	if (err != nil) {
+
+		// Attempt to create the file if it doesn't already exist
+		fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+		if (err != nil) {
+			fmt.Printf("Logging: error creating file %s: %s\n", file, err);
+			return;
+		}
+
+		// Write the header
+		fd.WriteString("Captured,Device ID,Unit,Value,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OP # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
+		
+	}
+
+	// Write the stuff
+	fd.WriteString("hi there\n");
+	
+	// Close and exit
+	fd.Close();
 
 }

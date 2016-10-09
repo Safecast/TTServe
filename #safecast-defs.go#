@@ -26,7 +26,7 @@ type SafecastData struct {
     EnvPress		string `json:"env_press,omitempty"`     // Pascals
     PmsPm01_0		string `json:"pms_pm01_0,omitempty"`
     PmsPm02_5		string `json:"pms_pm02_5,omitempty"`
-    PmsPm10_0		string `json:"pms_pm10_0,omitempty"`
+xc    PmsPm10_0		string `json:"pms_pm10_0,omitempty"`
     PmsC00_30		string `json:"pms_c00_30,omitempty"`
     PmsC00_50		string `json:"pms_c00_50,omitempty"`
     PmsC01_00		string `json:"pms_c01_00,omitempty"`
@@ -44,8 +44,6 @@ type SafecastData struct {
     OpcC05_00		string `json:"opc_c05_00,omitempty"`
     OpcC10_00		string `json:"opc_c10_00,omitempty"`
     OpcCsecs		string `json:"opc_csecs,omitempty"`
-    Cpm0			string `json:"cpm0,omitempty"`
-    Cpm1			string `json:"cpm1,omitempty"`
 }
 
 // These are strings used as the "unit" for the extended safecast uploads, and
