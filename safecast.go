@@ -3,6 +3,7 @@ package main
 
 import (
 	"os"
+	"os/user"
     "net/http"
     "fmt"
     "bytes"
@@ -766,11 +767,14 @@ func sendSafecastDeviceSummaryToSlack() {
 func writeToLog(sc SafecastData) {
 
 	// The file pathname on the server
-	directory := "~"
+	usr, _ := user.Current()
+	directory := usr.HomeDir
+	directory = directory + "/safecast/"
 
 	// Extract the device number and form a filename
 	file := directory + "/" + sc.DeviceID + ".csv"
-
+	fmt.Printf("%s\n", file)
+	
 	// Open it
 	fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
 	if (err != nil) {
