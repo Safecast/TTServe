@@ -785,19 +785,20 @@ func writeToLog(sc SafecastData) {
     if (err != nil) {
 
         // Attempt to create the file if it doesn't already exist
-        fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+        fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
         if (err != nil) {
             fmt.Printf("Logging: error creating file %s: %s\n", file, err);
             return;
         }
 
         // Write the header
-        fd.WriteString("Captured,Device ID,Unit,Value,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OP # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
+        fd.WriteString("Logged,Captured,Device ID,Unit,Value,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OP # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
 
     }
 
     // Write the stuff
-    s := fmt.Sprintf("%s", sc.CapturedAt)
+    s := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+    s = s + fmt.Sprintf(",%s", sc.CapturedAt)
     s = s + fmt.Sprintf(",%s", sc.DeviceID)
     s = s + fmt.Sprintf(",%s", sc.Unit)
     s = s + fmt.Sprintf(",%s", sc.Value)
