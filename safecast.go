@@ -775,11 +775,10 @@ func writeToLog(sc SafecastData) {
     // The file pathname on the server
     usr, _ := user.Current()
     directory := usr.HomeDir
-    directory = directory + "/safecast/"
+    directory = directory + "/safecast"
 
     // Extract the device number and form a filename
     file := directory + "/" + sc.DeviceID + ".csv"
-    fmt.Printf("%s\n", file)
 
     // Open it
     fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
