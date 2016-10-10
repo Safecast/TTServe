@@ -9,6 +9,7 @@ import (
     "bytes"
     "sort"
     "time"
+	"strings"
     "strconv"
     "encoding/json"
     "github.com/rayozzie/teletype-proto/golang"
@@ -797,15 +798,24 @@ func writeToLog(sc SafecastData) {
         }
 
         // Write the header
-        fd.WriteString("Logged,Captured,Device ID,Message,Value,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OP # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
+        fd.WriteString("Logged,Captured,Device ID,Stats,Uptime,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OP # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
 
+    }
+
+    // Turn stats into a safe string for CSV
+    stats := sc.DeviceTypeID;
+    if (stats != "") {
+        stats = strings.Replace(stats, "\"", "", -1)
+        stats = strings.Replace(stats, ",", " ", -1)
+        stats = strings.Replace(stats, "{", "\"", -1)
+        stats = strings.Replace(stats, "}", "\"", -1)
     }
 
     // Write the stuff
     s := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
     s = s + fmt.Sprintf(",%s", sc.CapturedAt)
     s = s + fmt.Sprintf(",%s", sc.DeviceID)
-    s = s + fmt.Sprintf(",%s", sc.DeviceTypeID)
+    s = s + fmt.Sprintf(",%s", stats)
     s = s + fmt.Sprintf(",%s", sc.Value)
     s = s + fmt.Sprintf(",%s", sc.Cpm0)
     s = s + fmt.Sprintf(",%s", sc.Cpm1)
