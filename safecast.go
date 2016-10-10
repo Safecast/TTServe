@@ -301,15 +301,17 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
         // Write a new-style entry to the log
         sc2 := sc1
-        did := uint64(msg.GetDeviceIDNumber())
-        if ((did & 0x01) == 0) {
-            sc2.Cpm0 = sc1.Value
-        } else {
-            sc2.DeviceID = strconv.FormatUint(did & 0xfffffffe, 10)
-            sc2.Cpm1 = sc1.Value
+        if msg.Message == nil {
+            did := uint64(msg.GetDeviceIDNumber())
+            if ((did & 0x01) == 0) {
+                sc2.Cpm0 = sc1.Value
+            } else {
+                sc2.DeviceID = strconv.FormatUint(did & 0xfffffffe, 10)
+                sc2.Cpm1 = sc1.Value
+            }
+            sc2.Unit = ""
+            sc2.Value = ""
         }
-        sc2.Unit = ""
-        sc2.Value = ""
         writeToLog(sc2)
 
     } else if msg.DeviceIDNumber != nil {
@@ -332,13 +334,13 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         }
 
         // Write it to the log
-		sc2 := sc1
-		if msg.Cpm0 != nil {
-			sc2.Cpm0 = fmt.Sprintf("%d", msg.GetCpm0())
-		}
-		if msg.Cpm1 != nil {
-			sc2.Cpm1 = fmt.Sprintf("%d", msg.GetCpm1())
-		}
+        sc2 := sc1
+        if msg.Cpm0 != nil {
+            sc2.Cpm0 = fmt.Sprintf("%d", msg.GetCpm0())
+        }
+        if msg.Cpm1 != nil {
+            sc2.Cpm1 = fmt.Sprintf("%d", msg.GetCpm1())
+        }
         writeToLog(sc2)
 
     }
@@ -795,7 +797,7 @@ func writeToLog(sc SafecastData) {
         }
 
         // Write the header
-        fd.WriteString("Logged,Captured,Device ID,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OP # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
+        fd.WriteString("Logged,Captured,Device ID,Message,Value,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OP # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
 
     }
 
@@ -803,6 +805,8 @@ func writeToLog(sc SafecastData) {
     s := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
     s = s + fmt.Sprintf(",%s", sc.CapturedAt)
     s = s + fmt.Sprintf(",%s", sc.DeviceID)
+    s = s + fmt.Sprintf(",%s", sc.DeviceTypeID)
+    s = s + fmt.Sprintf(",%s", sc.Value)
     s = s + fmt.Sprintf(",%s", sc.Cpm0)
     s = s + fmt.Sprintf(",%s", sc.Cpm1)
     s = s + fmt.Sprintf(",%s", sc.Latitude)
