@@ -302,7 +302,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
         // Write a new-style entry to the log
         sc2 := sc1
-        if msg.Message == nil {
+        if msg.StatsUptimeMinutes == nil {
             did := uint64(msg.GetDeviceIDNumber())
             if ((did & 0x01) == 0) {
                 sc2.Cpm0 = sc1.Value
