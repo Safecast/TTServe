@@ -24,7 +24,7 @@ var httpTransactionTimes[httpTransactionsRecorded] time.Time
 var httpTransactionErrorTime string
 var httpTransactionErrorString string
 var httpTransactionErrors = 0
-var httpTransactionErrorFirst bool = false
+var httpTransactionErrorFirst bool = true
 
 // Describes every device that has sent us a message
 type seenDevice struct {
