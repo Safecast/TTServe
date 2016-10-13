@@ -661,7 +661,16 @@ func trackDevice(DeviceID uint32) {
             // Notify when the device comes back
             if seenDevices[i].notifiedAsUnseen {
                 minutesAgo := int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
-                sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after away for %d minutes", seenDevices[i].normalizedDeviceNo, minutesAgo))
+				hoursAgo := minutesAgo / 60
+				daysAgo := hoursAgo / 24
+				message := fmt.Sprintf("%d minutes", minutesAgo)
+				switch {
+				case daysAgo >= 2:
+					message = fmt.Sprintf("~%d days", daysAgo)
+				case minutesAgo >= 120:
+					message = fmt.Sprintf("~%d hours", hoursAgo)
+				}
+                sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after %s away", seenDevices[i].normalizedDeviceNo, message))
             }
             // Mark as seen
             seenDevices[i].seen = time.Now().UTC()
