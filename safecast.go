@@ -701,10 +701,10 @@ func trackDevice(DeviceID uint32) {
 func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
     if (httpTransactionErrors != 0) {
         if (httpTransactionErrors == 1) {
-            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s, one error uploading to Safecast (%s)",
+            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to Safecast (%s)",
                 httpTransactionErrorTime, httpTransactionErrorString));
         } else {
-            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s, for %d minutes, %d error(s) uploading to Safecast (%s)",
+            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, for %d minutes, %d error(s) uploading to Safecast (%s)",
                 httpTransactionErrorTime, PeriodMinutes, httpTransactionErrors, httpTransactionErrorString));
         }
         httpTransactionErrors = 0
