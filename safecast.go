@@ -9,7 +9,7 @@ import (
     "bytes"
     "sort"
     "time"
-	"strings"
+    "strings"
     "strconv"
     "encoding/json"
     "github.com/rayozzie/teletype-proto/golang"
@@ -661,15 +661,15 @@ func trackDevice(DeviceID uint32) {
             // Notify when the device comes back
             if seenDevices[i].notifiedAsUnseen {
                 minutesAgo := int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
-				hoursAgo := minutesAgo / 60
-				daysAgo := hoursAgo / 24
-				message := fmt.Sprintf("%d minutes", minutesAgo)
-				switch {
-				case daysAgo >= 2:
-					message = fmt.Sprintf("~%d days", daysAgo)
-				case minutesAgo >= 120:
-					message = fmt.Sprintf("~%d hours", hoursAgo)
-				}
+                hoursAgo := minutesAgo / 60
+                daysAgo := hoursAgo / 24
+                message := fmt.Sprintf("%d minutes", minutesAgo)
+                switch {
+                case daysAgo >= 2:
+                    message = fmt.Sprintf("~%d days", daysAgo)
+                case minutesAgo >= 120:
+                    message = fmt.Sprintf("~%d hours", hoursAgo)
+                }
                 sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after %s away", seenDevices[i].normalizedDeviceNo, message))
             }
             // Mark as seen
@@ -700,8 +700,13 @@ func trackDevice(DeviceID uint32) {
 // Update message ages and notify
 func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
     if (httpTransactionErrors != 0) {
-        sendToSafecastOps(fmt.Sprintf("** Warning **  At %s, for %d minutes, %d error(s) uploading to Safecast (%s)",
-            httpTransactionErrorTime, PeriodMinutes, httpTransactionErrors, httpTransactionErrorString));
+        if (httpTransactionErrors == 1) {
+            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s, one error uploading to Safecast (%s)",
+                httpTransactionErrorTime, httpTransactionErrorString));
+        } else {
+            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s, for %d minutes, %d error(s) uploading to Safecast (%s)",
+                httpTransactionErrorTime, PeriodMinutes, httpTransactionErrors, httpTransactionErrorString));
+        }
         httpTransactionErrors = 0
         httpTransactionErrorFirst = true;
     }
