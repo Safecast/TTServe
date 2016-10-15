@@ -516,12 +516,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 }
 
 // Begin transaction and return the transaction ID
-func beginTransaction(url string, message string) int {
+func beginTransaction(url string, message1 string, message2 string) int {
     httpTransactionsInProgress += 1
     httpTransactions += 1
     transaction := httpTransactions % httpTransactionsRecorded
     httpTransactionTimes[transaction] = time.Now()
-    fmt.Printf("%s >>> [%d] %s\n", time.Now().Format(logDateFormat), transaction, message)
+    fmt.Printf("%s >>> [%d] %s %s\n", time.Now().Format(logDateFormat), transaction, message1, message2)
     return transaction
 }
 
@@ -591,7 +591,7 @@ func endTransaction(transaction int, errstr string) {
 // Upload a Safecast data structure to the Safecast service
 func uploadToSafecast(sc SafecastData) {
 
-    transaction := beginTransaction(SafecastUploadURL, sc.Unit)
+    transaction := beginTransaction(SafecastUploadURL, sc.Unit, sc.Value)
 
     scJSON, _ := json.Marshal(sc)
 
