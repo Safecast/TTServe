@@ -705,11 +705,15 @@ func trackDevice(DeviceID uint32) {
 func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
     if (httpTransactionErrors != 0) {
         if (httpTransactionErrors == 1) {
-            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to Safecast (%s)",
-                httpTransactionErrorTime, httpTransactionErrorString));
+			// As of 10/2016, I've chosen to suppress single-instance errors simply because they occur too frequently,
+			// i.e. every day or few days.  When we ultimately move the dev server to AWS, we should re-enable this.
+            if (false) {
+                sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to Safecast (%s)",
+                    httpTransactionErrorTime, httpTransactionErrorString));
+            }
         } else {
-            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, for %d minutes, %d error(s) uploading to Safecast (%s)",
-                httpTransactionErrorTime, PeriodMinutes, httpTransactionErrors, httpTransactionErrorString));
+            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d Safecast upload errors in %d minutes (%s)",
+                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorString));
         }
         httpTransactionErrors = 0
         httpTransactionErrorFirst = true;
