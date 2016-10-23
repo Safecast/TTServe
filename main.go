@@ -10,7 +10,7 @@ import (
     "time"
     "encoding/json"
     "encoding/hex"
-	"github.com/rdegges/go-ipify"
+    "github.com/rdegges/go-ipify"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
     "hash/crc32"
@@ -56,14 +56,14 @@ var reqQ chan DataUpAppReq
 // Main entry point for app
 func main() {
 
-	// Get our external IP address
+    // Get our external IP address
     ip, err := ipify.GetIp()
-	if err != nil {
-		ttServer = "http://api.teletype.io"
-	} else {
-		ttServer = "http://" + ip
-	}
-	
+    if err != nil {
+        ttServer = "http://api.teletype.io"
+    } else {
+        ttServer = "http://" + ip
+    }
+
     // Set up our internal message queues
     upQ = make(chan MQTT.Message, 5)
     reqQ = make(chan DataUpAppReq, 5)
@@ -144,7 +144,7 @@ func udpInboundHandler() {
     defer ServerConn.Close()
 
     for {
-	    buf := make([]byte, 1024)
+        buf := make([]byte, 1024)
 
         n, addr, err := ServerConn.ReadFromUDP(buf)
         if (err != nil) {
@@ -209,28 +209,38 @@ func tcpInboundHandler() {
         //  1) the Payload comes from UDP
         //  2) We'll add the server's time, in case the payload lacked CapturedAt
         //  3) Everything else is null
-
         var AppReq DataUpAppReq
         AppReq.Payload = buf[0:n]
         AppReq.Metadata = make([]AppMetadata, 1)
         AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
-        fmt.Printf("\n%s Received %d-byte TCP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), conn.RemoteAddr().String())
+        // Test the received data to see if it's just some random port scanner trying to probe what we are
+        msg := &teletype.Telecast{}
+        err = proto.Unmarshal(AppReq.Payload, msg)
+        if (err != nil) {
 
-        // Enqueue it for TTN-like processing
-        reqQ <- AppReq
+            fmt.Printf("\n%s Ignoring %d-byte TCP port scan probe from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), conn.RemoteAddr().String())
 
-        // Delay to see if we can pick up a reply for this request.  This is certainly
-        // controversial because it slows down the incoming message processing, however there
-        // is a trivial fix:  Create many instances of this goroutine on the service instead
-        // of just one.
-        time.Sleep(1 * time.Second)
+        } else {
 
-        // See if there's an outbound message waiting for this app.  If so, send it now because we
-        // know that there's a narrow receive window open.
-        isAvailable, outboundPayload := getOutboundPayload(AppReq.Payload)
-        if isAvailable {
-            conn.Write(outboundPayload)
+            fmt.Printf("\n%s Received %d-byte TCP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), conn.RemoteAddr().String())
+
+            // Enqueue it for TTN-like processing
+            reqQ <- AppReq
+
+            // Delay to see if we can pick up a reply for this request.  This is certainly
+            // controversial because it slows down the incoming message processing, however there
+            // is a trivial fix:  Create many instances of this goroutine on the service instead
+            // of just one.
+            time.Sleep(1 * time.Second)
+
+            // See if there's an outbound message waiting for this app.  If so, send it now because we
+            // know that there's a narrow receive window open.
+            isAvailable, outboundPayload := getOutboundPayload(AppReq.Payload)
+            if isAvailable {
+                conn.Write(outboundPayload)
+            }
+
         }
 
         // Close the connection
@@ -387,9 +397,9 @@ func ttnSubscriptionMonitor() {
             for consecutiveFailures := 0; consecutiveFailures < 3; {
                 time.Sleep(60 * time.Second)
                 if fullyConnected {
-					if false {
-	                    fmt.Printf("\n%s TTN Alive\n", time.Now().Format(logDateFormat))
-					}
+                    if false {
+                        fmt.Printf("\n%s TTN Alive\n", time.Now().Format(logDateFormat))
+                    }
                     consecutiveFailures = 0
                 } else {
                     fmt.Printf("\n%s TTN *** UNREACHABLE ***\n", time.Now().Format(logDateFormat))
@@ -492,16 +502,16 @@ func commonRequestHandler() {
         err := proto.Unmarshal(AppReq.Payload, msg)
         if err != nil {
             fmt.Printf("*** PB unmarshaling error: \n", err)
-			fmt.Printf("*** ");
-			for i:=0; i<len(AppReq.Payload); i++ {
-				fmt.Printf("%02x", AppReq.Payload[i]);
-			}
-			fmt.Printf("\n");
+            fmt.Printf("*** ");
+            for i:=0; i<len(AppReq.Payload); i++ {
+                fmt.Printf("%02x", AppReq.Payload[i]);
+            }
+            fmt.Printf("\n");
             continue
         }
 
-		// Display the actual unmarshaled value received in the payload
-		fmt.Printf("%v\n", msg);
+        // Display the actual unmarshaled value received in the payload
+        fmt.Printf("%v\n", msg);
 
         // Display info about the received message
         deviceID := TelecastDeviceID(msg)
