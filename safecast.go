@@ -216,6 +216,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         sc1.BatSOC = fmt.Sprintf("%.2f", msg.GetBatterySOC())
     }
 
+    if msg.BatteryCurrent != nil {
+        sc1.BatCurrent = fmt.Sprintf("%.3f", msg.GetBatteryCurrent())
+    }
+
     if msg.EnvTemperature != nil {
         sc1.EnvTemp = fmt.Sprintf("%.2f", msg.GetEnvTemperature())
     }
@@ -363,6 +367,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         sc2 := sc
         sc2.Unit = UnitBatSOC
         sc2.Value = sc1.BatSOC
+        uploadToSafecast(sc2)
+    }
+    if msg.BatteryCurrent != nil {
+        sc2 := sc
+        sc2.Unit = UnitBatCurrent
+        sc2.Value = sc1.BatCurrent
         uploadToSafecast(sc2)
     }
     if msg.EnvTemperature != nil {
@@ -777,6 +787,7 @@ func sendSafecastDeviceSummaryToSlack() {
         s = fmt.Sprintf("%s (", s)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=bat_voltage|V>", s, id)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=bat_soc|%%>", s, id)
+        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=bat_current|I>", s, id)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_temp|T>", s, id)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_humid|H>", s, id)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_press|P>", s, id)
@@ -820,7 +831,7 @@ func writeToLog(sc SafecastData) {
         }
 
         // Write the header
-        fd.WriteString("Logged,Captured,Device ID,Stats,Uptime,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OPC # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
+        fd.WriteString("Logged,Captured,Device ID,Stats,Uptime,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,Bat I,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OPC # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
 
     }
 
@@ -846,6 +857,7 @@ func writeToLog(sc SafecastData) {
     s = s + fmt.Sprintf(",%s", sc.Height)
     s = s + fmt.Sprintf(",%s", sc.BatVoltage)
     s = s + fmt.Sprintf(",%s", sc.BatSOC)
+    s = s + fmt.Sprintf(",%s", sc.BatCurrent)
     s = s + fmt.Sprintf(",%s", sc.WirelessSNR)
     s = s + fmt.Sprintf(",%s", sc.EnvTemp)
     s = s + fmt.Sprintf(",%s", sc.EnvHumid)

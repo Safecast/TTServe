@@ -20,6 +20,7 @@ type SafecastData struct {
     Longitude		string `json:"longitude,omitempty"`     // 140.9253
     BatVoltage		string `json:"bat_voltage,omitempty"`   // 0-N volts
     BatSOC			string `json:"bat_soc,omitempty"`       // 0%-100%
+    BatCurrent		string `json:"bat_current,omitempty"`   // -N to +N amps
     WirelessSNR		string `json:"wireless_snr,omitempty"`  // -127db to +127db
     EnvTemp			string `json:"env_temp,omitempty"`      // Degrees centigrade
     EnvHumid		string `json:"env_humid,omitempty"`     // Percent RH
@@ -55,6 +56,7 @@ const UnitMessage string = "message"
 const UnitCPM string = "cpm"
 const UnitBatVoltage string = "bat_voltage"
 const UnitBatSOC string = "bat_soc"
+const UnitBatCurrent string = "bat_current"
 const UnitEnvTemp string = "env_temp"
 const UnitEnvHumid string = "env_humid"
 const UnitEnvPress string = "env_press"
