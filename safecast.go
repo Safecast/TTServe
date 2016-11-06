@@ -623,7 +623,11 @@ func uploadToSafecast(sc SafecastData) {
     if (err == nil) {
         resp.Body.Close()
     } else {
+		// Eliminate the URL from the string because exposing the API key is not secure.
+		// Empirically we've seen that the actual error message is after the rightmost colon
         errString = fmt.Sprintf("%s", err)
+		s := strings.Split(errString, ":")
+		errString = s[len(s)-1]
     }
 
     endTransaction(transaction, errString)
