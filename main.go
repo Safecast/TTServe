@@ -274,8 +274,8 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
         err = json.Unmarshal(body, &AppReq.TTN)
         if err != nil {
-            io.WriteString(rw, "This is the teletype API endpoint.")
-            // Very common case where anyone comes to web page, such as google health check
+            io.WriteString(rw, "Hello.")
+            // Very common case where anyone comes to web page, such as a google health check or our own TTGATE health check
             return
         }
 
