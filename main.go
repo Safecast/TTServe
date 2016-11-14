@@ -51,7 +51,14 @@ var mqttClient MQTT.Client
 var lastConnected string = "(never)"
 var lastDisconnected string = "(never)"
 var upQ chan MQTT.Message
-var reqQ chan DataUpAppReq
+var reqQ chan IncomingReq
+
+// Common app request
+
+type IncomingReq struct {
+	TTN	DataUpAppReq
+	Transport string
+}
 
 // Main entry point for app
 func main() {
@@ -66,7 +73,7 @@ func main() {
 
     // Set up our internal message queues
     upQ = make(chan MQTT.Message, 5)
-    reqQ = make(chan DataUpAppReq, 5)
+    reqQ = make(chan IncomingReq, 5)
 
     // Spawn the app request handler shared by both TTN and direct inbound server
     go commonRequestHandler()
@@ -156,14 +163,15 @@ func udpInboundHandler() {
             //  2) We'll add the server's time, in case the payload lacked CapturedAt
             //  3) Everything else is null
 
-            var AppReq DataUpAppReq
-            AppReq.Payload = buf[0:n]
-            AppReq.Metadata = make([]AppMetadata, 1)
-            AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+            var AppReq IncomingReq
+            AppReq.TTN.Payload = buf[0:n]
+            AppReq.TTN.Metadata = make([]AppMetadata, 1)
+            AppReq.TTN.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
-            fmt.Printf("\n%s Received %d-byte UDP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), addr)
+            fmt.Printf("\n%s Received %d-byte UDP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload), addr)
 
             // Enqueue it for TTN-like processing
+			AppReq.Transport = "udp"
             reqQ <- AppReq
 
         }
@@ -209,23 +217,24 @@ func tcpInboundHandler() {
         //  1) the Payload comes from UDP
         //  2) We'll add the server's time, in case the payload lacked CapturedAt
         //  3) Everything else is null
-        var AppReq DataUpAppReq
-        AppReq.Payload = buf[0:n]
-        AppReq.Metadata = make([]AppMetadata, 1)
-        AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+        var AppReq IncomingReq
+        AppReq.TTN.Payload = buf[0:n]
+        AppReq.TTN.Metadata = make([]AppMetadata, 1)
+        AppReq.TTN.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
         // Test the received data to see if it's just some random port scanner trying to probe what we are
         msg := &teletype.Telecast{}
-        err = proto.Unmarshal(AppReq.Payload, msg)
+        err = proto.Unmarshal(AppReq.TTN.Payload, msg)
         if (err != nil) {
 
-            fmt.Printf("\n%s Ignoring %d-byte TCP port scan probe from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), conn.RemoteAddr().String())
+            fmt.Printf("\n%s Ignoring %d-byte TCP port scan probe from %s\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload), conn.RemoteAddr().String())
 
         } else {
 
-            fmt.Printf("\n%s Received %d-byte TCP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), conn.RemoteAddr().String())
+            fmt.Printf("\n%s Received %d-byte TCP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload), conn.RemoteAddr().String())
 
             // Enqueue it for TTN-like processing
+			AppReq.Transport = "tcp"
             reqQ <- AppReq
 
             // Delay to see if we can pick up a reply for this request.  This is certainly
@@ -236,7 +245,7 @@ func tcpInboundHandler() {
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.
-            isAvailable, outboundPayload := getOutboundPayload(AppReq.Payload)
+            isAvailable, outboundPayload := getOutboundPayload(AppReq.TTN.Payload)
             if isAvailable {
                 conn.Write(outboundPayload)
             }
@@ -251,7 +260,7 @@ func tcpInboundHandler() {
 
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
-    var AppReq DataUpAppReq
+    var AppReq IncomingReq
 
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
@@ -263,21 +272,21 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
     case "TTGATE": {
 
-        err = json.Unmarshal(body, &AppReq)
+        err = json.Unmarshal(body, &AppReq.TTN)
         if err != nil {
             io.WriteString(rw, "This is the teletype API endpoint.")
             // Very common case where anyone comes to web page, such as google health check
             return
         }
 
-        fmt.Printf("\n%s Received %d-byte HTTP payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+        fmt.Printf("\n%s Received %d-byte HTTP payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload))
 
         // We now have a TTN-like message, constructed as follows:
         //  1) the Payload came from the device itself
         //  2) TTGATE filled in the lat/lon/alt metadata, just in case the payload doesn't have location
         //  3) TTGATE filled in SNR if it had access to it
         //  4) We'll add the server's time, in case the payload lacked CapturedAt
-        AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+        AppReq.TTN.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
     }
 
@@ -289,14 +298,14 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
             return
         }
 
-        AppReq.Payload = inboundPayload
-        fmt.Printf("\n%s Received %d-byte HTTP payload from DEVICE\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+        AppReq.TTN.Payload = inboundPayload
+        fmt.Printf("\n%s Received %d-byte HTTP payload from DEVICE\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload))
 
         // We now have a TTN-like message, constructed as follws:
         //  1) the Payload came from the device itself
         //  2) We'll add the server's time, in case the payload lacked CapturedAt
-        AppReq.Metadata = make([]AppMetadata, 1)
-        AppReq.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+        AppReq.TTN.Metadata = make([]AppMetadata, 1)
+        AppReq.TTN.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
     }
 
@@ -310,6 +319,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Enqueue AppReq for TTN-like processing
+	AppReq.Transport = "http"
     reqQ <- AppReq
 
     // Delay to see if we can pick up a reply for this request.  This is certainly
@@ -320,7 +330,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
     // See if there's an outbound message waiting for this app.  If so, send it now because we
     // know that there's a narrow receive window open.
-    isAvailable, outboundPayload := getOutboundPayload(AppReq.Payload)
+    isAvailable, outboundPayload := getOutboundPayload(AppReq.TTN.Payload)
     if isAvailable {
         hexPayload := hex.EncodeToString(outboundPayload)
         io.WriteString(rw, hexPayload)
@@ -444,14 +454,14 @@ func ttnInboundHandler() {
 
     // Dequeue and process the messages as they're enqueued
     for msg := range upQ {
-        var AppReq DataUpAppReq
+        var AppReq IncomingReq
 
         // Unmarshal the payload and extract the base64 data
-        err := json.Unmarshal(msg.Payload(), &AppReq)
+        err := json.Unmarshal(msg.Payload(), &AppReq.TTN)
         if err != nil {
             fmt.Printf("*** Payload doesn't have TTN data ***\n")
         } else {
-            fmt.Printf("\n%s Received %d-byte payload from TTN\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+            fmt.Printf("\n%s Received %d-byte payload from TTN\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload))
             // Note that there is some missing code here.  Ideally, in the appreq
             // we supply json-formatted IPINFO to ttserve.  TTGATE tunneled this through
             // the GatewayEUI field of the DataUpAppReq, but in the TTN case we don't
@@ -462,13 +472,14 @@ func ttnInboundHandler() {
             // I haven't written this code simply because this requires registering
             // for a Yahoo/Google account, and potentially paying.  Since none of the
             // code here is actually utilizing geo, we'll wait until then.
+			AppReq.Transport = "ttn"
             reqQ <- AppReq
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.
-            isAvailable, Payload := getOutboundPayload(AppReq.Payload)
+            isAvailable, Payload := getOutboundPayload(AppReq.TTN.Payload)
             if isAvailable {
-                ttnOutboundPublish(AppReq.DevEUI, Payload)
+                ttnOutboundPublish(AppReq.TTN.DevEUI, Payload)
             }
         }
 
@@ -499,12 +510,12 @@ func commonRequestHandler() {
 
         // Unmarshal the message
         msg := &teletype.Telecast{}
-        err := proto.Unmarshal(AppReq.Payload, msg)
+        err := proto.Unmarshal(AppReq.TTN.Payload, msg)
         if err != nil {
             fmt.Printf("*** PB unmarshaling error: \n", err)
             fmt.Printf("*** ");
-            for i:=0; i<len(AppReq.Payload); i++ {
-                fmt.Printf("%02x", AppReq.Payload[i]);
+            for i:=0; i<len(AppReq.TTN.Payload); i++ {
+                fmt.Printf("%02x", AppReq.TTN.Payload[i]);
             }
             fmt.Printf("\n");
             continue
@@ -553,15 +564,15 @@ func commonRequestHandler() {
         case teletype.Telecast_BGEIGIE_NANO:
             fallthrough
         case teletype.Telecast_SIMPLECAST:
-            metadata := AppReq.Metadata[0]
-            ProcessSafecastMessage(msg, checksum, metadata.GatewayEUI,
+            metadata := AppReq.TTN.Metadata[0]
+            ProcessSafecastMessage(msg, checksum, metadata.GatewayEUI, AppReq.Transport,
                 metadata.ServerTime,
                 metadata.Lsnr,
                 metadata.Latitude, metadata.Longitude, metadata.Altitude)
 
             // Handle messages from non-safecast devices
         default:
-            ProcessTelecastMessage(msg, AppReq.DevEUI)
+            ProcessTelecastMessage(msg, AppReq.TTN.DevEUI)
         }
     }
 }

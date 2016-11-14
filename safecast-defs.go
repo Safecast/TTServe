@@ -47,6 +47,7 @@ type SafecastData struct {
     OpcCsecs		string `json:"opc_csecs,omitempty"`
     Cpm0			string `json:"cpm0,omitempty"`
     Cpm1			string `json:"cpm1,omitempty"`
+    Transport		string `json:"transport,omitempty"`
 }
 
 // These are strings used as the "unit" for the extended safecast uploads, and
@@ -81,5 +82,6 @@ const UnitOpcC02_10 string = "opc_c02_10"
 const UnitOpcC05_00 string = "opc_c05_00"
 const UnitOpcC10_00 string = "opc_c10_00"
 const UnitOpcCsecs string = "opc_csecs"
+const UnitTransport string = "transport"
 
 //

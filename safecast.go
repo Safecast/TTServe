@@ -82,6 +82,7 @@ func (a ByKey) Less(i, j int) bool {
 func ProcessSafecastMessage(msg *teletype.Telecast,
     checksum uint32,
     ipInfo string,
+    Transport string,
     defaultTime string,
     defaultSNR float32,
     defaultLat float32, defaultLon float32, defaultAlt int32) {
@@ -230,6 +231,8 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         sc1.EnvPress = fmt.Sprintf("%.2f", msg.GetEnvPressure())
     }
 
+	sc1.Transport = Transport
+	
     if msg.WirelessSNR != nil {
         theSNR = msg.GetWirelessSNR()
     } else {
@@ -394,15 +397,24 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         uploadToSafecast(sc2)
     }
 
-    // Only bother uploading a SNR value if it coincides with another
+    // Only bother uploading certain values if they coincides with another
     // really low-occurrance feature, because the device just doesn't
     // move that much and so its SNR should remain reasonably constant
     // except for rain.
-    if theSNR != 0.0 && msg.BatteryVoltage != nil {
+    if msg.BatteryVoltage != nil {
+
+        if theSNR != 0.0  {
+            sc2 := sc
+            sc2.Unit = UnitWirelessSNR
+            sc2.Value = sc1.WirelessSNR
+            uploadToSafecast(sc2)
+        }
+
         sc2 := sc
-        sc2.Unit = UnitWirelessSNR
-        sc2.Value = sc1.WirelessSNR
+        sc2.Unit = UnitTransport
+        sc2.Value = sc1.Transport
         uploadToSafecast(sc2)
+
     }
 
     if msg.PmsPm01_0 != nil {
@@ -623,11 +635,11 @@ func uploadToSafecast(sc SafecastData) {
     if (err == nil) {
         resp.Body.Close()
     } else {
-		// Eliminate the URL from the string because exposing the API key is not secure.
-		// Empirically we've seen that the actual error message is after the rightmost colon
+        // Eliminate the URL from the string because exposing the API key is not secure.
+        // Empirically we've seen that the actual error message is after the rightmost colon
         errString = fmt.Sprintf("%s", err)
-		s := strings.Split(errString, ":")
-		errString = s[len(s)-1]
+        s := strings.Split(errString, ":")
+        errString = s[len(s)-1]
     }
 
     endTransaction(transaction, errString)
@@ -719,8 +731,8 @@ func trackDevice(DeviceID uint32) {
 func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
     if (httpTransactionErrors != 0) {
         if (httpTransactionErrors == 1) {
-			// As of 10/2016, I've chosen to suppress single-instance errors simply because they occur too frequently,
-			// i.e. every day or few days.  When we ultimately move the dev server to AWS, we should re-enable this.
+            // As of 10/2016, I've chosen to suppress single-instance errors simply because they occur too frequently,
+            // i.e. every day or few days.  When we ultimately move the dev server to AWS, we should re-enable this.
             if (false) {
                 sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to Safecast (%s)",
                     httpTransactionErrorTime, httpTransactionErrorString));
