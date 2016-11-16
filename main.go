@@ -386,7 +386,7 @@ func ttnSubscriptionMonitor() {
                 if (everConnected) {
 	                minutesOffline := int64(time.Now().Sub(lastDisconnectedTime) / time.Minute)
 					if (minutesOffline != 0) {
-	                    sendToSafecastOps(fmt.Sprintf("TTN returned after %d-minute outage", minutesOffline))
+	                    sendToSafecastOps(fmt.Sprintf("TTN returned after %d-minute outage that began at %s", minutesOffline, lastDisconnected))
 					}
                     sendToTTNOps(fmt.Sprintf("Connection restored from this server to %s\n", ttnServer))
                     fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))
