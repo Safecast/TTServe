@@ -49,6 +49,7 @@ var everConnected bool = false
 var fullyConnected bool = false
 var mqttClient MQTT.Client
 var lastConnected string = "(never)"
+var lastDisconnectedTime time.Time
 var lastDisconnected string = "(never)"
 var upQ chan MQTT.Message
 var reqQ chan IncomingReq
@@ -357,9 +358,10 @@ func ttnSubscriptionMonitor() {
         // Handle lost connections
         onMqConnectionLost := func (client MQTT.Client, err error) {
             fullyConnected = false
+			lastDisconnectedTime = time.Now()
             lastDisconnected = time.Now().Format(logDateFormat)
             fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
-            sendToSafecastOps(fmt.Sprintf("connection lost: %v\n", err))
+//            sendToSafecastOps(fmt.Sprintf("TTN connection lost: %v\n", err))
             sendToTTNOps(fmt.Sprintf("Connection lost from this server to %s: %v\n", ttnServer, err))
         }
         mqttOpts.SetConnectionLostHandler(onMqConnectionLost)
@@ -382,7 +384,10 @@ func ttnSubscriptionMonitor() {
                 fullyConnected = true
                 lastConnected = time.Now().Format(logDateFormat)
                 if (everConnected) {
-                    sendToSafecastOps("TTN connection restored")
+	                minutesOffline := int64(time.Now().Sub(lastDisconnectedTime) / time.Minute)
+					if (minutesOffline != 0) {
+	                    sendToSafecastOps(fmt.Sprintf("TTN returned after %d-minute outage", minutesOffline))
+					}
                     sendToTTNOps(fmt.Sprintf("Connection restored from this server to %s\n", ttnServer))
                     fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))
                 } else {
