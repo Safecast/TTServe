@@ -361,7 +361,6 @@ func ttnSubscriptionMonitor() {
 			lastDisconnectedTime = time.Now()
             lastDisconnected = time.Now().Format(logDateFormat)
             fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
-//            sendToSafecastOps(fmt.Sprintf("TTN connection lost: %v\n", err))
             sendToTTNOps(fmt.Sprintf("Connection lost from this server to %s: %v\n", ttnServer, err))
         }
         mqttOpts.SetConnectionLostHandler(onMqConnectionLost)
@@ -385,7 +384,8 @@ func ttnSubscriptionMonitor() {
                 lastConnected = time.Now().Format(logDateFormat)
                 if (everConnected) {
 	                minutesOffline := int64(time.Now().Sub(lastDisconnectedTime) / time.Minute)
-					if (minutesOffline != 0) {
+					// Don't bother reporting quick outages, generally caused by server restarts
+					if (minutesOffline > 2) {
 	                    sendToSafecastOps(fmt.Sprintf("TTN returned after %d-minute outage that began at %s UTC", minutesOffline, lastDisconnected))
 					}
                     sendToTTNOps(fmt.Sprintf("Connection restored from this server to %s\n", ttnServer))
