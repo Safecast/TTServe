@@ -45,21 +45,20 @@ var ttServer string
 const logDateFormat string = "2006-01-02 15:04:05"
 
 // Statics
-var everConnected bool = false
-var fullyConnected bool = false
-var mqttClient MQTT.Client
-var lastConnected string = "(never)"
-var lastDisconnectedTime time.Time
-var lastDisconnected string = "(never)"
-var upQ chan MQTT.Message
-var reqQ chan IncomingReq
+var ttnEverConnected bool = false
+var ttnFullyConnected bool = false
+var ttnMqttClient MQTT.Client
+var ttnLastConnected string = "(never)"
+var ttnLastDisconnectedTime time.Time
+var ttnLastDisconnected string = "(never)"
+var ttnUpQ chan MQTT.Message
 
 // Common app request
-
 type IncomingReq struct {
-	TTN	DataUpAppReq
-	Transport string
+    TTN DataUpAppReq
+    Transport string
 }
+var reqQ chan IncomingReq
 
 // Main entry point for app
 func main() {
@@ -73,7 +72,7 @@ func main() {
     }
 
     // Set up our internal message queues
-    upQ = make(chan MQTT.Message, 5)
+    ttnUpQ = make(chan MQTT.Message, 5)
     reqQ = make(chan IncomingReq, 5)
 
     // Spawn the app request handler shared by both TTN and direct inbound server
@@ -114,7 +113,17 @@ func timer1m() {
 func timer15m() {
     for {
         time.Sleep(15 * 60 * time.Second)
+
+        // Post Safecast errors
         sendSafecastCommsErrorsToSlack(15)
+
+        // Post long TTN outages
+        if (!ttnFullyConnected) {
+            minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
+            if (minutesOffline > 15) {
+                sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
+            }
+        }
     }
 }
 
@@ -172,7 +181,7 @@ func udpInboundHandler() {
             fmt.Printf("\n%s Received %d-byte UDP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload), addr)
 
             // Enqueue it for TTN-like processing
-			AppReq.Transport = "udp"
+            AppReq.Transport = "udp"
             reqQ <- AppReq
 
         }
@@ -235,7 +244,7 @@ func tcpInboundHandler() {
             fmt.Printf("\n%s Received %d-byte TCP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload), conn.RemoteAddr().String())
 
             // Enqueue it for TTN-like processing
-			AppReq.Transport = "tcp"
+            AppReq.Transport = "tcp"
             reqQ <- AppReq
 
             // Delay to see if we can pick up a reply for this request.  This is certainly
@@ -320,7 +329,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Enqueue AppReq for TTN-like processing
-	AppReq.Transport = "http"
+    AppReq.Transport = "http"
     reqQ <- AppReq
 
     // Delay to see if we can pick up a reply for this request.  This is certainly
@@ -357,9 +366,9 @@ func ttnSubscriptionMonitor() {
 
         // Handle lost connections
         onMqConnectionLost := func (client MQTT.Client, err error) {
-            fullyConnected = false
-			lastDisconnectedTime = time.Now()
-            lastDisconnected = time.Now().Format(logDateFormat)
+            ttnFullyConnected = false
+            ttnLastDisconnectedTime = time.Now()
+            ttnLastDisconnected = time.Now().Format(logDateFormat)
             fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
             sendToTTNOps(fmt.Sprintf("Connection lost from this server to %s: %v\n", ttnServer, err))
         }
@@ -370,28 +379,30 @@ func ttnSubscriptionMonitor() {
 
             // Function to process received messages
             onMqMessageReceived := func(client MQTT.Client, message MQTT.Message) {
-                upQ <- message
+                ttnUpQ <- message
             }
 
             // Subscribe to the upstream topic
             if token := client.Subscribe(ttnTopic, 0, onMqMessageReceived); token.Wait() && token.Error() != nil {
                 // Treat subscription failure as a connection failure
                 fmt.Printf("Error subscribing to topic %s\n", ttnTopic, token.Error())
-                fullyConnected = false
+                ttnFullyConnected = false
+                ttnLastDisconnectedTime = time.Now()
+                ttnLastDisconnected = time.Now().Format(logDateFormat)
             } else {
                 // Successful subscription
-                fullyConnected = true
-                lastConnected = time.Now().Format(logDateFormat)
-                if (everConnected) {
-	                minutesOffline := int64(time.Now().Sub(lastDisconnectedTime) / time.Minute)
-					// Don't bother reporting quick outages, generally caused by server restarts
-					if (minutesOffline > 2) {
-	                    sendToSafecastOps(fmt.Sprintf("TTN returned after %d-minute outage that began at %s UTC", minutesOffline, lastDisconnected))
-					}
+                ttnFullyConnected = true
+                ttnLastConnected = time.Now().Format(logDateFormat)
+                if (ttnEverConnected) {
+                    minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
+                    // Don't bother reporting quick outages, generally caused by server restarts
+                    if (minutesOffline > 2) {
+                        sendToSafecastOps(fmt.Sprintf("TTN returned (%d-minute outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
+                    }
                     sendToTTNOps(fmt.Sprintf("Connection restored from this server to %s\n", ttnServer))
                     fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))
                 } else {
-                    everConnected = true
+                    ttnEverConnected = true
                     fmt.Printf("TTN Connection Established\n")
                 }
             }
@@ -401,17 +412,17 @@ func ttnSubscriptionMonitor() {
 
         // Create the client session context, saving it
         // in a global so that it may also be used to Publish
-        mqttClient = MQTT.NewClient(mqttOpts)
+        ttnMqttClient = MQTT.NewClient(mqttOpts)
 
         // Connect to the service
-        if token := mqttClient.Connect(); token.Wait() && token.Error() != nil {
+        if token := ttnMqttClient.Connect(); token.Wait() && token.Error() != nil {
             fmt.Printf("Error connecting to service: %s\n", token.Error())
         } else {
 
             fmt.Printf("Now handling inbound MQTT on: %s mqtt:%s\n", ttnServer, ttnTopic)
             for consecutiveFailures := 0; consecutiveFailures < 3; {
                 time.Sleep(60 * time.Second)
-                if fullyConnected {
+                if ttnFullyConnected {
                     if false {
                         fmt.Printf("\n%s TTN Alive\n", time.Now().Format(logDateFormat))
                     }
@@ -426,11 +437,11 @@ func ttnSubscriptionMonitor() {
 
         // Failure
         mqttOpts = nil
-        mqttClient = nil
+        ttnMqttClient = nil
         time.Sleep(5 * time.Second)
         fmt.Printf("\n***\n")
-        fmt.Printf("*** Last time connection was successfully made: %s\n", lastConnected)
-        fmt.Printf("*** Last time connection was lost: %s\n", lastDisconnected)
+        fmt.Printf("*** Last time connection was successfully made: %s\n", ttnLastConnected)
+        fmt.Printf("*** Last time connection was lost: %s\n", ttnLastDisconnected)
         fmt.Printf("*** Now attempting to reconnect: %s\n", time.Now().Format(logDateFormat))
         fmt.Printf("***\n\n")
 
@@ -439,7 +450,7 @@ func ttnSubscriptionMonitor() {
 
 // Send to a ttn device outbound
 func ttnOutboundPublish(devEui string, payload []byte) {
-    if fullyConnected {
+    if ttnFullyConnected {
         jmsg := &DataDownAppReq{}
         jmsg.Payload = payload
         jmsg.FPort = 1
@@ -450,7 +461,7 @@ func ttnOutboundPublish(devEui string, payload []byte) {
         }
         topic := appEui + "/devices/" + devEui + "/down"
         fmt.Printf("Send %s: %s\n", topic, jdata)
-        mqttClient.Publish(topic, 0, false, jdata)
+        ttnMqttClient.Publish(topic, 0, false, jdata)
     }
 }
 
@@ -458,7 +469,7 @@ func ttnOutboundPublish(devEui string, payload []byte) {
 func ttnInboundHandler() {
 
     // Dequeue and process the messages as they're enqueued
-    for msg := range upQ {
+    for msg := range ttnUpQ {
         var AppReq IncomingReq
 
         // Unmarshal the payload and extract the base64 data
@@ -477,7 +488,7 @@ func ttnInboundHandler() {
             // I haven't written this code simply because this requires registering
             // for a Yahoo/Google account, and potentially paying.  Since none of the
             // code here is actually utilizing geo, we'll wait until then.
-			AppReq.Transport = "ttn"
+            AppReq.Transport = "ttn"
             reqQ <- AppReq
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
