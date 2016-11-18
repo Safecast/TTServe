@@ -750,7 +750,7 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
 func sendExpiredSafecastDevicesToSlack() {
 
     // Compute an expiration time
-    const deviceWarningAfterMinutes = 30
+    const deviceWarningAfterMinutes = 90
     expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes) * time.Minute))
 
     // Sweep through all devices that we've seen
