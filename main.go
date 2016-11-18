@@ -124,11 +124,12 @@ func timer15m() {
             if (minutesOffline > 15) {
                 sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
             }
+        } else {
+            if (ttnOutages > 0) {
+                sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m)", ttnOutages))
+                ttnOutages = 0;
+            }
         }
-		if (ttnOutages > 0) {
-			sendToSafecastOps(fmt.Sprintf("TTN has had %d unique outages in the past 15m)", ttnOutages))
-			ttnOutages = 0;
-		}
     }
 }
 
@@ -374,7 +375,7 @@ func ttnSubscriptionMonitor() {
             ttnFullyConnected = false
             ttnLastDisconnectedTime = time.Now()
             ttnLastDisconnected = time.Now().Format(logDateFormat)
-			ttnOutages = ttnOutages+1
+            ttnOutages = ttnOutages+1
             fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
             sendToTTNOps(fmt.Sprintf("Connection lost from this server to %s: %v\n", ttnServer, err))
         }
