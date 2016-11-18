@@ -125,8 +125,8 @@ func timer15m() {
                 sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
             }
         } else {
-            if (ttnOutages > 0) {
-                sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m)", ttnOutages))
+            if (ttnOutages > 1) {
+                sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m", ttnOutages))
                 ttnOutages = 0;
             }
         }
