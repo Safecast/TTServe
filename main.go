@@ -47,6 +47,7 @@ const logDateFormat string = "2006-01-02 15:04:05"
 // Statics
 var ttnEverConnected bool = false
 var ttnFullyConnected bool = false
+var ttnOutages uint16 = 0
 var ttnMqttClient MQTT.Client
 var ttnLastConnected string = "(never)"
 var ttnLastDisconnectedTime time.Time
@@ -124,6 +125,10 @@ func timer15m() {
                 sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
             }
         }
+		if (ttnOutages > 0) {
+			sendToSafecastOps(fmt.Sprintf("TTN has had %d unique outages in the past 15m)", ttnOutages))
+			ttnOutages = 0;
+		}
     }
 }
 
@@ -369,6 +374,7 @@ func ttnSubscriptionMonitor() {
             ttnFullyConnected = false
             ttnLastDisconnectedTime = time.Now()
             ttnLastDisconnected = time.Now().Format(logDateFormat)
+			ttnOutages = ttnOutages+1
             fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
             sendToTTNOps(fmt.Sprintf("Connection lost from this server to %s: %v\n", ttnServer, err))
         }
@@ -396,7 +402,7 @@ func ttnSubscriptionMonitor() {
                 if (ttnEverConnected) {
                     minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
                     // Don't bother reporting quick outages, generally caused by server restarts
-                    if (minutesOffline > 2) {
+                    if (minutesOffline >= 5) {
                         sendToSafecastOps(fmt.Sprintf("TTN returned (%d-minute outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
                     }
                     sendToTTNOps(fmt.Sprintf("Connection restored from this server to %s\n", ttnServer))
