@@ -187,7 +187,7 @@ func udpInboundHandler() {
             fmt.Printf("\n%s Received %d-byte UDP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload), addr)
 
             // Enqueue it for TTN-like processing
-            AppReq.Transport = "udp"
+            AppReq.Transport = "udp:" + addr.String()
             reqQ <- AppReq
 
         }
@@ -250,7 +250,7 @@ func tcpInboundHandler() {
             fmt.Printf("\n%s Received %d-byte TCP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload), conn.RemoteAddr().String())
 
             // Enqueue it for TTN-like processing
-            AppReq.Transport = "tcp"
+            AppReq.Transport = "tcp:" + conn.RemoteAddr().String()
             reqQ <- AppReq
 
             // Delay to see if we can pick up a reply for this request.  This is certainly
@@ -335,7 +335,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Enqueue AppReq for TTN-like processing
-    AppReq.Transport = "http"
+    AppReq.Transport = "http:" + req.RemoteAddr
     reqQ <- AppReq
 
     // Delay to see if we can pick up a reply for this request.  This is certainly
