@@ -1,4 +1,4 @@
-// Teletype Message Publishing Service
+// Teletype Message Publishing Service 
 package main
 
 import (
