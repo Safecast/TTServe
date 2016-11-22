@@ -495,7 +495,7 @@ func ttnInboundHandler() {
             // I haven't written this code simply because this requires registering
             // for a Yahoo/Google account, and potentially paying.  Since none of the
             // code here is actually utilizing geo, we'll wait until then.
-            AppReq.Transport = "ttn"
+            AppReq.Transport = "ttn:" + AppReq.TTN.DevEUI
             reqQ <- AppReq
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
