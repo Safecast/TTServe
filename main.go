@@ -427,20 +427,15 @@ func ttnSubscriptionMonitor() {
         } else {
 
             fmt.Printf("Now handling inbound MQTT on: %s mqtt:%s\n", ttnServer, ttnTopic)
-            for consecutiveFailures := 0; consecutiveFailures < 6; {
+            for consecutiveFailures := 0; consecutiveFailures < 3; {
+				time.Sleep(60 * time.Second);
                 if ttnFullyConnected {
-					// While connected, just wait in this idle loop
-					time.Sleep(60 * time.Second);
                     if false {
                         fmt.Printf("\n%s TTN Alive\n", time.Now().Format(logDateFormat))
                     }
                     consecutiveFailures = 0
                 } else {
-					if (consecutiveFailures > 3) {
-	                    fmt.Printf("\n%s TTN *** UNREACHABLE ***\n", time.Now().Format(logDateFormat))
-						// After the first retry, sleep a bit before trying again
-		                time.Sleep(15 * time.Second)
-					}
+                    fmt.Printf("\n%s TTN *** UNREACHABLE ***\n", time.Now().Format(logDateFormat))
                     consecutiveFailures += 1
                 }
             }
