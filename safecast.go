@@ -590,7 +590,7 @@ func endTransaction(transaction int, errstr string) {
     theMean := theTotal / theCount
 
     // Output to console every time we are in a "slow mode"
-    if (theMin > 10) {
+    if (theMin > 5) {
         fmt.Printf("%s Safecast HTTP Upload Statistics\n", time.Now().Format(logDateFormat))
         fmt.Printf("%s *** %d total uploads since restart\n", time.Now().Format(logDateFormat), httpTransactions)
         if (httpTransactionsInProgress > 0) {
@@ -601,7 +601,7 @@ func endTransaction(transaction int, errstr string) {
     }
 
     // If there's a problem, output to Slack once every 25 transactions
-    if (theMin > 10 && transaction == 0) {
+    if (theMin > 5 && transaction == 0) {
         // If all of them have the same timeout value, the server must be down.
         s := ""
         if (theMin == theMax && theMin == theMean) {
@@ -734,12 +734,12 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
             // As of 10/2016, I've chosen to suppress single-instance errors simply because they occur too frequently,
             // i.e. every day or few days.  When we ultimately move the dev server to AWS, we should re-enable this.
             if (false) {
-                sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to Safecast (%s)",
-                    httpTransactionErrorTime, httpTransactionErrorString));
+                sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to Safecast at %s:%s)",
+                    httpTransactionErrorTime, SafecastUploadIP, httpTransactionErrorString));
             }
         } else {
-            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d Safecast upload errors in %d minutes (%s)",
-                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorString));
+            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading to Safecast at %s in %d minutes:%s)",
+                httpTransactionErrorTime, SafecastUploadIP, httpTransactionErrors, PeriodMinutes, httpTransactionErrorString));
         }
         httpTransactionErrors = 0
         httpTransactionErrorFirst = true;
