@@ -54,6 +54,7 @@ type safecastStats struct {
     StatsCommsResets      uint32 `json:"comms_resets,omitempty"`
     StatsCommsPowerFails  uint32 `json:"comms_power_fails,omitempty"`
     StatsOneshots         uint32 `json:"oneshots,omitempty"`
+    StatsCell		      string `json:"version,omitempty"`
 }
 
 // Class used to sort seen devices
@@ -181,6 +182,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         }
         if (msg.StatsOneshots != nil) {
             scStats.StatsOneshots = msg.GetStatsOneshots()
+        }
+        if (msg.StatsCell != nil) {
+            scStats.StatsCell = msg.GetStatsCell()
         }
 
         scsJSON, _ := json.Marshal(scStats)
