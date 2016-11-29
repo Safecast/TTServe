@@ -18,7 +18,7 @@ import (
 // For dealing with transaction timeouts
 var httpTransactionsInProgress int = 0
 var httpTransactions = 0
-const httpTransactionsRecorded = 25
+const httpTransactionsRecorded = 250
 var httpTransactionDurations[httpTransactionsRecorded] int
 var httpTransactionTimes[httpTransactionsRecorded] time.Time
 var httpTransactionErrorTime string
@@ -614,8 +614,21 @@ func endTransaction(transaction int, errstr string) {
 
 }
 
-// Upload a Safecast data structure to the Safecast service
+// Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
 func uploadToSafecast(sc SafecastData) {
+
+	uploadInParallel := true;
+	
+	if (uploadInParallel) {
+		go doUploadToSafecast(sc)
+	} else {
+		doUploadToSafecast(sc)
+	}
+
+}
+
+// Upload a Safecast data structure to the Safecast service
+func doUploadToSafecast(sc SafecastData) {
 
     transaction := beginTransaction(SafecastUploadURL, sc.Unit, sc.Value)
 
