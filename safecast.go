@@ -617,12 +617,16 @@ func endTransaction(transaction int, errstr string) {
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
 func uploadToSafecast(sc SafecastData) {
 
+    // We've found that in certain cases the server gets overloaded.  When we run into those cases,
+	// turn this OFF and things will slow down.  (Obviously this is not the preferred mode of operation,
+	// because it creates a huge queue of things waiting to be uploaded.)
 	uploadInParallel := true;
 	
 	if (uploadInParallel) {
 		go doUploadToSafecast(sc)
 	} else {
 		doUploadToSafecast(sc)
+	    time.Sleep(2 * time.Second)
 	}
 
 }
@@ -656,9 +660,6 @@ func doUploadToSafecast(sc SafecastData) {
     }
 
     endTransaction(transaction, errString)
-
-    // The service gets overloaded if we jam it too quickly
-    time.Sleep(2 * time.Second)
 
 }
 
