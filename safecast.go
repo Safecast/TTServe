@@ -190,8 +190,6 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scsJSON, _ := json.Marshal(scStats)
         sc1.DeviceTypeID = string(scsJSON)
 
-		fmt.Printf("\nStats: %v\njson: %v\nstring: %s\n", scStats, scsJSON, sc1.DeviceTypeID);
-
     } else if msg.Message != nil {
 
         // A text message.  Since the Value in safecast
