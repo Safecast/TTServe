@@ -624,7 +624,7 @@ func uploadToSafecast(sc SafecastData) {
     // We've found that in certain cases the server gets overloaded.  When we run into those cases,
 	// turn this OFF and things will slow down.  (Obviously this is not the preferred mode of operation,
 	// because it creates a huge queue of things waiting to be uploaded.)
-	uploadInParallel := true;
+	uploadInParallel := false;
 	
 	if (uploadInParallel) {
 		go doUploadToSafecast(sc)
