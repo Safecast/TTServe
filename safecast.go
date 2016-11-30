@@ -54,7 +54,7 @@ type safecastStats struct {
     StatsCommsResets      uint32 `json:"comms_resets,omitempty"`
     StatsCommsPowerFails  uint32 `json:"comms_power_fails,omitempty"`
     StatsOneshots         uint32 `json:"oneshots,omitempty"`
-    StatsCell		      string `json:"version,omitempty"`
+    StatsCell		      string `json:"cell,omitempty"`
 }
 
 // Class used to sort seen devices
