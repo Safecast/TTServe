@@ -628,12 +628,9 @@ func uploadToSafecast(sc SafecastData) {
 	
 	if (uploadInParallel) {
 		go doUploadToSafecast(sc)
-		// This is merely to get some ordering for what we see on the service, rather than randomly-ordered uploads
-	    time.Sleep(100 * time.Millisecond)
 	} else {
 		doUploadToSafecast(sc)
-		// This is actually to slow the uploads way down so as not to overload the service
-	    time.Sleep(2 * time.Second)
+	    time.Sleep(1 * time.Second)
 	}
 
 }
