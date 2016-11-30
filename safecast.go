@@ -187,10 +187,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scStats.StatsCell = msg.GetStatsCell()
         }
 
-		fmt.Printf("\nStats: %v\nMessage: %v\n\n", scStats, msg);
-
         scsJSON, _ := json.Marshal(scStats)
         sc1.DeviceTypeID = string(scsJSON)
+
+		fmt.Printf("\nStats: %v\njson: %v\nstring: %s\n", scStats, scsJSON, sc1.DeviceTypeID);
 
     } else if msg.Message != nil {
 
