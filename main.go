@@ -2,6 +2,7 @@
 package main
 
 import (
+	"os"
     "io"
     "io/ioutil"
     "net/http"
@@ -53,6 +54,7 @@ var ttnLastConnected string = "(never)"
 var ttnLastDisconnectedTime time.Time
 var ttnLastDisconnected string = "(never)"
 var ttnUpQ chan MQTT.Message
+var MAX_PENDING_REQUESTS int = 25
 
 // Common app request
 type IncomingReq struct {
@@ -60,6 +62,7 @@ type IncomingReq struct {
     Transport string
 }
 var reqQ chan IncomingReq
+var reqQMaxLength = 0
 
 // Main entry point for app
 func main() {
@@ -74,7 +77,7 @@ func main() {
 
     // Set up our internal message queues
     ttnUpQ = make(chan MQTT.Message, 5)
-    reqQ = make(chan IncomingReq, 5)
+    reqQ = make(chan IncomingReq, MAX_PENDING_REQUESTS)
 
     // Spawn the app request handler shared by both TTN and direct inbound server
     go commonRequestHandler()
@@ -115,6 +118,11 @@ func timer15m() {
     for {
         time.Sleep(15 * 60 * time.Second)
 
+		// Report maximum inbound pending transactions
+		if (reqQMaxLength > 1) {
+            fmt.Printf("%s Maximum request queue length reached %d\n", time.Now().Format(logDateFormat), reqQMaxLength)
+		}
+		
         // Post Safecast errors
         sendSafecastCommsErrorsToSlack(15)
 
@@ -189,6 +197,7 @@ func udpInboundHandler() {
             // Enqueue it for TTN-like processing
             AppReq.Transport = "udp:" + addr.String()
             reqQ <- AppReq
+			monitorReqQ()
 
         }
     }
@@ -252,6 +261,7 @@ func tcpInboundHandler() {
             // Enqueue it for TTN-like processing
             AppReq.Transport = "tcp:" + conn.RemoteAddr().String()
             reqQ <- AppReq
+			monitorReqQ()
 
             // Delay to see if we can pick up a reply for this request.  This is certainly
             // controversial because it slows down the incoming message processing, however there
@@ -337,6 +347,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
     // Enqueue AppReq for TTN-like processing
     AppReq.Transport = "http:" + req.RemoteAddr
     reqQ <- AppReq
+	monitorReqQ()
 
     // Delay to see if we can pick up a reply for this request.  This is certainly
     // controversial because it slows down the incoming message processing, however there
@@ -497,6 +508,7 @@ func ttnInboundHandler() {
             // code here is actually utilizing geo, we'll wait until then.
             AppReq.Transport = "ttn:" + AppReq.TTN.DevEUI
             reqQ <- AppReq
+			monitorReqQ()
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.
@@ -598,4 +610,26 @@ func commonRequestHandler() {
             ProcessTelecastMessage(msg, AppReq.TTN.DevEUI)
         }
     }
+}
+
+// Monitor the queue length
+func monitorReqQ() {
+	elements := len(reqQ)
+
+	if (elements > reqQMaxLength) {
+		reqQMaxLength = elements
+
+		if (reqQMaxLength > 1) {
+            fmt.Printf("\n%s Requests pending reached new maximum of %d\n", time.Now().Format(logDateFormat), reqQMaxLength)
+		}
+
+	}
+
+	// We have observed once that the HTTP stack got messed up to the point where the queue just grew forever
+	// because nothing was getting serviced.  In this case, abort and restart the process.
+	if (reqQMaxLength > MAX_PENDING_REQUESTS) {
+        fmt.Printf("\n***\n***\n*** RESTARTING defensively because of request queue overflow\n***\n***\n\n")
+	    os.Exit(0)
+	}
+
 }
