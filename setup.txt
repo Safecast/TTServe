@@ -9,12 +9,18 @@
 // ..Add an "allow-8081" firewall rule for udp:8081 that applies to all targets
 // ..Add an "allow-8082" firewall rule for tcp:8082 that applies to all targets
 
-// On Amazon
+// On Amazon AWS
 // In Network & Security / Security Groups
 // Create or Edit the rules of the security group attached to the instance
-// 
-sudo apt-get update
-sudo apt-get install git --assume-yes
+
+// On Amazon Lightsail
+// - create the above allow rules in networking
+// - create a static ip address
+
+// Now install required tools
+sudo apt update
+sudo apt install git --assume-yes
+sudo apt install golang-go --assume-yes
 
 // Install golang in a way appropriate for the OS.  Do NOT use apt-get because
 // it installs an old version!
