@@ -53,6 +53,7 @@ type safecastStats struct {
     StatsReceivedBytes    uint32 `json:"received_bytes,omitempty"`
     StatsCommsResets      uint32 `json:"comms_resets,omitempty"`
     StatsCommsPowerFails  uint32 `json:"comms_power_fails,omitempty"`
+    StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
     StatsOneshots         uint32 `json:"oneshots,omitempty"`
     StatsCell		      string `json:"cell,omitempty"`
 }
@@ -182,6 +183,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         }
         if (msg.StatsOneshots != nil) {
             scStats.StatsOneshots = msg.GetStatsOneshots()
+        }
+        if (msg.StatsMotiondrops != nil) {
+            scStats.StatsMotiondrops = msg.GetStatsMotiondrops()
         }
         if (msg.StatsCell != nil) {
             scStats.StatsCell = msg.GetStatsCell()
