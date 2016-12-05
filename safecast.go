@@ -761,7 +761,7 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
             }
         } else {
             sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading to Safecast at %s in %d minutes:%s)",
-                httpTransactionErrorTime, SafecastUploadIP, httpTransactionErrors, PeriodMinutes, httpTransactionErrorString));
+                httpTransactionErrorTime, httpTransactionErrors, SafecastUploadIP, PeriodMinutes, httpTransactionErrorString));
         }
         httpTransactionErrors = 0
         httpTransactionErrorFirst = true;
