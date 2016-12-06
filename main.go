@@ -1,8 +1,8 @@
-// Teletype Message Publishing Service 
+// Teletype Message Publishing Service
 package main
 
 import (
-	"os"
+    "os"
     "io"
     "io/ioutil"
     "net/http"
@@ -118,11 +118,11 @@ func timer15m() {
     for {
         time.Sleep(15 * 60 * time.Second)
 
-		// Report maximum inbound pending transactions
-		if (reqQMaxLength > 1) {
+        // Report maximum inbound pending transactions
+        if (reqQMaxLength > 1) {
             fmt.Printf("%s Maximum request queue length reached %d\n", time.Now().Format(logDateFormat), reqQMaxLength)
-		}
-		
+        }
+
         // Post Safecast errors
         sendSafecastCommsErrorsToSlack(15)
 
@@ -180,7 +180,7 @@ func udpInboundHandler() {
         n, addr, err := ServerConn.ReadFromUDP(buf)
         if (err != nil) {
             fmt.Printf("UDP read error: \n%v\n", err)
-	        time.Sleep(1 * 60 * time.Second)
+            time.Sleep(1 * 60 * time.Second)
         } else {
 
             // Construct a TTN-like message
@@ -198,7 +198,7 @@ func udpInboundHandler() {
             // Enqueue it for TTN-like processing
             AppReq.Transport = "udp:" + addr.String()
             reqQ <- AppReq
-			monitorReqQ()
+            monitorReqQ()
 
         }
     }
@@ -229,8 +229,21 @@ func tcpInboundHandler() {
         conn, err := ServerConn.AcceptTCP()
         if err != nil {
             fmt.Printf("Error accepting TCP session: \n%v\n", err)
-			impossibleError()
-	        time.Sleep(1 * 60 * time.Second)
+            impossibleError()
+            time.Sleep(1 * 60 * time.Second)
+
+			// This should NOT HAPPEN.
+			// The one time I saw this happen, it was because the accept
+			// failed because of "use of closed network connection",.
+			// presumably because of something that happened at the OS
+			// level.  Attempt to re-open it.
+            ServerConn, err := net.ListenTCP("tcp", ServerAddr)
+            if err != nil {
+                fmt.Printf("Error listening on TCP port: \n%v\n", err)
+                return
+            }
+            defer ServerConn.Close()
+
             continue
         }
 
@@ -238,7 +251,7 @@ func tcpInboundHandler() {
         if err != nil {
             fmt.Printf("TCP read error: \n%v\n", err)
             ServerConn.Close()
-	        time.Sleep(1 * 60 * time.Second)
+            time.Sleep(1 * 60 * time.Second)
             continue
         }
 
@@ -265,7 +278,7 @@ func tcpInboundHandler() {
             // Enqueue it for TTN-like processing
             AppReq.Transport = "tcp:" + conn.RemoteAddr().String()
             reqQ <- AppReq
-			monitorReqQ()
+            monitorReqQ()
 
             // Delay to see if we can pick up a reply for this request.  This is certainly
             // controversial because it slows down the incoming message processing, however there
@@ -351,7 +364,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
     // Enqueue AppReq for TTN-like processing
     AppReq.Transport = "http:" + req.RemoteAddr
     reqQ <- AppReq
-	monitorReqQ()
+    monitorReqQ()
 
     // Delay to see if we can pick up a reply for this request.  This is certainly
     // controversial because it slows down the incoming message processing, however there
@@ -443,7 +456,7 @@ func ttnSubscriptionMonitor() {
 
             fmt.Printf("Now handling inbound MQTT on: %s mqtt:%s\n", ttnServer, ttnTopic)
             for consecutiveFailures := 0; consecutiveFailures < 3; {
-				time.Sleep(60 * time.Second);
+                time.Sleep(60 * time.Second);
                 if ttnFullyConnected {
                     if false {
                         fmt.Printf("\n%s TTN Alive\n", time.Now().Format(logDateFormat))
@@ -512,7 +525,7 @@ func ttnInboundHandler() {
             // code here is actually utilizing geo, we'll wait until then.
             AppReq.Transport = "ttn:" + AppReq.TTN.DevEUI
             reqQ <- AppReq
-			monitorReqQ()
+            monitorReqQ()
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.
@@ -618,23 +631,23 @@ func commonRequestHandler() {
 
 // Monitor the queue length
 func monitorReqQ() {
-	elements := len(reqQ)
+    elements := len(reqQ)
 
-	if (elements > reqQMaxLength) {
-		reqQMaxLength = elements
+    if (elements > reqQMaxLength) {
+        reqQMaxLength = elements
 
-		if (reqQMaxLength > 1) {
+        if (reqQMaxLength > 1) {
             fmt.Printf("\n%s Requests pending reached new maximum of %d\n", time.Now().Format(logDateFormat), reqQMaxLength)
-		}
+        }
 
-	}
+    }
 
-	// We have observed once that the HTTP stack got messed up to the point where the queue just grew forever
-	// because nothing was getting serviced.  In this case, abort and restart the process.
-	if (reqQMaxLength > MAX_PENDING_REQUESTS) {
+    // We have observed once that the HTTP stack got messed up to the point where the queue just grew forever
+    // because nothing was getting serviced.  In this case, abort and restart the process.
+    if (reqQMaxLength > MAX_PENDING_REQUESTS) {
         fmt.Printf("\n***\n***\n*** RESTARTING defensively because of request queue overflow\n***\n***\n\n")
-	    os.Exit(0)
-	}
+        os.Exit(0)
+    }
 
 }
 
@@ -644,11 +657,11 @@ var impossibleErrorCount = 0;
 
 func impossibleError() {
 
-	impossibleErrorCount = impossibleErrorCount + 1
+    impossibleErrorCount = impossibleErrorCount + 1
 
-	if (impossibleErrorCount < 25) {
-		return;
-	}
+    if (impossibleErrorCount < 25) {
+        return;
+    }
 
     fmt.Printf("\n***\n***\n*** RESTARTING defensively because of impossible errors\n***\n***\n\n")
     os.Exit(0)
