@@ -180,6 +180,7 @@ func udpInboundHandler() {
         n, addr, err := ServerConn.ReadFromUDP(buf)
         if (err != nil) {
             fmt.Printf("UDP read error: \n%v\n", err)
+	        time.Sleep(1 * 60 * time.Second)
         } else {
 
             // Construct a TTN-like message
@@ -228,6 +229,8 @@ func tcpInboundHandler() {
         conn, err := ServerConn.AcceptTCP()
         if err != nil {
             fmt.Printf("Error accepting TCP session: \n%v\n", err)
+			impossibleError()
+	        time.Sleep(1 * 60 * time.Second)
             continue
         }
 
@@ -235,6 +238,7 @@ func tcpInboundHandler() {
         if err != nil {
             fmt.Printf("TCP read error: \n%v\n", err)
             ServerConn.Close()
+	        time.Sleep(1 * 60 * time.Second)
             continue
         }
 
@@ -631,5 +635,22 @@ func monitorReqQ() {
         fmt.Printf("\n***\n***\n*** RESTARTING defensively because of request queue overflow\n***\n***\n\n")
 	    os.Exit(0)
 	}
+
+}
+
+// Record the occurrence of another impossible error.
+// If this is called too many times, restart the server, for robustness.
+var impossibleErrorCount = 0;
+
+func impossibleError() {
+
+	impossibleErrorCount = impossibleErrorCount + 1
+
+	if (impossibleErrorCount < 25) {
+		return;
+	}
+
+    fmt.Printf("\n***\n***\n*** RESTARTING defensively because of impossible errors\n***\n***\n\n")
+    os.Exit(0)
 
 }
