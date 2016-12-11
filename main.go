@@ -121,6 +121,10 @@ func timer15m() {
         // Report maximum inbound pending transactions
         if (reqQMaxLength > 1) {
             fmt.Printf("%s Maximum request queue length reached %d\n", time.Now().Format(logDateFormat), reqQMaxLength)
+		    if (reqQMaxLength >= MAX_PENDING_REQUESTS) {
+		        fmt.Printf("\n***\n***\n*** RESTARTING defensively because of request queue overflow\n***\n***\n\n")
+		        os.Exit(0)
+		    }
         }
 
         // Post Safecast errors
@@ -644,7 +648,7 @@ func monitorReqQ() {
 
     // We have observed once that the HTTP stack got messed up to the point where the queue just grew forever
     // because nothing was getting serviced.  In this case, abort and restart the process.
-    if (reqQMaxLength > MAX_PENDING_REQUESTS) {
+    if (reqQMaxLength >= MAX_PENDING_REQUESTS) {
         fmt.Printf("\n***\n***\n*** RESTARTING defensively because of request queue overflow\n***\n***\n\n")
         os.Exit(0)
     }
