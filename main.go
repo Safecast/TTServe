@@ -266,21 +266,8 @@ func tcpInboundHandler() {
         conn, err := ServerConn.AcceptTCP()
         if err != nil {
             fmt.Printf("Error accepting TCP session: \n%v\n", err)
-            impossibleError()
-            time.Sleep(1 * 60 * time.Second)
-
-			// This should NOT HAPPEN.
-			// The one time I saw this happen, it was because the accept
-			// failed because of "use of closed network connection",.
-			// presumably because of something that happened at the OS
-			// level.  Attempt to re-open it.
-            ServerConn, err := net.ListenTCP("tcp", ServerAddr)
-            if err != nil {
-                fmt.Printf("Error listening on TCP port: \n%v\n", err)
-                return
-            }
-            defer ServerConn.Close()
-
+			// We see "use of closed network connection" when port scanners hit us
+            time.Sleep(10 * time.Second)
             continue
         }
 

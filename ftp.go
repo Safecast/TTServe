@@ -93,6 +93,7 @@ func (driver *TeletypeDriver) ListFiles(cc server.ClientContext) ([]os.FileInfo,
     path := driver.baseDir + cc.Path()
 
     files, err := ioutil.ReadDir(path)
+	fmt.Printf("** baseDir='%s', cc.Path='%s', path='%s', err=%v, files=%v\n", driver.baseDir, cc.Path(), path, err, files)
 
     // We add a virtual dir
     if cc.Path() == "/" && err == nil {
