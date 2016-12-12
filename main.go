@@ -40,7 +40,7 @@ const TTServerBuildPath = "/safecast/build"
 
 // This server-related
 const TTServerAddress = "api.teletype.io"
-const TTServerPortFTP int = 21
+const TTServerPortFTP int = 8021
 const TTServerPort string = ":8080"
 const TTServerPortUDP string = ":8081"
 const TTServerPortTCP string = ":8082"
