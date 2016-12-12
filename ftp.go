@@ -46,10 +46,6 @@ func (driver *TeletypeDriver) GetTLSConfig() (*tls.Config, error) {
 }
 
 func (driver *TeletypeDriver) ChangeDirectory(cc server.ClientContext, directory string) error {
-
-	// Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
-	return errors.New("CD not implemented")
-
     _, err := os.Stat(driver.baseDir + directory)
     return err
 }
