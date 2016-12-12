@@ -653,7 +653,9 @@ func doUploadToSafecast(sc SafecastData) {
     req, err := http.NewRequest("POST", fmt.Sprintf(SafecastUploadURL, SafecastAppKey), bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
-    httpclient := &http.Client{}
+    httpclient := &http.Client{
+		Timeout: time.Second * 15,
+	}
     resp, err := httpclient.Do(req)
 
     errString := ""
