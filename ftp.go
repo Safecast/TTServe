@@ -172,7 +172,7 @@ func (driver *TeletypeDriver) RenameFile(cc server.ClientContext, from, to strin
 
 func (driver *TeletypeDriver) GetSettings() *server.Settings {
 	config := &server.Settings{}
-	config.Host = TTServerAddress
+	config.Host = ""
 	config.Port = TTServerPortFTP
 	config.MaxConnections = 10000
     return config
