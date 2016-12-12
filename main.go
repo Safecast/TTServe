@@ -3,6 +3,8 @@ package main
 
 import (
     "os"
+	"os/signal"
+	"syscall"
     "io"
     "io/ioutil"
     "net/http"
@@ -14,6 +16,7 @@ import (
     "github.com/rdegges/go-ipify"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
+	"github.com/fclairamb/ftpserver/server"
     "hash/crc32"
     MQTT "github.com/eclipse/paho.mqtt.golang"
 )
@@ -31,19 +34,30 @@ const SafecastUploadIP = "107.161.164.163"
 const SafecastUploadURL = "http://" + SafecastUploadIP + "/scripts/indextest.php?api_key=%s"
 const SafecastAppKey = "z3sHhgousVDDrCVXhzMT"
 
-// This HTTP server-related
-const ttServerPort string = ":8080"
-const ttServerPortUDP string = ":8081"
-const ttServerPortTCP string = ":8082"
-const ttServerURLSend string = "/send"
-const ttServerURLGithub string = "/github"
-const ttServerURLSlack string = "/slack"
+// File system related paths relative to the server's HomeDir
+const TTServerLogPath = "/safecast/log"
+const TTServerBuildPath = "/safecast/build"
+
+// This server-related
+const TTServerAddress = "api.teletype.io"
+const TTServerPortFTP int = 21
+const TTServerPort string = ":8080"
+const TTServerPortUDP string = ":8081"
+const TTServerPortTCP string = ":8082"
+const TTServerURLSend string = "/send"
+const TTServerURLGithub string = "/github"
+const TTServerURLSlack string = "/slack"
 
 // Our server
-var ttServer string
+var TTServer string
 
 // Constants
 const logDateFormat string = "2006-01-02 15:04:05"
+
+// FTP
+var (
+	ftpServer *server.FtpServer
+)
 
 // Statics
 var ttnEverConnected bool = false
@@ -70,11 +84,14 @@ func main() {
     // Get our external IP address
     ip, err := ipify.GetIp()
     if err != nil {
-        ttServer = "http://api.teletype.io"
+        TTServer = "http://" + TTServerAddress
     } else {
-        ttServer = "http://" + ip
+        TTServer = "http://" + ip
     }
 
+	// Set up our signal handler
+	go signalHandler()
+	
     // Set up our internal message queues
     ttnUpQ = make(chan MQTT.Message, 5)
     reqQ = make(chan IncomingReq, MAX_PENDING_REQUESTS)
@@ -93,6 +110,9 @@ func main() {
 
     // Init our UDP request inbound server
     go tcpInboundHandler()
+
+    // Init our FTP server
+    go ftpInboundHandler()
 
     // Init our housekeeping process
     go timer1m()
@@ -146,26 +166,39 @@ func timer15m() {
 }
 
 // Kick off inbound messages coming from all sources, then serve HTTP
+func ftpInboundHandler() {
+
+    fmt.Printf("Now handling inbound FTP on: %s:%d\n", TTServer, TTServerPortFTP)
+
+	ftpServer = server.NewFtpServer(NewTeletypeDriver())
+	err := ftpServer.ListenAndServe()
+	if err != nil {
+	    fmt.Printf("Error listening on FTP: %s\n", err)
+	}
+	
+}
+
+// Kick off inbound messages coming from all sources, then serve HTTP
 func webInboundHandler() {
 
-    http.HandleFunc(ttServerURLSend, inboundWebTTGateHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", ttServer, ttServerPort, ttServerURLSend)
+    http.HandleFunc(TTServerURLSend, inboundWebTTGateHandler)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLSend)
 
-    http.HandleFunc(ttServerURLGithub, inboundWebGithubHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", ttServer, ttServerPort, ttServerURLGithub)
+    http.HandleFunc(TTServerURLGithub, inboundWebGithubHandler)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLGithub)
 
-    http.HandleFunc(ttServerURLSlack, inboundWebSlackHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", ttServer, ttServerPort, ttServerURLSlack)
+    http.HandleFunc(TTServerURLSlack, inboundWebSlackHandler)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLSlack)
 
-    http.ListenAndServe(ttServerPort, nil)
+    http.ListenAndServe(TTServerPort, nil)
 }
 
 // Kick off UDP server
 func udpInboundHandler() {
 
-    fmt.Printf("Now handling inbound UDP on: %s%s\n", ttServer, ttServerPortUDP)
+    fmt.Printf("Now handling inbound UDP on: %s%s\n", TTServer, TTServerPortUDP)
 
-    ServerAddr, err := net.ResolveUDPAddr("udp", ttServerPortUDP)
+    ServerAddr, err := net.ResolveUDPAddr("udp", TTServerPortUDP)
     if err != nil {
         fmt.Printf("Error resolving UDP port: \n%v\n", err)
         return
@@ -212,9 +245,9 @@ func udpInboundHandler() {
 // Kick off TCP server
 func tcpInboundHandler() {
 
-    fmt.Printf("Now handling inbound TCP on: %s%s\n", ttServer, ttServerPortTCP)
+    fmt.Printf("Now handling inbound TCP on: %s%s\n", TTServer, TTServerPortTCP)
 
-    ServerAddr, err := net.ResolveTCPAddr("tcp", ttServerPortTCP)
+    ServerAddr, err := net.ResolveTCPAddr("tcp", TTServerPortTCP)
     if err != nil {
         fmt.Printf("Error resolving TCP port: \n%v\n", err)
         return
@@ -670,4 +703,17 @@ func impossibleError() {
     fmt.Printf("\n***\n***\n*** RESTARTING defensively because of impossible errors\n***\n***\n\n")
     os.Exit(0)
 
+}
+
+// Our app's signal handler
+func signalHandler() {
+	ch := make(chan os.Signal)
+	signal.Notify(ch, syscall.SIGTERM)
+	for {
+		switch <-ch {
+		case syscall.SIGTERM:
+			ftpServer.Stop()
+			break
+		}
+	}
 }

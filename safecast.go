@@ -854,7 +854,7 @@ func writeToLog(sc SafecastData) {
     // The file pathname on the server
     usr, _ := user.Current()
     directory := usr.HomeDir
-    directory = directory + "/safecast/log"
+    directory = directory + TTServerLogPath
 
     // Extract the device number and form a filename
     file := directory + "/" + sc.DeviceID + ".csv"
