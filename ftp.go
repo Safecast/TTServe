@@ -6,11 +6,9 @@ import (
     "crypto/tls"
     "errors"
     "github.com/fclairamb/ftpserver/server"
-    "io"
     "io/ioutil"
     "os"
 	"fmt"
-    "time"
 )
 
 // TeletypeDriver defines a very basic serverftp driver
