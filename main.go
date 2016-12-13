@@ -2,6 +2,7 @@
 package main
 
 import (
+	"strings"
     "os"
 	"os/signal"
 	"syscall"
@@ -88,7 +89,10 @@ func main() {
         os.Exit(0)
 	}
     TTServer = "http://" + TTServerIP
-
+	fmt.Printf("TTServerIP = '%s' '%v'\n", TTServerIP, TTServerIP);
+	quads := strings.Split(TTServerIP, ".")
+	fmt.Printf("quads: %v\n", quads)
+	
 	// Set up our signal handler
 	go signalHandler()
 	
