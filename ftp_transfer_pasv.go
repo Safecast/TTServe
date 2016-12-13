@@ -65,11 +65,8 @@ func (c *clientHandler) handlePASV() {
         // ROZZIE: This completely prevented FTP passive mode from working because the IP address sent back to
         // the client MUST be our external address!  This code exposes the internal address.
         quads = strings.Split(TTServerIP, ".")
-	fmt.Printf("TTServerIP = '%s' '%v'\n", TTServerIP, TTServerIP);
-	fmt.Printf("quads: %v\n", quads)
 
         c.writeMessage(227, fmt.Sprintf("Entering Passive Mode (%s,%s,%s,%s,%d,%d)", quads[0], quads[1], quads[2], quads[3], p1, p2))
-	fmt.Printf("quads: %v\n", quads)
     } else {
         c.writeMessage(229, fmt.Sprintf("Entering Extended Passive Mode (|||%d|)", p.Port))
     }
