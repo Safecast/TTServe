@@ -7,7 +7,7 @@ import (
     "errors"
     "io/ioutil"
     "os"
-	"fmt"
+    "fmt"
 )
 
 // TeletypeDriver defines a very basic serverftp driver
@@ -31,8 +31,11 @@ func (driver *TeletypeDriver) AuthUser(cc ClientContext, user, pass string) (Cli
 
 func (driver *TeletypeDriver) GetTLSConfig() (*tls.Config, error) {
     if driver.tlsConfig == nil {
-		fmt.Printf("FTP: Loading certificate\n")
-        if cert, err := tls.LoadX509KeyPair("sample/certs/mycert.crt", "certs/mycert.key"); err == nil {
+        fmt.Printf("FTP: Loading certificate\n")
+        usr, _ := user.Current()
+        directory := usr.HomeDir
+        directory = directory + TTServerFTPCertPath
+        if cert, err := tls.LoadX509KeyPair(directory+"/mycert.crt", directory+"certs/mycert.key"); err == nil {
             driver.tlsConfig = &tls.Config{
                 NextProtos:   []string{"ftp"},
                 Certificates: []tls.Certificate{cert},
@@ -51,8 +54,8 @@ func (driver *TeletypeDriver) ChangeDirectory(cc ClientContext, directory string
 
 func (driver *TeletypeDriver) MakeDirectory(cc ClientContext, directory string) error {
 
-	// Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
-	return errors.New("MKDIR not implemented")
+    // Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
+    return errors.New("MKDIR not implemented")
 
     return os.Mkdir(driver.baseDir+directory, 0777)
 }
@@ -74,9 +77,9 @@ func (driver *TeletypeDriver) OpenFile(cc ClientContext, path string, flag int) 
 
     path = driver.baseDir + path
 
-	// Teletype NOT IMPLEMENTED - our FTP server is read-only root-only open-to-all
-	flag = os.O_RDONLY
-	
+    // Teletype NOT IMPLEMENTED - our FTP server is read-only root-only open-to-all
+    flag = os.O_RDONLY
+
     // If we are writing and we are not in append mode, we should remove the file
     if (flag & os.O_WRONLY) != 0 {
         flag |= os.O_CREATE
@@ -100,8 +103,8 @@ func (driver *TeletypeDriver) CanAllocate(cc ClientContext, size int) (bool, err
 
 func (driver *TeletypeDriver) ChmodFile(cc ClientContext, path string, mode os.FileMode) error {
 
-	// Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
-	return errors.New("CHMOD not implemented")
+    // Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
+    return errors.New("CHMOD not implemented")
 
     path = driver.baseDir + path
     return os.Chmod(path, mode)
@@ -109,8 +112,8 @@ func (driver *TeletypeDriver) ChmodFile(cc ClientContext, path string, mode os.F
 
 func (driver *TeletypeDriver) DeleteFile(cc ClientContext, path string) error {
 
-	// Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
-	return errors.New("RM not implemented")
+    // Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
+    return errors.New("RM not implemented")
 
     path = driver.baseDir + path
     return os.Remove(path)
@@ -118,8 +121,8 @@ func (driver *TeletypeDriver) DeleteFile(cc ClientContext, path string) error {
 
 func (driver *TeletypeDriver) RenameFile(cc ClientContext, from, to string) error {
 
-	// Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
-	return errors.New("MV not implemented")
+    // Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
+    return errors.New("MV not implemented")
 
     from = driver.baseDir + from
     to = driver.baseDir + to
@@ -127,10 +130,10 @@ func (driver *TeletypeDriver) RenameFile(cc ClientContext, from, to string) erro
 }
 
 func (driver *TeletypeDriver) GetSettings() *Settings {
-	config := &Settings{}
-	config.Host = ""
-	config.Port = TTServerPortFTP
-	config.MaxConnections = 10000
+    config := &Settings{}
+    config.Host = ""
+    config.Port = TTServerPortFTP
+    config.MaxConnections = 10000
     return config
 }
 
@@ -141,6 +144,6 @@ func NewTeletypeDriver() *TeletypeDriver {
     directory := usr.HomeDir
     directory = directory + TTServerBuildPath
     driver := &TeletypeDriver{}
-	driver.baseDir = directory
+    driver.baseDir = directory
     return driver
 }

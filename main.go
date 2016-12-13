@@ -36,6 +36,7 @@ const SafecastAppKey = "z3sHhgousVDDrCVXhzMT"
 // File system related paths relative to the server's HomeDir
 const TTServerLogPath = "/safecast/log"
 const TTServerBuildPath = "/safecast/build"
+const TTServerFTPCertPath = "/safecast/cert/ftp"
 
 // This server-related
 const TTServerAddress = "api.teletype.io"
