@@ -16,7 +16,6 @@ import (
     "github.com/rdegges/go-ipify"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
-	"github.com/fclairamb/ftpserver/server"
     "hash/crc32"
     MQTT "github.com/eclipse/paho.mqtt.golang"
 )
@@ -50,13 +49,14 @@ const TTServerURLSlack string = "/slack"
 
 // Our server
 var TTServer string
+var TTServerIP string
 
 // Constants
 const logDateFormat string = "2006-01-02 15:04:05"
 
 // FTP
 var (
-	ftpServer *server.FtpServer
+	ftpServer *FtpServer
 )
 
 // Statics
@@ -82,12 +82,12 @@ var reqQMaxLength = 0
 func main() {
 
     // Get our external IP address
-    ip, err := ipify.GetIp()
+    TTServerIP, err := ipify.GetIp()
     if err != nil {
-        TTServer = "http://" + TTServerAddress
-    } else {
-        TTServer = "http://" + ip
-    }
+		fmt.Printf("Can't get our own IP address\n");
+        os.Exit(0)
+	}
+    TTServer = "http://" + TTServerIP
 
 	// Set up our signal handler
 	go signalHandler()
@@ -170,7 +170,7 @@ func ftpInboundHandler() {
 
     fmt.Printf("Now handling inbound FTP on: %s:%d\n", TTServer, TTServerPortFTP)
 
-	ftpServer = server.NewFtpServer(NewTeletypeDriver())
+	ftpServer = NewFtpServer(NewTeletypeDriver())
 	err := ftpServer.ListenAndServe()
 	if err != nil {
 	    fmt.Printf("Error listening on FTP: %s\n", err)

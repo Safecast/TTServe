@@ -5,7 +5,6 @@ import (
     "os/user"
     "crypto/tls"
     "errors"
-    "github.com/fclairamb/ftpserver/server"
     "io/ioutil"
     "os"
 	"fmt"
@@ -17,12 +16,12 @@ type TeletypeDriver struct {
     tlsConfig *tls.Config
 }
 
-func (driver *TeletypeDriver) WelcomeUser(cc server.ClientContext) (string, error) {
+func (driver *TeletypeDriver) WelcomeUser(cc ClientContext) (string, error) {
     cc.SetDebug(true)
     return "Welcome to TTSERVE", nil
 }
 
-func (driver *TeletypeDriver) AuthUser(cc server.ClientContext, user, pass string) (server.ClientHandlingDriver, error) {
+func (driver *TeletypeDriver) AuthUser(cc ClientContext, user, pass string) (ClientHandlingDriver, error) {
     if user == "bad" || pass == "bad" {
         return nil, errors.New("BAD username or password !")
     } else {
@@ -45,12 +44,12 @@ func (driver *TeletypeDriver) GetTLSConfig() (*tls.Config, error) {
     return driver.tlsConfig, nil
 }
 
-func (driver *TeletypeDriver) ChangeDirectory(cc server.ClientContext, directory string) error {
+func (driver *TeletypeDriver) ChangeDirectory(cc ClientContext, directory string) error {
     _, err := os.Stat(driver.baseDir + directory)
     return err
 }
 
-func (driver *TeletypeDriver) MakeDirectory(cc server.ClientContext, directory string) error {
+func (driver *TeletypeDriver) MakeDirectory(cc ClientContext, directory string) error {
 
 	// Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
 	return errors.New("MKDIR not implemented")
@@ -58,7 +57,7 @@ func (driver *TeletypeDriver) MakeDirectory(cc server.ClientContext, directory s
     return os.Mkdir(driver.baseDir+directory, 0777)
 }
 
-func (driver *TeletypeDriver) ListFiles(cc server.ClientContext) ([]os.FileInfo, error) {
+func (driver *TeletypeDriver) ListFiles(cc ClientContext) ([]os.FileInfo, error) {
 
     path := driver.baseDir + cc.Path()
 
@@ -67,11 +66,11 @@ func (driver *TeletypeDriver) ListFiles(cc server.ClientContext) ([]os.FileInfo,
     return files, err
 }
 
-func (driver *TeletypeDriver) UserLeft(cc server.ClientContext) {
+func (driver *TeletypeDriver) UserLeft(cc ClientContext) {
 
 }
 
-func (driver *TeletypeDriver) OpenFile(cc server.ClientContext, path string, flag int) (server.FileStream, error) {
+func (driver *TeletypeDriver) OpenFile(cc ClientContext, path string, flag int) (FileStream, error) {
 
     path = driver.baseDir + path
 
@@ -89,17 +88,17 @@ func (driver *TeletypeDriver) OpenFile(cc server.ClientContext, path string, fla
     return os.OpenFile(path, flag, 0666)
 }
 
-func (driver *TeletypeDriver) GetFileInfo(cc server.ClientContext, path string) (os.FileInfo, error) {
+func (driver *TeletypeDriver) GetFileInfo(cc ClientContext, path string) (os.FileInfo, error) {
     path = driver.baseDir + path
 
     return os.Stat(path)
 }
 
-func (driver *TeletypeDriver) CanAllocate(cc server.ClientContext, size int) (bool, error) {
+func (driver *TeletypeDriver) CanAllocate(cc ClientContext, size int) (bool, error) {
     return true, nil
 }
 
-func (driver *TeletypeDriver) ChmodFile(cc server.ClientContext, path string, mode os.FileMode) error {
+func (driver *TeletypeDriver) ChmodFile(cc ClientContext, path string, mode os.FileMode) error {
 
 	// Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
 	return errors.New("CHMOD not implemented")
@@ -108,7 +107,7 @@ func (driver *TeletypeDriver) ChmodFile(cc server.ClientContext, path string, mo
     return os.Chmod(path, mode)
 }
 
-func (driver *TeletypeDriver) DeleteFile(cc server.ClientContext, path string) error {
+func (driver *TeletypeDriver) DeleteFile(cc ClientContext, path string) error {
 
 	// Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
 	return errors.New("RM not implemented")
@@ -117,7 +116,7 @@ func (driver *TeletypeDriver) DeleteFile(cc server.ClientContext, path string) e
     return os.Remove(path)
 }
 
-func (driver *TeletypeDriver) RenameFile(cc server.ClientContext, from, to string) error {
+func (driver *TeletypeDriver) RenameFile(cc ClientContext, from, to string) error {
 
 	// Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
 	return errors.New("MV not implemented")
@@ -127,8 +126,8 @@ func (driver *TeletypeDriver) RenameFile(cc server.ClientContext, from, to strin
     return os.Rename(from, to)
 }
 
-func (driver *TeletypeDriver) GetSettings() *server.Settings {
-	config := &server.Settings{}
+func (driver *TeletypeDriver) GetSettings() *Settings {
+	config := &Settings{}
 	config.Host = ""
 	config.Port = TTServerPortFTP
 	config.MaxConnections = 10000
