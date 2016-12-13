@@ -35,7 +35,7 @@ func (driver *TeletypeDriver) GetTLSConfig() (*tls.Config, error) {
         usr, _ := user.Current()
         directory := usr.HomeDir
         directory = directory + TTServerFTPCertPath
-        if cert, err := tls.LoadX509KeyPair(directory+"/mycert.crt", directory+"certs/mycert.key"); err == nil {
+        if cert, err := tls.LoadX509KeyPair(directory+"/mycert.crt", directory+"/mycert.key"); err == nil {
             driver.tlsConfig = &tls.Config{
                 NextProtos:   []string{"ftp"},
                 Certificates: []tls.Certificate{cert},
