@@ -82,11 +82,12 @@ var reqQMaxLength = 0
 func main() {
 
     // Get our external IP address
-    TTServerIP, err := ipify.GetIp()
+    ip, err := ipify.GetIp()
     if err != nil {
 		fmt.Printf("Can't get our own IP address\n");
         os.Exit(0)
 	}
+	TTServerIP = ip
     TTServer = "http://" + TTServerIP
 	
 	// Set up our signal handler
