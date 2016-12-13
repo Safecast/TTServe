@@ -29,7 +29,7 @@ const appAccessKey string = "bgCzOOs/5K16cuwP3/sGP9sea/4jKFwFEdTbYHw2fRE="
 const ttnServer string = "tcp://staging.thethingsnetwork.org:1883"
 const ttnTopic string = appEui + "/devices/+/up"
 
-// Safecast-related
+// Safecast-related 
 const SafecastUploadIP = "107.161.164.163"
 const SafecastUploadURL = "http://" + SafecastUploadIP + "/scripts/indextest.php?api_key=%s"
 const SafecastAppKey = "z3sHhgousVDDrCVXhzMT"
