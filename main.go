@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bytes"
     "os"
 	"os/signal"
 	"syscall"
@@ -13,7 +14,6 @@ import (
     "time"
     "encoding/json"
     "encoding/hex"
-    "github.com/rdegges/go-ipify"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
     "hash/crc32"
@@ -82,12 +82,18 @@ var reqQMaxLength = 0
 func main() {
 
     // Get our external IP address
-    ip, err := ipify.GetIp()
-    if err != nil {
-		fmt.Printf("Can't get our own IP address\n");
+	rsp, err := http.Get("http://checkip.amazonaws.com")
+	if err != nil {
+		fmt.Printf("Can't get our own IP address: %v\n", err);
         os.Exit(0)
 	}
-	TTServerIP = ip
+	defer rsp.Body.Close()
+	buf, err := ioutil.ReadAll(rsp.Body)
+	if err != nil {
+		fmt.Printf("Error fetching IP address: %v\n", err);
+        os.Exit(0)
+	}
+	TTServerIP = string(bytes.TrimSpace(buf))
     TTServer = "http://" + TTServerIP
 	
 	// Set up our signal handler
