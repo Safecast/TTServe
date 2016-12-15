@@ -58,9 +58,9 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
     case "/hi":
         fmt.Printf("%s Telecast \"Hello\" message\n", time.Now().Format(logDateFormat))
         if argRest == "" {
-            sendMessage(deviceID, "@ttserve: Hello.")
+            sendMessage(deviceID, "@server: Hello.")
         } else {
-            sendMessage(deviceID, "@ttserve: "+argRest)
+            sendMessage(deviceID, "@server: "+argRest)
         }
 
         // Handle an inbound upstream-only ping (blank message) by just ignoring it

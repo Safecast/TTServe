@@ -137,8 +137,7 @@ func (driver *TeletypeDriver) GetSettings() *Settings {
     return config
 }
 
-// Note: This is not a mistake. Interface can be pointers. There seems to be a lot of confusion around this in the
-//       server_ftp original code.
+// Create a new instance of an FTP driver
 func NewTeletypeDriver() *TeletypeDriver {
     usr, _ := user.Current()
     directory := usr.HomeDir

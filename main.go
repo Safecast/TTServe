@@ -546,7 +546,7 @@ func ttnInboundHandler() {
         } else {
             fmt.Printf("\n%s Received %d-byte payload from TTN\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload))
             // Note that there is some missing code here.  Ideally, in the appreq
-            // we supply json-formatted IPINFO to ttserve.  TTGATE tunneled this through
+            // we supply json-formatted IPINFO.  TTGATE tunneled this through
             // the GatewayEUI field of the DataUpAppReq, but in the TTN case we don't
             // have such a luxury.  That said, the DataUpAppReq for TTN DOES have the
             // Latitude/Longitude fields to work with.  Ideally we would then use
