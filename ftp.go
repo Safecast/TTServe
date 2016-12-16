@@ -2,6 +2,8 @@
 package main
 
 import (
+	"bytes"
+	"net/http"
     "os/user"
     "crypto/tls"
     "errors"
@@ -10,6 +12,33 @@ import (
     "fmt"
 	ftp "github.com/fclairamb/ftpserver/server"
 )
+
+// externalIP is a function to retrieve this machine's external IP address as a string
+var thisIP string = ""
+
+func externalIP() (string, error) {
+
+	// Cache the IP after the first time we've fetched it
+	if (thisIP != "") {
+		return thisIP, nil
+	}
+
+	// If you need to take a bet, amazon is about as reliable & sustainable a service as you can get
+	rsp, err := http.Get("http://checkip.amazonaws.com")
+	if err != nil {
+		return "", err
+	}
+	defer rsp.Body.Close()
+
+	buf, err := ioutil.ReadAll(rsp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	thisIP = string(bytes.TrimSpace(buf))
+	return thisIP, nil
+
+}
 
 // TeletypeDriver defines a very basic serverftp driver
 type TeletypeDriver struct {
@@ -132,7 +161,7 @@ func (driver *TeletypeDriver) RenameFile(cc ftp.ClientContext, from, to string) 
 
 func (driver *TeletypeDriver) GetSettings() *ftp.Settings {
     config := &ftp.Settings{}
-	config.PublicHost = ""
+	config.PublicHost, _ = externalIP()
     config.ListenHost = ""
     config.ListenPort = TTServerPortFTP
     config.MaxConnections = 10000
