@@ -18,6 +18,7 @@ import (
     "github.com/rayozzie/teletype-proto/golang"
     "hash/crc32"
     MQTT "github.com/eclipse/paho.mqtt.golang"
+	ftp "github.com/fclairamb/ftpserver/server"
 )
 
 // Derived from "ttnctl applications", the AppEUI and its Access Key
@@ -57,7 +58,7 @@ const logDateFormat string = "2006-01-02 15:04:05"
 
 // FTP
 var (
-	ftpServer *FtpServer
+	ftpServer *ftp.FtpServer
 )
 
 // Statics
@@ -178,7 +179,7 @@ func ftpInboundHandler() {
 
     fmt.Printf("Now handling inbound FTP on: %s:%d\n", TTServer, TTServerPortFTP)
 
-	ftpServer = NewFtpServer(NewTeletypeDriver())
+	ftpServer = ftp.NewFtpServer(NewTeletypeDriver())
 	err := ftpServer.ListenAndServe()
 	if err != nil {
 	    fmt.Printf("Error listening on FTP: %s\n", err)
