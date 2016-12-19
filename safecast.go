@@ -55,8 +55,8 @@ type safecastStats struct {
     StatsCommsPowerFails  uint32 `json:"comms_power_fails,omitempty"`
     StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
     StatsOneshots         uint32 `json:"oneshots,omitempty"`
-    StatsCell		      string `json:"cell,omitempty"`
-    StatsDfu		      string `json:"dfu,omitempty"`
+    StatsCell             string `json:"cell,omitempty"`
+    StatsDfu              string `json:"dfu,omitempty"`
 }
 
 // Class used to sort seen devices
@@ -243,8 +243,8 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         sc1.EnvPress = fmt.Sprintf("%.2f", msg.GetEnvPressure())
     }
 
-	sc1.Transport = Transport
-	
+    sc1.Transport = Transport
+
     if msg.WirelessSNR != nil {
         theSNR = msg.GetWirelessSNR()
     } else {
@@ -321,7 +321,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
         // Either an old-style upload, and the kind used by bGeigies,
         // or an upload of metadata without any kind of CPM
-        uploadToSafecast(sc1)
+        if (!uploadToSafecast(sc1)) {
+            return
+        }
 
         // Write a new-style entry to the log
         sc2 := sc1
@@ -347,14 +349,18 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() & 0xfffffffe), 10)
             sc2.Unit = UnitCPM
             sc2.Value = fmt.Sprintf("%d", msg.GetCpm0())
-            uploadToSafecast(sc2)
+            if (!uploadToSafecast(sc2)) {
+                return
+            }
         }
         if msg.Cpm1 != nil {
             sc2 := sc
             sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() | 0x00000001), 10)
             sc2.Unit = UnitCPM
             sc2.Value = fmt.Sprintf("%d", msg.GetCpm1())
-            uploadToSafecast(sc2)
+            if (!uploadToSafecast(sc2)) {
+                return
+            }
         }
 
         // Write it to the log
@@ -376,37 +382,49 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         sc2 := sc
         sc2.Unit = UnitBatVoltage
         sc2.Value = sc1.BatVoltage
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.BatterySOC != nil {
         sc2 := sc
         sc2.Unit = UnitBatSOC
         sc2.Value = sc1.BatSOC
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.BatteryCurrent != nil {
         sc2 := sc
         sc2.Unit = UnitBatCurrent
         sc2.Value = sc1.BatCurrent
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.EnvTemperature != nil {
         sc2 := sc
         sc2.Unit = UnitEnvTemp
         sc2.Value = sc1.EnvTemp
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.EnvHumidity != nil {
         sc2 := sc
         sc2.Unit = UnitEnvHumid
         sc2.Value = sc1.EnvHumid
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.EnvPressure != nil {
         sc2 := sc
         sc2.Unit = UnitEnvPress
         sc2.Value = sc1.EnvPress
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
 
     // Only bother uploading certain values if they coincides with another
@@ -419,13 +437,17 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             sc2 := sc
             sc2.Unit = UnitWirelessSNR
             sc2.Value = sc1.WirelessSNR
-            uploadToSafecast(sc2)
+            if (!uploadToSafecast(sc2)) {
+                return
+            }
         }
 
         sc2 := sc
         sc2.Unit = UnitTransport
         sc2.Value = sc1.Transport
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
 
     }
 
@@ -433,122 +455,162 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         sc2 := sc
         sc2.Unit = UnitPmsPm01_0
         sc2.Value = sc1.PmsPm01_0
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.PmsPm02_5 != nil {
         sc2 := sc
         sc2.Unit = UnitPmsPm02_5
         sc2.Value = sc1.PmsPm02_5
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.PmsPm10_0 != nil {
         sc2 := sc
         sc2.Unit = UnitPmsPm10_0
         sc2.Value = sc1.PmsPm10_0
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.PmsC00_30 != nil {
         sc2 := sc
         sc2.Unit = UnitPmsC00_30
         sc2.Value = sc1.PmsC00_30
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.PmsC00_50 != nil {
         sc2 := sc
         sc2.Unit = UnitPmsC00_50
         sc2.Value = sc1.PmsC00_50
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.PmsC01_00 != nil {
         sc2 := sc
         sc2.Unit = UnitPmsC01_00
         sc2.Value = sc1.PmsC01_00
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.PmsC02_50 != nil {
         sc2 := sc
         sc2.Unit = UnitPmsC02_50
         sc2.Value = sc1.PmsC02_50
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.PmsC05_00 != nil {
         sc2 := sc
         sc2.Unit = UnitPmsC05_00
         sc2.Value = sc1.PmsC05_00
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.PmsC10_00 != nil {
         sc2 := sc
         sc2.Unit = UnitPmsC10_00
         sc2.Value = sc1.PmsC10_00
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.PmsCsecs != nil {
         sc2 := sc
         sc2.Unit = UnitPmsCsecs
         sc2.Value = sc1.PmsCsecs
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
 
     if msg.OpcPm01_0 != nil {
         sc2 := sc
         sc2.Unit = UnitOpcPm01_0
         sc2.Value = sc1.OpcPm01_0
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.OpcPm02_5 != nil {
         sc2 := sc
         sc2.Unit = UnitOpcPm02_5
         sc2.Value = sc1.OpcPm02_5
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.OpcPm10_0 != nil {
         sc2 := sc
         sc2.Unit = UnitOpcPm10_0
         sc2.Value = sc1.OpcPm10_0
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.OpcC00_38 != nil {
         sc2 := sc
         sc2.Unit = UnitOpcC00_38
         sc2.Value = sc1.OpcC00_38
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.OpcC00_54 != nil {
         sc2 := sc
         sc2.Unit = UnitOpcC00_54
         sc2.Value = sc1.OpcC00_54
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.OpcC01_00 != nil {
         sc2 := sc
         sc2.Unit = UnitOpcC01_00
         sc2.Value = sc1.OpcC01_00
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.OpcC02_10 != nil {
         sc2 := sc
         sc2.Unit = UnitOpcC02_10
         sc2.Value = sc1.OpcC02_10
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.OpcC05_00 != nil {
         sc2 := sc
         sc2.Unit = UnitOpcC05_00
         sc2.Value = sc1.OpcC05_00
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.OpcC10_00 != nil {
         sc2 := sc
         sc2.Unit = UnitOpcC10_00
         sc2.Value = sc1.OpcC10_00
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
     if msg.OpcCsecs != nil {
         sc2 := sc
         sc2.Unit = UnitOpcCsecs
         sc2.Value = sc1.OpcCsecs
-        uploadToSafecast(sc2)
+        if (!uploadToSafecast(sc2)) {
+            return
+        }
     }
 
 }
@@ -627,24 +689,28 @@ func endTransaction(transaction int, errstr string) {
 }
 
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
-func uploadToSafecast(sc SafecastData) {
+func uploadToSafecast(sc SafecastData) bool {
 
     // We've found that in certain cases the server gets overloaded.  When we run into those cases,
-	// turn this OFF and things will slow down.  (Obviously this is not the preferred mode of operation,
-	// because it creates a huge queue of things waiting to be uploaded.)
-	uploadInParallel := false;
-	
-	if (uploadInParallel) {
-		go doUploadToSafecast(sc)
-	} else {
-		doUploadToSafecast(sc)
-	    time.Sleep(1 * time.Second)
-	}
+    // turn this OFF and things will slow down.  (Obviously this is not the preferred mode of operation,
+    // because it creates a huge queue of things waiting to be uploaded.)
+    uploadInParallel := false;
+
+    if (uploadInParallel) {
+        go doUploadToSafecast(sc)
+    } else {
+        if (!doUploadToSafecast(sc)) {
+            return false
+        }
+        time.Sleep(1 * time.Second)
+    }
+
+    return true
 
 }
 
 // Upload a Safecast data structure to the Safecast service
-func doUploadToSafecast(sc SafecastData) {
+func doUploadToSafecast(sc SafecastData) bool {
 
     transaction := beginTransaction(SafecastUploadURL, sc.Unit, sc.Value)
 
@@ -658,8 +724,8 @@ func doUploadToSafecast(sc SafecastData) {
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{
-		Timeout: time.Second * 15,
-	}
+        Timeout: time.Second * 15,
+    }
     resp, err := httpclient.Do(req)
 
     errString := ""
@@ -675,6 +741,7 @@ func doUploadToSafecast(sc SafecastData) {
 
     endTransaction(transaction, errString)
 
+    return errString == ""
 }
 
 // Check to see if this is a duplicate of a message we've recently seen
