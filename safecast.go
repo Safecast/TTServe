@@ -341,7 +341,8 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         writeToLog(sc2)
 
     } else if msg.DeviceIDNumber != nil {
-
+		var uploaded = true
+		
         // A new style upload has "cpm0" or "cpm1" values, and
         // must have a numeric device ID
         if msg.Cpm0 != nil {
@@ -349,18 +350,14 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() & 0xfffffffe), 10)
             sc2.Unit = UnitCPM
             sc2.Value = fmt.Sprintf("%d", msg.GetCpm0())
-            if (!uploadToSafecast(sc2)) {
-                return
-            }
+            uploaded = uploadToSafecast(sc2)
         }
         if msg.Cpm1 != nil {
             sc2 := sc
             sc2.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() | 0x00000001), 10)
             sc2.Unit = UnitCPM
             sc2.Value = fmt.Sprintf("%d", msg.GetCpm1())
-            if (!uploadToSafecast(sc2)) {
-                return
-            }
+            uploaded = uploadToSafecast(sc2)
         }
 
         // Write it to the log
@@ -372,6 +369,11 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             sc2.Cpm1 = fmt.Sprintf("%d", msg.GetCpm1())
         }
         writeToLog(sc2)
+
+		// Exit if not uploaded
+		if (!uploaded) {
+			return
+		}
 
     }
 
