@@ -110,7 +110,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-// Send a text string to the Safecast #ops channel
+// Send a text string to the Safecast #ops channel 
 func sendToSafecastOps(msg string) {
 	sendToOpsViaSlack(msg, "https://hooks.slack.com/services/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")
 }
