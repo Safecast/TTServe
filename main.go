@@ -648,7 +648,7 @@ func commonRequestHandler() {
             // Is it something we recognize as being from safecast?
         case teletype.Telecast_BGEIGIE_NANO:
             fallthrough
-        case teletype.Telecast_SIMPLECAST:
+        case teletype.Telecast_SOLARCAST:
             metadata := AppReq.TTN.Metadata[0]
             ProcessSafecastMessage(msg, checksum, metadata.GatewayEUI, AppReq.Transport,
                 metadata.ServerTime,
