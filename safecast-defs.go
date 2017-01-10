@@ -50,6 +50,21 @@ type SafecastDataV1 struct {
     Transport		string `json:"transport,omitempty"`
 }
 
+// Safecast stats
+type safecastStatsV1 struct {
+    StatsUptimeMinutes    uint32 `json:"uptime_min,omitempty"`
+    StatsAppVersion       string `json:"version,omitempty"`
+    StatsDeviceParams     string `json:"config,omitempty"`
+    StatsTransmittedBytes uint32 `json:"transmitted_bytes,omitempty"`
+    StatsReceivedBytes    uint32 `json:"received_bytes,omitempty"`
+    StatsCommsResets      uint32 `json:"comms_resets,omitempty"`
+    StatsCommsPowerFails  uint32 `json:"comms_power_fails,omitempty"`
+    StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
+    StatsOneshots         uint32 `json:"oneshots,omitempty"`
+    StatsCell             string `json:"cell,omitempty"`
+    StatsDfu              string `json:"dfu,omitempty"`
+}
+
 type SafecastDataV2 struct {
     CapturedAt		string `json:"captured_at,omitempty"`
     DeviceID		uint32 `json:"device_id,omitempty"`
@@ -86,7 +101,17 @@ type SafecastDataV2 struct {
     Cpm0			float32 `json:"lndp_cpm,omitempty"`
     Cpm1			float32 `json:"lndc_cpm,omitempty"`
     Transport		string `json:"transport,omitempty"`
-    Stats			string `json:"stats,omitempty"`
+    StatsUptimeMinutes    uint32 `json:"uptime_min,omitempty"`
+    StatsAppVersion       string `json:"version,omitempty"`
+    StatsDeviceParams     string `json:"config,omitempty"`
+    StatsTransmittedBytes uint32 `json:"transmitted_bytes,omitempty"`
+    StatsReceivedBytes    uint32 `json:"received_bytes,omitempty"`
+    StatsCommsResets      uint32 `json:"comms_resets,omitempty"`
+    StatsCommsPowerFails  uint32 `json:"comms_power_fails,omitempty"`
+    StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
+    StatsOneshots         uint32 `json:"oneshots,omitempty"`
+    StatsCell             string `json:"cell,omitempty"`
+    StatsDfu              string `json:"dfu,omitempty"`
     Message			string `json:"message,omitempty"`
 }
 

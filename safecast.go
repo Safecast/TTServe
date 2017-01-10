@@ -44,21 +44,6 @@ type receivedMessage struct {
 }
 var recentlyReceived [25]receivedMessage
 
-// Safecast stats
-type safecastStats struct {
-    StatsUptimeMinutes    uint32 `json:"uptime_min,omitempty"`
-    StatsAppVersion       string `json:"version,omitempty"`
-    StatsDeviceParams     string `json:"config,omitempty"`
-    StatsTransmittedBytes uint32 `json:"transmitted_bytes,omitempty"`
-    StatsReceivedBytes    uint32 `json:"received_bytes,omitempty"`
-    StatsCommsResets      uint32 `json:"comms_resets,omitempty"`
-    StatsCommsPowerFails  uint32 `json:"comms_power_fails,omitempty"`
-    StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
-    StatsOneshots         uint32 `json:"oneshots,omitempty"`
-    StatsCell             string `json:"cell,omitempty"`
-    StatsDfu              string `json:"dfu,omitempty"`
-}
-
 // Class used to sort seen devices
 type ByKey []seenDevice
 func (a ByKey) Len() int      { return len(a) }
@@ -176,42 +161,52 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1a.Unit = UnitStats
         scV1a.Value = fmt.Sprintf("%d", msg.GetStatsUptimeMinutes())
 
-        var scStats safecastStats
+        var scStats safecastStatsV1
         scStats.StatsUptimeMinutes = msg.GetStatsUptimeMinutes()
+        scV2a.StatsUptimeMinutes = msg.GetStatsUptimeMinutes()
         if (msg.StatsAppVersion != nil) {
             scStats.StatsAppVersion = msg.GetStatsAppVersion()
+            scV2a.StatsAppVersion = msg.GetStatsAppVersion()
         }
         if (msg.StatsDeviceParams != nil) {
             scStats.StatsDeviceParams = msg.GetStatsDeviceParams()
+            scV2a.StatsDeviceParams = msg.GetStatsDeviceParams()
         }
         if (msg.StatsTransmittedBytes != nil) {
             scStats.StatsTransmittedBytes = msg.GetStatsTransmittedBytes()
+            scV2a.StatsTransmittedBytes = msg.GetStatsTransmittedBytes()
         }
         if (msg.StatsReceivedBytes != nil) {
             scStats.StatsReceivedBytes = msg.GetStatsReceivedBytes()
+            scV2a.StatsReceivedBytes = msg.GetStatsReceivedBytes()
         }
         if (msg.StatsCommsResets != nil) {
             scStats.StatsCommsResets = msg.GetStatsCommsResets()
+            scV2a.StatsCommsResets = msg.GetStatsCommsResets()
         }
         if (msg.StatsCommsPowerFails != nil) {
             scStats.StatsCommsPowerFails = msg.GetStatsCommsPowerFails()
+            scV2a.StatsCommsPowerFails = msg.GetStatsCommsPowerFails()
         }
         if (msg.StatsOneshots != nil) {
             scStats.StatsOneshots = msg.GetStatsOneshots()
+            scV2a.StatsOneshots = msg.GetStatsOneshots()
         }
         if (msg.StatsMotiondrops != nil) {
             scStats.StatsMotiondrops = msg.GetStatsMotiondrops()
+            scV2a.StatsMotiondrops = msg.GetStatsMotiondrops()
         }
         if (msg.StatsCell != nil) {
             scStats.StatsCell = msg.GetStatsCell()
+            scV2a.StatsCell = msg.GetStatsCell()
         }
         if (msg.StatsDfu != nil) {
             scStats.StatsDfu = msg.GetStatsDfu()
+            scV2a.StatsDfu = msg.GetStatsDfu()
         }
 
         scsJSON, _ := json.Marshal(scStats)
         scV1a.DeviceTypeID = string(scsJSON)
-		scV2a.Stats = string(scsJSON)
 
     } else if msg.Message != nil {
 
