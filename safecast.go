@@ -377,9 +377,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             did := uint64(msg.GetDeviceIDNumber())
             if ((did & 0x01) == 0) {
                 scV1b.Cpm0 = scV1a.Value
+				scV2b.Cpm0 = float32(msg.GetValue())
             } else {
                 scV1b.DeviceID = strconv.FormatUint(did & 0xfffffffe, 10)
                 scV1b.Cpm1 = scV1a.Value
+                scV2b.DeviceID = uint32(did & 0xfffffffe)
+				scV2b.Cpm1 = float32(msg.GetValue())
             }
             scV1b.Unit = ""
             scV1b.Value = ""
