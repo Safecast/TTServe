@@ -2,7 +2,7 @@
 
 package main
 
-type SafecastData struct {
+type SafecastDataV1 struct {
     CapturedAt		string `json:"captured_at,omitempty"`   // 2016-02-20T14:02:25Z
     ChannelID		string `json:"channel_id,omitempty"`    // nil
     DeviceID		string `json:"device_id,omitempty"`     // 140
@@ -48,6 +48,46 @@ type SafecastData struct {
     Cpm0			string `json:"cpm0,omitempty"`
     Cpm1			string `json:"cpm1,omitempty"`
     Transport		string `json:"transport,omitempty"`
+}
+
+type SafecastDataV2 struct {
+    CapturedAt		string `json:"captured_at,omitempty"`
+    DeviceID		uint32 `json:"device_id,omitempty"`
+    Height			float32 `json:"height,omitempty"`
+    Latitude		float32 `json:"latitude,omitempty"`
+    Longitude		float32 `json:"longitude,omitempty"`
+    BatVoltage		float32 `json:"bat_voltage,omitempty"`
+    BatSOC			float32 `json:"bat_soc,omitempty"`
+    BatCurrent		float32 `json:"bat_current,omitempty"`
+    WirelessSNR		float32 `json:"lora_snr,omitempty"`
+    EnvTemp			float32 `json:"env_temp,omitempty"`
+    EnvHumid		float32 `json:"env_humid,omitempty"`
+    EnvPress		float32 `json:"env_press,omitempty"`
+    PmsPm01_0		float32 `json:"pms_pm01_0,omitempty"`
+    PmsPm02_5		float32 `json:"pms_pm02_5,omitempty"`
+    PmsPm10_0		float32 `json:"pms_pm10_0,omitempty"`
+    PmsC00_30		uint32 `json:"pms_c00_30,omitempty"`
+    PmsC00_50		uint32 `json:"pms_c00_50,omitempty"`
+    PmsC01_00		uint32 `json:"pms_c01_00,omitempty"`
+    PmsC02_50		uint32 `json:"pms_c02_50,omitempty"`
+    PmsC05_00		uint32 `json:"pms_c05_00,omitempty"`
+    PmsC10_00		uint32 `json:"pms_c10_00,omitempty"`
+    PmsCsecs		uint32 `json:"pms_csecs,omitempty"`
+    OpcPm01_0		float32 `json:"opc_pm01_0,omitempty"`
+    OpcPm02_5		float32 `json:"opc_pm02_5,omitempty"`
+    OpcPm10_0		float32 `json:"opc_pm10_0,omitempty"`
+    OpcC00_38		uint32 `json:"opc_c00_38,omitempty"`
+    OpcC00_54		uint32 `json:"opc_c00_54,omitempty"`
+    OpcC01_00		uint32 `json:"opc_c01_00,omitempty"`
+    OpcC02_10		uint32 `json:"opc_c02_10,omitempty"`
+    OpcC05_00		uint32 `json:"opc_c05_00,omitempty"`
+    OpcC10_00		uint32 `json:"opc_c10_00,omitempty"`
+    OpcCsecs		uint32 `json:"opc_csecs,omitempty"`
+    Cpm0			float32 `json:"lndp_cpm,omitempty"`
+    Cpm1			float32 `json:"lndc_cpm,omitempty"`
+    Transport		string `json:"transport,omitempty"`
+    Stats			string `json:"stats,omitempty"`
+    Message			string `json:"stats,omitempty"`
 }
 
 // These are strings used as the "unit" for the extended safecast uploads, and
