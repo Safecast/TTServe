@@ -338,7 +338,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             sc2.Unit = ""
             sc2.Value = ""
         }
-        writeToLog(sc2)
+        writeToLogs(sc2)
 
     } else if msg.DeviceIDNumber != nil {
 		var uploaded = true
@@ -368,7 +368,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         if msg.Cpm1 != nil {
             sc2.Cpm1 = fmt.Sprintf("%d", msg.GetCpm1())
         }
-        writeToLog(sc2)
+        writeToLogs(sc2)
 
 		// Exit if not uploaded
 		if (!uploaded) {
@@ -923,8 +923,14 @@ func sendSafecastDeviceSummaryToSlack() {
 
 }
 
+// Write to both logs
+func writeToLogs(sc SafecastData) {
+	writeToCSV(sc)
+	writeToJSON(sc)
+}
+
 // Write the value to the log
-func writeToLog(sc SafecastData) {
+func writeToCSV(sc SafecastData) {
 
     // The file pathname on the server
     usr, _ := user.Current()
@@ -1000,6 +1006,39 @@ func writeToLog(sc SafecastData) {
     s = s + "\r\n"
 
     fd.WriteString(s);
+
+    // Close and exit
+    fd.Close();
+
+}
+
+// Write the value to the log
+func writeToJSON(sc SafecastData) {
+
+    // The file pathname on the server
+    usr, _ := user.Current()
+    directory := usr.HomeDir
+    directory = directory + TTServerLogPath
+
+    // Extract the device number and form a filename
+    file := directory + "/" + sc.DeviceID + ".json"
+
+    // Open it
+    fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
+    if (err != nil) {
+
+        // Attempt to create the file if it doesn't already exist
+        fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+        if (err != nil) {
+            fmt.Printf("Logging: error creating file %s: %s\n", file, err);
+            return;
+        }
+
+    }
+
+    // Turn stats into a safe string writing
+    scJSON, _ := json.Marshal(sc)
+    fd.WriteString(string(scJSON));
 
     // Close and exit
     fd.Close();
