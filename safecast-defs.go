@@ -87,7 +87,7 @@ type SafecastDataV2 struct {
     Cpm1			float32 `json:"lndc_cpm,omitempty"`
     Transport		string `json:"transport,omitempty"`
     Stats			string `json:"stats,omitempty"`
-    Message			string `json:"stats,omitempty"`
+    Message			string `json:"message,omitempty"`
 }
 
 // These are strings used as the "unit" for the extended safecast uploads, and
