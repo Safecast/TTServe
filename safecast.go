@@ -1083,7 +1083,7 @@ func writeToJSON(scV2 SafecastDataV2) {
     directory = directory + TTServerLogPath
 
     // Extract the device number and form a filename
-    file := directory + "/" + string(scV2.DeviceID) + ".json"
+    file := directory + "/" + fmt.Sprintf("%d", scV2.DeviceID) + ".json"
 
     // Open it
     fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
