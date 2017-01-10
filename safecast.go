@@ -229,7 +229,6 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
                 scV1a.Unit = fmt.Sprintf("%s", msg.GetUnit())
             }
             scV1a.Value = fmt.Sprintf("%d", msg.GetValue())
-			scV2a.Cpm0 = float32(msg.GetValue())
         }
 
     }
