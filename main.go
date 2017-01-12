@@ -30,9 +30,12 @@ const ttnServer string = "tcp://staging.thethingsnetwork.org:1883"
 const ttnTopic string = appEui + "/devices/+/up"
 
 // Safecast-related 
-const SafecastUploadIP = "107.161.164.163"
-const SafecastUploadURL = "http://" + SafecastUploadIP + "/scripts/indextest.php?api_key=%s"
-const SafecastAppKey = "z3sHhgousVDDrCVXhzMT"
+const SafecastV1UploadIP = "107.161.164.163"
+const SafecastV1UploadURL = "http://" + SafecastV1UploadIP + "/scripts/indextest.php?api_key=%s"
+const SafecastV1AppKey = "z3sHhgousVDDrCVXhzMT"
+const SafecastV2UploadIP = ""
+const SafecastV2UploadURL = "http://" + SafecastV2UploadIP + "/scripts/indextest.php?api_key=%s"
+const SafecastV2AppKey = "z3sHhgousVDDrCVXhzMT"
 
 // File system related paths relative to the server's HomeDir
 const TTServerLogPath = "/safecast/log"

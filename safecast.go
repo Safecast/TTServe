@@ -735,9 +735,9 @@ func endTransaction(transaction int, errstr string) {
         // If all of them have the same timeout value, the server must be down.
         s := ""
         if (theMin == theMax && theMin == theMean) {
-            s = fmt.Sprintf("Safecast API on %s: all of the most recent %d uploads failed. Please check the service.", SafecastUploadIP, theCount)
+            s = fmt.Sprintf("Safecast API: all of the most recent %d uploads failed. Please check the service.", theCount)
         } else {
-            s = fmt.Sprintf("Safecast API on %s: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", SafecastUploadIP, theCount, theMin, theMax, theMean)
+            s = fmt.Sprintf("Safecast API: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", theCount, theMin, theMax, theMean)
         }
         sendToSafecastApi(s);
     }
@@ -745,8 +745,49 @@ func endTransaction(transaction int, errstr string) {
 }
 
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
-func uploadToSafecastV2(scV1 SafecastDataV2) bool {
-	return false
+func uploadToSafecastV2(scV2 SafecastDataV2) bool {
+    go doUploadToSafecastV2(scV2)
+	return true
+}
+
+// Upload a Safecast data structure to the Safecast service
+func doUploadToSafecastV2(scV2 SafecastDataV2) bool {
+
+	// while waiting for it
+	if (SafecastV2UploadURL == "") {
+		return false
+	}
+	
+    transaction := beginTransaction(SafecastV2UploadURL, "(aggregate)", "")
+
+    scJSON, _ := json.Marshal(scV2)
+
+    if false {
+        fmt.Printf("%s\n", scJSON)
+    }
+
+    req, err := http.NewRequest("POST", fmt.Sprintf(SafecastV2UploadURL, SafecastV2AppKey), bytes.NewBuffer(scJSON))
+    req.Header.Set("User-Agent", "TTSERVE")
+    req.Header.Set("Content-Type", "application/json")
+    httpclient := &http.Client{
+        Timeout: time.Second * 15,
+    }
+    resp, err := httpclient.Do(req)
+
+    errString := ""
+    if (err == nil) {
+        resp.Body.Close()
+    } else {
+        // Eliminate the URL from the string because exposing the API key is not secure.
+        // Empirically we've seen that the actual error message is after the rightmost colon
+        errString = fmt.Sprintf("%s", err)
+        s := strings.Split(errString, ":")
+        errString = s[len(s)-1]
+    }
+
+    endTransaction(transaction, errString)
+
+    return errString == ""
 }
 
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
@@ -773,7 +814,7 @@ func uploadToSafecastV1(scV1 SafecastDataV1) bool {
 // Upload a Safecast data structure to the Safecast service
 func doUploadToSafecastV1(scV1 SafecastDataV1) bool {
 
-    transaction := beginTransaction(SafecastUploadURL, scV1.Unit, scV1.Value)
+    transaction := beginTransaction(SafecastV1UploadURL, scV1.Unit, scV1.Value)
 
     scJSON, _ := json.Marshal(scV1)
 
@@ -781,7 +822,7 @@ func doUploadToSafecastV1(scV1 SafecastDataV1) bool {
         fmt.Printf("%s\n", scJSON)
     }
 
-    req, err := http.NewRequest("POST", fmt.Sprintf(SafecastUploadURL, SafecastAppKey), bytes.NewBuffer(scJSON))
+    req, err := http.NewRequest("POST", fmt.Sprintf(SafecastV1UploadURL, SafecastV1AppKey), bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{
@@ -890,14 +931,14 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
             // As of 10/2016, I've chosen to suppress single-instance errors simply because they occur too frequently,
             // i.e. every day or few days.  When we ultimately move the dev server to AWS, we should re-enable this.
             if (false) {
-                sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to Safecast at %s:%s)",
-                    httpTransactionErrorTime, SafecastUploadIP, httpTransactionErrorString));
+                sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to Safecast:%s)",
+                    httpTransactionErrorTime, httpTransactionErrorString));
             }
         } else {
-            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading to Safecast at %s in %d minutes:%s)",
-                httpTransactionErrorTime, httpTransactionErrors, SafecastUploadIP, PeriodMinutes, httpTransactionErrorString));
-            sendToSafecastApi(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading to Safecast at %s in %d minutes:%s)",
-                httpTransactionErrorTime, httpTransactionErrors, SafecastUploadIP, PeriodMinutes, httpTransactionErrorString));
+            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading to Safecast in %d minutes:%s)",
+                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorString));
+            sendToSafecastApi(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading to Safecast in %d minutes:%s)",
+                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorString));
         }
         httpTransactionErrors = 0
         httpTransactionErrorFirst = true;
