@@ -52,7 +52,8 @@ const TTServerPortFTP int = 8083
 const TTServerURLSend string = "/send"
 const TTServerURLGithub string = "/github"
 const TTServerURLSlack string = "/slack"
-const TTServerURLRedirect string = "/scripts/"
+const TTServerURLRedirect1 string = "/scripts/"
+const TTServerURLRedirect2 string = "/"
 
 // Our server
 var TTServer string
@@ -204,8 +205,11 @@ func webInboundHandler() {
     http.HandleFunc(TTServerURLSlack, inboundWebSlackHandler)
     fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLSlack)
 
-    http.HandleFunc(TTServerURLRedirect, inboundWebRedirectHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLRedirect)
+    http.HandleFunc(TTServerURLRedirect1, inboundWebRedirectHandler)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLRedirect1)
+
+    http.HandleFunc(TTServerURLRedirect2, inboundWebRedirectHandler)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLRedirect2)
 
     http.ListenAndServe(TTServerPort, nil)
 }
