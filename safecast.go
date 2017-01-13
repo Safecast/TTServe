@@ -139,15 +139,11 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 		minute := uint32(i64)
 		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[10], s[11]), 10, 32)
 		second := uint32(i64)
-		fmt.Printf("day=%d mon=%d yr=%d hr=%d min=%d sec=%d\n", day, month, year, hour, minute, second);
 		tbefore := time.Date(int(year), time.Month(month), int(day), int(hour), int(minute), int(second), 0, time.UTC)
-		fmt.Printf("%v\n", tbefore);
 		tafter := tbefore.Add(time.Duration(offset) * time.Second)
-		fmt.Printf("%v\n", tafter);
 		tstr := tafter.UTC().Format("2006-01-02T15:04:05Z")		
         scV1.CapturedAt = tstr
         scV2.CapturedAt = tstr
-		fmt.Printf("%s\n", tstr);
 	}
 
     // Include lat/lon/alt on all messages, including metadata
