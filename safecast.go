@@ -127,7 +127,6 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 			offset = msg.GetCapturedAtOffset()
 		}
 		s := fmt.Sprintf("%06d%06d", msg.GetCapturedAtDate(), msg.GetCapturedAtTime())
-		fmt.Printf("%s %d\n", s, offset);
 		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[0], s[1]), 10, 32)
 		day := uint32(i64)
 		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[2], s[3]), 10, 32)
@@ -141,7 +140,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[10], s[11]), 10, 32)
 		second := uint32(i64)
 		fmt.Printf("day=%d mon=%d yr=%d hr=%d min=%d sec=%d\n", day, month, year, hour, minute, second);
-
+		tbefore := time.Date(int(year), time.Month(month), int(day), int(hour), int(minute), int(second), 0, time.UTC)
+		fmt.Printf("%v\n", tbefore);
+		tafter := tbefore.Add(time.Duration(offset) * time.Second)
+		fmt.Printf("%v\n", tafter);
 		
 	}
 
