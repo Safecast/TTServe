@@ -1164,7 +1164,7 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 	v2.CapturedAt = v1.CapturedAt
 
 	i64, _ = strconv.ParseUint(v1.DeviceID, 10, 32)
-	subtype = v2.DeviceID % 10
+	subtype = uint32(i64) % 10
 	v2.DeviceID = uint32(i64) - subtype
 
 	f64, _ = strconv.ParseFloat(v1.Height, 32)
@@ -1199,6 +1199,7 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 
 	default:
 		fmt.Sprintf("*** Warning ***\n*** Unit %s = Value %s UNRECOGNIZED\n", v1.Unit, v1.Value)
+
 	}
 
 	return v2
