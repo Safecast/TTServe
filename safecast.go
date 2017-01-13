@@ -1164,8 +1164,8 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 	v2.CapturedAt = v1.CapturedAt
 
 	i64, _ = strconv.ParseUint(v1.DeviceID, 10, 32)
-	v2.DeviceID = uint32(i64)
 	subtype = v2.DeviceID % 10
+	v2.DeviceID = uint32(i64) - subtype
 
 	f64, _ = strconv.ParseFloat(v1.Height, 32)
 	v2.Height = float32(f64)
