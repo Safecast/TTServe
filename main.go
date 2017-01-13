@@ -439,9 +439,11 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
 	// https://golang.org/pkg/net/http/#Request
+	fmt.Printf("Redirect Query: %s\n", req.URL.RawQuery)
 	fmt.Printf("Redirect URI: %s\n", req.RequestURI)
 	fmt.Printf("Redirect Body: %v\n", body)
 
+	// postSafecastV1ToSafecast
 	// Attempt to unmarshal it as a Safecast V1 data structure
     err = json.Unmarshal(body, &sreq)
 	if (err != nil) {
