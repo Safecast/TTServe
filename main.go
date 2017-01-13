@@ -194,7 +194,7 @@ func ftpInboundHandler() {
 
 // Kick off inbound messages coming from all sources, then serve HTTP
 func webInboundHandler() {
-
+	
     http.HandleFunc(TTServerURLSend, inboundWebTTGateHandler)
     fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLSend)
 
@@ -212,8 +212,11 @@ func webInboundHandler() {
 
     http.HandleFunc(TTServerURLTest, inboundWebTestHandler)
 
+	go func() {
+		http.ListenAndServe(":80", nil)
+	}()
+
     http.ListenAndServe(TTServerPort, nil)
-    http.ListenAndServe(":80", nil)
 
 }
 
