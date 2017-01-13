@@ -119,6 +119,17 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV2.CapturedAt = defaultTime
     }
 
+	// Handle the GPS capture fields
+	if (msg.CapturedAtDate != nil && msg.CapturedAtTime != nil) {
+		var offset uint32 = 0
+		if (msg.CapturedAtOffset != nil) {
+			offset = msg.GetCapturedAtOffset()
+		}
+		s := fmt.Sprintf("%06d%06d", msg.GetCapturedAtDate(), msg.GetCapturedAtTime())
+		fmt.Printf("%s %d\n", s, offset);
+
+	}
+
     // Include lat/lon/alt on all messages, including metadata
     if msg.Latitude != nil {
         scV1.Latitude = fmt.Sprintf("%f", msg.GetLatitude())
