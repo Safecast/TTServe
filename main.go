@@ -212,8 +212,8 @@ func webInboundHandler() {
 
     http.HandleFunc(TTServerURLTest, inboundWebTestHandler)
 
+    http.ListenAndServe(TTServerPort, nil)
     http.ListenAndServe(":80", nil)
-//    http.ListenAndServe(TTServerPort, nil)
 
 }
 
