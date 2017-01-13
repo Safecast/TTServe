@@ -2,10 +2,10 @@
 package main
 
 import (
-	"bytes"
+    "bytes"
     "os"
-	"os/signal"
-	"syscall"
+    "os/signal"
+    "syscall"
     "io"
     "io/ioutil"
     "net/http"
@@ -18,7 +18,7 @@ import (
     "github.com/rayozzie/teletype-proto/golang"
     "hash/crc32"
     MQTT "github.com/eclipse/paho.mqtt.golang"
-	ftp "github.com/fclairamb/ftpserver/server"
+    ftp "github.com/fclairamb/ftpserver/server"
 )
 
 // Derived from "ttnctl applications", the AppEUI and its Access Key
@@ -29,7 +29,7 @@ const appAccessKey string = "bgCzOOs/5K16cuwP3/sGP9sea/4jKFwFEdTbYHw2fRE="
 const ttnServer string = "tcp://staging.thethingsnetwork.org:1883"
 const ttnTopic string = appEui + "/devices/+/up"
 
-// Safecast-related 
+// Safecast-related
 const SafecastV1UploadIP = "107.161.164.163"
 const SafecastV1UploadURL = "http://" + SafecastV1UploadIP + "/scripts/indextest.php"
 const SafecastV1QueryString = "api_key=z3sHhgousVDDrCVXhzMT"
@@ -63,7 +63,7 @@ const logDateFormat string = "2006-01-02 15:04:05"
 
 // FTP
 var (
-	ftpServer *ftp.FtpServer
+    ftpServer *ftp.FtpServer
 )
 
 // Statics
@@ -89,23 +89,23 @@ var reqQMaxLength = 0
 func main() {
 
     // Get our external IP address
-	rsp, err := http.Get("http://checkip.amazonaws.com")
-	if err != nil {
-		fmt.Printf("Can't get our own IP address: %v\n", err);
+    rsp, err := http.Get("http://checkip.amazonaws.com")
+    if err != nil {
+        fmt.Printf("Can't get our own IP address: %v\n", err);
         os.Exit(0)
-	}
-	defer rsp.Body.Close()
-	buf, err := ioutil.ReadAll(rsp.Body)
-	if err != nil {
-		fmt.Printf("Error fetching IP address: %v\n", err);
+    }
+    defer rsp.Body.Close()
+    buf, err := ioutil.ReadAll(rsp.Body)
+    if err != nil {
+        fmt.Printf("Error fetching IP address: %v\n", err);
         os.Exit(0)
-	}
-	TTServerIP = string(bytes.TrimSpace(buf))
+    }
+    TTServerIP = string(bytes.TrimSpace(buf))
     TTServer = "http://" + TTServerIP
-	
-	// Set up our signal handler
-	go signalHandler()
-	
+
+    // Set up our signal handler
+    go signalHandler()
+
     // Set up our internal message queues
     ttnUpQ = make(chan MQTT.Message, 5)
     reqQ = make(chan IncomingReq, MAX_PENDING_REQUESTS)
@@ -155,10 +155,10 @@ func timer15m() {
         // Report maximum inbound pending transactions
         if (reqQMaxLength > 1) {
             fmt.Printf("%s Maximum request queue length reached %d\n", time.Now().Format(logDateFormat), reqQMaxLength)
-		    if (reqQMaxLength >= MAX_PENDING_REQUESTS) {
-		        fmt.Printf("\n***\n***\n*** RESTARTING defensively because of request queue overflow\n***\n***\n\n")
-		        os.Exit(0)
-		    }
+            if (reqQMaxLength >= MAX_PENDING_REQUESTS) {
+                fmt.Printf("\n***\n***\n*** RESTARTING defensively because of request queue overflow\n***\n***\n\n")
+                os.Exit(0)
+            }
         }
 
         // Post Safecast errors
@@ -184,12 +184,12 @@ func ftpInboundHandler() {
 
     fmt.Printf("Now handling inbound FTP on: %s:%d\n", TTServer, TTServerPortFTP)
 
-	ftpServer = ftp.NewFtpServer(NewTeletypeDriver())
-	err := ftpServer.ListenAndServe()
-	if err != nil {
-	    fmt.Printf("Error listening on FTP: %s\n", err)
-	}
-	
+    ftpServer = ftp.NewFtpServer(NewTeletypeDriver())
+    err := ftpServer.ListenAndServe()
+    if err != nil {
+        fmt.Printf("Error listening on FTP: %s\n", err)
+    }
+
 }
 
 // Kick off inbound messages coming from all sources, then serve HTTP
@@ -286,7 +286,7 @@ func tcpInboundHandler() {
         conn, err := ServerConn.AcceptTCP()
         if err != nil {
             fmt.Printf("Error accepting TCP session: \n%v\n", err)
-			// We see "use of closed network connection" when port scanners hit us
+            // We see "use of closed network connection" when port scanners hit us
             time.Sleep(10 * time.Second)
             continue
         }
@@ -429,31 +429,31 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
-	var sV1 SafecastDataV1
-	var sV2 SafecastDataV2
-	
+    var sV1 SafecastDataV1
+    var sV2 SafecastDataV2
+
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
         fmt.Printf("Error reading HTTP request body: \n%v\n", req)
         return
     }
 
-	// postSafecastV1ToSafecast
-	// Attempt to unmarshal it as a Safecast V1 data structure
+    // postSafecastV1ToSafecast
+    // Attempt to unmarshal it as a Safecast V1 data structure
     err = json.Unmarshal(body, &sV1)
-	if (err != nil) {
-		fmt.Printf("Redirect body does not appear to be Safecast JSON:\n%s\n%s\n", req.RequestURI, body);
-	} else {
-		fmt.Printf("Redirect Safecast V1 data: %v\n", sV1);
+    if (err != nil) {
+        fmt.Printf("Redirect body does not appear to be Safecast JSON:\n%s\n%s\n", req.RequestURI, body);
+    } else {
+        fmt.Printf("Redirect Safecast V1 data: \n%s\n", body);
 
-	// Repost it to both V1 and V2
-	SafecastV1Upload(sV1, req.URL.RawQuery)
-	SafecastV1Log(sV1)
-	sV2 = SafecastV1toV2(sV1)
-	SafecastV2Upload(sV2, req.URL.RawQuery)
-	SafecastV2Log(sV2)
+        // Repost it to both V1 and V2
+        SafecastV1Upload(sV1, req.URL.RawQuery)
+        SafecastV1Log(sV1)
+        sV2 = SafecastV1toV2(sV1)
+        SafecastV2Upload(sV2, req.URL.RawQuery)
+        SafecastV2Log(sV2)
 
-	}
+    }
 
 }
 
@@ -744,13 +744,13 @@ func impossibleError() {
 
 // Our app's signal handler
 func signalHandler() {
-	ch := make(chan os.Signal)
-	signal.Notify(ch, syscall.SIGTERM)
-	for {
-		switch <-ch {
-		case syscall.SIGTERM:
-			ftpServer.Stop()
-			break
-		}
-	}
+    ch := make(chan os.Signal)
+    signal.Notify(ch, syscall.SIGTERM)
+    for {
+        switch <-ch {
+        case syscall.SIGTERM:
+            ftpServer.Stop()
+            break
+        }
+    }
 }
