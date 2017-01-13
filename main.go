@@ -51,7 +51,7 @@ const TTServerPortFTP int = 8083
 const TTServerURLSend string = "/send"
 const TTServerURLGithub string = "/github"
 const TTServerURLSlack string = "/slack"
-const TTServerURLRedirect string = "/scripts"
+const TTServerURLRedirect string = "/scripts/"
 
 // Our server
 var TTServer string
