@@ -1180,11 +1180,27 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 	f64, _ = strconv.ParseFloat(v1.Longitude, 32)
 	v2.Longitude = float32(f64)
 
-	switch (v1.Unit) {
+	switch (strings.ToLower(v1.Unit)) {
+
+	case "pm1":
+		f64, _ = strconv.ParseFloat(v1.Value, 32)
+		v2.OpcPm01_0 = float32(f64)
 
 	case "pm2.5":
 		f64, _ = strconv.ParseFloat(v1.Value, 32)
-		v2.PmsPm02_5 = float32(f64)
+		v2.OpcPm02_5 = float32(f64)
+
+	case "pm10":
+		f64, _ = strconv.ParseFloat(v1.Value, 32)
+		v2.OpcPm10_0 = float32(f64)
+
+	case "humd%":
+		f64, _ = strconv.ParseFloat(v1.Value, 32)
+		v2.EnvHumid = float32(f64)
+
+	case "tempc":
+		f64, _ = strconv.ParseFloat(v1.Value, 32)
+		v2.EnvTemp = float32(f64)
 
 	case "cpm":
 		f64, _ = strconv.ParseFloat(v1.Value, 32)
@@ -1197,9 +1213,49 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 		}
 
 	case "status":
-		v2.Status = v1.DeviceTypeID
 		f64, _ = strconv.ParseFloat(v1.Value, 32)
 		v2.EnvTemp = float32(f64)
+
+		// Parse and split into its sub-fields
+		unrecognized := ""
+		status := v1.DeviceTypeID
+		fields := strings.Split(status, ",")
+		for v := range fields {
+			field := strings.Split(fields[v], ":")
+			switch (field[0]) {
+			case "Battery Voltage":
+				f64, _ = strconv.ParseFloat(field[1], 32)
+				v2.BatVoltage = float32(f64)
+			case "Fails":
+				i64, _ = strconv.ParseUint(field[1], 10, 32)
+				v2.StatsCommsFails = uint32(i64)
+			case "Restarts":
+				i64, _ = strconv.ParseUint(field[1], 10, 32)
+				v2.StatsDeviceRestarts = uint32(i64)
+			case "FreeRam":
+				i64, _ = strconv.ParseUint(field[1], 10, 32)
+				v2.StatsFreeMem = uint32(i64)
+			case "NTP count":
+				i64, _ = strconv.ParseUint(field[1], 10, 32)
+				v2.StatsNTPCount = uint32(i64)
+			case "Last failure":
+				v2.StatsLastFailure = field[1]
+			default:
+				if (unrecognized == "") {
+					unrecognized = "{"
+				} else {
+					unrecognized = unrecognized + ","
+				}
+				unrecognized = unrecognized + "\"" + field[0] + "\":\"" + field[1] + "\""
+			}
+			fmt.Printf("%s=%s\n", field[0], field[1])
+		}
+
+		// If we found unrecognized fields, emit them
+		if (unrecognized == "") {
+			unrecognized = unrecognized + "}"
+			v2.StatsStatus = unrecognized
+		}
 
 	default:
 		fmt.Sprintf("*** Warning ***\n*** Unit %s = Value %s UNRECOGNIZED\n", v1.Unit, v1.Value)

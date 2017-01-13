@@ -107,12 +107,17 @@ type SafecastDataV2 struct {
     StatsTransmittedBytes uint32 `json:"transmitted_bytes,omitempty"`
     StatsReceivedBytes    uint32 `json:"received_bytes,omitempty"`
     StatsCommsResets      uint32 `json:"comms_resets,omitempty"`
+    StatsCommsFails       uint32 `json:"comms_failures,omitempty"`
     StatsCommsPowerFails  uint32 `json:"comms_power_fails,omitempty"`
+    StatsDeviceRestarts   uint32 `json:"restarts,omitempty"`
     StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
     StatsOneshots         uint32 `json:"oneshots,omitempty"`
     StatsCell             string `json:"cell,omitempty"`
     StatsDfu              string `json:"dfu,omitempty"`
-	Status				  string `json:"status,omitempty"`
+    StatsFreeMem          uint32 `json:"free_memory,omitempty"`
+    StatsNTPCount         uint32 `json:"ntp_count,omitempty"`
+	StatsLastFailure	  string `json:"last_failure,omitempty"`
+	StatsStatus			  string `json:"status,omitempty"`
     Message				  string `json:"message,omitempty"`
 }
 
