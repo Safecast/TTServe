@@ -33,6 +33,7 @@ const ttnTopic string = appEui + "/devices/+/up"
 const SafecastV1UploadIP = "107.161.164.163"
 const SafecastV1UploadURL = "http://" + SafecastV1UploadIP + "/scripts/indextest.php?api_key=%s"
 const SafecastV1AppKey = "z3sHhgousVDDrCVXhzMT"
+const SafecastV1RedirectURL = "http://" + SafecastV1UploadIP + "%s"
 const SafecastV2UploadIP = ""
 const SafecastV2UploadURL = "http://" + SafecastV2UploadIP + "/scripts/indextest.php?api_key=%s"
 const SafecastV2AppKey = "z3sHhgousVDDrCVXhzMT"
@@ -425,6 +426,7 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
+	var sreq SafecastDataV1
 	
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
@@ -433,9 +435,32 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
 	// https://golang.org/pkg/net/http/#Request
-	fmt.Printf("RequestURI: %s\n", req.RequestURI)
-	fmt.Printf("URL: %v\n", req.URL)
-	fmt.Printf("Body: %v\n", body)
+	fmt.Printf("Redirect URI: %s\n", req.RequestURI)
+	fmt.Printf("Redirect Body: %v\n", body)
+
+	// Attempt to unmarshal it as a Safecast V1 data structure
+    err = json.Unmarshal(body, &sreq)
+	if (err != nil) {
+		fmt.Printf("Redirect body does not appear to be Safecast JSON\n");
+	} else {
+		fmt.Printf("Redirect Safecast V1 data: %v\n", sreq);
+	}
+	
+	// Re-post it to the V1 Safecast API
+    rreq, err := http.NewRequest("POST", fmt.Sprintf(SafecastV1RedirectURL, req.RequestURI), bytes.NewBuffer(body))
+    rreq.Header.Set("User-Agent", "TTSERVE")
+    rreq.Header.Set("Content-Type", "application/json")
+    httpclient := &http.Client{
+        Timeout: time.Second * 15,
+    }
+
+    rrsp, err := httpclient.Do(rreq)
+
+    if (err == nil) {
+        rrsp.Body.Close()
+    } else {
+		fmt.Printf("Redirect err: %v\n", err)
+	}
 
 }
 
