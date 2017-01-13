@@ -677,12 +677,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 }
 
 // Begin transaction and return the transaction ID
-func beginTransaction(url string, message1 string, message2 string) int {
+func beginTransaction(version string, url string, message1 string, message2 string) int {
     httpTransactionsInProgress += 1
     httpTransactions += 1
     transaction := httpTransactions % httpTransactionsRecorded
     httpTransactionTimes[transaction] = time.Now()
-    fmt.Printf("%s >>> [%d] %s %s\n", time.Now().Format(logDateFormat), transaction, message1, message2)
+    fmt.Printf("%s >>> %s [%d] %s %s\n", time.Now().Format(logDateFormat), version, transaction, message1, message2)
     return transaction
 }
 
@@ -699,7 +699,7 @@ func endTransaction(transaction int, errstr string) {
             httpTransactionErrorString = errstr
             httpTransactionErrorFirst = false
         }
-        fmt.Printf("%s <<< [%d] *** after %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
+        fmt.Printf("%s <<<   [%d] *** after %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
     } else {
         if (duration < 5) {
             fmt.Printf("%s <<< [%d]\n", time.Now().Format(logDateFormat), transaction);
@@ -758,7 +758,7 @@ func SafecastV2Upload(scV2 SafecastDataV2, query string) bool {
 // Upload a Safecast data structure to the Safecast service
 func doUploadToSafecastV2(scV2 SafecastDataV2, query string) bool {
 	
-    transaction := beginTransaction(SafecastV2UploadURL, "(aggregate)", "")
+    transaction := beginTransaction("V2", SafecastV2UploadURL, "all", "")
 
     scJSON, _ := json.Marshal(scV2)
 
@@ -818,7 +818,7 @@ func SafecastV1Upload(scV1 SafecastDataV1, query string) bool {
 // Upload a Safecast data structure to the Safecast service
 func doUploadToSafecastV1(scV1 SafecastDataV1, query string) bool {
 
-    transaction := beginTransaction(SafecastV1UploadURL, scV1.Unit, scV1.Value)
+    transaction := beginTransaction("V1", SafecastV1UploadURL, scV1.Unit, scV1.Value)
 
     scJSON, _ := json.Marshal(scV1)
 
