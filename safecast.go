@@ -753,8 +753,8 @@ func SafecastV2Upload(scV2 SafecastDataV2, query string) bool {
 // Upload a Safecast data structure to the Safecast service
 func doUploadToSafecastV2(scV2 SafecastDataV2, query string) bool {
 
-	// while waiting for it
-	if (SafecastV2UploadURL == "") {
+	// while waiting to know where to post
+	if (true) {
 		return false
 	}
 	
