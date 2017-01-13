@@ -360,7 +360,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
         // Either an old-style upload, and the kind used by bGeigies,
         // or an upload of metadata without any kind of CPM
-        if (!uploadToSafecastV1(scV1a)) {
+        if (!SafecastV1Upload(scV1a, SafecastV1QueryString)) {
             return
         }
 
@@ -393,7 +393,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1b.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() & 0xfffffffe), 10)
             scV1b.Unit = UnitCPM
             scV1b.Value = fmt.Sprintf("%d", msg.GetCpm0())
-            if (uploadToSafecastV1(scV1b)) {
+            if (SafecastV1Upload(scV1b, SafecastV1QueryString)) {
 				uploaded = uploaded + 1
 			}
         }
@@ -402,7 +402,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1b.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() | 0x00000001), 10)
             scV1b.Unit = UnitCPM
             scV1b.Value = fmt.Sprintf("%d", msg.GetCpm1())
-            if (uploadToSafecastV1(scV1b)) {
+            if (SafecastV1Upload(scV1b, SafecastV1QueryString)) {
 				uploaded = uploaded + 1
 			}
         }
@@ -417,7 +417,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1c.Cpm1 = fmt.Sprintf("%d", msg.GetCpm1())
 			scV2c.Cpm1 = float32(msg.GetCpm1())
 		}
-        if (uploadToSafecastV2(scV2c)) {
+        if (SafecastV2Upload(scV2c, SafecastV2QueryString)) {
 			uploaded = uploaded + 1
 		}
 
@@ -438,7 +438,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitBatVoltage
         scV1b.Value = scV1a.BatVoltage
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -446,7 +446,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitBatSOC
         scV1b.Value = scV1a.BatSOC
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -454,7 +454,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitBatCurrent
         scV1b.Value = scV1a.BatCurrent
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -462,7 +462,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitEnvTemp
         scV1b.Value = scV1a.EnvTemp
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -470,7 +470,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitEnvHumid
         scV1b.Value = scV1a.EnvHumid
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -478,7 +478,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitEnvPress
         scV1b.Value = scV1a.EnvPress
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -493,7 +493,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 	        scV1b := scV1
             scV1b.Unit = UnitWirelessSNR
             scV1b.Value = scV1a.WirelessSNR
-            if (!uploadToSafecastV1(scV1b)) {
+            if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
                 return
             }
         }
@@ -501,7 +501,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitTransport
         scV1b.Value = scV1a.Transport
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
 
@@ -511,7 +511,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsPm01_0
         scV1b.Value = scV1a.PmsPm01_0
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -519,7 +519,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsPm02_5
         scV1b.Value = scV1a.PmsPm02_5
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -527,7 +527,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsPm10_0
         scV1b.Value = scV1a.PmsPm10_0
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -535,7 +535,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC00_30
         scV1b.Value = scV1a.PmsC00_30
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -543,7 +543,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC00_50
         scV1b.Value = scV1a.PmsC00_50
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -551,7 +551,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC01_00
         scV1b.Value = scV1a.PmsC01_00
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -559,7 +559,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC02_50
         scV1b.Value = scV1a.PmsC02_50
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -567,7 +567,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC05_00
         scV1b.Value = scV1a.PmsC05_00
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -575,7 +575,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC10_00
         scV1b.Value = scV1a.PmsC10_00
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -583,7 +583,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsCsecs
         scV1b.Value = scV1a.PmsCsecs
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -592,7 +592,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcPm01_0
         scV1b.Value = scV1a.OpcPm01_0
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -600,7 +600,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcPm02_5
         scV1b.Value = scV1a.OpcPm02_5
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -608,7 +608,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcPm10_0
         scV1b.Value = scV1a.OpcPm10_0
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -616,7 +616,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC00_38
         scV1b.Value = scV1a.OpcC00_38
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -624,7 +624,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC00_54
         scV1b.Value = scV1a.OpcC00_54
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -632,7 +632,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC01_00
         scV1b.Value = scV1a.OpcC01_00
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -640,7 +640,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC02_10
         scV1b.Value = scV1a.OpcC02_10
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -648,7 +648,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC05_00
         scV1b.Value = scV1a.OpcC05_00
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -656,7 +656,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC10_00
         scV1b.Value = scV1a.OpcC10_00
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -664,7 +664,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcCsecs
         scV1b.Value = scV1a.OpcCsecs
-        if (!uploadToSafecastV1(scV1b)) {
+        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
             return
         }
     }
@@ -745,13 +745,13 @@ func endTransaction(transaction int, errstr string) {
 }
 
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
-func uploadToSafecastV2(scV2 SafecastDataV2) bool {
-    go doUploadToSafecastV2(scV2)
+func SafecastV2Upload(scV2 SafecastDataV2, query string) bool {
+    go doUploadToSafecastV2(scV2, query)
 	return true
 }
 
 // Upload a Safecast data structure to the Safecast service
-func doUploadToSafecastV2(scV2 SafecastDataV2) bool {
+func doUploadToSafecastV2(scV2 SafecastDataV2, query string) bool {
 
 	// while waiting for it
 	if (SafecastV2UploadURL == "") {
@@ -766,7 +766,11 @@ func doUploadToSafecastV2(scV2 SafecastDataV2) bool {
         fmt.Printf("%s\n", scJSON)
     }
 
-    req, err := http.NewRequest("POST", fmt.Sprintf(SafecastV2UploadURL, SafecastV2AppKey), bytes.NewBuffer(scJSON))
+	url := SafecastV2UploadURL
+	if (query != "") {
+		url = fmt.Sprintf("%s?%s", SafecastV2UploadURL, query)
+	}
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{
@@ -790,8 +794,42 @@ func doUploadToSafecastV2(scV2 SafecastDataV2) bool {
     return errString == ""
 }
 
+// Convert v1 to v2
+func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
+	var v2 SafecastDataV2
+	var i64 uint64
+	var f64 float64
+
+	v2.CapturedAt = v1.CapturedAt
+
+	i64, _ = strconv.ParseUint(v1.DeviceID, 10, 32)
+	v2.DeviceID = uint32(i64)
+
+	f64, _ = strconv.ParseFloat(v1.Height, 32)
+	v2.Height = float32(f64)
+
+	f64, _ = strconv.ParseFloat(v1.Latitude, 32)
+	v2.Latitude = float32(f64)
+
+	f64, _ = strconv.ParseFloat(v1.Longitude, 32)
+	v2.Longitude = float32(f64)
+
+	switch (v1.Unit) {
+	case "pm2.5":
+		f64, _ = strconv.ParseFloat(v1.Value, 32)
+		v2.PmsPm02_5 = float32(f64)
+	case "cpm":
+		f64, _ = strconv.ParseFloat(v1.Value, 32)
+		v2.Cpm0 = float32(f64)
+	default:
+		fmt.Sprintf("*** Warning ***\n*** Unit %s = Value %s UNRECOGNIZED\n", v1.Unit, v1.Value)
+	}
+
+	return v2
+}
+
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
-func uploadToSafecastV1(scV1 SafecastDataV1) bool {
+func SafecastV1Upload(scV1 SafecastDataV1, query string) bool {
 
     // We've found that in certain cases the server gets overloaded.  When we run into those cases,
     // turn this OFF and things will slow down.  (Obviously this is not the preferred mode of operation,
@@ -799,9 +837,9 @@ func uploadToSafecastV1(scV1 SafecastDataV1) bool {
     uploadInParallel := false;
 
     if (uploadInParallel) {
-        go doUploadToSafecastV1(scV1)
+        go doUploadToSafecastV1(scV1, query)
     } else {
-        if (!doUploadToSafecastV1(scV1)) {
+        if (!doUploadToSafecastV1(scV1, query)) {
             return false
         }
         time.Sleep(1 * time.Second)
@@ -812,7 +850,7 @@ func uploadToSafecastV1(scV1 SafecastDataV1) bool {
 }
 
 // Upload a Safecast data structure to the Safecast service
-func doUploadToSafecastV1(scV1 SafecastDataV1) bool {
+func doUploadToSafecastV1(scV1 SafecastDataV1, query string) bool {
 
     transaction := beginTransaction(SafecastV1UploadURL, scV1.Unit, scV1.Value)
 
@@ -822,7 +860,11 @@ func doUploadToSafecastV1(scV1 SafecastDataV1) bool {
         fmt.Printf("%s\n", scJSON)
     }
 
-    req, err := http.NewRequest("POST", fmt.Sprintf(SafecastV1UploadURL, SafecastV1AppKey), bytes.NewBuffer(scJSON))
+	url := SafecastV1UploadURL
+	if (query != "") {
+		url = fmt.Sprintf("%s?%s", SafecastV1UploadURL, query)
+	}
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{
@@ -1025,12 +1067,12 @@ func sendSafecastDeviceSummaryToSlack() {
 
 // Write to both logs
 func writeToLogs(scV1 SafecastDataV1, scV2 SafecastDataV2) {
-	writeToCSV(scV1)
-	writeToJSON(scV2)
+	SafecastV1Log(scV1)
+	SafecastV2Log(scV2)
 }
 
 // Write the value to the log
-func writeToCSV(scV1 SafecastDataV1) {
+func SafecastV1Log(scV1 SafecastDataV1) {
 
     // The file pathname on the server
     usr, _ := user.Current()
@@ -1113,7 +1155,7 @@ func writeToCSV(scV1 SafecastDataV1) {
 }
 
 // Write the value to the log
-func writeToJSON(scV2 SafecastDataV2) {
+func SafecastV2Log(scV2 SafecastDataV2) {
 
     // The file pathname on the server
     usr, _ := user.Current()
