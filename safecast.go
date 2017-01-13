@@ -794,40 +794,6 @@ func doUploadToSafecastV2(scV2 SafecastDataV2, query string) bool {
     return errString == ""
 }
 
-// Convert v1 to v2
-func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
-	var v2 SafecastDataV2
-	var i64 uint64
-	var f64 float64
-
-	v2.CapturedAt = v1.CapturedAt
-
-	i64, _ = strconv.ParseUint(v1.DeviceID, 10, 32)
-	v2.DeviceID = uint32(i64)
-
-	f64, _ = strconv.ParseFloat(v1.Height, 32)
-	v2.Height = float32(f64)
-
-	f64, _ = strconv.ParseFloat(v1.Latitude, 32)
-	v2.Latitude = float32(f64)
-
-	f64, _ = strconv.ParseFloat(v1.Longitude, 32)
-	v2.Longitude = float32(f64)
-
-	switch (v1.Unit) {
-	case "pm2.5":
-		f64, _ = strconv.ParseFloat(v1.Value, 32)
-		v2.PmsPm02_5 = float32(f64)
-	case "cpm":
-		f64, _ = strconv.ParseFloat(v1.Value, 32)
-		v2.Cpm0 = float32(f64)
-	default:
-		fmt.Sprintf("*** Warning ***\n*** Unit %s = Value %s UNRECOGNIZED\n", v1.Unit, v1.Value)
-	}
-
-	return v2
-}
-
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
 func SafecastV1Upload(scV1 SafecastDataV1, query string) bool {
 
@@ -1186,4 +1152,52 @@ func SafecastV2Log(scV2 SafecastDataV2) {
     // Close and exit
     fd.Close();
 
+}
+
+// Convert v1 to v2
+func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
+	var v2 SafecastDataV2
+	var i64 uint64
+	var f64 float64
+	var subtype uint32
+
+	v2.CapturedAt = v1.CapturedAt
+
+	i64, _ = strconv.ParseUint(v1.DeviceID, 10, 32)
+	v2.DeviceID = uint32(i64)
+	subtype = v2.DeviceID % 10
+
+	f64, _ = strconv.ParseFloat(v1.Height, 32)
+	v2.Height = float32(f64)
+
+	f64, _ = strconv.ParseFloat(v1.Latitude, 32)
+	v2.Latitude = float32(f64)
+
+	f64, _ = strconv.ParseFloat(v1.Longitude, 32)
+	v2.Longitude = float32(f64)
+
+	switch (v1.Unit) {
+
+	case "pm2.5":
+		f64, _ = strconv.ParseFloat(v1.Value, 32)
+		v2.PmsPm02_5 = float32(f64)
+
+	case "cpm":
+		f64, _ = strconv.ParseFloat(v1.Value, 32)
+		if (subtype == 1) {
+			v2.Cpm0 = float32(f64)
+		} else if (subtype == 2) {
+			v2.Cpm1 = float32(f64)
+		} else {
+			fmt.Sprintf("*** V1toV2 %d cpm not understood for this subtype\n", v2.DeviceID);
+		}
+
+	case "status":
+		v2.Status = v1.DeviceTypeID
+
+	default:
+		fmt.Sprintf("*** Warning ***\n*** Unit %s = Value %s UNRECOGNIZED\n", v1.Unit, v1.Value)
+	}
+
+	return v2
 }

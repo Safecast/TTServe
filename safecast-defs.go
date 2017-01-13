@@ -112,7 +112,8 @@ type SafecastDataV2 struct {
     StatsOneshots         uint32 `json:"oneshots,omitempty"`
     StatsCell             string `json:"cell,omitempty"`
     StatsDfu              string `json:"dfu,omitempty"`
-    Message			string `json:"message,omitempty"`
+	Status				  string `json:"status,omitempty"`
+    Message				  string `json:"message,omitempty"`
 }
 
 // These are strings used as the "unit" for the extended safecast uploads, and
