@@ -48,6 +48,7 @@ const TTServerPortUDP string = ":8081"
 const TTServerPortTCP string = ":8082"
 const TTServerPortFTP int = 8083
 const TTServerURLSend string = "/send"
+const TTServerURLTest string = "/test"
 const TTServerURLGithub string = "/github"
 const TTServerURLSlack string = "/slack"
 const TTServerURLRedirect1 string = "/scripts/"
@@ -208,6 +209,8 @@ func webInboundHandler() {
 
     http.HandleFunc(TTServerURLRedirect2, inboundWebRedirectHandler)
     fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLRedirect2)
+
+    http.HandleFunc(TTServerURLTest, inboundWebTestHandler)
 
     http.ListenAndServe(TTServerPort, nil)
 }
@@ -427,6 +430,14 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 }
 
 // Handle inbound HTTP requests from the Teletype Gateway
+func inboundWebTestHandler(rw http.ResponseWriter, req *http.Request) {
+
+	fmt.Printf("***** Test *****\n")
+    io.WriteString(rw, "This is a test of the emergency broadcast system.\n")
+
+}
+
+// Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     var sV1 SafecastDataV1
     var sV2 SafecastDataV2
@@ -443,7 +454,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     if (err != nil) {
         fmt.Printf("Redirect body does not appear to be Safecast JSON:\n%s\n%s\n", req.RequestURI, body);
     } else {
-        fmt.Printf("Redirect Safecast V1 data: \n%s\n", body);
 
         // Repost it to both V1 and V2
         SafecastV1Upload(sV1, req.URL.RawQuery)
