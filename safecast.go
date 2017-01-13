@@ -1247,6 +1247,8 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 					unrecognized = unrecognized + ","
 				}
 				unrecognized = unrecognized + "\"" + field[0] + "\":\"" + field[1] + "\""
+			case "DeviceID":
+			case "Temperature":
 			}
 		}
 
