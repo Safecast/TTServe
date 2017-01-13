@@ -460,9 +460,12 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         fmt.Printf("Redirect body does not appear to be Safecast JSON:\n%s\n%s\n", req.RequestURI, body);
     } else {
 
+		// Convert to V2 format
+        sV2 = SafecastV1toV2(sV1)
+        fmt.Printf("\n%s Received redirect payload from Device ID %d\n%s\n", time.Now().Format(logDateFormat), sV2.DeviceID, body)
+
         // Repost it to both V1 and V2
         SafecastV1Upload(sV1, req.URL.RawQuery)
-        sV2 = SafecastV1toV2(sV1)
         SafecastV2Upload(sV2, req.URL.RawQuery)
         SafecastV2Log(sV2)
 
