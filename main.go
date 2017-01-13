@@ -48,10 +48,10 @@ const TTServerPort string = ":8080"
 const TTServerPortUDP string = ":8081"
 const TTServerPortTCP string = ":8082"
 const TTServerPortFTP int = 8083
-const TTServerPortRedirect int = ":8086"
 const TTServerURLSend string = "/send"
 const TTServerURLGithub string = "/github"
 const TTServerURLSlack string = "/slack"
+const TTServerURLRedirect string = "/scripts"
 
 // Our server
 var TTServer string
@@ -117,9 +117,6 @@ func main() {
 
     // Init our web request inbound server
     go webInboundHandler()
-
-    // Init our web request inbound server
-    go webRedirectInboundHandler()
 
     // Init our UDP request inbound server
     go udpInboundHandler()
@@ -206,16 +203,10 @@ func webInboundHandler() {
     http.HandleFunc(TTServerURLSlack, inboundWebSlackHandler)
     fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLSlack)
 
+    http.HandleFunc(TTServerURLRedirect, inboundWebRedirectHandler)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLRedirect)
+
     http.ListenAndServe(TTServerPort, nil)
-}
-
-// Kick off redirect handler
-func webRedirectInboundHandler() {
-
-    http.HandleFunc("/", inboundWebRedirectHandler)
-    fmt.Printf("Now handling inbound HTTP redirect on: %s%s\n", TTServer, TTServerPortRedirect)
-    http.ListenAndServe(TTServerPort, nil)
-
 }
 
 // Kick off UDP server
