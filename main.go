@@ -154,7 +154,7 @@ func timer15m() {
 
         // Report maximum inbound pending transactions
         if (reqQMaxLength > 1) {
-            fmt.Printf("%s Maximum request queue length reached %d\n", time.Now().Format(logDateFormat), reqQMaxLength)
+            fmt.Printf("%s Max request queue length reached %d\n", time.Now().Format(logDateFormat), reqQMaxLength)
             if (reqQMaxLength >= MAX_PENDING_REQUESTS) {
                 fmt.Printf("\n***\n***\n*** RESTARTING defensively because of request queue overflow\n***\n***\n\n")
                 os.Exit(0)
