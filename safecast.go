@@ -383,6 +383,11 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         }
         writeToLogs(scV1b, scV2b)
 
+		// Post to the V2 api
+        if (!SafecastV2Upload(scV2b, SafecastV2QueryString)) {
+			return
+		}
+
     } else if msg.DeviceIDNumber != nil {
 		var uploaded = 0
 		
