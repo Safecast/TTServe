@@ -33,9 +33,8 @@ const ttnTopic string = appEui + "/devices/+/up"
 const SafecastV1UploadIP = "107.161.164.163"
 const SafecastV1UploadURL = "http://" + SafecastV1UploadIP + "/scripts/indextest.php"
 const SafecastV1QueryString = "api_key=z3sHhgousVDDrCVXhzMT"
-const SafecastV2UploadIP = ""
-const SafecastV2UploadURL = "http://" + SafecastV2UploadIP + "/scripts/indextest.php"
-const SafecastV2QueryString = "api_key=z3sHhgousVDDrCVXhzMT"
+const SafecastV2UploadURL = "http://ingest.safecast.org/v1/measurements"
+const SafecastV2QueryString = ""
 
 // File system related paths relative to the server's HomeDir
 const TTServerLogPath = "/safecast/log"
