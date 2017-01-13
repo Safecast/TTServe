@@ -1248,11 +1248,10 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 				}
 				unrecognized = unrecognized + "\"" + field[0] + "\":\"" + field[1] + "\""
 			}
-			fmt.Printf("%s=%s\n", field[0], field[1])
 		}
 
 		// If we found unrecognized fields, emit them
-		if (unrecognized == "") {
+		if (unrecognized != "") {
 			unrecognized = unrecognized + "}"
 			v2.StatsStatus = unrecognized
 		}
