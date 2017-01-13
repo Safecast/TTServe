@@ -212,7 +212,9 @@ func webInboundHandler() {
 
     http.HandleFunc(TTServerURLTest, inboundWebTestHandler)
 
+    http.ListenAndServe(":80", nil)
     http.ListenAndServe(TTServerPort, nil)
+
 }
 
 // Kick off UDP server
