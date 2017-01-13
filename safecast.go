@@ -702,9 +702,9 @@ func endTransaction(transaction int, errstr string) {
         fmt.Printf("%s <<<   [%d] *** after %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
     } else {
         if (duration < 5) {
-            fmt.Printf("%s <<< [%d]\n", time.Now().Format(logDateFormat), transaction);
+            fmt.Printf("%s <<<   [%d]\n", time.Now().Format(logDateFormat), transaction);
         } else {
-            fmt.Printf("%s <<< [%d] completed after %d seconds\n", time.Now().Format(logDateFormat), transaction, duration);
+            fmt.Printf("%s <<<   [%d] completed after %d seconds\n", time.Now().Format(logDateFormat), transaction, duration);
         }
     }
 
