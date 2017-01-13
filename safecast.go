@@ -144,7 +144,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 		fmt.Printf("%v\n", tbefore);
 		tafter := tbefore.Add(time.Duration(offset) * time.Second)
 		fmt.Printf("%v\n", tafter);
-		
+		tstr := tafter.UTC().Format("2006-01-02T15:04:05Z")		
+        scV1.CapturedAt = tstr
+        scV2.CapturedAt = tstr
+		fmt.Printf("%s\n", tstr);
 	}
 
     // Include lat/lon/alt on all messages, including metadata
