@@ -48,6 +48,7 @@ const TTServerPort string = ":8080"
 const TTServerPortUDP string = ":8081"
 const TTServerPortTCP string = ":8082"
 const TTServerPortFTP int = 8083
+const TTServerPortRedirect int = 8086
 const TTServerURLSend string = "/send"
 const TTServerURLGithub string = "/github"
 const TTServerURLSlack string = "/slack"
@@ -116,6 +117,9 @@ func main() {
 
     // Init our web request inbound server
     go webInboundHandler()
+
+    // Init our web request inbound server
+    go webRedirectInboundHandler()
 
     // Init our UDP request inbound server
     go udpInboundHandler()
@@ -203,6 +207,15 @@ func webInboundHandler() {
     fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLSlack)
 
     http.ListenAndServe(TTServerPort, nil)
+}
+
+// Kick off redirect handler
+func webRedirectInboundHandler() {
+
+    http.HandleFunc("", inboundWebRedirectHandler)
+    fmt.Printf("Now handling inbound HTTP redirect on: %s%s\n", TTServer, TTServerPortRedirect)
+    http.ListenAndServe(TTServerPort, nil)
+
 }
 
 // Kick off UDP server
@@ -416,6 +429,22 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
         io.WriteString(rw, hexPayload)
         fmt.Printf("HTTP Reply payload: %s\n", hexPayload)
     }
+
+}
+
+// Handle inbound HTTP requests from the Teletype Gateway
+func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
+	
+    body, err := ioutil.ReadAll(req.Body)
+    if err != nil {
+        fmt.Printf("Error reading HTTP request body: \n%v\n", req)
+        return
+    }
+
+	// https://golang.org/pkg/net/http/#Request
+	fmt.Printf("RequestURI: %s\n", req.RequestURI)
+	fmt.Printf("URL: %v\n", req.URL)
+	fmt.Printf("Body: %v\n", body)
 
 }
 
