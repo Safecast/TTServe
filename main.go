@@ -447,7 +447,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Repost it to both V1 and V2
         SafecastV1Upload(sV1, req.URL.RawQuery)
-        SafecastV1Log(sV1)
         sV2 = SafecastV1toV2(sV1)
         SafecastV2Upload(sV2, req.URL.RawQuery)
         SafecastV2Log(sV2)

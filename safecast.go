@@ -1156,7 +1156,11 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 	var f64 float64
 	var subtype uint32
 
-	v2.CapturedAt = v1.CapturedAt
+	if (v1.CapturedAt == "") {
+		v2.CapturedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")		
+	} else {
+		v2.CapturedAt = v1.CapturedAt
+	}
 
 	i64, _ = strconv.ParseUint(v1.DeviceID, 10, 32)
 	subtype = uint32(i64) % 10
