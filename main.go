@@ -97,7 +97,7 @@ func main() {
     defer rsp.Body.Close()
     buf, err := ioutil.ReadAll(rsp.Body)
     if err != nil {
-        fmt.Printf("Error fetching IP address: %v\n", err);
+        fmt.Printf("Error fetching IP addr: %v\n", err);
         os.Exit(0)
     }
     TTServerIP = string(bytes.TrimSpace(buf))
