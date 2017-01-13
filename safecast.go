@@ -1194,6 +1194,8 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 
 	case "status":
 		v2.Status = v1.DeviceTypeID
+		f64, _ = strconv.ParseFloat(v1.Value, 32)
+		v2.EnvTemp = float32(f64)
 
 	default:
 		fmt.Sprintf("*** Warning ***\n*** Unit %s = Value %s UNRECOGNIZED\n", v1.Unit, v1.Value)
