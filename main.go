@@ -212,7 +212,7 @@ func webInboundHandler() {
 // Kick off redirect handler
 func webRedirectInboundHandler() {
 
-    http.HandleFunc("", inboundWebRedirectHandler)
+    http.HandleFunc("/xxx", inboundWebRedirectHandler)
     fmt.Printf("Now handling inbound HTTP redirect on: %s%s\n", TTServer, TTServerPortRedirect)
     http.ListenAndServe(TTServerPort, nil)
 
