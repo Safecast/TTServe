@@ -121,13 +121,28 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
 	// Handle the GPS capture fields
 	if (msg.CapturedAtDate != nil && msg.CapturedAtTime != nil) {
+		var i64 uint64
 		var offset uint32 = 0
 		if (msg.CapturedAtOffset != nil) {
 			offset = msg.GetCapturedAtOffset()
 		}
 		s := fmt.Sprintf("%06d%06d", msg.GetCapturedAtDate(), msg.GetCapturedAtTime())
 		fmt.Printf("%s %d\n", s, offset);
+		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[0], s[1]), 10, 32)
+		day := uint32(i64)
+		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[2], s[3]), 10, 32)
+		month := uint32(i64)
+		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[4], s[5]), 10, 32)
+		year := uint32(i64) + 2000
+		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[6], s[7]), 10, 32)
+		hour := uint32(i64)
+		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[8], s[9]), 10, 32)
+		minute := uint32(i64)
+		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[10], s[11]), 10, 32)
+		second := uint32(i64)
+		fmt.Printf("day=%d mon=%d yr=%d hr=%d min=%d sec=%d\n", day, month, year, hour, minute, second);
 
+		
 	}
 
     // Include lat/lon/alt on all messages, including metadata
