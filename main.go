@@ -45,9 +45,10 @@ const TTServerFTPCertPath = "/safecast/cert/ftp"
 const TTServerAddress = "api.teletype.io"
 const TTServerPort string = ":8080"
 const TTServerPortAlternate string = ":80"
-const TTServerPortUDP string = ":8081"
+const TTServerPortUDP1 string = ":8081"
 const TTServerPortTCP string = ":8082"
-const TTServerPortFTP int = 8083
+const TTServerPortFTP int = 8083	// and 8084, and entire passive range
+const TTServerPortUDPN string = ":8085"
 const TTServerURLSend string = "/send"
 const TTServerURLTest string = "/test"
 const TTServerURLGithub string = "/github"
@@ -120,10 +121,13 @@ func main() {
     // Init our web request inbound server
     go webInboundHandler()
 
-    // Init our UDP request inbound server
-    go udpInboundHandler()
+    // Init our UDP single-sample upload request inbound server
+    go udp1InboundHandler()
 
-    // Init our UDP request inbound server
+    // Init our UDP bulk upload request inbound server
+    go udpNInboundHandler()
+
+    // Init our TCP request inbound server
     go tcpInboundHandler()
 
     // Init our FTP server
@@ -221,12 +225,12 @@ func webInboundHandler() {
 
 }
 
-// Kick off UDP server
-func udpInboundHandler() {
+// Kick off UDP single-upload request server
+func udp1InboundHandler() {
 
-    fmt.Printf("Now handling inbound UDP on: %s%s\n", TTServer, TTServerPortUDP)
+    fmt.Printf("Now handling inbound UDP single-uploads on: %s%s\n", TTServer, TTServerPortUDP1)
 
-    ServerAddr, err := net.ResolveUDPAddr("udp", TTServerPortUDP)
+    ServerAddr, err := net.ResolveUDPAddr("udp", TTServerPortUDP1)
     if err != nil {
         fmt.Printf("Error resolving UDP port: \n%v\n", err)
         return
@@ -264,6 +268,41 @@ func udpInboundHandler() {
             AppReq.Transport = "udp:" + addr.String()
             reqQ <- AppReq
             monitorReqQ()
+
+        }
+    }
+
+}
+
+// Kick off UDP bulk-upload request server
+func udpNInboundHandler() {
+
+    fmt.Printf("Now handling inbound UDP bulk uploads on: %s%s\n", TTServer, TTServerPortUDPN)
+
+    ServerAddr, err := net.ResolveUDPAddr("udp", TTServerPortUDPN)
+    if err != nil {
+        fmt.Printf("Error resolving UDP port: \n%v\n", err)
+        return
+    }
+
+    ServerConn, err := net.ListenUDP("udp", ServerAddr)
+    if err != nil {
+        fmt.Printf("Error listening on UDP port: \n%v\n", err)
+        return
+    }
+    defer ServerConn.Close()
+
+    for {
+        buf := make([]byte, 4096)
+
+        n, addr, err := ServerConn.ReadFromUDP(buf)
+        if (err != nil) {
+            fmt.Printf("UDP read error: \n%v\n", err)
+            time.Sleep(1 * 60 * time.Second)
+        } else {
+
+            fmt.Printf("\n%s Received %d-byte UDP payload from %s\n", time.Now().Format(logDateFormat), n, addr)
+            fmt.Printf("*** DISCARDED ***\n")
 
         }
     }
