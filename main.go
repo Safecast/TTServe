@@ -44,6 +44,7 @@ const TTServerFTPCertPath = "/safecast/cert/ftp"
 // This server-related
 const TTServerAddress = "api.teletype.io"
 const TTServerPort string = ":8080"
+const TTServerPortAlternate string = ":81"
 const TTServerPortUDP string = ":8081"
 const TTServerPortTCP string = ":8082"
 const TTServerPortFTP int = 8083
@@ -213,7 +214,7 @@ func webInboundHandler() {
     http.HandleFunc(TTServerURLTest, inboundWebTestHandler)
 
 	go func() {
-		http.ListenAndServe(":80", nil)
+		http.ListenAndServe(TTServerPortAlternate, nil)
 	}()
 
     http.ListenAndServe(TTServerPort, nil)
