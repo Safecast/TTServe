@@ -785,7 +785,7 @@ func SafecastV2Upload(scV2 SafecastDataV2, query string) bool {
 // Upload a Safecast data structure to the Safecast service
 func doUploadToSafecastV2(scV2 SafecastDataV2, query string) bool {
 	
-    transaction := beginTransaction("V2", SafecastV2UploadURL, "all", "")
+    transaction := beginTransaction("V2", SafecastV2UploadURL, "captured", scV2.CapturedAt)
 
     scJSON, _ := json.Marshal(scV2)
 
