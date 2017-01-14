@@ -14,6 +14,15 @@ import (
     "github.com/rayozzie/teletype-proto/golang"
 )
 
+// Upload Behavior
+var uploadToSafecastV1 = true;
+var uploadToSafecastV2 = true;
+
+// For V1, We've found that in certain cases the server gets overloaded.  When we run into those cases,
+// turn this OFF and things will slow down.  (Obviously this is not the preferred mode of operation,
+// because it creates a huge queue of things waiting to be uploaded.)
+var parallelV1Uploads = false
+
 // For dealing with transaction timeouts
 var httpTransactionsInProgress int = 0
 var httpTransactions = 0
@@ -777,7 +786,20 @@ func endTransaction(transaction int, errstr string) {
 
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
 func SafecastV2Upload(scV2 SafecastDataV2, query string) bool {
-    go doUploadToSafecastV2(scV2, query)
+
+	// If not configured, make it appear as though we succeeded
+	if (!uploadToSafecastV2) {
+		return true
+	}
+
+	// If uploading to V1 and we're doing it serially, we may as well do this
+	// serially also simply so that the console output looks easy to read.
+	if (uploadToSafecastV1 && !parallelV1Uploads) {
+	    doUploadToSafecastV2(scV2, query)
+	} else {
+	    go doUploadToSafecastV2(scV2, query)
+	}
+
 	return true
 }
 
@@ -823,12 +845,12 @@ func doUploadToSafecastV2(scV2 SafecastDataV2, query string) bool {
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
 func SafecastV1Upload(scV1 SafecastDataV1, query string) bool {
 
-    // We've found that in certain cases the server gets overloaded.  When we run into those cases,
-    // turn this OFF and things will slow down.  (Obviously this is not the preferred mode of operation,
-    // because it creates a huge queue of things waiting to be uploaded.)
-    uploadInParallel := false;
-
-    if (uploadInParallel) {
+	// If not configured, make it appear as though we succeeded
+	if (!uploadToSafecastV1) {
+		return true
+	}
+	
+    if (parallelV1Uploads) {
         go doUploadToSafecastV1(scV1, query)
     } else {
         if (!doUploadToSafecastV1(scV1, query)) {
