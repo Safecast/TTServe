@@ -3,7 +3,6 @@ package main
 
 import (
     "os"
-    "os/user"
     "net/http"
     "fmt"
     "bytes"
@@ -1064,12 +1063,15 @@ func writeToLogs(scV1 SafecastDataV1, scV2 SafecastDataV2) {
 	SafecastV2Log(scV2)
 }
 
+func SafecastDirectory() string {
+	return(os.Getenv("SAFECAST"))
+}
+
 // Write the value to the log
 func SafecastV1Log(scV1 SafecastDataV1) {
 
     // The file pathname on the server
-    usr, _ := user.Current()
-    directory := usr.HomeDir
+    directory := SafecastDirectory()
     directory = directory + TTServerLogPath
 
     // Extract the device number and form a filename
@@ -1151,8 +1153,7 @@ func SafecastV1Log(scV1 SafecastDataV1) {
 func SafecastV2Log(scV2 SafecastDataV2) {
 
     // The file pathname on the server
-    usr, _ := user.Current()
-    directory := usr.HomeDir
+    directory := SafecastDirectory()
     directory = directory + TTServerLogPath
 
     // Extract the device number and form a filename

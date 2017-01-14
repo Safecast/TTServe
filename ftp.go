@@ -4,7 +4,6 @@ package main
 import (
 	"bytes"
 	"net/http"
-    "os/user"
     "crypto/tls"
     "errors"
     "io/ioutil"
@@ -62,8 +61,7 @@ func (driver *TeletypeDriver) AuthUser(cc ftp.ClientContext, user, pass string) 
 func (driver *TeletypeDriver) GetTLSConfig() (*tls.Config, error) {
     if driver.tlsConfig == nil {
         fmt.Printf("FTP: Loading certificate\n")
-        usr, _ := user.Current()
-        directory := usr.HomeDir
+        directory := SafecastDirectory()
         directory = directory + TTServerFTPCertPath
         if cert, err := tls.LoadX509KeyPair(directory+"/mycert.crt", directory+"/mycert.key"); err == nil {
             driver.tlsConfig = &tls.Config{
@@ -170,8 +168,7 @@ func (driver *TeletypeDriver) GetSettings() *ftp.Settings {
 
 // Create a new instance of an FTP driver
 func NewTeletypeDriver() *TeletypeDriver {
-    usr, _ := user.Current()
-    directory := usr.HomeDir
+    directory := SafecastDirectory()
     directory = directory + TTServerBuildPath
     driver := &TeletypeDriver{}
     driver.baseDir = directory

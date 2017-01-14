@@ -458,7 +458,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // Attempt to unmarshal it as a Safecast V1 data structure
     err = json.Unmarshal(body, &sV1)
     if (err != nil) {
-        fmt.Printf("Redirect body does not appear to be Safecast JSON:\n%s\n%s\n", req.RequestURI, body);
+		if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
+	        fmt.Printf("\n%s HTTP request %s does not contain valid Safecast JSON\n", time.Now().Format(logDateFormat), req.RequestURI);
+		}
     } else {
 
 		// Convert to V2 format

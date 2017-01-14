@@ -6,6 +6,9 @@
 # First, ensure that GOPATH is set to the folder containing "src"
 export GOPATH=$(readlink -m ../../../..)
 
+# Set the place where safecast data should be kept
+export SAFECAST=$HOME
+
 while [ : ]; do
     echo "Updating from GitHub..."
     git pull https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
