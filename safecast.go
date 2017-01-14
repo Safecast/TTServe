@@ -1069,7 +1069,6 @@ func SafecastDirectory() string {
 		fmt.Printf("TTSERVE: first argument must be folder containing safecast data!\n")
         os.Exit(0)
 	}
-	fmt.Printf("%s\n", directory)
 	return(directory)
 }
 
