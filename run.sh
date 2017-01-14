@@ -13,7 +13,8 @@ while [ : ]; do
     go get -u
     go build
     echo "Starting..."
-    ./teletype-ttserve
+    # Note that we must "sudo" so we can listen on port # less than 1024
+    sudo ./teletype-ttserve
     echo "Restarting..."
     sleep 2s
 done
