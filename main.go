@@ -44,7 +44,7 @@ const TTServerFTPCertPath = "/safecast/cert/ftp"
 // This server-related
 const TTServerAddress = "api.teletype.io"
 const TTServerPort string = ":8080"
-const TTServerPortAlternate string = ":1000"
+const TTServerPortAlternate string = ":1024"
 const TTServerPortUDP string = ":8081"
 const TTServerPortTCP string = ":8082"
 const TTServerPortFTP int = 8083
