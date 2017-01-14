@@ -1064,7 +1064,13 @@ func writeToLogs(scV1 SafecastDataV1, scV2 SafecastDataV2) {
 }
 
 func SafecastDirectory() string {
-	return(os.Getenv("SAFECAST"))
+	directory := os.Args[1]
+	if (directory == "") {
+		fmt.Printf("TTSERVE: first argument must be folder containing safecast data!\n")
+        os.Exit(0)
+	}
+	fmt.Printf("%s\n", directory)
+	return(directory)
 }
 
 // Write the value to the log
