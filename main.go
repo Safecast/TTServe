@@ -461,6 +461,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 		if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
 	        fmt.Printf("\n%s HTTP request '%s' does not contain valid Safecast JSON\n", time.Now().Format(logDateFormat), req.RequestURI);
 		}
+		if (req.RequestURI == "/") {
+		    io.WriteString(rw, "Live Free or Die.\n")
+		}
     } else {
 
 		// Convert to V2 format
