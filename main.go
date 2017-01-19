@@ -498,33 +498,8 @@ func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	defer fd.Close()
 	
-	if false {
-	// Get the file size
-	filesize, _ := fd.Seek(0, 2)
-
-	// Read the entire file
-	data := make([]byte, filesize)
-	if err != nil {
-	    io.WriteString(rw, errorString(err))
-		return
-	}
-
-	fd.Seek(0, 0)
-	count, err := fd.Read(data)
-	if err != nil {
-	    io.WriteString(rw, errorString(err))
-		return
-	}
-	if int64(count) != filesize {
-	    io.WriteString(rw, fmt.Sprintf("Only %d of %d was read\r\n", count, filesize))
-		return
-	}
-
-	// Write it as a string to output
-	io.WriteString(rw, string(data))
-	} else {
-		io.Copy(rw, fd)
-	}
+	// Copy the file to output
+	io.Copy(rw, fd)
 
 }
 
