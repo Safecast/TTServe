@@ -227,6 +227,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scStats.StatsOneshots = msg.GetStatsOneshots()
             scV2a.StatsOneshots = msg.GetStatsOneshots()
         }
+        if (msg.StatsOneshotSeconds != nil) {
+            scStats.StatsOneshotSeconds = msg.GetStatsOneshotSeconds()
+            scV2a.StatsOneshotSeconds = msg.GetStatsOneshotSeconds()
+        }
         if (msg.StatsMotiondrops != nil) {
             scStats.StatsMotiondrops = msg.GetStatsMotiondrops()
             scV2a.StatsMotiondrops = msg.GetStatsMotiondrops()

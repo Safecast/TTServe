@@ -61,6 +61,7 @@ type safecastStatsV1 struct {
     StatsCommsPowerFails  uint32 `json:"comms_power_fails,omitempty"`
     StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
     StatsOneshots         uint32 `json:"oneshots,omitempty"`
+    StatsOneshotSeconds   uint32 `json:"oneshot_seconds,omitempty"`
     StatsCell             string `json:"cell,omitempty"`
     StatsDfu              string `json:"dfu,omitempty"`
 }
@@ -112,6 +113,7 @@ type SafecastDataV2 struct {
     StatsDeviceRestarts   uint32 `json:"restarts,omitempty"`
     StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
     StatsOneshots         uint32 `json:"oneshots,omitempty"`
+    StatsOneshotSeconds   uint32 `json:"oneshot_seconds,omitempty"`
     StatsCell             string `json:"cell,omitempty"`
     StatsDfu              string `json:"dfu,omitempty"`
     StatsFreeMem          uint32 `json:"free_memory,omitempty"`
