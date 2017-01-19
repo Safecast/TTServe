@@ -51,6 +51,7 @@ const TTServerPortFTP int = 8083	// and 8084, and entire passive range
 const TTServerPortUDPN string = ":8085"
 const TTServerURLSend string = "/send"
 const TTServerURLTest string = "/test"
+const TTServerURLLog string = "/log"
 const TTServerURLGithub string = "/github"
 const TTServerURLSlack string = "/slack"
 const TTServerURLRedirect1 string = "/scripts/"
@@ -214,6 +215,8 @@ func webInboundHandler() {
 
     http.HandleFunc(TTServerURLRedirect2, inboundWebRedirectHandler)
     fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPort, TTServerURLRedirect2)
+
+    http.HandleFunc(TTServerURLLog, inboundWebLogHandler)
 
     http.HandleFunc(TTServerURLTest, inboundWebTestHandler)
 
@@ -474,7 +477,14 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-// Handle inbound HTTP requests from the Teletype Gateway
+// Handle inbound HTTP requests to fetch log files
+func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
+
+	fmt.Printf("Request: '%s' Folder: '%s'\n", (req.RequestURI), SafecastDirectory()+TTServerLogPath);
+
+}
+
+// Handle inbound HTTP requests to test
 func inboundWebTestHandler(rw http.ResponseWriter, req *http.Request) {
 
 	fmt.Printf("***** Test *****\n")
