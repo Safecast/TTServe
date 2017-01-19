@@ -480,8 +480,39 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 // Handle inbound HTTP requests to fetch log files
 func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
 
-	filename := SafecastDirectory() + TTServerLogPath + req.RequestURI[len(TTServerURLLog):]
-	fmt.Printf("Request: '%s' Folder: '%s'\n", (req.RequestURI), filename);
+	file := SafecastDirectory() + TTServerLogPath + "/" + req.RequestURI[len(TTServerURLLog):]
+
+	// Open the file
+    fd, err := os.Open(file)
+	if err != nil {
+	    io.WriteString(rw, fmt.Sprintf("%s\r\n", err))
+		return
+	}
+	defer fd.Close()
+	
+	// Get the file size
+	filesize, _ := fd.Seek(0, 2)
+
+	// Read the entire file
+	data := make([]byte, filesize)
+	if err != nil {
+	    io.WriteString(rw, fmt.Sprintf("%s\r\n", err))
+		return
+	}
+
+	fd.Seek(0, 0)
+	count, err := fd.Read(data)
+	if err != nil {
+	    io.WriteString(rw, fmt.Sprintf("%s\r\n", err))
+		return
+	}
+	if int64(count) != filesize {
+	    io.WriteString(rw, fmt.Sprintf("Only %d of %d was read\r\n", count, filesize))
+		return
+	}
+
+	// Write it as a string to output
+	io.WriteString(rw, string(data))
 
 }
 
