@@ -1094,15 +1094,18 @@ func SafecastDirectory() string {
 	return(directory)
 }
 
+func SafecastLogFilename(DeviceID string, Extension string) string {
+	directory := SafecastDirectory()
+	prefix := time.Now().UTC().Format("2006-01-")		
+	file := directory + TTServerLogPath + "/" + prefix + DeviceID + Extension
+	return file
+}
+
 // Write the value to the log
 func SafecastV1Log(scV1 SafecastDataV1) {
 
-    // The file pathname on the server
-    directory := SafecastDirectory()
-    directory = directory + TTServerLogPath
-
     // Extract the device number and form a filename
-    file := directory + "/" + scV1.DeviceID + ".csv"
+    file := SafecastLogFilename(scV1.DeviceID, ".csv")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
@@ -1179,12 +1182,7 @@ func SafecastV1Log(scV1 SafecastDataV1) {
 // Write the value to the log
 func SafecastV2Log(scV2 SafecastDataV2) {
 
-    // The file pathname on the server
-    directory := SafecastDirectory()
-    directory = directory + TTServerLogPath
-
-    // Extract the device number and form a filename
-    file := directory + "/" + fmt.Sprintf("%d", scV2.DeviceID) + ".json"
+    file := SafecastLogFilename(fmt.Sprintf("%d", scV2.DeviceID), ".json")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
