@@ -498,6 +498,7 @@ func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	defer fd.Close()
 	
+	if false {
 	// Get the file size
 	filesize, _ := fd.Seek(0, 2)
 
@@ -521,6 +522,9 @@ func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// Write it as a string to output
 	io.WriteString(rw, string(data))
+	} else {
+		io.Copy(rw, fd)
+	}
 
 }
 
