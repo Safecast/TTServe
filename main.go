@@ -480,7 +480,8 @@ func inboundWebTTGateHandler(rw http.ResponseWriter, req *http.Request) {
 // Handle inbound HTTP requests to fetch log files
 func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
 
-	fmt.Printf("Request: '%s' Folder: '%s'\n", (req.RequestURI), SafecastDirectory()+TTServerLogPath);
+	filename := SafecastDirectory() + TTServerLogPath + req.RequestURI[len(TTServerURLLog):]
+	fmt.Printf("Request: '%s' Folder: '%s'\n", (req.RequestURI), filename);
 
 }
 
