@@ -108,9 +108,8 @@ func sendMessage(deviceID uint32, message string) {
 
 // See if there is an outbound payload waiting for this device.
 // If so, fetch it, clear it out, and return it.
-func TelecastOutboundPayload(msg *teletype.Telecast) (isAvailable bool, payload []byte) {
+func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte) {
 
-	deviceID := TelecastDeviceID(msg);
     for i := 0; i < len(knownDevices); i++ {
 		if (knownDevices[i].deviceID == deviceID) {
 			if (knownDevices[i].messageToDevice != nil) {

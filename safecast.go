@@ -399,7 +399,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
         // Either an old-style upload, and the kind used by bGeigies,
         // or an upload of metadata without any kind of CPM
-        if (!SafecastV1Upload(scV1a, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1a, "")) {
             return
         }
 
@@ -423,7 +423,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         writeToLogs(scV1b, scV2b)
 
 		// Post to the V2 api
-        if (!SafecastV2Upload(scV2b, SafecastV2QueryString)) {
+        if (!SafecastV2Upload(scV2b)) {
 			return
 		}
 
@@ -437,7 +437,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1b.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() & 0xfffffffe), 10)
             scV1b.Unit = UnitCPM
             scV1b.Value = fmt.Sprintf("%d", msg.GetCpm0())
-            if (SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+            if (SafecastV1Upload(scV1b, "")) {
 				uploaded = uploaded + 1
 			}
         }
@@ -446,7 +446,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1b.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() | 0x00000001), 10)
             scV1b.Unit = UnitCPM
             scV1b.Value = fmt.Sprintf("%d", msg.GetCpm1())
-            if (SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+            if (SafecastV1Upload(scV1b, "")) {
 				uploaded = uploaded + 1
 			}
         }
@@ -461,7 +461,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1c.Cpm1 = fmt.Sprintf("%d", msg.GetCpm1())
 			scV2c.Cpm1 = float32(msg.GetCpm1())
 		}
-        if (SafecastV2Upload(scV2c, SafecastV2QueryString)) {
+        if (SafecastV2Upload(scV2c)) {
 			uploaded = uploaded + 1
 		}
 
@@ -482,7 +482,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitBatVoltage
         scV1b.Value = scV1a.BatVoltage
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -490,7 +490,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitBatSOC
         scV1b.Value = scV1a.BatSOC
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -498,7 +498,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitBatCurrent
         scV1b.Value = scV1a.BatCurrent
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -506,7 +506,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitEnvTemp
         scV1b.Value = scV1a.EnvTemp
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -514,7 +514,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitEnvHumid
         scV1b.Value = scV1a.EnvHumid
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -522,7 +522,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitEnvPress
         scV1b.Value = scV1a.EnvPress
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -537,7 +537,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 	        scV1b := scV1
             scV1b.Unit = UnitWirelessSNR
             scV1b.Value = scV1a.WirelessSNR
-            if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+            if (!SafecastV1Upload(scV1b, "")) {
                 return
             }
         }
@@ -545,7 +545,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitTransport
         scV1b.Value = scV1a.Transport
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
 
@@ -555,7 +555,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsPm01_0
         scV1b.Value = scV1a.PmsPm01_0
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -563,7 +563,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsPm02_5
         scV1b.Value = scV1a.PmsPm02_5
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -571,7 +571,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsPm10_0
         scV1b.Value = scV1a.PmsPm10_0
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -579,7 +579,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC00_30
         scV1b.Value = scV1a.PmsC00_30
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -587,7 +587,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC00_50
         scV1b.Value = scV1a.PmsC00_50
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -595,7 +595,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC01_00
         scV1b.Value = scV1a.PmsC01_00
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -603,7 +603,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC02_50
         scV1b.Value = scV1a.PmsC02_50
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -611,7 +611,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC05_00
         scV1b.Value = scV1a.PmsC05_00
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -619,7 +619,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsC10_00
         scV1b.Value = scV1a.PmsC10_00
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -627,7 +627,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsCsecs
         scV1b.Value = scV1a.PmsCsecs
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -636,7 +636,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcPm01_0
         scV1b.Value = scV1a.OpcPm01_0
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -644,7 +644,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcPm02_5
         scV1b.Value = scV1a.OpcPm02_5
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -652,7 +652,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcPm10_0
         scV1b.Value = scV1a.OpcPm10_0
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -660,7 +660,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC00_38
         scV1b.Value = scV1a.OpcC00_38
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -668,7 +668,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC00_54
         scV1b.Value = scV1a.OpcC00_54
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -676,7 +676,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC01_00
         scV1b.Value = scV1a.OpcC01_00
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -684,7 +684,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC02_10
         scV1b.Value = scV1a.OpcC02_10
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -692,7 +692,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC05_00
         scV1b.Value = scV1a.OpcC05_00
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -700,7 +700,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcC10_00
         scV1b.Value = scV1a.OpcC10_00
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -708,7 +708,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitOpcCsecs
         scV1b.Value = scV1a.OpcCsecs
-        if (!SafecastV1Upload(scV1b, SafecastV1QueryString)) {
+        if (!SafecastV1Upload(scV1b, "")) {
             return
         }
     }
@@ -786,124 +786,6 @@ func endTransaction(transaction int, errstr string) {
         sendToSafecastApi(s);
     }
 
-}
-
-// Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
-func SafecastV2Upload(scV2 SafecastDataV2, query string) bool {
-
-	// If not configured, make it appear as though we succeeded
-	if (!uploadToSafecastV2) {
-		return true
-	}
-
-	// If uploading to V1 and we're doing it serially, we may as well do this
-	// serially also simply so that the console output looks easy to read.
-	if (uploadToSafecastV1 && !parallelV1Uploads) {
-	    doUploadToSafecastV2(scV2, query)
-	} else {
-	    go doUploadToSafecastV2(scV2, query)
-	}
-
-	return true
-}
-
-// Upload a Safecast data structure to the Safecast service
-func doUploadToSafecastV2(scV2 SafecastDataV2, query string) bool {
-	
-    transaction := beginTransaction("V2", SafecastV2UploadURL, "captured", scV2.CapturedAt)
-
-    scJSON, _ := json.Marshal(scV2)
-
-    if false {
-        fmt.Printf("%s\n", scJSON)
-    }
-
-	url := SafecastV2UploadURL
-	if (query != "") {
-		url = fmt.Sprintf("%s?%s", SafecastV2UploadURL, query)
-	}
-    req, err := http.NewRequest("POST", url, bytes.NewBuffer(scJSON))
-    req.Header.Set("User-Agent", "TTSERVE")
-    req.Header.Set("Content-Type", "application/json")
-    httpclient := &http.Client{
-        Timeout: time.Second * 15,
-    }
-    resp, err := httpclient.Do(req)
-
-    errString := ""
-    if (err == nil) {
-        resp.Body.Close()
-    } else {
-        // Eliminate the URL from the string because exposing the API key is not secure.
-        // Empirically we've seen that the actual error message is after the rightmost colon
-        errString = fmt.Sprintf("%s", err)
-        s := strings.Split(errString, ":")
-        errString = s[len(s)-1]
-    }
-
-    endTransaction(transaction, errString)
-
-    return errString == ""
-}
-
-// Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
-func SafecastV1Upload(scV1 SafecastDataV1, query string) bool {
-
-	// If not configured, make it appear as though we succeeded
-	if (!uploadToSafecastV1) {
-		return true
-	}
-	
-    if (parallelV1Uploads) {
-        go doUploadToSafecastV1(scV1, query)
-    } else {
-        if (!doUploadToSafecastV1(scV1, query)) {
-            return false
-        }
-        time.Sleep(1 * time.Second)
-    }
-
-    return true
-
-}
-
-// Upload a Safecast data structure to the Safecast service
-func doUploadToSafecastV1(scV1 SafecastDataV1, query string) bool {
-
-    transaction := beginTransaction("V1", SafecastV1UploadURL, scV1.Unit, scV1.Value)
-
-    scJSON, _ := json.Marshal(scV1)
-
-    if false {
-        fmt.Printf("%s\n", scJSON)
-    }
-
-	url := SafecastV1UploadURL
-	if (query != "") {
-		url = fmt.Sprintf("%s?%s", SafecastV1UploadURL, query)
-	}
-    req, err := http.NewRequest("POST", url, bytes.NewBuffer(scJSON))
-    req.Header.Set("User-Agent", "TTSERVE")
-    req.Header.Set("Content-Type", "application/json")
-    httpclient := &http.Client{
-        Timeout: time.Second * 15,
-    }
-    resp, err := httpclient.Do(req)
-
-    errString := ""
-    if (err == nil) {
-        resp.Body.Close()
-    } else {
-        // Eliminate the URL from the string because exposing the API key is not secure.
-        // Empirically we've seen that the actual error message is after the rightmost colon
-        errString = fmt.Sprintf("%s", err)
-        s := strings.Split(errString, ":")
-        errString = s[len(s)-1]
-    }
-
-    endTransaction(transaction, errString)
-
-    return errString == ""
 }
 
 // Check to see if this is a duplicate of a message we've recently seen
@@ -1321,4 +1203,115 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 	}
 
 	return v2
+}
+
+// Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
+func SafecastV1Upload(scV1 SafecastDataV1, url string) bool {
+
+	// If not configured, make it appear as though we succeeded
+	if (!uploadToSafecastV1) {
+		return true
+	}
+	
+    if (parallelV1Uploads) {
+        go doUploadToSafecastV1(scV1, url)
+    } else {
+        if (!doUploadToSafecastV1(scV1, url)) {
+            return false
+        }
+        time.Sleep(1 * time.Second)
+    }
+
+    return true
+
+}
+
+// Upload a Safecast data structure to the Safecast service
+func doUploadToSafecastV1(scV1 SafecastDataV1, url string) bool {
+
+    transaction := beginTransaction("V1", SafecastV1UploadURL, scV1.Unit, scV1.Value)
+
+    scJSON, _ := json.Marshal(scV1)
+
+    if false {
+        fmt.Printf("%s\n", scJSON)
+    }
+
+	urlForUpload := fmt.Sprintf("%s?%s", SafecastV1UploadURL, SafecastV1QueryString)
+	if (url != "") {
+		urlForUpload = url
+	}
+    req, err := http.NewRequest("POST", urlForUpload, bytes.NewBuffer(scJSON))
+    req.Header.Set("User-Agent", "TTSERVE")
+    req.Header.Set("Content-Type", "application/json")
+    httpclient := &http.Client{
+        Timeout: time.Second * 15,
+    }
+    resp, err := httpclient.Do(req)
+
+    errString := ""
+    if (err == nil) {
+        resp.Body.Close()
+    } else {
+        // Eliminate the URL from the string because exposing the API key is not secure.
+        // Empirically we've seen that the actual error message is after the rightmost colon
+        errString = fmt.Sprintf("%s", err)
+        s := strings.Split(errString, ":")
+        errString = s[len(s)-1]
+    }
+
+    endTransaction(transaction, errString)
+
+    return errString == ""
+}
+
+// Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
+func SafecastV2Upload(scV2 SafecastDataV2) bool {
+
+	// If not configured, make it appear as though we succeeded
+	if (!uploadToSafecastV2) {
+		return true
+	}
+
+	// Upload to all URLs
+	for _, url := range SafecastV2UploadURLs {
+	    go doUploadToSafecastV2(scV2, url)
+	}
+	
+	return true
+}
+
+// Upload a Safecast data structure to the Safecast service
+func doUploadToSafecastV2(scV2 SafecastDataV2, url string) bool {
+	
+    transaction := beginTransaction("V2", url, "captured", scV2.CapturedAt)
+
+    scJSON, _ := json.Marshal(scV2)
+
+    if false {
+        fmt.Printf("%s\n", scJSON)
+    }
+
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(scJSON))
+    req.Header.Set("User-Agent", "TTSERVE")
+    req.Header.Set("Content-Type", "application/json")
+    httpclient := &http.Client{
+        Timeout: time.Second * 15,
+    }
+    resp, err := httpclient.Do(req)
+
+    errString := ""
+    if (err == nil) {
+        resp.Body.Close()
+    } else {
+        // Eliminate the URL from the string because exposing the API key is not secure.
+        // Empirically we've seen that the actual error message is after the rightmost colon
+        errString = fmt.Sprintf("%s", err)
+        s := strings.Split(errString, ":")
+        errString = s[len(s)-1]
+    }
+
+    endTransaction(transaction, errString)
+
+    return errString == ""
 }
