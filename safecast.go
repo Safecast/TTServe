@@ -399,9 +399,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
         // Either an old-style upload, and the kind used by bGeigies,
         // or an upload of metadata without any kind of CPM
-        if (!SafecastV1Upload(scV1a, "")) {
-            return
-        }
+        SafecastV1Upload(scV1a, "")
 
         // Write a new-style entry to the log
         scV1b := scV1a
@@ -423,12 +421,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         writeToLogs(scV1b, scV2b)
 
 		// Post to the V2 api
-        if (!SafecastV2Upload(scV2b)) {
-			return
-		}
+        SafecastV2Upload(scV2b)
 
     } else if msg.DeviceIDNumber != nil {
-		var uploaded = 0
 		
         // A new style upload has "cpm0" or "cpm1" values, and
         // must have a numeric device ID
@@ -437,18 +432,14 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1b.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() & 0xfffffffe), 10)
             scV1b.Unit = UnitCPM
             scV1b.Value = fmt.Sprintf("%d", msg.GetCpm0())
-            if (SafecastV1Upload(scV1b, "")) {
-				uploaded = uploaded + 1
-			}
+            SafecastV1Upload(scV1b, "")
         }
         if msg.Cpm1 != nil {
             scV1b := scV1
             scV1b.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() | 0x00000001), 10)
             scV1b.Unit = UnitCPM
             scV1b.Value = fmt.Sprintf("%d", msg.GetCpm1())
-            if (SafecastV1Upload(scV1b, "")) {
-				uploaded = uploaded + 1
-			}
+            SafecastV1Upload(scV1b, "")
         }
 
         scV1c := scV1a
@@ -461,17 +452,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1c.Cpm1 = fmt.Sprintf("%d", msg.GetCpm1())
 			scV2c.Cpm1 = float32(msg.GetCpm1())
 		}
-        if (SafecastV2Upload(scV2c)) {
-			uploaded = uploaded + 1
-		}
+        SafecastV2Upload(scV2c)
 
 		// Log it
         writeToLogs(scV1c, scV2c)
-
-		// Exit if not uploaded
-		if (uploaded == 0) {
-			return
-		}
 
     }
 
@@ -482,49 +466,37 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitBatVoltage
         scV1b.Value = scV1a.BatVoltage
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.BatterySOC != nil {
         scV1b := scV1
         scV1b.Unit = UnitBatSOC
         scV1b.Value = scV1a.BatSOC
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.BatteryCurrent != nil {
         scV1b := scV1
         scV1b.Unit = UnitBatCurrent
         scV1b.Value = scV1a.BatCurrent
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.EnvTemperature != nil {
         scV1b := scV1
         scV1b.Unit = UnitEnvTemp
         scV1b.Value = scV1a.EnvTemp
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.EnvHumidity != nil {
         scV1b := scV1
         scV1b.Unit = UnitEnvHumid
         scV1b.Value = scV1a.EnvHumid
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.EnvPressure != nil {
         scV1b := scV1
         scV1b.Unit = UnitEnvPress
         scV1b.Value = scV1a.EnvPress
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
 
     // Only bother uploading certain values if they coincides with another
@@ -537,17 +509,13 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 	        scV1b := scV1
             scV1b.Unit = UnitWirelessSNR
             scV1b.Value = scV1a.WirelessSNR
-            if (!SafecastV1Upload(scV1b, "")) {
-                return
-            }
+            SafecastV1Upload(scV1b, "")
         }
 
         scV1b := scV1
         scV1b.Unit = UnitTransport
         scV1b.Value = scV1a.Transport
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
 
     }
 
@@ -555,162 +523,122 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsPm01_0
         scV1b.Value = scV1a.PmsPm01_0
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.PmsPm02_5 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsPm02_5
         scV1b.Value = scV1a.PmsPm02_5
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.PmsPm10_0 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsPm10_0
         scV1b.Value = scV1a.PmsPm10_0
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.PmsC00_30 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC00_30
         scV1b.Value = scV1a.PmsC00_30
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.PmsC00_50 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC00_50
         scV1b.Value = scV1a.PmsC00_50
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.PmsC01_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC01_00
         scV1b.Value = scV1a.PmsC01_00
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.PmsC02_50 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC02_50
         scV1b.Value = scV1a.PmsC02_50
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.PmsC05_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC05_00
         scV1b.Value = scV1a.PmsC05_00
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.PmsC10_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC10_00
         scV1b.Value = scV1a.PmsC10_00
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.PmsCsecs != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsCsecs
         scV1b.Value = scV1a.PmsCsecs
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
 
     if msg.OpcPm01_0 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcPm01_0
         scV1b.Value = scV1a.OpcPm01_0
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.OpcPm02_5 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcPm02_5
         scV1b.Value = scV1a.OpcPm02_5
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.OpcPm10_0 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcPm10_0
         scV1b.Value = scV1a.OpcPm10_0
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.OpcC00_38 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC00_38
         scV1b.Value = scV1a.OpcC00_38
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.OpcC00_54 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC00_54
         scV1b.Value = scV1a.OpcC00_54
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.OpcC01_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC01_00
         scV1b.Value = scV1a.OpcC01_00
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.OpcC02_10 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC02_10
         scV1b.Value = scV1a.OpcC02_10
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.OpcC05_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC05_00
         scV1b.Value = scV1a.OpcC05_00
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.OpcC10_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC10_00
         scV1b.Value = scV1a.OpcC10_00
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
     if msg.OpcCsecs != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcCsecs
         scV1b.Value = scV1a.OpcCsecs
-        if (!SafecastV1Upload(scV1b, "")) {
-            return
-        }
+        SafecastV1Upload(scV1b, "")
     }
 
 }
