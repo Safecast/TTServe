@@ -315,16 +315,19 @@ func udpNInboundHandler() {
         } else {
 
             fmt.Printf("\n%s Received %d-byte UDP buffered payload from %s\n", time.Now().Format(logDateFormat), n, addr)
+			if !validBulkPayload(buf, n) {
+				continue;
+			}
 
             // Loop over the various things in the buffer
             count := int(buf[0])
-            countOffset := 1
-            payloadOffset := countOffset + count
+            lengthArrayOffset := 1
+            payloadOffset := lengthArrayOffset + count
 
             for i:=0; i<count; i++ {
 
                 // Extract the length
-                length := int(buf[countOffset+i])
+                length := int(buf[lengthArrayOffset+i])
 
                 // Construct a TTN-like message
                 //  1) the Payload comes from UDP
@@ -479,16 +482,19 @@ func tcpNInboundHandler() {
         }
 
         fmt.Printf("\n%s Received %d-byte TCP buffered payload from %s\n", time.Now().Format(logDateFormat), n, conn.RemoteAddr().String())
+		if !validBulkPayload(buf, n) {
+			continue;
+		}
 
         // Loop over the various things in the buffer
         count := int(buf[0])
-        countOffset := 1
-        payloadOffset := countOffset + count
+        lengthArrayOffset := 1
+        payloadOffset := lengthArrayOffset + count
 
         for i:=0; i<count; i++ {
 
             // Extract the length
-            length := int(buf[countOffset+i])
+            length := int(buf[lengthArrayOffset+i])
 
             // Construct a TTN-like message
             //  1) the Payload comes from TCP
@@ -654,16 +660,19 @@ func inboundWebSendNHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         fmt.Printf("\n%s Received %d-byte HTTP buffered payload from DEVICE\n", time.Now().Format(logDateFormat), len(buf))
+		if !validBulkPayload(buf, len(buf)) {
+			return
+		}
 
         // Loop over the various things in the buffer
         count := int(buf[0])
-        countOffset := 1
-        payloadOffset := countOffset + count
+        lengthArrayOffset := 1
+        payloadOffset := lengthArrayOffset + count
 
         for i:=0; i<count; i++ {
 
             // Extract the length
-            length := int(buf[countOffset+i])
+            length := int(buf[lengthArrayOffset+i])
 
             // Construct the TTN-like messager
             AppReq.TTN.Payload = buf[payloadOffset:length]
@@ -716,6 +725,41 @@ func inboundWebSendNHandler(rw http.ResponseWriter, req *http.Request) {
 		}
     }
 
+}
+
+// Validate a bulk payload
+func validBulkPayload(buf []byte, length int) (bool) {
+
+	// Debug
+	if (true) {
+        fmt.Printf("%v\n", buf)
+	}
+
+	// Enough room for the count field in header?
+	header_length := 1
+	if length < header_length {
+		return false
+	}
+
+	// Enough room for the length array?
+    count := int(buf[0])
+	header_length += count
+	if length < header_length {
+		return false
+	}
+	
+	// Enough room for payloads?
+	total_length := header_length
+    lengthArrayOffset := 1
+    for i:=0; i<count; i++ {
+		total_length += int(buf[lengthArrayOffset+i])
+	}
+	if length < total_length {
+		return false
+	}
+
+	// Safe
+	return true
 }
 
 // Function to clean up an error string to eliminate the filename
