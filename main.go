@@ -335,7 +335,7 @@ func udpNInboundHandler() {
                 //  3) Everything else is null
 
                 var AppReq IncomingReq
-                AppReq.TTN.Payload = buf[payloadOffset:length]
+                AppReq.TTN.Payload = buf[payloadOffset:payloadOffset+length]
                 AppReq.TTN.Metadata = make([]AppMetadata, 1)
                 AppReq.TTN.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
@@ -501,7 +501,7 @@ func tcpNInboundHandler() {
             //  2) We'll add the server's time, in case the payload lacked CapturedAt
             //  3) Everything else is null
             var AppReq IncomingReq
-            AppReq.TTN.Payload = buf[payloadOffset:length]
+            AppReq.TTN.Payload = buf[payloadOffset:payloadOffset+length]
             AppReq.TTN.Metadata = make([]AppMetadata, 1)
             AppReq.TTN.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
@@ -675,7 +675,7 @@ func inboundWebSendNHandler(rw http.ResponseWriter, req *http.Request) {
             length := int(buf[lengthArrayOffset+i])
 
             // Construct the TTN-like messager
-            AppReq.TTN.Payload = buf[payloadOffset:length]
+            AppReq.TTN.Payload = buf[payloadOffset:payloadOffset+length]
 
             // We now have a TTN-like message, constructed as follws:
             //  1) the Payload came from the device itself
@@ -731,7 +731,7 @@ func inboundWebSendNHandler(rw http.ResponseWriter, req *http.Request) {
 func validBulkPayload(buf []byte, length int) (bool) {
 
 	// Debug
-	if (true) {
+	if (false) {
         fmt.Printf("%v\n", buf)
 	}
 
