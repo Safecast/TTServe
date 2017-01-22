@@ -21,12 +21,12 @@ var uploadToSafecastV2 = true;
 // For V1, We've found that in certain cases the server gets overloaded.  When we run into those cases,
 // turn this OFF and things will slow down.  (Obviously this is not the preferred mode of operation,
 // because it creates a huge queue of things waiting to be uploaded.)
-var parallelV1Uploads = false
+var parallelV1Uploads = true
 
 // For dealing with transaction timeouts
 var httpTransactionsInProgress int = 0
 var httpTransactions = 0
-const httpTransactionsRecorded = 250
+const httpTransactionsRecorded = 500
 var httpTransactionDurations[httpTransactionsRecorded] int
 var httpTransactionTimes[httpTransactionsRecorded] time.Time
 var httpTransactionErrorTime string
