@@ -82,7 +82,7 @@ var ttnLastConnected string = "(never)"
 var ttnLastDisconnectedTime time.Time
 var ttnLastDisconnected string = "(never)"
 var ttnUpQ chan MQTT.Message
-var MAX_PENDING_REQUESTS int = 25
+var MAX_PENDING_REQUESTS int = 100
 
 // Common app request
 type IncomingReq struct {
