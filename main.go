@@ -738,6 +738,7 @@ func validBulkPayload(buf []byte, length int) (bool) {
 	// Enough room for the count field in header?
 	header_length := 1
 	if length < header_length {
+        fmt.Printf("*** Invalid header ***\n", time.Now().Format(logDateFormat))
 		return false
 	}
 
@@ -745,6 +746,7 @@ func validBulkPayload(buf []byte, length int) (bool) {
     count := int(buf[0])
 	header_length += count
 	if length < header_length {
+        fmt.Printf("*** Invalid header ***\n", time.Now().Format(logDateFormat))
 		return false
 	}
 	
@@ -755,6 +757,7 @@ func validBulkPayload(buf []byte, length int) (bool) {
 		total_length += int(buf[lengthArrayOffset+i])
 	}
 	if length < total_length {
+        fmt.Printf("*** Invalid payload ***\n", time.Now().Format(logDateFormat))
 		return false
 	}
 
