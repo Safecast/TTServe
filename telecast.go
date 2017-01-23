@@ -3,9 +3,9 @@ package main
 
 import (
     "fmt"
-	"time"
+    "time"
     "strings"
-	"strconv"
+    "strconv"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
 )
@@ -13,8 +13,9 @@ import (
 // Describes every device to which we've sent a message
 type knownDevice struct {
     devEui string
-	deviceID uint32
-	messageToDevice []byte
+    deviceID uint32
+    messageToDeviceText string
+    messageToDevice []byte
 }
 
 // Statics
@@ -30,27 +31,27 @@ func TelecastDeviceID (msg *teletype.Telecast) uint32 {
             return uint32(i64)
         }
     }
-	return 0
-}	
+    return 0
+}
 
 // Get a summary of devices that are older than this many minutes ago
 func sendTelecastOutboundSummaryToSlack() {
 
-	first := true
+    first := true
     s := "Nothing pending for transmission."
     for i := 0; i < len(knownDevices); i++ {
 
-		if (first) {
-			s = ""
-		} else {
-			first = false
-			s = s + "\n"
-		}
-		
-		if (knownDevices[i].messageToDevice == nil) {
+        if (first) {
+            s = ""
+        } else {
+            first = false
+            s = s + "\n"
+        }
+
+        if (knownDevices[i].messageToDevice == nil) {
             s = fmt.Sprintf("%d: (no message)", knownDevices[i].deviceID)
-		} else {
-            s = fmt.Sprintf("%d: %s", knownDevices[i].deviceID, knownDevices[i].messageToDevice)
+        } else {
+            s = fmt.Sprintf("%d: %s", knownDevices[i].deviceID, knownDevices[i].messageToDeviceText)
         }
 
     }
@@ -63,8 +64,8 @@ func sendTelecastOutboundSummaryToSlack() {
 // Process inbound telecast message
 func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
 
-	// Keep track of devices from whom we've received message
-	deviceID := TelecastDeviceID(msg)
+    // Keep track of devices from whom we've received message
+    deviceID := TelecastDeviceID(msg)
     addKnownDevice(devEui, deviceID)
 
     // Unpack the message arguments
@@ -92,8 +93,8 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
 
         // Handle an inbound upstream-only ping (blank message) by just ignoring it
     case "":
-		fmt.Printf("%s Telecast \"Ping\" message\n", time.Now().Format(logDateFormat))
-		
+        fmt.Printf("%s Telecast \"Ping\" message\n", time.Now().Format(logDateFormat))
+
         // Anything else is broadcast to all OTHER known devices
     default:
         fmt.Printf("\n%s \"Broadcast\" message: '%s'\n\n", time.Now().Format(logDateFormat), message)
@@ -105,10 +106,10 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
 // Send a message to a specific device
 func sendMessage(deviceID uint32, message string) {
 
-	// Marshal the text string into a telecast message
+    // Marshal the text string into a telecast message
     deviceType := teletype.Telecast_TTSERVE
     tmsg := &teletype.Telecast{}
-	tmsg.DeviceIDNumber = &deviceID;
+    tmsg.DeviceIDNumber = &deviceID;
     tmsg.DeviceType = &deviceType
     tmsg.Message = proto.String(message)
     tdata, terr := proto.Marshal(tmsg)
@@ -116,20 +117,32 @@ func sendMessage(deviceID uint32, message string) {
         fmt.Printf("t marshaling error: ", terr)
     }
 
-	// Ask TTN to publish it, else leave it waiting
-	// as an outbound message for the next time
-	// the node polls.
-    for i := 0; i < len(knownDevices); i++ {
-		if (knownDevices[i].deviceID == deviceID) {
-			if (knownDevices[i].devEui != "") {
-				ttnOutboundPublish(knownDevices[i].devEui, tdata)
-			} else {
-				knownDevices[i].messageToDevice = tdata
-				fmt.Printf("Enqueued %d-byte message for device %d\n", len(tdata), deviceID)
-			}
-		break;
-		}
-	}
+    // Ask TTN to publish it, else leave it waiting
+    // as an outbound message for the next time
+    // the node polls.
+
+    found := false;
+    for !found {
+
+        for i := 0; i < len(knownDevices); i++ {
+            if (knownDevices[i].deviceID == deviceID) {
+                found = true;
+                if (knownDevices[i].devEui != "") {
+                    ttnOutboundPublish(knownDevices[i].devEui, tdata)
+                } else {
+                    knownDevices[i].messageToDeviceText = message
+                    knownDevices[i].messageToDevice = tdata
+                    fmt.Printf("Enqueued %d-byte message for device %d\n", len(tdata), deviceID)
+                }
+                break;
+            }
+        }
+
+        // If not found, add it
+        if !found {
+            addKnownDevice("", deviceID)
+        }
+    }
 
 }
 
@@ -138,20 +151,20 @@ func sendMessage(deviceID uint32, message string) {
 func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte) {
 
     for i := 0; i < len(knownDevices); i++ {
-		if (knownDevices[i].deviceID == deviceID) {
-			if (knownDevices[i].messageToDevice != nil) {
-				messageToDevice := knownDevices[i].messageToDevice
-				knownDevices[i].messageToDevice = nil
-				fmt.Printf("Dequeued %d-byte message for device %d\n", len(messageToDevice), deviceID)
-				return true, messageToDevice
-			}
-		break;
-		}
-	}
+        if (knownDevices[i].deviceID == deviceID) {
+            if (knownDevices[i].messageToDevice != nil) {
+                messageToDevice := knownDevices[i].messageToDevice
+                knownDevices[i].messageToDevice = nil
+                fmt.Printf("Dequeued %d-byte message for device %d\n", len(messageToDevice), deviceID)
+                return true, messageToDevice
+            }
+            break;
+        }
+    }
 
-	return false, nil
+    return false, nil
 
-}	
+}
 
 // Keep track of known devices
 func addKnownDevice(devEui string, deviceID uint32) {
@@ -162,8 +175,8 @@ func addKnownDevice(devEui string, deviceID uint32) {
         }
     }
     e.devEui = devEui
-	e.deviceID = deviceID;
-	e.messageToDevice = nil
+    e.deviceID = deviceID;
+    e.messageToDevice = nil
     knownDevices = append(knownDevices, e)
 }
 
@@ -175,12 +188,12 @@ func broadcastMessage(message string, skipDeviceID uint32) {
         fmt.Printf("Skipping %d, broadcast '%s'\n", skipDeviceID, message)
     }
     for _, e := range knownDevices {
-		if (skipDeviceID == 0) {
-			sendMessage(e.deviceID, message)
-		} else {
-			if e.deviceID != skipDeviceID {
-	            sendMessage(e.deviceID, message)
-			}
+        if (skipDeviceID == 0) {
+            sendMessage(e.deviceID, message)
+        } else {
+            if e.deviceID != skipDeviceID {
+                sendMessage(e.deviceID, message)
+            }
         }
     }
 }
