@@ -436,6 +436,7 @@ func tcp1InboundHandler() {
 				isAvailable, payload := TelecastOutboundPayload(deviceID)
 				if (isAvailable) {
 	                conn.Write(payload)
+					sendToSafecastOps(fmt.Sprintf("Device %d picked up a payload\n", deviceID))
 				}
             }
 
@@ -544,6 +545,7 @@ func tcpNInboundHandler() {
 			isAvailable, payload := TelecastOutboundPayload(deviceID)
 			if (isAvailable) {
                 conn.Write(payload)
+				sendToSafecastOps(fmt.Sprintf("Device %d picked up a payload\n", deviceID))
 			}
         }
 
@@ -641,7 +643,7 @@ func inboundWebSend1Handler(rw http.ResponseWriter, req *http.Request) {
 		if (isAvailable) {
 	        hexPayload := hex.EncodeToString(payload)
 	        io.WriteString(rw, hexPayload)
-	        fmt.Printf("HTTP Reply payload: %s\n", hexPayload)
+			sendToSafecastOps(fmt.Sprintf("Device %d picked up a payload\n", deviceID))
 		}
     }
 
@@ -732,7 +734,7 @@ func inboundWebSendNHandler(rw http.ResponseWriter, req *http.Request) {
 		if (isAvailable) {
 	        hexPayload := hex.EncodeToString(payload)
 	        io.WriteString(rw, hexPayload)
-	        fmt.Printf("HTTP Reply payload: %s\n", hexPayload)
+			sendToSafecastOps(fmt.Sprintf("Device %d picked up a payload\n", deviceID))
 		}
     }
 
