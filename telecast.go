@@ -146,6 +146,23 @@ func sendMessage(deviceID uint32, message string) {
 
 }
 
+// Cancel a message to a specific device
+func cancelMessage(deviceID uint32) (isCancelled bool) {
+
+    for i := 0; i < len(knownDevices); i++ {
+        if (knownDevices[i].deviceID == deviceID) {
+            if (knownDevices[i].messageToDevice == nil) {
+                return false
+            }
+            knownDevices[i].messageToDevice = nil
+            return true
+        }
+    }
+
+    return false
+
+}
+
 // See if there is an outbound payload waiting for this device.
 // If so, fetch it, clear it out, and return it.
 func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte) {
