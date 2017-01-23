@@ -48,9 +48,7 @@ func sendTelecastOutboundSummaryToSlack() {
             s = s + "\n"
         }
 
-        if (knownDevices[i].messageToDevice == nil) {
-            s = fmt.Sprintf("%d: (no message)", knownDevices[i].deviceID)
-        } else {
+        if (knownDevices[i].messageToDevice != nil) {
             s = fmt.Sprintf("%d: %s", knownDevices[i].deviceID, knownDevices[i].messageToDeviceText)
         }
 

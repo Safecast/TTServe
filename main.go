@@ -638,17 +638,11 @@ func inboundWebSend1Handler(rw http.ResponseWriter, req *http.Request) {
     // See if there's an outbound message waiting for this app.  If so, send it now because we
     // know that there's a narrow receive window open.
     isAvailable, deviceID := getDeviceIDFromPayload(AppReq.TTN.Payload)
-// OZZIE
-	fmt.Printf("IsAvailable: %v\n", isAvailable)
 	if (isAvailable) {
-// OZZIE
-    fmt.Printf("Device: %d\n", deviceID);
 		isAvailable, payload := TelecastOutboundPayload(deviceID)
 		if (isAvailable) {
 	        hexPayload := hex.EncodeToString(payload)
 	        io.WriteString(rw, hexPayload)
-// OZZIE
-		    fmt.Printf("Payload: %v\n", hexPayload);
 			sendToSafecastOps(fmt.Sprintf("Device %d picked up a payload\n", deviceID))
 		}
     }
