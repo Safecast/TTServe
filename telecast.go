@@ -42,9 +42,9 @@ func sendTelecastOutboundSummaryToSlack() {
     for i := 0; i < len(knownDevices); i++ {
 
         if (first) {
+            first = false
             s = ""
         } else {
-            first = false
             s = s + "\n"
         }
 
