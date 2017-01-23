@@ -168,7 +168,7 @@ func timer15m() {
 
         // Report maximum inbound pending transactions
         if (reqQMaxLength > 1) {
-            fmt.Printf("%s Max request queue length reached %d\n", time.Now().Format(logDateFormat), reqQMaxLength)
+            fmt.Printf("%s New high water mark for request queue length: %d\n", time.Now().Format(logDateFormat), reqQMaxLength)
             if (reqQMaxLength >= MAX_PENDING_REQUESTS) {
                 fmt.Printf("\n***\n***\n*** RESTARTING defensively because of request queue overflow\n***\n***\n\n")
                 os.Exit(0)
@@ -638,11 +638,17 @@ func inboundWebSend1Handler(rw http.ResponseWriter, req *http.Request) {
     // See if there's an outbound message waiting for this app.  If so, send it now because we
     // know that there's a narrow receive window open.
     isAvailable, deviceID := getDeviceIDFromPayload(AppReq.TTN.Payload)
+// OZZIE
+	fmt.Printf("IsAvailable: %v\n", isAvailable)
 	if (isAvailable) {
+// OZZIE
+    fmt.Printf("Device: %d\n", deviceID);
 		isAvailable, payload := TelecastOutboundPayload(deviceID)
 		if (isAvailable) {
 	        hexPayload := hex.EncodeToString(payload)
 	        io.WriteString(rw, hexPayload)
+// OZZIE
+		    fmt.Printf("Payload: %v\n", hexPayload);
 			sendToSafecastOps(fmt.Sprintf("Device %d picked up a payload\n", deviceID))
 		}
     }
