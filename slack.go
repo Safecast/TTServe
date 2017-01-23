@@ -70,6 +70,11 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 			sendSafecastDeviceSummaryToSlack()
         }
 
+	case "pending":
+		fallthrough
+    case "outbound":
+		sendTelecastOutboundSummaryToSlack()
+
     case "restart":
         sendToSafecastOps(fmt.Sprintf("** Restarting **"))
         fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart' command\n***\n***\n\n")

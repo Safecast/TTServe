@@ -33,6 +33,33 @@ func TelecastDeviceID (msg *teletype.Telecast) uint32 {
 	return 0
 }	
 
+// Get a summary of devices that are older than this many minutes ago
+func sendTelecastOutboundSummaryToSlack() {
+
+	first := true
+    s := "Nothing pending for transmission."
+    for i := 0; i < len(knownDevices); i++ {
+
+		if (first) {
+			s = ""
+		} else {
+			first = false
+			s = s + "\n"
+		}
+		
+		if (knownDevices[i].messageToDevice == nil) {
+            s = fmt.Sprintf("%d: (no message)", knownDevices[i].deviceID)
+		} else {
+            s = fmt.Sprintf("%d: %s", knownDevices[i].deviceID, knownDevices[i].messageToDevice)
+        }
+
+    }
+
+    // Send it to Slack
+    sendToSafecastOps(s)
+
+}
+
 // Process inbound telecast message
 func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
 
