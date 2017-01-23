@@ -88,7 +88,7 @@ var MAX_PENDING_REQUESTS int = 100
 type IncomingReq struct {
     TTN DataUpAppReq
     Transport string
-	ReceivedAt string
+	UploadedAt string
 }
 var reqQ chan IncomingReq
 var reqQMaxLength = 0
@@ -280,7 +280,7 @@ func udp1InboundHandler() {
 
             // Enqueue it for TTN-like processing
             AppReq.Transport = "udp:" + addr.String()
-			AppReq.ReceivedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+			AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
             reqQ <- AppReq
             monitorReqQ()
 
@@ -322,7 +322,7 @@ func udpNInboundHandler() {
 			}
 
             // Loop over the various things in the buffer
-			ReceivedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+			UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
             count := int(buf[0])
             lengthArrayOffset := 1
             payloadOffset := lengthArrayOffset + count
@@ -347,7 +347,7 @@ func udpNInboundHandler() {
 
                 // Enqueue it for TTN-like processing
                 AppReq.Transport = "udp:" + addr.String()
-				AppReq.ReceivedAt = ReceivedAt
+				AppReq.UploadedAt = UploadedAt
                 reqQ <- AppReq
                 monitorReqQ()
 
@@ -419,7 +419,7 @@ func tcp1InboundHandler() {
 
             // Enqueue it for TTN-like processing
             AppReq.Transport = "tcp:" + conn.RemoteAddr().String()
-			AppReq.ReceivedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+			AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
             reqQ <- AppReq
             monitorReqQ()
 
@@ -492,7 +492,7 @@ func tcpNInboundHandler() {
 		}
 
         // Loop over the various things in the buffer
-		ReceivedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+		UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
         count := int(buf[0])
         lengthArrayOffset := 1
         payloadOffset := lengthArrayOffset + count
@@ -523,7 +523,7 @@ func tcpNInboundHandler() {
 			
             // Enqueue it for TTN-like processing
             AppReq.Transport = "tcp:" + conn.RemoteAddr().String()
-			AppReq.ReceivedAt = ReceivedAt
+			AppReq.UploadedAt = UploadedAt
             reqQ <- AppReq
             monitorReqQ()
 
@@ -586,7 +586,7 @@ func inboundWebSend1Handler(rw http.ResponseWriter, req *http.Request) {
 
         // Enqueue AppReq for TTN-like processing
         AppReq.Transport = "http:" + req.RemoteAddr
-		AppReq.ReceivedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+		AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
         reqQ <- AppReq
         monitorReqQ()
 
@@ -612,7 +612,7 @@ func inboundWebSend1Handler(rw http.ResponseWriter, req *http.Request) {
 
         // Enqueue AppReq for TTN-like processing
         AppReq.Transport = "http:" + req.RemoteAddr
-		AppReq.ReceivedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+		AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
         reqQ <- AppReq
         monitorReqQ()
 
@@ -674,7 +674,7 @@ func inboundWebSendNHandler(rw http.ResponseWriter, req *http.Request) {
 		}
 
         // Loop over the various things in the buffer
-		ReceivedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+		UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
         count := int(buf[0])
         lengthArrayOffset := 1
         payloadOffset := lengthArrayOffset + count
@@ -698,7 +698,7 @@ func inboundWebSendNHandler(rw http.ResponseWriter, req *http.Request) {
 
             // Enqueue AppReq for TTN-like processing
             AppReq.Transport = "http:" + req.RemoteAddr
-			AppReq.ReceivedAt = ReceivedAt
+			AppReq.UploadedAt = UploadedAt
             reqQ <- AppReq
             monitorReqQ()
 
@@ -844,9 +844,10 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 		if (req.URL.RawQuery != "") {
 			urlV1 = fmt.Sprintf("%s?%s", urlV1, req.URL.RawQuery)
 		}
+		UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
         SafecastV1Upload(sV1, urlV1)
-        SafecastV2Upload(sV2)
-        SafecastV2Log(fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05")), sV2)
+        SafecastV2Upload(UploadedAt, sV2)
+        SafecastV2Log(UploadedAt, sV2)
 
     }
 
@@ -993,7 +994,7 @@ func ttnInboundHandler() {
             // for a Yahoo/Google account, and potentially paying.  Since none of the
             // code here is actually utilizing geo, we'll wait until then.
             AppReq.Transport = "ttn:" + AppReq.TTN.DevEUI
-			AppReq.ReceivedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+			AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
             reqQ <- AppReq
             monitorReqQ()
 
@@ -1089,7 +1090,7 @@ func commonRequestHandler() {
             fallthrough
         case teletype.Telecast_SOLARCAST:
             metadata := AppReq.TTN.Metadata[0]
-            ProcessSafecastMessage(msg, checksum, metadata.GatewayEUI, AppReq.ReceivedAt, AppReq.Transport,
+            ProcessSafecastMessage(msg, checksum, metadata.GatewayEUI, AppReq.UploadedAt, AppReq.Transport,
                 metadata.ServerTime,
                 metadata.Lsnr,
                 metadata.Latitude, metadata.Longitude, metadata.Altitude)

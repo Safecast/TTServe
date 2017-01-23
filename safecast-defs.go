@@ -67,6 +67,7 @@ type safecastStatsV1 struct {
 }
 
 type SafecastDataV2 struct {
+	UploadedAt		string `json:"uploaded_at,omitempty"`
     CapturedAt		string `json:"captured_at,omitempty"`
     DeviceID		uint32 `json:"device_id,omitempty"`
     Height			float32 `json:"height,omitempty"`

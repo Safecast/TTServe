@@ -78,7 +78,7 @@ func (a ByKey) Less(i, j int) bool {
 func ProcessSafecastMessage(msg *teletype.Telecast,
     checksum uint32,
     ipInfo string,
-    ReceivedAt string,
+    UploadedAt string,
     Transport string,
     defaultTime string,
     defaultSNR float32,
@@ -419,10 +419,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1b.Unit = ""
             scV1b.Value = ""
         }
-        writeToLogs(ReceivedAt, scV1b, scV2b)
+        writeToLogs(UploadedAt, scV1b, scV2b)
 
 		// Post to the V2 api
-        SafecastV2Upload(scV2b)
+        SafecastV2Upload(UploadedAt, scV2b)
 
     } else if msg.DeviceIDNumber != nil {
 		
@@ -453,10 +453,10 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1c.Cpm1 = fmt.Sprintf("%d", msg.GetCpm1())
 			scV2c.Cpm1 = float32(msg.GetCpm1())
 		}
-        SafecastV2Upload(scV2c)
+        SafecastV2Upload(UploadedAt, scV2c)
 
 		// Log it
-        writeToLogs(ReceivedAt, scV1c, scV2c)
+        writeToLogs(UploadedAt, scV1c, scV2c)
 
     }
 
@@ -895,9 +895,9 @@ func sendSafecastDeviceSummaryToSlack() {
 }
 
 // Write to both logs
-func writeToLogs(ReceivedAt string, scV1 SafecastDataV1, scV2 SafecastDataV2) {
-	SafecastV1Log(ReceivedAt, scV1)
-	SafecastV2Log(ReceivedAt, scV2)
+func writeToLogs(UploadedAt string, scV1 SafecastDataV1, scV2 SafecastDataV2) {
+	SafecastV1Log(UploadedAt, scV1)
+	SafecastV2Log(UploadedAt, scV2)
 }
 
 func SafecastDirectory() string {
@@ -917,7 +917,7 @@ func SafecastLogFilename(DeviceID string, Extension string) string {
 }
 
 // Write the value to the log
-func SafecastV1Log(ReceivedAt string, scV1 SafecastDataV1) {
+func SafecastV1Log(UploadedAt string, scV1 SafecastDataV1) {
 
     // Extract the device number and form a filename
     file := SafecastLogFilename(scV1.DeviceID, ".csv")
@@ -948,7 +948,7 @@ func SafecastV1Log(ReceivedAt string, scV1 SafecastDataV1) {
     }
 
     // Write the stuff
-    s := ReceivedAt
+    s := UploadedAt
     s = s + fmt.Sprintf(",%s", scV1.CapturedAt)
     s = s + fmt.Sprintf(",%s", scV1.DeviceID)
     s = s + fmt.Sprintf(",%s", stats)
@@ -995,7 +995,7 @@ func SafecastV1Log(ReceivedAt string, scV1 SafecastDataV1) {
 }
 
 // Write the value to the log
-func SafecastV2Log(ReceivedAt string, scV2 SafecastDataV2) {
+func SafecastV2Log(UploadedAt string, scV2 SafecastDataV2) {
 
     file := SafecastLogFilename(fmt.Sprintf("%d", scV2.DeviceID), ".json")
 
@@ -1013,6 +1013,7 @@ func SafecastV2Log(ReceivedAt string, scV2 SafecastDataV2) {
     }
 
     // Turn stats into a safe string writing
+	scV2.UploadedAt = UploadedAt
     scJSON, _ := json.Marshal(scV2)
     fd.WriteString(string(scJSON));
 	fd.WriteString("\r\n\r\n");
@@ -1195,7 +1196,7 @@ func doUploadToSafecastV1(scV1 SafecastDataV1, url string) bool {
 }
 
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
-func SafecastV2Upload(scV2 SafecastDataV2) bool {
+func SafecastV2Upload(UploadedAt string, scV2 SafecastDataV2) bool {
 
 	// If not configured, make it appear as though we succeeded
 	if (!uploadToSafecastV2) {
@@ -1204,17 +1205,18 @@ func SafecastV2Upload(scV2 SafecastDataV2) bool {
 
 	// Upload to all URLs
 	for _, url := range SafecastV2UploadURLs {
-	    go doUploadToSafecastV2(scV2, url)
+	    go doUploadToSafecastV2(UploadedAt, scV2, url)
 	}
 	
 	return true
 }
 
 // Upload a Safecast data structure to the Safecast service
-func doUploadToSafecastV2(scV2 SafecastDataV2, url string) bool {
+func doUploadToSafecastV2(UploadedAt string, scV2 SafecastDataV2, url string) bool {
 	
     transaction := beginTransaction("V2", url, "captured", scV2.CapturedAt)
 
+	scV2.UploadedAt = UploadedAt
     scJSON, _ := json.Marshal(scV2)
 
     if false {
