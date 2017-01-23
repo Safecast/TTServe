@@ -322,6 +322,7 @@ func udpNInboundHandler() {
 			}
 
             // Loop over the various things in the buffer
+			ReceivedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
             count := int(buf[0])
             lengthArrayOffset := 1
             payloadOffset := lengthArrayOffset + count
@@ -346,7 +347,7 @@ func udpNInboundHandler() {
 
                 // Enqueue it for TTN-like processing
                 AppReq.Transport = "udp:" + addr.String()
-				AppReq.ReceivedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+				AppReq.ReceivedAt = ReceivedAt
                 reqQ <- AppReq
                 monitorReqQ()
 
@@ -491,6 +492,7 @@ func tcpNInboundHandler() {
 		}
 
         // Loop over the various things in the buffer
+		ReceivedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
         count := int(buf[0])
         lengthArrayOffset := 1
         payloadOffset := lengthArrayOffset + count
@@ -521,7 +523,7 @@ func tcpNInboundHandler() {
 			
             // Enqueue it for TTN-like processing
             AppReq.Transport = "tcp:" + conn.RemoteAddr().String()
-			AppReq.ReceivedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+			AppReq.ReceivedAt = ReceivedAt
             reqQ <- AppReq
             monitorReqQ()
 
@@ -672,6 +674,7 @@ func inboundWebSendNHandler(rw http.ResponseWriter, req *http.Request) {
 		}
 
         // Loop over the various things in the buffer
+		ReceivedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
         count := int(buf[0])
         lengthArrayOffset := 1
         payloadOffset := lengthArrayOffset + count
@@ -695,7 +698,7 @@ func inboundWebSendNHandler(rw http.ResponseWriter, req *http.Request) {
 
             // Enqueue AppReq for TTN-like processing
             AppReq.Transport = "http:" + req.RemoteAddr
-			AppReq.ReceivedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+			AppReq.ReceivedAt = ReceivedAt
             reqQ <- AppReq
             monitorReqQ()
 
