@@ -78,6 +78,7 @@ func (a ByKey) Less(i, j int) bool {
 func ProcessSafecastMessage(msg *teletype.Telecast,
     checksum uint32,
     ipInfo string,
+    ReceivedAt string,
     Transport string,
     defaultTime string,
     defaultSNR float32,
@@ -418,7 +419,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1b.Unit = ""
             scV1b.Value = ""
         }
-        writeToLogs(scV1b, scV2b)
+        writeToLogs(ReceivedAt, scV1b, scV2b)
 
 		// Post to the V2 api
         SafecastV2Upload(scV2b)
@@ -455,7 +456,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         SafecastV2Upload(scV2c)
 
 		// Log it
-        writeToLogs(scV1c, scV2c)
+        writeToLogs(ReceivedAt, scV1c, scV2c)
 
     }
 
@@ -894,9 +895,9 @@ func sendSafecastDeviceSummaryToSlack() {
 }
 
 // Write to both logs
-func writeToLogs(scV1 SafecastDataV1, scV2 SafecastDataV2) {
-	SafecastV1Log(scV1)
-	SafecastV2Log(scV2)
+func writeToLogs(ReceivedAt string, scV1 SafecastDataV1, scV2 SafecastDataV2) {
+	SafecastV1Log(ReceivedAt, scV1)
+	SafecastV2Log(ReceivedAt, scV2)
 }
 
 func SafecastDirectory() string {
@@ -916,7 +917,7 @@ func SafecastLogFilename(DeviceID string, Extension string) string {
 }
 
 // Write the value to the log
-func SafecastV1Log(scV1 SafecastDataV1) {
+func SafecastV1Log(ReceivedAt string, scV1 SafecastDataV1) {
 
     // Extract the device number and form a filename
     file := SafecastLogFilename(scV1.DeviceID, ".csv")
@@ -947,7 +948,7 @@ func SafecastV1Log(scV1 SafecastDataV1) {
     }
 
     // Write the stuff
-    s := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+    s := ReceivedAt
     s = s + fmt.Sprintf(",%s", scV1.CapturedAt)
     s = s + fmt.Sprintf(",%s", scV1.DeviceID)
     s = s + fmt.Sprintf(",%s", stats)
@@ -994,7 +995,7 @@ func SafecastV1Log(scV1 SafecastDataV1) {
 }
 
 // Write the value to the log
-func SafecastV2Log(scV2 SafecastDataV2) {
+func SafecastV2Log(ReceivedAt string, scV2 SafecastDataV2) {
 
     file := SafecastLogFilename(fmt.Sprintf("%d", scV2.DeviceID), ".json")
 
