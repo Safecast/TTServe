@@ -658,7 +658,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 func validBulkPayload(buf []byte, length int) (bool) {
 
     // Debug
-    if (false) {
+    if (true) {
         fmt.Printf("%v\n", buf)
     }
 
