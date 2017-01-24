@@ -46,8 +46,8 @@ const TTServerFTPCertPath = "/safecast/cert/ftp"
 // Buffered I/O header formats.  Note that although we are now starting with version number 0, we
 // special case version number 8 because of the old style "single protocl buffer" message format that
 // always begins with 0x08. (see ttnode/send.c)
-const BUFF_FORMAT_PB_ARRAY byte  =	0
-const BUFF_FORMAT_SINGLE_PB byte =	8
+const BUFF_FORMAT_PB_ARRAY byte  =  0
+const BUFF_FORMAT_SINGLE_PB byte =  8
 
 // This server-related
 const TTServerAddress = "api.teletype.io"
@@ -327,6 +327,12 @@ func udpInboundHandler() {
                 }
             }
 
+            default: {
+
+                fmt.Printf("\n%s Received INVALID %d-byte UDP payload from %s\n", time.Now().Format(logDateFormat), buf_length, addr)
+
+            }
+
             }
         }
     }
@@ -464,6 +470,13 @@ func tcpInboundHandler() {
             }
 
         }
+
+        default: {
+
+            fmt.Printf("\n%s Received INVALID %d-byte TCP payload from %s\n", time.Now().Format(logDateFormat), buf_length, conn.RemoteAddr().String())
+
+        }
+
         }
 
         // Delay to see if we can pick up a reply for this request.  This is certainly
@@ -604,6 +617,11 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
             }
 
         }
+
+		default: {
+            fmt.Printf("\n%s Received INVALID %d-byte HTTP buffered payload from DEVICE\n", time.Now().Format(logDateFormat), buf_length)
+		}
+			
         }
     }
 
@@ -645,14 +663,14 @@ func validBulkPayload(buf []byte, length int) (bool) {
     }
 
     // Enough room for the count field in header?
-    header_length := 1
+    header_length := 2
     if length < header_length {
         fmt.Printf("*** Invalid header ***\n", time.Now().Format(logDateFormat))
         return false
     }
 
     // Enough room for the length array?
-    count := int(buf[0])
+    count := int(buf[1])
     header_length += count
     if length < header_length {
         fmt.Printf("*** Invalid header ***\n", time.Now().Format(logDateFormat))
@@ -661,7 +679,7 @@ func validBulkPayload(buf []byte, length int) (bool) {
 
     // Enough room for payloads?
     total_length := header_length
-    lengthArrayOffset := 1
+    lengthArrayOffset := 2
     for i:=0; i<count; i++ {
         total_length += int(buf[lengthArrayOffset+i])
     }
