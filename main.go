@@ -288,6 +288,8 @@ func udpInboundHandler() {
 
             case BUFF_FORMAT_PB_ARRAY: {
 
+	            fmt.Printf("\n%s Received %d-byte UDP BUFFERED payload from %s\n", time.Now().Format(logDateFormat), buf_length, addr)
+
                 if !validBulkPayload(buf, buf_length) {
                     continue;
                 }
@@ -422,7 +424,7 @@ func tcpInboundHandler() {
 
         case BUFF_FORMAT_PB_ARRAY: {
 
-            fmt.Printf("\n%s Received %d-byte TCP buffered payload from %s\n", time.Now().Format(logDateFormat), buf_length, conn.RemoteAddr().String())
+            fmt.Printf("\n%s Received %d-byte TCP BUFFERED payload from %s\n", time.Now().Format(logDateFormat), buf_length, conn.RemoteAddr().String())
 
             if !validBulkPayload(buf, buf_length) {
                 continue;
@@ -577,7 +579,8 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         case BUFF_FORMAT_PB_ARRAY: {
 
-            fmt.Printf("\n%s Received %d-byte HTTP buffered payload from DEVICE\n", time.Now().Format(logDateFormat), buf_length)
+            fmt.Printf("\n%s Received %d-byte HTTP BUFFERED payload from DEVICE\n", time.Now().Format(logDateFormat), buf_length)
+
             if !validBulkPayload(buf, buf_length) {
                 return
             }
@@ -658,7 +661,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 func validBulkPayload(buf []byte, length int) (bool) {
 
     // Debug
-    if (true) {
+    if (false) {
         fmt.Printf("%v\n", buf)
     }
 
