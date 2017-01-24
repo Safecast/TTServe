@@ -579,6 +579,8 @@ func inboundWebSend1Handler(rw http.ResponseWriter, req *http.Request) {
             return
         }
 
+		fmt.Printf("*** TCP PAYLOAD[0] == 0x%02x\n", AppReq.TTN.Payload[0])
+
         fmt.Printf("\n%s Received %d-byte HTTP payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload))
 
         // We now have a TTN-like message, constructed as follows:
@@ -604,8 +606,6 @@ func inboundWebSend1Handler(rw http.ResponseWriter, req *http.Request) {
             fmt.Printf("Hex decoding error: ", err)
             return
         }
-
-		fmt.Printf("*** TCP PAYLOAD[0] == 0x%02x\n", inboundPayload[0])
 
         AppReq.TTN.Payload = inboundPayload
         fmt.Printf("\n%s Received %d-byte HTTP payload from DEVICE\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload))
