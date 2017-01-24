@@ -258,7 +258,7 @@ func udp1InboundHandler() {
     defer ServerConn.Close()
 
     for {
-        buf := make([]byte, 1024)
+        buf := make([]byte, 4096)
 
         n, addr, err := ServerConn.ReadFromUDP(buf)
         if (err != nil) {
@@ -266,6 +266,8 @@ func udp1InboundHandler() {
             time.Sleep(1 * 60 * time.Second)
         } else {
 
+			fmt.Printf("*** UDP PAYLOAD[0] == 0x%02x\n", buf[0])
+			
             // Construct a TTN-like message
             //  1) the Payload comes from UDP
             //  2) We'll add the server's time, in case the payload lacked CapturedAt
@@ -595,13 +597,15 @@ func inboundWebSend1Handler(rw http.ResponseWriter, req *http.Request) {
     }
 
         // Messages from devices are hexified
-    case "TTRELAY": {
+    case "TTNODE": {
 
         inboundPayload, err := hex.DecodeString(string(body))
         if err != nil {
             fmt.Printf("Hex decoding error: ", err)
             return
         }
+
+		fmt.Printf("*** TCP PAYLOAD[0] == 0x%02x\n", inboundPayload[0])
 
         AppReq.TTN.Payload = inboundPayload
         fmt.Printf("\n%s Received %d-byte HTTP payload from DEVICE\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload))
@@ -662,7 +666,7 @@ func inboundWebSendNHandler(rw http.ResponseWriter, req *http.Request) {
     switch (req.UserAgent()) {
 
         // Messages from devices are hexified
-    case "TTRELAY": {
+    case "TTNODE": {
 
         buf, err := hex.DecodeString(string(body))
         if err != nil {
