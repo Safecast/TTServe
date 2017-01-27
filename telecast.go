@@ -2,24 +2,23 @@
 package main
 
 import (
+    "os"
     "fmt"
     "time"
     "strings"
     "strconv"
+	"io/ioutil"
+    "encoding/json"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
 )
 
-// Describes every device to which we've sent a message
-type knownDevice struct {
-    devEui string
-    deviceID uint32
-    messageToDeviceText string
-    messageToDevice []byte
+// Safecast Command as saved in text file
+type safecastCommand struct {
+    Command               string `json:"command,omitempty"`
+    IssuedAt              string `json:"issued_at,omitempty"`
+    IssuedBy              string `json:"issued_by,omitempty"`
 }
-
-// Statics
-var knownDevices []knownDevice
 
 // Get a Telecast Device ID number for this message
 func TelecastDeviceID (msg *teletype.Telecast) uint32 {
@@ -39,17 +38,33 @@ func sendTelecastOutboundSummaryToSlack() {
 
     first := true
     s := "Nothing pending for transmission."
-    for i := 0; i < len(knownDevices); i++ {
 
-        if (first) {
-            first = false
-            s = ""
-        } else {
-            s = s + "\n"
-        }
+    // Open the directory
+    files, err := ioutil.ReadDir(SafecastDirectory() + TTServerCommandPath)
+    if err == nil {
 
-        if (knownDevices[i].messageToDevice != nil) {
-            s = fmt.Sprintf("%d: %s", knownDevices[i].deviceID, knownDevices[i].messageToDeviceText)
+        // Iterate over each of the pending commands
+        for _, file := range files {
+
+            // Extract device ID from filename
+            i64, _ := strconv.ParseUint(file.Name(), 10, 32)
+            deviceID := uint32(i64)
+
+            // Get the command info
+            isValid, cmd := getCommand(deviceID)
+            if (isValid) {
+
+                if (first) {
+                    first = false
+                    s = ""
+                } else {
+                    s = s + "\n"
+                }
+
+                s = fmt.Sprintf("%d: %s '%s' %s", deviceID, cmd.IssuedBy, cmd.Command, cmd.IssuedAt)
+
+            }
+
         }
 
     }
@@ -64,7 +79,6 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
 
     // Keep track of devices from whom we've received message
     deviceID := TelecastDeviceID(msg)
-    addKnownDevice(devEui, deviceID)
 
     // Unpack the message arguments
     message := msg.GetMessage()
@@ -84,80 +98,79 @@ func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
     case "/hi":
         fmt.Printf("%s Telecast \"Hello\" message\n", time.Now().Format(logDateFormat))
         if argRest == "" {
-            sendMessage(deviceID, "@server: Hello.")
+            sendCommand("", deviceID, "@server: Hello.")
         } else {
-            sendMessage(deviceID, "@server: "+argRest)
+            sendCommand("", deviceID, "@server: "+argRest)
         }
 
         // Handle an inbound upstream-only ping (blank message) by just ignoring it
     case "":
         fmt.Printf("%s Telecast \"Ping\" message\n", time.Now().Format(logDateFormat))
 
-        // Anything else is broadcast to all OTHER known devices
-    default:
-        fmt.Printf("\n%s \"Broadcast\" message: '%s'\n\n", time.Now().Format(logDateFormat), message)
-        broadcastMessage(message, deviceID)
+
     }
 
+}
+
+// Construct the path of a command file
+func SafecastCommandFilename(DeviceID uint32) string {
+    directory := SafecastDirectory()
+    file := directory + TTServerCommandPath + "/" + fmt.Sprintf("%d", DeviceID) + ".json"
+    return file
 }
 
 // Send a message to a specific device
-func sendMessage(deviceID uint32, message string) {
+func sendCommand(sender string, deviceID uint32, message string) {
 
-    // Marshal the text string into a telecast message
-    deviceType := teletype.Telecast_TTSERVE
-    tmsg := &teletype.Telecast{}
-    tmsg.DeviceIDNumber = &deviceID;
-    tmsg.DeviceType = &deviceType
-    tmsg.Message = proto.String(message)
-    tdata, terr := proto.Marshal(tmsg)
-    if terr != nil {
-        fmt.Printf("t marshaling error: ", terr)
+    // Generate a command
+    cmd := &safecastCommand{}
+    cmd.IssuedBy = sender
+    cmd.IssuedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+    cmd.Command = message
+    cmdJSON, _ := json.Marshal(cmd)
+
+    // Write it to a file, overwriting if it already exists
+    file := SafecastCommandFilename(deviceID)
+    fd, err := os.OpenFile(file, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
+    if (err != nil) {
+        fmt.Printf("SendCommand: error creating file %s: %s\n", file, err);
+        return;
     }
+    fd.WriteString(string(cmdJSON));
 
-    // Ask TTN to publish it, else leave it waiting
-    // as an outbound message for the next time
-    // the node polls.
-
-    found := false;
-    for !found {
-
-        for i := 0; i < len(knownDevices); i++ {
-            if (knownDevices[i].deviceID == deviceID) {
-                found = true;
-                if (knownDevices[i].devEui != "") {
-                    ttnOutboundPublish(knownDevices[i].devEui, tdata)
-                } else {
-                    knownDevices[i].messageToDeviceText = message
-                    knownDevices[i].messageToDevice = tdata
-                    fmt.Printf("Enqueued %d-byte message for device %d\n", len(tdata), deviceID)
-                }
-                break;
-            }
-        }
-
-        // If not found, add it
-        if !found {
-            addKnownDevice("", deviceID)
-        }
-    }
+    // Done
+    fd.Close();
 
 }
 
-// Cancel a message to a specific device
-func cancelMessage(deviceID uint32) (isCancelled bool) {
+// Cancel a command destined for a specific device
+func cancelCommand(deviceID uint32) (isCancelled bool) {
 
-    for i := 0; i < len(knownDevices); i++ {
-        if (knownDevices[i].deviceID == deviceID) {
-            if (knownDevices[i].messageToDevice == nil) {
-                return false
-            }
-            knownDevices[i].messageToDevice = nil
-            return true
-        }
+    file := SafecastCommandFilename(deviceID)
+    err := os.Remove(file)
+    return err == nil
+
+}
+
+// Get command text
+func getCommand(deviceID uint32) (isValid bool, command safecastCommand) {
+    cmd := safecastCommand{}
+
+    // Read the file and delete it
+    file, err := ioutil.ReadFile(SafecastCommandFilename(deviceID))
+    if err != nil {
+        return false, cmd
     }
 
-    return false
+    // Read it as JSON
+    err = json.Unmarshal(file, &cmd)
+    if err != nil {
+        fmt.Printf("getCommand unmarshaling error: ", err)
+        return false, cmd
+    }
+
+    // Got it
+    return true, cmd
 
 }
 
@@ -165,50 +178,28 @@ func cancelMessage(deviceID uint32) (isCancelled bool) {
 // If so, fetch it, clear it out, and return it.
 func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte) {
 
-    for i := 0; i < len(knownDevices); i++ {
-        if (knownDevices[i].deviceID == deviceID) {
-            if (knownDevices[i].messageToDevice != nil) {
-                messageToDevice := knownDevices[i].messageToDevice
-                knownDevices[i].messageToDevice = nil
-                fmt.Printf("Dequeued %d-byte message for device %d\n", len(messageToDevice), deviceID)
-                return true, messageToDevice
-            }
-            break;
-        }
+    // Read the file and delete it
+    isValid, cmd := getCommand(deviceID)
+    if !isValid {
+        return false, nil
     }
 
-    return false, nil
-
-}
-
-// Keep track of known devices
-func addKnownDevice(devEui string, deviceID uint32) {
-    var e knownDevice
-    for _, e = range knownDevices {
-        if deviceID == e.deviceID {
-            return
-        }
+    // Marshal the command into a telecast message
+    deviceType := teletype.Telecast_TTSERVE
+    tmsg := &teletype.Telecast{}
+    tmsg.DeviceIDNumber = &deviceID;
+    tmsg.DeviceType = &deviceType
+    tmsg.Message = proto.String(cmd.Command)
+    tdata, terr := proto.Marshal(tmsg)
+    if terr != nil {
+        fmt.Printf("send msg marshaling error: ", terr)
+        return false, nil
     }
-    e.devEui = devEui
-    e.deviceID = deviceID;
-    e.messageToDevice = nil
-    knownDevices = append(knownDevices, e)
-}
 
-// Broadcast a message to all known devices except the one specified by 'skip'
-func broadcastMessage(message string, skipDeviceID uint32) {
-    if skipDeviceID == 0 {
-        fmt.Printf("Broadcast '%s'\n", message)
-    } else {
-        fmt.Printf("Skipping %d, broadcast '%s'\n", skipDeviceID, message)
-    }
-    for _, e := range knownDevices {
-        if (skipDeviceID == 0) {
-            sendMessage(e.deviceID, message)
-        } else {
-            if e.deviceID != skipDeviceID {
-                sendMessage(e.deviceID, message)
-            }
-        }
-    }
+    // Delete the file
+    cancelCommand(deviceID);
+
+    // Done
+    return true, tdata
+
 }

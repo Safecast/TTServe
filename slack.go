@@ -81,7 +81,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         } else {
             i64, _ := strconv.ParseUint(args[1], 10, 32)
             deviceID := uint32(i64)
-            if (cancelMessage(deviceID)) {
+            if (cancelCommand(deviceID)) {
                 sendToSafecastOps("Cancelled.")
             } else {
                 sendToSafecastOps("Not found.")
@@ -103,16 +103,8 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
                 sendToSafecastOps("Command format: send <deviceID> <message>")
             } else {
                 sendToSafecastOps(fmt.Sprintf("Sending to %d: %s", deviceID, messageAfterSecondWord))
-                sendMessage(deviceID, messageAfterSecondWord)
+                sendCommand(user, deviceID, messageAfterSecondWord)
             }
-        }
-
-    case "broadcast":
-        if len(args) < 2 {
-            sendToSafecastOps("Command format: broadcast <message>")
-        } else {
-            sendToSafecastOps(fmt.Sprintf("Broadcasting: %s", messageAfterFirstWord))
-            broadcastMessage(messageAfterFirstWord, 0)
         }
 
     case "hello":

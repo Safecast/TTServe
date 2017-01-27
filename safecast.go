@@ -900,6 +900,7 @@ func writeToLogs(UploadedAt string, scV1 SafecastDataV1, scV2 SafecastDataV2) {
 	SafecastV2Log(UploadedAt, scV2)
 }
 
+// Get path of the safecast directory
 func SafecastDirectory() string {
 	directory := os.Args[1]
 	if (directory == "") {
@@ -909,6 +910,7 @@ func SafecastDirectory() string {
 	return(directory)
 }
 
+// Construct path of a log file
 func SafecastLogFilename(DeviceID string, Extension string) string {
 	directory := SafecastDirectory()
 	prefix := time.Now().UTC().Format("2006-01-")		
