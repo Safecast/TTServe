@@ -22,18 +22,23 @@ sudo apt update
 sudo apt install git --assume-yes
 sudo apt install golang-go --assume-yes
 
-// Install golang in a way appropriate for the OS.  Do NOT use apt-get because
-// it installs an old version!
-// https://www.digitalocean.com/community/tutorials/how-to-install-go-1-6-on-ubuntu-14-04
+// So that we can mount an EFS filesystem on amazon
+sudo apt-get install nfs-common
+cd $HOME
+sudo mkdir efs
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-dd1ad674.efs.us-west-2.amazonaws.com:/ efs
+
+// Make sure that the version of golang is up to date
 
 // Create our app workspace
-mkdir $HOME/godev
-// Add it to .profile, so that this is what should be at the end
+mkdir $HOME/go
+// Add it to .profile with NANO editor, so that this is what should be at the end
+// (not sure if this path mod is needed if apt install is used to load golang)
 export PATH=$PATH:/usr/local/go/bin
-export GOPATH=$HOME/godev
+export GOPATH=$HOME/go
 
 // bring down our stuff
-cd ~/godev
+cd ~/go
 mkdir src
 cd src
 mkdir github.com

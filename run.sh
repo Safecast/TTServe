@@ -14,7 +14,8 @@ while [ : ]; do
     go build
     echo "Starting..."
     # Note that we must "sudo" so we can listen on port # less than 1024
-    sudo ./teletype-ttserve $HOME
+    # Note that we must use the "efs" subfolder because we mount EFS in AWS
+    sudo ./teletype-ttserve $HOME/efs
     echo "Restarting..."
     sleep 2s
 done
