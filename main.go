@@ -58,10 +58,10 @@ var   iAmTTServerUDP = false
 const TTServerFTPAddress = "tt-ftp.safecast.org"
 var   TTServerFTPAddressIPv4 = ""
 var   iAmTTServerFTP = false
-const TTServerPortHTTP string = ":8080"
-const TTServerPortHTTPAlternate string = ":80"
-const TTServerPortUDP string = ":8081"
-const TTServerPortFTP int = 8083    // plus 8084 plus the entire passive range
+const TTServerHTTPPort string = ":8080"
+const TTServerHTTPPortAlternate string = ":80"
+const TTServerUDPPort string = ":8081"
+const TTServerFTPPort int = 8083    // plus 8084 plus the entire passive range
 const TTServerTopicSend string = "/send"
 const TTServerTopicTest string = "/test"
 const TTServerTopicLog string = "/log/"
@@ -244,13 +244,33 @@ func timer15m() {
 // Kick off inbound messages coming from all sources, then serve HTTP
 func ftpInboundHandler() {
 
-    fmt.Printf("Now handling inbound FTP on: %s:%d\n", TTServer, TTServerPortFTP)
+    fmt.Printf("Now handling inbound FTP on: %s:%d\n", TTServer, TTServerFTPPort)
 
     ftpServer = ftp.NewFtpServer(NewTeletypeDriver())
     err := ftpServer.ListenAndServe()
     if err != nil {
         fmt.Printf("Error listening on FTP: %s\n", err)
     }
+
+}
+
+// Upload a Safecast data structure the load balancer for the web service
+func doUploadToWebLoadBalancer(data []byte, addr string) {
+
+    fmt.Printf("\n%s Received %d-byte UDP payload from %s, routing to LB\n", time.Now().Format(logDateFormat), len(data), addr)
+
+	url := "http://" + TTServerHTTPAddress + TTServerHTTPPort + TTServerTopicSend
+
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+    req.Header.Set("User-Agent", "TTSERVE")
+    req.Header.Set("Content-Type", "text/plain")
+    httpclient := &http.Client{
+        Timeout: time.Second * 15,
+    }
+    resp, err := httpclient.Do(req)
+    if (err == nil) {
+        resp.Body.Close()
+	}
 
 }
 
@@ -261,10 +281,10 @@ func webInboundHandler() {
     if iAmTTServerMonitor {
 
         http.HandleFunc(TTServerTopicGithub, inboundWebGithubHandler)
-        fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicGithub)
+        fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicGithub)
 
         http.HandleFunc(TTServerTopicSlack, inboundWebSlackHandler)
-        fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicSlack)
+        fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicSlack)
 
         http.HandleFunc(TTServerTopicLog, inboundWebLogHandler)
 
@@ -274,28 +294,28 @@ func webInboundHandler() {
 
     // Spin up functions available on all roles
     http.HandleFunc(TTServerTopicSend, inboundWebSendHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicSend)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicSend)
 
     http.HandleFunc(TTServerTopicRedirect1, inboundWebRedirectHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicRedirect1)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicRedirect1)
 
     http.HandleFunc(TTServerTopicRedirect2, inboundWebRedirectHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicRedirect2)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicRedirect2)
 
     go func() {
-        http.ListenAndServe(TTServerPortHTTPAlternate, nil)
+        http.ListenAndServe(TTServerHTTPPortAlternate, nil)
     }()
 
-    http.ListenAndServe(TTServerPortHTTP, nil)
+    http.ListenAndServe(TTServerHTTPPort, nil)
 
 }
 
 // Kick off UDP single-upload request server
 func udpInboundHandler() {
 
-    fmt.Printf("Now handling inbound UDP single-uploads on: %s%s\n", TTServer, TTServerPortUDP)
+    fmt.Printf("Now handling inbound UDP single-uploads on: %s%s\n", TTServer, TTServerUDPPort)
 
-    ServerAddr, err := net.ResolveUDPAddr("udp", TTServerPortUDP)
+    ServerAddr, err := net.ResolveUDPAddr("udp", TTServerUDPPort)
     if err != nil {
         fmt.Printf("Error resolving UDP port: \n%v\n", err)
         return
@@ -311,87 +331,22 @@ func udpInboundHandler() {
     for {
         buf := make([]byte, 4096)
 
-        n, addr, err := ServerConn.ReadFromUDP(buf)
+        _, addr, err := ServerConn.ReadFromUDP(buf)
         if (err != nil) {
             fmt.Printf("UDP read error: \n%v\n", err)
             time.Sleep(1 * 60 * time.Second)
         } else {
-            buf_format := buf[0]
-            buf_length := n
 
-            switch (buf_format) {
+	        ttg := &TTGateReq{}
+	        ttg.Payload = buf
+			ttg.Transport = "udp:" + addr.String()
+	        data, err := json.Marshal(ttg)
+			if err == nil {
+				go doUploadToWebLoadBalancer(data, addr.String())
+			}
 
-            case BUFF_FORMAT_SINGLE_PB: {
-
-                // Construct a TTN-like message
-                //  1) the Payload comes from UDP
-                //  2) We'll add the server's time, in case the payload lacked CapturedAt
-                //  3) Everything else is null
-
-                var AppReq IncomingReq
-                AppReq.Payload = buf[0:buf_length]
-                AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
-
-                fmt.Printf("\n%s Received %d-byte UDP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), addr)
-
-                // Enqueue it for TTN-like processing
-                AppReq.Transport = "udp:" + addr.String()
-                AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
-                reqQ <- AppReq
-                monitorReqQ()
-
-            }
-
-            case BUFF_FORMAT_PB_ARRAY: {
-
-                fmt.Printf("\n%s Received %d-byte UDP BUFFERED payload from %s\n", time.Now().Format(logDateFormat), buf_length, addr)
-
-                if !validBulkPayload(buf, buf_length) {
-                    continue;
-                }
-
-                // Loop over the various things in the buffer
-                UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
-                count := int(buf[1])
-                lengthArrayOffset := 2
-                payloadOffset := lengthArrayOffset + count
-
-                for i:=0; i<count; i++ {
-
-                    // Extract the length
-                    length := int(buf[lengthArrayOffset+i])
-
-                    // Construct a TTN-like message
-                    //  1) the Payload comes from UDP
-                    //  2) We'll add the server's time, in case the payload lacked CapturedAt
-                    //  3) Everything else is null
-
-                    var AppReq IncomingReq
-                    AppReq.Payload = buf[payloadOffset:payloadOffset+length]
-                    AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
-
-                    fmt.Printf("\n%s Received %d-byte UDP (%d/%d) payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload),
-                        i+1, count, addr)
-
-                    // Enqueue it
-                    AppReq.Transport = "udp:" + addr.String()
-                    AppReq.UploadedAt = UploadedAt
-                    reqQ <- AppReq
-                    monitorReqQ()
-
-                    // Bump the payload offset
-                    payloadOffset += length;
-                }
-            }
-
-            default: {
-
-                fmt.Printf("\n%s Received INVALID %d-byte UDP payload from %s\n", time.Now().Format(logDateFormat), buf_length, addr)
-
-            }
-
-            }
         }
+
     }
 
 }
@@ -409,7 +364,9 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
     switch (req.UserAgent()) {
 
-        // Messages from TTGATE are binary and take the form of a TTN-compatible payload
+    case "TTSERVE":
+		// TTSERVE messages are UDP-relayed
+		fallthrough
     case "TTGATE": {
         var ttg TTGateReq
 
@@ -427,17 +384,23 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq.Altitude = float32(ttg.Altitude)
         AppReq.Snr = ttg.Snr
         AppReq.Location = ttg.Location
-
+		AppReq.Transport = ttg.Transport
+		
         // For now we only handle single-PB format from TTGATE
         if (AppReq.Payload[0] != BUFF_FORMAT_SINGLE_PB) {
             return
         }
 
-        fmt.Printf("\n%s Received %d-byte HTTP payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
+        fmt.Printf("\n%s Received %d-byte HTTP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), req.UserAgent())
+		if (true) {
+			fmt.Printf("%v\n", ttg)
+		}
 
-        // Extract the device ID from the message, which we will need later
-        _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
-
+        // Extract the device ID from the message, which we will need later if replying
+		if (req.UserAgent() != "TTSERVE") {
+	        _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
+		}
+		
         // We now have a TTN-like message, constructed as follows:
         //  1) the Payload came from the device itself
         //  2) TTGATE filled in the lat/lon/alt metadata, just in case the payload doesn't have location
@@ -445,8 +408,12 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         //  4) We'll add the server's time, in case the payload lacked CapturedAt
         AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
+		// For TTSERVE, the transport will have been figured out at the UDP relay
+		if (AppReq.Transport == "") {
+	        AppReq.Transport = "http:" + req.RemoteAddr
+		}
+
         // Enqueue AppReq for TTN-like processing
-        AppReq.Transport = "http:" + req.RemoteAddr
         AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
         reqQ <- AppReq
         monitorReqQ()

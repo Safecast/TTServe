@@ -161,7 +161,7 @@ func (driver *TeletypeDriver) GetSettings() *ftp.Settings {
     config := &ftp.Settings{}
 	config.PublicHost, _ = externalIP()
     config.ListenHost = ""
-    config.ListenPort = TTServerPortFTP
+    config.ListenPort = TTServerFTPPort
     config.MaxConnections = 10000
     return config
 }
