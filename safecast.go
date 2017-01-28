@@ -85,7 +85,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     Transport string,
     defaultTime string,
     defaultSNR float32,
-    defaultLat float32, defaultLon float32, defaultAlt int32) {
+    defaultLat float32, defaultLon float32, defaultAlt float32) {
     var theSNR float32
 
     // Discard it if it's a duplicate
@@ -179,8 +179,8 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV2.Height = float32(msg.GetAltitude())
     } else {
         if defaultAlt != 0.0 {
-            scV1.Height = fmt.Sprintf("%d", defaultAlt)
-            scV2.Height = float32(defaultAlt)
+            scV1.Height = fmt.Sprintf("%f", defaultAlt)
+            scV2.Height = defaultAlt
         }
     }
 
