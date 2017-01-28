@@ -162,8 +162,11 @@ func timer1m() {
 func timer15m() {
     for {
 
-		// Track expired devices
+		// Track expired devices.  We do this before the first sleep so we have a list of device ASAP
         sendExpiredSafecastDevicesToSlack()
+
+		// Sleep
+        time.Sleep(15 * 60 * time.Second)
 
         // Report maximum inbound pending transactions
         if (reqQMaxLength > 1) {
@@ -190,8 +193,6 @@ func timer15m() {
             }
         }
 
-		// Sleep
-        time.Sleep(15 * 60 * time.Second)
     }
 
 }
