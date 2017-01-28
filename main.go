@@ -155,14 +155,15 @@ func main() {
 func timer1m() {
     for {
         time.Sleep(1 * 60 * time.Second)
-        sendExpiredSafecastDevicesToSlack()
     }
 }
 
 // General periodic housekeeping
 func timer15m() {
     for {
-        time.Sleep(15 * 60 * time.Second)
+
+		// Track expired devices
+        sendExpiredSafecastDevicesToSlack()
 
         // Report maximum inbound pending transactions
         if (reqQMaxLength > 1) {
@@ -188,7 +189,11 @@ func timer15m() {
                 ttnOutages = 0;
             }
         }
+
+		// Sleep
+        time.Sleep(15 * 60 * time.Second)
     }
+
 }
 
 // Kick off inbound messages coming from all sources, then serve HTTP

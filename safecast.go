@@ -8,6 +8,7 @@ import (
     "bytes"
     "sort"
     "time"
+    "io/ioutil"
     "strings"
     "strconv"
     "encoding/json"
@@ -36,9 +37,7 @@ var httpTransactionErrorFirst bool = true
 
 // Describes every device that has sent us a message
 type seenDevice struct {
-    originalDeviceNo    uint32
-    normalizedDeviceNo  uint32
-    dualSeen            bool
+    deviceid            uint32
     seen                time.Time
     notifiedAsUnseen    bool
     minutesAgo          int64
@@ -66,9 +65,9 @@ func (a ByKey) Less(i, j int) bool {
     }
     // Secondary
     // In an attempt to keep things reasonably deterministic, use device number
-    if a[i].normalizedDeviceNo < a[j].normalizedDeviceNo {
+    if a[i].deviceid < a[j].deviceid {
         return true
-    } else if a[i].normalizedDeviceNo > a[j].normalizedDeviceNo {
+    } else if a[i].deviceid > a[j].deviceid {
         return false
     }
     return false
@@ -103,15 +102,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         fmt.Printf("%s from %s/%s/%s\n", time.Now().Format(logDateFormat), info.City, info.Region, info.Country)
     }
 
-    // Log it
-    trackDevice(TelecastDeviceID(msg))
-
     // Generate the fields common to all uploads to safecast
     scV1 := SafecastDataV1{}
     scV2 := SafecastDataV2{}
     if msg.DeviceIDString != nil {
         scV1.DeviceID = msg.GetDeviceIDString()
-		// We do not support non-numeric device ID in the V2 format
+        // We do not support non-numeric device ID in the V2 format
         scV2.DeviceID = 0
     } else if msg.DeviceIDNumber != nil {
         scV1.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber()), 10)
@@ -128,32 +124,32 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV2.CapturedAt = defaultTime
     }
 
-	// Handle the GPS capture fields
-	if (msg.CapturedAtDate != nil && msg.CapturedAtTime != nil) {
-		var i64 uint64
-		var offset uint32 = 0
-		if (msg.CapturedAtOffset != nil) {
-			offset = msg.GetCapturedAtOffset()
-		}
-		s := fmt.Sprintf("%06d%06d", msg.GetCapturedAtDate(), msg.GetCapturedAtTime())
-		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[0], s[1]), 10, 32)
-		day := uint32(i64)
-		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[2], s[3]), 10, 32)
-		month := uint32(i64)
-		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[4], s[5]), 10, 32)
-		year := uint32(i64) + 2000
-		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[6], s[7]), 10, 32)
-		hour := uint32(i64)
-		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[8], s[9]), 10, 32)
-		minute := uint32(i64)
-		i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[10], s[11]), 10, 32)
-		second := uint32(i64)
-		tbefore := time.Date(int(year), time.Month(month), int(day), int(hour), int(minute), int(second), 0, time.UTC)
-		tafter := tbefore.Add(time.Duration(offset) * time.Second)
-		tstr := tafter.UTC().Format("2006-01-02T15:04:05Z")		
+    // Handle the GPS capture fields
+    if (msg.CapturedAtDate != nil && msg.CapturedAtTime != nil) {
+        var i64 uint64
+        var offset uint32 = 0
+        if (msg.CapturedAtOffset != nil) {
+            offset = msg.GetCapturedAtOffset()
+        }
+        s := fmt.Sprintf("%06d%06d", msg.GetCapturedAtDate(), msg.GetCapturedAtTime())
+        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[0], s[1]), 10, 32)
+        day := uint32(i64)
+        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[2], s[3]), 10, 32)
+        month := uint32(i64)
+        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[4], s[5]), 10, 32)
+        year := uint32(i64) + 2000
+        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[6], s[7]), 10, 32)
+        hour := uint32(i64)
+        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[8], s[9]), 10, 32)
+        minute := uint32(i64)
+        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[10], s[11]), 10, 32)
+        second := uint32(i64)
+        tbefore := time.Date(int(year), time.Month(month), int(day), int(hour), int(minute), int(second), 0, time.UTC)
+        tafter := tbefore.Add(time.Duration(offset) * time.Second)
+        tstr := tafter.UTC().Format("2006-01-02T15:04:05Z")
         scV1.CapturedAt = tstr
         scV2.CapturedAt = tstr
-	}
+    }
 
     // Include lat/lon/alt on all messages, including metadata
     if msg.Latitude != nil {
@@ -409,23 +405,23 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             did := uint64(msg.GetDeviceIDNumber())
             if ((did & 0x01) == 0) {
                 scV1b.Cpm0 = scV1a.Value
-				scV2b.Cpm0 = float32(msg.GetValue())
+                scV2b.Cpm0 = float32(msg.GetValue())
             } else {
                 scV1b.DeviceID = strconv.FormatUint(did & 0xfffffffe, 10)
                 scV1b.Cpm1 = scV1a.Value
                 scV2b.DeviceID = uint32(did & 0xfffffffe)
-				scV2b.Cpm1 = float32(msg.GetValue())
+                scV2b.Cpm1 = float32(msg.GetValue())
             }
             scV1b.Unit = ""
             scV1b.Value = ""
         }
         writeToLogs(UploadedAt, scV1b, scV2b)
 
-		// Post to the V2 api
+        // Post to the V2 api
         SafecastV2Upload(UploadedAt, scV2b)
 
     } else if msg.DeviceIDNumber != nil {
-		
+
         // A new style upload has "cpm0" or "cpm1" values, and
         // must have a numeric device ID
         if msg.Cpm0 != nil {
@@ -444,18 +440,18 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         }
 
         scV1c := scV1a
-		scV2c := scV2a
-		if (msg.Cpm0 != nil) {
+        scV2c := scV2a
+        if (msg.Cpm0 != nil) {
             scV1c.Cpm0 = fmt.Sprintf("%d", msg.GetCpm0())
-			scV2c.Cpm0 = float32(msg.GetCpm0())
-		}
-		if (msg.Cpm1 != nil) {
+            scV2c.Cpm0 = float32(msg.GetCpm0())
+        }
+        if (msg.Cpm1 != nil) {
             scV1c.Cpm1 = fmt.Sprintf("%d", msg.GetCpm1())
-			scV2c.Cpm1 = float32(msg.GetCpm1())
-		}
+            scV2c.Cpm1 = float32(msg.GetCpm1())
+        }
         SafecastV2Upload(UploadedAt, scV2c)
 
-		// Log it
+        // Log it
         writeToLogs(UploadedAt, scV1c, scV2c)
 
     }
@@ -507,7 +503,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     if msg.BatteryVoltage != nil {
 
         if theSNR != 0.0  {
-	        scV1b := scV1
+            scV1b := scV1
             scV1b.Unit = UnitWirelessSNR
             scV1b.Value = scV1a.WirelessSNR
             SafecastV1Upload(scV1b, "")
@@ -742,23 +738,21 @@ func isDuplicate(checksum uint32) bool {
 }
 
 // Keep track of all devices that have sent us a message
-func trackDevice(DeviceID uint32) {
+func trackDevice(DeviceID uint32, whenSeen time.Time) {
     var dev seenDevice
+//ozzie
+	fmt.Printf("%d %v\n", DeviceID, whenSeen)
 
     // For dual-sensor devices, collapse them to a single entry
-    dev.originalDeviceNo = DeviceID
-    dev.normalizedDeviceNo = dev.originalDeviceNo
-    if (dev.normalizedDeviceNo & 0x01) != 0 {
-        dev.normalizedDeviceNo = dev.normalizedDeviceNo - 1
-    }
+    dev.deviceid = DeviceID
 
     // Attempt to update the existing entry if we can find it
     found := false
     for i := 0; i < len(seenDevices); i++ {
-        if dev.normalizedDeviceNo == seenDevices[i].normalizedDeviceNo {
+        if dev.deviceid == seenDevices[i].deviceid {
             // Notify when the device comes back
             if seenDevices[i].notifiedAsUnseen {
-                minutesAgo := int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
+                minutesAgo := int64(whenSeen.Sub(seenDevices[i].seen) / time.Minute)
                 hoursAgo := minutesAgo / 60
                 daysAgo := hoursAgo / 24
                 message := fmt.Sprintf("%d minutes", minutesAgo)
@@ -768,18 +762,13 @@ func trackDevice(DeviceID uint32) {
                 case minutesAgo >= 120:
                     message = fmt.Sprintf("~%d hours", hoursAgo)
                 }
-                sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after %s away", seenDevices[i].normalizedDeviceNo, message))
+                sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after %s away", seenDevices[i].deviceid, message))
             }
-            // Mark as seen
-            seenDevices[i].seen = time.Now().UTC()
+            // Mark as having been seen on the latest date of any file having that time
+            if (seenDevices[i].seen.Before(whenSeen)) {
+                seenDevices[i].seen = whenSeen
+            }
             seenDevices[i].notifiedAsUnseen = false;
-            // Keep note of whether  we've seen both devices of a set of dual-tube updates
-            if (dev.originalDeviceNo != seenDevices[i].originalDeviceNo) {
-                seenDevices[i].dualSeen = true
-                if (seenDevices[i].originalDeviceNo == seenDevices[i].normalizedDeviceNo) {
-                    seenDevices[i].originalDeviceNo = dev.originalDeviceNo
-                }
-            }
             found = true
             break
         }
@@ -787,9 +776,9 @@ func trackDevice(DeviceID uint32) {
 
     // Add a new array entry if necessary
     if !found {
-        dev.seen = time.Now().UTC()
-        dev.notifiedAsUnseen = false
-        dev.dualSeen = false
+        dev.seen = whenSeen
+        // Set it so that we are notified when it returns
+        dev.notifiedAsUnseen = true
         seenDevices = append(seenDevices, dev)
     }
 
@@ -819,6 +808,41 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
 // Update message ages and notify
 func sendExpiredSafecastDevicesToSlack() {
 
+    // Loop over the file system, tracking all devices
+    // Open the directory
+    files, err := ioutil.ReadDir(SafecastDirectory() + TTServerLogPath)
+    if err == nil {
+
+        // Iterate over each of the pending commands
+        for _, file := range files {
+
+//ozzie
+			fmt.Printf("%s\n", file.Name())
+
+            if !file.IsDir() {
+
+                // Extract device ID from filename
+                // Extract device ID from filename
+                Str0 := file.Name()
+                Str1 := strings.Split(Str0, ".")[0]
+                Str2 := strings.Split(Str1, "-")
+                Str3 := ""
+                deviceID := uint32(0)
+                if (len(Str2) >= 3) {
+                    Str3 = Str2[2]
+                    i64, _ := strconv.ParseUint(Str3, 10, 32)
+                    deviceID = uint32(i64)
+                }
+
+                // Track the device
+                if (deviceID != 0) {
+                    trackDevice(deviceID, file.ModTime())
+                }
+
+            }
+        }
+    }
+
     // Compute an expiration time
     const deviceWarningAfterMinutes = 90
     expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes) * time.Minute))
@@ -834,7 +858,7 @@ func sendExpiredSafecastDevicesToSlack() {
             if seenDevices[i].seen.Before(expiration) {
                 seenDevices[i].notifiedAsUnseen = true
                 sendToSafecastOps(fmt.Sprintf("** Warning **  Device %d hasn't been seen for %d minutes",
-                    seenDevices[i].normalizedDeviceNo,
+                    seenDevices[i].deviceid,
                     seenDevices[i].minutesAgo))
             }
         }
@@ -855,7 +879,7 @@ func sendSafecastDeviceSummaryToSlack() {
     // generating a single large text string to be sent as a Slack message
     s := "No devices yet."
     for i := 0; i < len(sortedDevices); i++ {
-        id := sortedDevices[i].normalizedDeviceNo
+        id := sortedDevices[i].deviceid
 
         if i == 0 {
             s = ""
@@ -864,11 +888,6 @@ func sendSafecastDeviceSummaryToSlack() {
         }
 
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc|%010d>", s, id, id)
-
-        if (sortedDevices[i].dualSeen) {
-            s = fmt.Sprintf("%s <http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc|%010d>", s,
-                sortedDevices[i].originalDeviceNo, sortedDevices[i].originalDeviceNo)
-        }
 
         s = fmt.Sprintf("%s (", s)
         s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=bat_voltage|V>", s, id)
@@ -896,26 +915,26 @@ func sendSafecastDeviceSummaryToSlack() {
 
 // Write to both logs
 func writeToLogs(UploadedAt string, scV1 SafecastDataV1, scV2 SafecastDataV2) {
-	SafecastV1Log(UploadedAt, scV1)
-	SafecastV2Log(UploadedAt, scV2)
+    SafecastV1Log(UploadedAt, scV1)
+    SafecastV2Log(UploadedAt, scV2)
 }
 
 // Get path of the safecast directory
 func SafecastDirectory() string {
-	directory := os.Args[1]
-	if (directory == "") {
-		fmt.Printf("TTSERVE: first argument must be folder containing safecast data!\n")
+    directory := os.Args[1]
+    if (directory == "") {
+        fmt.Printf("TTSERVE: first argument must be folder containing safecast data!\n")
         os.Exit(0)
-	}
-	return(directory)
+    }
+    return(directory)
 }
 
 // Construct path of a log file
 func SafecastLogFilename(DeviceID string, Extension string) string {
-	directory := SafecastDirectory()
-	prefix := time.Now().UTC().Format("2006-01-")		
-	file := directory + TTServerLogPath + "/" + prefix + DeviceID + Extension
-	return file
+    directory := SafecastDirectory()
+    prefix := time.Now().UTC().Format("2006-01-")
+    file := directory + TTServerLogPath + "/" + prefix + DeviceID + Extension
+    return file
 }
 
 // Write the value to the log
@@ -1015,10 +1034,10 @@ func SafecastV2Log(UploadedAt string, scV2 SafecastDataV2) {
     }
 
     // Turn stats into a safe string writing
-	scV2.UploadedAt = UploadedAt
+    scV2.UploadedAt = UploadedAt
     scJSON, _ := json.Marshal(scV2)
     fd.WriteString(string(scJSON));
-	fd.WriteString("\r\n\r\n");
+    fd.WriteString("\r\n\r\n");
 
     // Close and exit
     fd.Close();
@@ -1027,124 +1046,124 @@ func SafecastV2Log(UploadedAt string, scV2 SafecastDataV2) {
 
 // Convert v1 to v2
 func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
-	var v2 SafecastDataV2
-	var i64 uint64
-	var f64 float64
-	var subtype uint32
+    var v2 SafecastDataV2
+    var i64 uint64
+    var f64 float64
+    var subtype uint32
 
-	if (v1.CapturedAt == "") {
-		v2.CapturedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")		
-	} else {
-		v2.CapturedAt = v1.CapturedAt
-	}
+    if (v1.CapturedAt == "") {
+        v2.CapturedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+    } else {
+        v2.CapturedAt = v1.CapturedAt
+    }
 
-	i64, _ = strconv.ParseUint(v1.DeviceID, 10, 32)
-	subtype = uint32(i64) % 10
-	v2.DeviceID = uint32(i64) - subtype
+    i64, _ = strconv.ParseUint(v1.DeviceID, 10, 32)
+    subtype = uint32(i64) % 10
+    v2.DeviceID = uint32(i64) - subtype
 
-	f64, _ = strconv.ParseFloat(v1.Height, 32)
-	v2.Height = float32(f64)
+    f64, _ = strconv.ParseFloat(v1.Height, 32)
+    v2.Height = float32(f64)
 
-	f64, _ = strconv.ParseFloat(v1.Latitude, 32)
-	v2.Latitude = float32(f64)
+    f64, _ = strconv.ParseFloat(v1.Latitude, 32)
+    v2.Latitude = float32(f64)
 
-	f64, _ = strconv.ParseFloat(v1.Longitude, 32)
-	v2.Longitude = float32(f64)
+    f64, _ = strconv.ParseFloat(v1.Longitude, 32)
+    v2.Longitude = float32(f64)
 
-	switch (strings.ToLower(v1.Unit)) {
+    switch (strings.ToLower(v1.Unit)) {
 
-	case "pm1":
-		f64, _ = strconv.ParseFloat(v1.Value, 32)
-		v2.OpcPm01_0 = float32(f64)
+    case "pm1":
+        f64, _ = strconv.ParseFloat(v1.Value, 32)
+        v2.OpcPm01_0 = float32(f64)
 
-	case "pm2.5":
-		f64, _ = strconv.ParseFloat(v1.Value, 32)
-		v2.OpcPm02_5 = float32(f64)
+    case "pm2.5":
+        f64, _ = strconv.ParseFloat(v1.Value, 32)
+        v2.OpcPm02_5 = float32(f64)
 
-	case "pm10":
-		f64, _ = strconv.ParseFloat(v1.Value, 32)
-		v2.OpcPm10_0 = float32(f64)
+    case "pm10":
+        f64, _ = strconv.ParseFloat(v1.Value, 32)
+        v2.OpcPm10_0 = float32(f64)
 
-	case "humd%":
-		f64, _ = strconv.ParseFloat(v1.Value, 32)
-		v2.EnvHumid = float32(f64)
+    case "humd%":
+        f64, _ = strconv.ParseFloat(v1.Value, 32)
+        v2.EnvHumid = float32(f64)
 
-	case "tempc":
-		f64, _ = strconv.ParseFloat(v1.Value, 32)
-		v2.EnvTemp = float32(f64)
+    case "tempc":
+        f64, _ = strconv.ParseFloat(v1.Value, 32)
+        v2.EnvTemp = float32(f64)
 
-	case "cpm":
-		f64, _ = strconv.ParseFloat(v1.Value, 32)
-		if (subtype == 1) {
-			v2.Cpm0 = float32(f64)
-		} else if (subtype == 2) {
-			v2.Cpm1 = float32(f64)
-		} else {
-			fmt.Sprintf("*** V1toV2 %d cpm not understood for this subtype\n", v2.DeviceID);
-		}
+    case "cpm":
+        f64, _ = strconv.ParseFloat(v1.Value, 32)
+        if (subtype == 1) {
+            v2.Cpm0 = float32(f64)
+        } else if (subtype == 2) {
+            v2.Cpm1 = float32(f64)
+        } else {
+            fmt.Sprintf("*** V1toV2 %d cpm not understood for this subtype\n", v2.DeviceID);
+        }
 
-	case "status":
-		f64, _ = strconv.ParseFloat(v1.Value, 32)
-		v2.EnvTemp = float32(f64)
+    case "status":
+        f64, _ = strconv.ParseFloat(v1.Value, 32)
+        v2.EnvTemp = float32(f64)
 
-		// Parse and split into its sub-fields
-		unrecognized := ""
-		status := v1.DeviceTypeID
-		fields := strings.Split(status, ",")
-		for v := range fields {
-			field := strings.Split(fields[v], ":")
-			switch (field[0]) {
-			case "Battery Voltage":
-				f64, _ = strconv.ParseFloat(field[1], 32)
-				v2.BatVoltage = float32(f64)
-			case "Fails":
-				i64, _ = strconv.ParseUint(field[1], 10, 32)
-				v2.StatsCommsFails = uint32(i64)
-			case "Restarts":
-				i64, _ = strconv.ParseUint(field[1], 10, 32)
-				v2.StatsDeviceRestarts = uint32(i64)
-			case "FreeRam":
-				i64, _ = strconv.ParseUint(field[1], 10, 32)
-				v2.StatsFreeMem = uint32(i64)
-			case "NTP count":
-				i64, _ = strconv.ParseUint(field[1], 10, 32)
-				v2.StatsNTPCount = uint32(i64)
-			case "Last failure":
-				v2.StatsLastFailure = field[1]
-			default:
-				if (unrecognized == "") {
-					unrecognized = "{"
-				} else {
-					unrecognized = unrecognized + ","
-				}
-				unrecognized = unrecognized + "\"" + field[0] + "\":\"" + field[1] + "\""
-			case "DeviceID":
-			case "Temperature":
-			}
-		}
+        // Parse and split into its sub-fields
+        unrecognized := ""
+        status := v1.DeviceTypeID
+        fields := strings.Split(status, ",")
+        for v := range fields {
+            field := strings.Split(fields[v], ":")
+            switch (field[0]) {
+            case "Battery Voltage":
+                f64, _ = strconv.ParseFloat(field[1], 32)
+                v2.BatVoltage = float32(f64)
+            case "Fails":
+                i64, _ = strconv.ParseUint(field[1], 10, 32)
+                v2.StatsCommsFails = uint32(i64)
+            case "Restarts":
+                i64, _ = strconv.ParseUint(field[1], 10, 32)
+                v2.StatsDeviceRestarts = uint32(i64)
+            case "FreeRam":
+                i64, _ = strconv.ParseUint(field[1], 10, 32)
+                v2.StatsFreeMem = uint32(i64)
+            case "NTP count":
+                i64, _ = strconv.ParseUint(field[1], 10, 32)
+                v2.StatsNTPCount = uint32(i64)
+            case "Last failure":
+                v2.StatsLastFailure = field[1]
+            default:
+                if (unrecognized == "") {
+                    unrecognized = "{"
+                } else {
+                    unrecognized = unrecognized + ","
+                }
+                unrecognized = unrecognized + "\"" + field[0] + "\":\"" + field[1] + "\""
+            case "DeviceID":
+            case "Temperature":
+            }
+        }
 
-		// If we found unrecognized fields, emit them
-		if (unrecognized != "") {
-			unrecognized = unrecognized + "}"
-			v2.StatsStatus = unrecognized
-		}
+        // If we found unrecognized fields, emit them
+        if (unrecognized != "") {
+            unrecognized = unrecognized + "}"
+            v2.StatsStatus = unrecognized
+        }
 
-	default:
-		fmt.Sprintf("*** Warning ***\n*** Unit %s = Value %s UNRECOGNIZED\n", v1.Unit, v1.Value)
+    default:
+        fmt.Sprintf("*** Warning ***\n*** Unit %s = Value %s UNRECOGNIZED\n", v1.Unit, v1.Value)
 
-	}
+    }
 
-	return v2
+    return v2
 }
 
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
 func SafecastV1Upload(scV1 SafecastDataV1, url string) bool {
 
-	// If not configured, make it appear as though we succeeded
-	if (!uploadToSafecastV1) {
-		return true
-	}
-	
+    // If not configured, make it appear as though we succeeded
+    if (!uploadToSafecastV1) {
+        return true
+    }
+
     if (parallelV1Uploads) {
         go doUploadToSafecastV1(scV1, url)
     } else {
@@ -1169,10 +1188,10 @@ func doUploadToSafecastV1(scV1 SafecastDataV1, url string) bool {
         fmt.Printf("%s\n", scJSON)
     }
 
-	urlForUpload := fmt.Sprintf("%s?%s", SafecastV1UploadURL, SafecastV1QueryString)
-	if (url != "") {
-		urlForUpload = url
-	}
+    urlForUpload := fmt.Sprintf("%s?%s", SafecastV1UploadURL, SafecastV1QueryString)
+    if (url != "") {
+        urlForUpload = url
+    }
     req, err := http.NewRequest("POST", urlForUpload, bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
@@ -1200,25 +1219,25 @@ func doUploadToSafecastV1(scV1 SafecastDataV1, url string) bool {
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
 func SafecastV2Upload(UploadedAt string, scV2 SafecastDataV2) bool {
 
-	// If not configured, make it appear as though we succeeded
-	if (!uploadToSafecastV2) {
-		return true
-	}
+    // If not configured, make it appear as though we succeeded
+    if (!uploadToSafecastV2) {
+        return true
+    }
 
-	// Upload to all URLs
-	for _, url := range SafecastV2UploadURLs {
-	    go doUploadToSafecastV2(UploadedAt, scV2, url)
-	}
-	
-	return true
+    // Upload to all URLs
+    for _, url := range SafecastV2UploadURLs {
+        go doUploadToSafecastV2(UploadedAt, scV2, url)
+    }
+
+    return true
 }
 
 // Upload a Safecast data structure to the Safecast service
 func doUploadToSafecastV2(UploadedAt string, scV2 SafecastDataV2, url string) bool {
-	
+
     transaction := beginTransaction("V2", url, "captured", scV2.CapturedAt)
 
-	scV2.UploadedAt = UploadedAt
+    scV2.UploadedAt = UploadedAt
     scJSON, _ := json.Marshal(scV2)
 
     if false {
