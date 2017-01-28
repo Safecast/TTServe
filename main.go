@@ -136,18 +136,18 @@ func main() {
 
 	addrs, err = net.LookupHost(TTServerFTPAddress)
 	if err != nil {
-        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddressIPv4, err);
+        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err);
         os.Exit(0)
     }
 	if len(addrs) < 1 {
-        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddressIPv4, err);
+        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err);
         os.Exit(0)
     }
 	TTServerFTPAddressIPv4 = addrs[0]
 	iAmTTServerFTP = TTServerFTPAddressIPv4 == TTServerIP
 
 	// Display these truths
-	fmt.Printf("'%s' '%s' '%s' %v %v\n", TTServerIP, TTServerUDPAddress, TTServerFTPAddress, iAmTTServerUDP, iAmTTServerFTP)
+	fmt.Printf("'%s' '%s' '%s' %v %v\n", TTServerIP, TTServerUDPAddressIPv4, TTServerFTPAddressIPv4, iAmTTServerUDP, iAmTTServerFTP)
 
     // Set up our signal handler
     go signalHandler()
