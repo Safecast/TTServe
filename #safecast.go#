@@ -15,7 +15,8 @@ import (
     "github.com/rayozzie/teletype-proto/golang"
 )
 
-// Warning behavior
+// Warning behavior.  Note that this has been disabled ever since we've gone multi-instance.
+bool deviceWarningEnabled = false
 const deviceWarningAfterMinutes = 90
 
 // Upload Behavior

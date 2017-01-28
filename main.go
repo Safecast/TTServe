@@ -55,7 +55,6 @@ const TTServerAddress = "api.teletype.io"
 const TTServerPortHTTP string = ":8080"
 const TTServerPortHTTPAlternate string = ":80"
 const TTServerPortUDP string = ":8081"
-const TTServerPortTCP string = ":8082"
 const TTServerPortFTP int = 8083    // plus 8084, and entire passive range
 const TTServerTopicSend string = "/send"
 const TTServerTopicTest string = "/test"
@@ -133,9 +132,6 @@ func main() {
 
     // Init our UDP single-sample upload request inbound server
     go udpInboundHandler()
-
-    // Init our TCP request inbound server
-    go tcpInboundHandler()
 
     // Init our FTP server
     go ftpInboundHandler()
@@ -348,170 +344,11 @@ func udpInboundHandler() {
 
 }
 
-// Kick off TCP server
-func tcpInboundHandler() {
-    var isAvailable bool
-    var deviceID uint32 = 0
-
-    fmt.Printf("Now handling inbound TCP on: %s%s\n", TTServer, TTServerPortTCP)
-
-    ServerAddr, err := net.ResolveTCPAddr("tcp", TTServerPortTCP)
-    if err != nil {
-        fmt.Printf("Error resolving TCP port: \n%v\n", err)
-        return
-    }
-
-    ServerConn, err := net.ListenTCP("tcp", ServerAddr)
-    if err != nil {
-        fmt.Printf("Error listening on TCP port: \n%v\n", err)
-        return
-    }
-    defer ServerConn.Close()
-
-    for {
-        buf := make([]byte, 4096)
-
-        conn, err := ServerConn.AcceptTCP()
-        if err != nil {
-            fmt.Printf("Error accepting TCP session: \n%v\n", err)
-            // We see "use of closed network connection" when port scanners hit us
-            time.Sleep(10 * time.Second)
-            continue
-        }
-
-        n, err := conn.Read(buf)
-        if err != nil {
-            fmt.Printf("TCP read error: \n%v\n", err)
-            ServerConn.Close()
-            time.Sleep(1 * 60 * time.Second)
-            continue
-        }
-
-        buf_format := buf[0]
-        buf_length := n
-
-        switch (buf_format) {
-
-        case BUFF_FORMAT_SINGLE_PB: {
-
-            // Construct a TTN-like message
-            //  1) the Payload comes from TCP
-            //  2) We'll add the server's time, in case the payload lacked CapturedAt
-            //  3) Everything else is null
-            var AppReq IncomingReq
-            AppReq.TTN.Payload = buf[0:buf_length]
-            AppReq.TTN.Metadata = make([]AppMetadata, 1)
-            AppReq.TTN.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
-
-            // Extract device ID for later
-            isAvailable, deviceID = getDeviceIDFromPayload(AppReq.TTN.Payload)
-            if (!isAvailable) {
-                deviceID = 0
-            }
-
-            // Test the received data to see if it's just some random port scanner trying to probe what we are
-            msg := &teletype.Telecast{}
-            err = proto.Unmarshal(AppReq.TTN.Payload, msg)
-            if (err != nil) {
-
-                fmt.Printf("\n%s Ignoring %d-byte TCP port scan probe from %s\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload), conn.RemoteAddr().String())
-                continue
-
-            }
-
-            fmt.Printf("\n%s Received %d-byte TCP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload), conn.RemoteAddr().String())
-
-            // Enqueue it for TTN-like processing
-            AppReq.Transport = "tcp:" + conn.RemoteAddr().String()
-            AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
-            reqQ <- AppReq
-            monitorReqQ()
-
-        }
-
-        case BUFF_FORMAT_PB_ARRAY: {
-
-            fmt.Printf("\n%s Received %d-byte TCP BUFFERED payload from %s\n", time.Now().Format(logDateFormat), buf_length, conn.RemoteAddr().String())
-
-            if !validBulkPayload(buf, buf_length) {
-                continue;
-            }
-
-            // Loop over the various things in the buffer
-            UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
-            count := int(buf[1])
-            lengthArrayOffset := 2
-            payloadOffset := lengthArrayOffset + count
-
-            for i:=0; i<count; i++ {
-
-                // Extract the length
-                length := int(buf[lengthArrayOffset+i])
-
-                // Construct a TTN-like message
-                //  1) the Payload comes from TCP
-                //  2) We'll add the server's time, in case the payload lacked CapturedAt
-                //  3) Everything else is null
-                var AppReq IncomingReq
-                AppReq.TTN.Payload = buf[payloadOffset:payloadOffset+length]
-                AppReq.TTN.Metadata = make([]AppMetadata, 1)
-                AppReq.TTN.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
-
-                fmt.Printf("\n%s Received %d-byte TCP (%d/%d) payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload),
-                    i+1, count,
-                    conn.RemoteAddr().String())
-
-                // Extract device ID for later
-                isAvailable, deviceID = getDeviceIDFromPayload(AppReq.TTN.Payload)
-                if (!isAvailable) {
-                    deviceID = 0
-                }
-
-                // Enqueue it for TTN-like processing
-                AppReq.Transport = "tcp:" + conn.RemoteAddr().String()
-                AppReq.UploadedAt = UploadedAt
-                reqQ <- AppReq
-                monitorReqQ()
-
-                // Bump the payload offset
-                payloadOffset += length;
-
-            }
-
-        }
-
-        default: {
-
-            fmt.Printf("\n%s Received INVALID %d-byte TCP payload from %s\n", time.Now().Format(logDateFormat), buf_length, conn.RemoteAddr().String())
-
-        }
-
-        }
-
-        // Delay to see if we can pick up a reply for this request.  This is certainly
-        // controversial because it slows down the incoming message processing, however there
-        // is a trivial fix:  Create many instances of this goroutine on the service instead
-        // of just one.
-        time.Sleep(1 * time.Second)
-
-        // See if there's an outbound message waiting for this app.  If so, send it now because we
-        // know that there's a narrow receive window open.
-        isAvailable, payload := TelecastOutboundPayload(deviceID)
-        if (isAvailable) {
-            conn.Write(payload)
-            sendToSafecastOps(fmt.Sprintf("Device %d picked up a payload\n", deviceID))
-        }
-
-        // Close the connection
-        conn.Close()
-    }
-
-}
-
 // Handle inbound HTTP requests from the gateway or directly from the device
 func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
     var AppReq IncomingReq
-
+	var DeviceID uint32 = 0
+	
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
         fmt.Printf("Error reading HTTP request body: \n%v\n", req)
@@ -537,6 +374,9 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         fmt.Printf("\n%s Received %d-byte HTTP payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload))
 
+		// Extract the device ID from the message, which we will need later
+	    _, DeviceID = getDeviceIDFromPayload(AppReq.TTN.Payload)
+		
         // We now have a TTN-like message, constructed as follows:
         //  1) the Payload came from the device itself
         //  2) TTGATE filled in the lat/lon/alt metadata, just in case the payload doesn't have location
@@ -577,6 +417,9 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
             AppReq.TTN.Metadata = make([]AppMetadata, 1)
             AppReq.TTN.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
+			// Extract the device ID from the message, which we will need later
+		    _, DeviceID = getDeviceIDFromPayload(AppReq.TTN.Payload)
+
             // Enqueue AppReq for TTN-like processing
             AppReq.Transport = "http:" + req.RemoteAddr
             AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
@@ -605,6 +448,9 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
                 // Construct the TTN-like messager
                 AppReq.TTN.Payload = buf[payloadOffset:payloadOffset+length]
+
+				// Extract the device ID from the message, which we will need later
+			    _, DeviceID = getDeviceIDFromPayload(AppReq.TTN.Payload)
 
                 // We now have a TTN-like message, constructed as follws:
                 //  1) the Payload came from the device itself
@@ -644,22 +490,22 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
     }
 
-    // Delay to see if we can pick up a reply for this request.  This is certainly
-    // controversial because it slows down the incoming message processing, however there
-    // is a trivial fix:  Create many instances of this goroutine on the service instead
-    // of just one.
-    time.Sleep(1 * time.Second)
+	// Outbound message processing
+    if (DeviceID != 0) {
 
-    // See if there's an outbound message waiting for this app.  If so, send it now because we
-    // know that there's a narrow receive window open.
-    isAvailable, deviceID := getDeviceIDFromPayload(AppReq.TTN.Payload)
-    if (isAvailable) {
-        isAvailable, payload := TelecastOutboundPayload(deviceID)
+	    // Delay just in case there's a chance that request processing may generate a reply
+		// to this request.  It's no big deal if we miss it, though, because it will just be
+	    // picked up on the next call.
+	    time.Sleep(1 * time.Second)
+
+	    // See if there's an outbound message waiting for this device.
+        isAvailable, payload := TelecastOutboundPayload(DeviceID)
         if (isAvailable) {
             hexPayload := hex.EncodeToString(payload)
             io.WriteString(rw, hexPayload)
-            sendToSafecastOps(fmt.Sprintf("Device %d picked up a payload\n", deviceID))
+            sendToSafecastOps(fmt.Sprintf("Device %d picked up a payload\n", DeviceID))
         }
+
     }
 
 }
@@ -775,6 +621,12 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         SafecastV2Upload(UploadedAt, sV2)
         SafecastV2Log(UploadedAt, sV2)
 
+		// It is an error if there is a pending outbound payload for this device, so remove it and report it
+        isAvailable, _ := TelecastOutboundPayload(sV2.DeviceID)
+		if (isAvailable) {
+	        sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", sV2.DeviceID))
+		}
+		
     }
 
 }
@@ -939,7 +791,8 @@ func ttnInboundHandler() {
 
 }
 
-// Get any outbound payload waiting for the node who sent us an AppReq
+// Get any outbound payload waiting for the node who sent us an AppReq.  If
+// the device ID is not found, guarantee that a 0 is returned for the device ID.
 func getDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, deviceID uint32) {
 
     // Extract the telecast message from the AppReq
