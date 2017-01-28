@@ -331,14 +331,14 @@ func udpInboundHandler() {
     for {
         buf := make([]byte, 4096)
 
-        _, addr, err := ServerConn.ReadFromUDP(buf)
+        n, addr, err := ServerConn.ReadFromUDP(buf)
         if (err != nil) {
             fmt.Printf("UDP read error: \n%v\n", err)
             time.Sleep(1 * 60 * time.Second)
         } else {
 
 	        ttg := &TTGateReq{}
-	        ttg.Payload = buf
+	        ttg.Payload = buf[0:n]
 			ttg.Transport = "udp:" + addr.String()
 	        data, err := json.Marshal(ttg)
 			if err == nil {
