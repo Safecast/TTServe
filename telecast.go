@@ -7,7 +7,7 @@ import (
     "time"
     "strings"
     "strconv"
-	"io/ioutil"
+    "io/ioutil"
     "encoding/json"
     "github.com/golang/protobuf/proto"
     "github.com/rayozzie/teletype-proto/golang"
@@ -43,19 +43,16 @@ func sendTelecastOutboundSummaryToSlack() {
     files, err := ioutil.ReadDir(SafecastDirectory() + TTServerCommandPath)
     if err == nil {
 
-		fmt.Printf("files:\n");
-
         // Iterate over each of the pending commands
         for _, file := range files {
 
             // Extract device ID from filename
-			deviceStr := strings.Split(file.Name(), ".")[0]
+            deviceStr := strings.Split(file.Name(), ".")[0]
             i64, _ := strconv.ParseUint(deviceStr, 10, 32)
             deviceID := uint32(i64)
 
             // Get the command info
             isValid, cmd := getCommand(deviceID)
-			fmt.Printf("file: %s %d %d %d %v:\n", file.Name(), i64, deviceID, isValid, cmd);
             if (isValid) {
 
                 if (first) {
@@ -65,7 +62,11 @@ func sendTelecastOutboundSummaryToSlack() {
                     s = s + "\n"
                 }
 
-                s = s + fmt.Sprintf("%d: %s '%s' %s", deviceID, cmd.IssuedBy, cmd.Command, cmd.IssuedAt)
+                // Extract the time
+                IssuedAt, _ := time.Parse("2006-01-02T15:04:05Z", cmd.IssuedAt)
+                IssuedAtStr := IssuedAt.Format("2006-01-02 15:04 UTC")
+
+                s = s + fmt.Sprintf("%d: %s (%s %s)", deviceID, cmd.Command, cmd.IssuedBy, IssuedAtStr)
 
             }
 
