@@ -49,7 +49,8 @@ func sendTelecastOutboundSummaryToSlack() {
         for _, file := range files {
 
             // Extract device ID from filename
-            i64, _ := strconv.ParseUint(file.Name(), 10, 32)
+			deviceStr := strings.Split(file.Name(), ".")[0]
+            i64, _ := strconv.ParseUint(deviceStr, 10, 32)
             deviceID := uint32(i64)
 
             // Get the command info
