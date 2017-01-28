@@ -136,11 +136,11 @@ func main() {
 
 	addrs, err = net.LookupHost(TTServerFTPAddress)
 	if err != nil {
-        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err);
+        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddressIPv4, err);
         os.Exit(0)
     }
 	if len(addrs) < 1 {
-        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err);
+        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddressIPv4, err);
         os.Exit(0)
     }
 	TTServerFTPAddressIPv4 = addrs[0]
