@@ -43,6 +43,8 @@ func sendTelecastOutboundSummaryToSlack() {
     files, err := ioutil.ReadDir(SafecastDirectory() + TTServerCommandPath)
     if err == nil {
 
+		fmt.Printf("files:\n");
+
         // Iterate over each of the pending commands
         for _, file := range files {
 
@@ -52,6 +54,7 @@ func sendTelecastOutboundSummaryToSlack() {
 
             // Get the command info
             isValid, cmd := getCommand(deviceID)
+			fmt.Printf("file: %s %d %d %d %v:\n", file.Name(), i64, deviceID, isValid, cmd);
             if (isValid) {
 
                 if (first) {
