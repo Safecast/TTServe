@@ -65,7 +65,7 @@ func sendTelecastOutboundSummaryToSlack() {
                     s = s + "\n"
                 }
 
-                s = fmt.Sprintf("%d: %s '%s' %s", deviceID, cmd.IssuedBy, cmd.Command, cmd.IssuedAt)
+                s = s + fmt.Sprintf("%d: %s '%s' %s", deviceID, cmd.IssuedBy, cmd.Command, cmd.IssuedAt)
 
             }
 
