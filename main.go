@@ -131,7 +131,7 @@ func main() {
         fmt.Printf("Can't resolve %s: %v\n", TTServerUDPAddress, err);
         os.Exit(0)
     }
-	TTServerUDPAddressIPv4 = addrs[0]
+	TTServerUDPAddressIPv4 = addrs[0] + "1"
 	iAmTTServerUDP = TTServerUDPAddressIPv4 == TTServerIP
 
 	addrs, err = net.LookupHost(TTServerFTPAddress)
