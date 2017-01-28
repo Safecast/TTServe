@@ -15,6 +15,9 @@ import (
     "github.com/rayozzie/teletype-proto/golang"
 )
 
+// Warning behavior
+const deviceWarningAfterMinutes = 90
+
 // Upload Behavior
 var uploadToSafecastV1 = true
 var uploadToSafecastV2 = true
@@ -740,8 +743,6 @@ func isDuplicate(checksum uint32) bool {
 // Keep track of all devices that have sent us a message
 func trackDevice(DeviceID uint32, whenSeen time.Time) {
     var dev seenDevice
-//ozzie
-	fmt.Printf("%d %v\n", DeviceID, whenSeen)
 
     // For dual-sensor devices, collapse them to a single entry
     dev.deviceid = DeviceID
@@ -752,7 +753,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time) {
         if dev.deviceid == seenDevices[i].deviceid {
             // Notify when the device comes back
             if seenDevices[i].notifiedAsUnseen {
-                minutesAgo := int64(whenSeen.Sub(seenDevices[i].seen) / time.Minute)
+                minutesAgo := int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
                 hoursAgo := minutesAgo / 60
                 daysAgo := hoursAgo / 24
                 message := fmt.Sprintf("%d minutes", minutesAgo)
@@ -777,8 +778,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time) {
     // Add a new array entry if necessary
     if !found {
         dev.seen = whenSeen
-        // Set it so that we are notified when it returns
-        dev.notifiedAsUnseen = true
+        dev.notifiedAsUnseen = false
         seenDevices = append(seenDevices, dev)
     }
 
@@ -816,9 +816,6 @@ func sendExpiredSafecastDevicesToSlack() {
         // Iterate over each of the pending commands
         for _, file := range files {
 
-//ozzie
-			fmt.Printf("%s\n", file.Name())
-
             if !file.IsDir() {
 
                 // Extract device ID from filename
@@ -844,7 +841,6 @@ func sendExpiredSafecastDevicesToSlack() {
     }
 
     // Compute an expiration time
-    const deviceWarningAfterMinutes = 90
     expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes) * time.Minute))
 
     // Sweep through all devices that we've seen
