@@ -51,7 +51,13 @@ const BUFF_FORMAT_PB_ARRAY byte  =  0
 const BUFF_FORMAT_SINGLE_PB byte =  8
 
 // This server-related
-const TTServerAddress = "api.teletype.io"
+const TTServerHTTPAddress = "tt.safecast.org"
+const TTServerUDPAddress = "tt-udp.safecast.org"
+var	  TTServerUDPAddressIPv4 = ""
+var	  iAmTTServerUDP = false
+const TTServerFTPAddress = "tt-ftp.safecast.org"
+var	  TTServerFTPAddressIPv4 = ""
+var	  iAmTTServerFTP = false
 const TTServerPortHTTP string = ":8080"
 const TTServerPortHTTPAlternate string = ":80"
 const TTServerPortUDP string = ":8081"
@@ -113,6 +119,35 @@ func main() {
     }
     TTServerIP = string(bytes.TrimSpace(buf))
     TTServer = "http://" + TTServerIP
+
+	// Look up the two IP addresses that we KNOW have only a single A record,
+	// and determine if WE are the server for those protocols
+	addrs, err := net.LookupHost(TTServerUDPAddress)
+	if err != nil {
+        fmt.Printf("Can't resolve %s: %v\n", TTServerUDPAddress, err);
+        os.Exit(0)
+    }
+	if len(addrs) < 1 {
+        fmt.Printf("Can't resolve %s: %v\n", TTServerUDPAddress, err);
+        os.Exit(0)
+    }
+	TTServerUDPAddressIPv4 = addrs[0]
+	iAmTTServerUDP = TTServerUDPAddressIPv4 == TTServerIP
+
+	addrs, err = net.LookupHost(TTServerFTPAddress)
+	if err != nil {
+        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err);
+        os.Exit(0)
+    }
+	if len(addrs) < 1 {
+        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err);
+        os.Exit(0)
+    }
+	TTServerFTPAddressIPv4 = addrs[0]
+	iAmTTServerFTP = TTServerFTPAddressIPv4 == TTServerIP
+
+	// Display these truths
+	fmt.Printf("'%s' '%s' '%s' %v %v\n", TTServerIP, TTServerUDPAddress, TTServerFTPAddress, iAmTTServerUDP, iAmTTServerFTP)
 
     // Set up our signal handler
     go signalHandler()
@@ -347,7 +382,7 @@ func udpInboundHandler() {
 // Handle inbound HTTP requests from the gateway or directly from the device
 func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
     var AppReq IncomingReq
-	var DeviceID uint32 = 0
+	var ReplyToDeviceID uint32 = 0
 	
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
@@ -375,7 +410,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         fmt.Printf("\n%s Received %d-byte HTTP payload from TTGATE\n", time.Now().Format(logDateFormat), len(AppReq.TTN.Payload))
 
 		// Extract the device ID from the message, which we will need later
-	    _, DeviceID = getDeviceIDFromPayload(AppReq.TTN.Payload)
+	    _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.TTN.Payload)
 		
         // We now have a TTN-like message, constructed as follows:
         //  1) the Payload came from the device itself
@@ -418,7 +453,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
             AppReq.TTN.Metadata[0].ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
 			// Extract the device ID from the message, which we will need later
-		    _, DeviceID = getDeviceIDFromPayload(AppReq.TTN.Payload)
+		    _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.TTN.Payload)
 
             // Enqueue AppReq for TTN-like processing
             AppReq.Transport = "http:" + req.RemoteAddr
@@ -450,7 +485,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
                 AppReq.TTN.Payload = buf[payloadOffset:payloadOffset+length]
 
 				// Extract the device ID from the message, which we will need later
-			    _, DeviceID = getDeviceIDFromPayload(AppReq.TTN.Payload)
+			    _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.TTN.Payload)
 
                 // We now have a TTN-like message, constructed as follws:
                 //  1) the Payload came from the device itself
@@ -491,7 +526,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
 	// Outbound message processing
-    if (DeviceID != 0) {
+    if (ReplyToDeviceID != 0) {
 
 	    // Delay just in case there's a chance that request processing may generate a reply
 		// to this request.  It's no big deal if we miss it, though, because it will just be
@@ -499,11 +534,11 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 	    time.Sleep(1 * time.Second)
 
 	    // See if there's an outbound message waiting for this device.
-        isAvailable, payload := TelecastOutboundPayload(DeviceID)
+        isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
         if (isAvailable) {
             hexPayload := hex.EncodeToString(payload)
             io.WriteString(rw, hexPayload)
-            sendToSafecastOps(fmt.Sprintf("Device %d picked up a payload\n", DeviceID))
+            sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID))
         }
 
     }
