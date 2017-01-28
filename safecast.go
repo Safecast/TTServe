@@ -42,6 +42,7 @@ var httpTransactionErrorFirst bool = true
 type seenDevice struct {
     deviceid            uint32
     seen                time.Time
+	everRecentlySeen	bool
     notifiedAsUnseen    bool
     minutesAgo          int64
 }
@@ -751,9 +752,14 @@ func trackDevice(DeviceID uint32, whenSeen time.Time) {
     found := false
     for i := 0; i < len(seenDevices); i++ {
         if dev.deviceid == seenDevices[i].deviceid {
+			// Update the "recently seen" flag
+	        minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
+			if (minutesAgo < deviceWarningAfterMinutes) {
+				seenDevices[i].everRecentlySeen = true
+			}
             // Notify when the device comes back
             if seenDevices[i].notifiedAsUnseen {
-                minutesAgo := int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
+                minutesAgo := int64(whenSeen.Sub(seenDevices[i].seen) / time.Minute)
                 hoursAgo := minutesAgo / 60
                 daysAgo := hoursAgo / 24
                 message := fmt.Sprintf("%d minutes", minutesAgo)
@@ -778,6 +784,8 @@ func trackDevice(DeviceID uint32, whenSeen time.Time) {
     // Add a new array entry if necessary
     if !found {
         dev.seen = whenSeen
+        minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
+		dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes
         dev.notifiedAsUnseen = false
         seenDevices = append(seenDevices, dev)
     }
@@ -850,7 +858,7 @@ func sendExpiredSafecastDevicesToSlack() {
         seenDevices[i].minutesAgo = int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
 
         // Notify Slack once and only once when a device has expired
-        if !seenDevices[i].notifiedAsUnseen {
+        if !seenDevices[i].notifiedAsUnseen && seenDevices[i].everRecentlySeen {
             if seenDevices[i].seen.Before(expiration) {
                 seenDevices[i].notifiedAsUnseen = true
                 sendToSafecastOps(fmt.Sprintf("** Warning **  Device %d hasn't been seen for %d minutes",
