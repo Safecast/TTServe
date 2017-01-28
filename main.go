@@ -69,6 +69,7 @@ const TTServerTopicGithub string = "/github"
 const TTServerTopicSlack string = "/slack"
 const TTServerTopicRedirect1 string = "/scripts/"
 const TTServerTopicRedirect2 string = "/"
+var	  iAmTTServerMonitor = false
 
 // Our server
 var TTServer string
@@ -131,7 +132,7 @@ func main() {
         fmt.Printf("Can't resolve %s: %v\n", TTServerUDPAddress, err);
         os.Exit(0)
     }
-	TTServerUDPAddressIPv4 = addrs[0] + "1"
+	TTServerUDPAddressIPv4 = addrs[0]
 	iAmTTServerUDP = TTServerUDPAddressIPv4 == TTServerIP
 
 	addrs, err = net.LookupHost(TTServerFTPAddress)
@@ -145,9 +146,7 @@ func main() {
     }
 	TTServerFTPAddressIPv4 = addrs[0]
 	iAmTTServerFTP = TTServerFTPAddressIPv4 == TTServerIP
-
-	// Display these truths
-	fmt.Printf("'%s' '%s' '%s' %v %v\n", TTServerIP, TTServerUDPAddressIPv4, TTServerFTPAddressIPv4, iAmTTServerUDP, iAmTTServerFTP)
+	iAmTTServerMonitor = iAmTTServerFTP
 
     // Set up our signal handler
     go signalHandler()
@@ -159,18 +158,22 @@ func main() {
     // Spawn the app request handler shared by both TTN and direct inbound server
     go commonRequestHandler()
 
-    // Spawn the TTN inbound message handler
-    go ttnInboundHandler()
-
     // Init our web request inbound server
     go webInboundHandler()
 
+    // Spawn the TTN inbound message handler
+    go ttnInboundHandler()
+
     // Init our UDP single-sample upload request inbound server
-    go udpInboundHandler()
-
+	if iAmTTServerUDP {
+	    go udpInboundHandler()
+	}
+	
     // Init our FTP server
-    go ftpInboundHandler()
-
+	if iAmTTServerFTP {
+	    go ftpInboundHandler()
+	}
+	
     // Init our housekeeping process
     go timer1m()
 
@@ -193,9 +196,12 @@ func timer1m() {
 func timer15m() {
     for {
 
-		// Track expired devices.  We do this before the first sleep so we have a list of device ASAP
-        sendExpiredSafecastDevicesToSlack()
-
+		// On the monitor role, track expired devices.
+		// We do this before the first sleep so we have a list of device ASAP
+		if iAmTTServerMonitor {
+	        sendExpiredSafecastDevicesToSlack()
+		}
+		
 		// Sleep
         time.Sleep(15 * 60 * time.Second)
 
@@ -244,24 +250,30 @@ func ftpInboundHandler() {
 // Kick off inbound messages coming from all sources, then serve HTTP
 func webInboundHandler() {
 
+	// Spin up functions only available on the monitor role, of which there is only one
+	if iAmTTServerMonitor {
+
+	    http.HandleFunc(TTServerTopicGithub, inboundWebGithubHandler)
+	    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicGithub)
+
+	    http.HandleFunc(TTServerTopicSlack, inboundWebSlackHandler)
+	    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicSlack)
+
+	    http.HandleFunc(TTServerTopicLog, inboundWebLogHandler)
+
+	    http.HandleFunc(TTServerTopicTest, inboundWebTestHandler)
+
+	}
+
+	// Spin up functions available on all roles
     http.HandleFunc(TTServerTopicSend, inboundWebSendHandler)
     fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicSend)
-
-    http.HandleFunc(TTServerTopicGithub, inboundWebGithubHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicGithub)
-
-    http.HandleFunc(TTServerTopicSlack, inboundWebSlackHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicSlack)
 
     http.HandleFunc(TTServerTopicRedirect1, inboundWebRedirectHandler)
     fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicRedirect1)
 
     http.HandleFunc(TTServerTopicRedirect2, inboundWebRedirectHandler)
     fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerPortHTTP, TTServerTopicRedirect2)
-
-    http.HandleFunc(TTServerTopicLog, inboundWebLogHandler)
-
-    http.HandleFunc(TTServerTopicTest, inboundWebTestHandler)
 
     go func() {
         http.ListenAndServe(TTServerPortHTTPAlternate, nil)
