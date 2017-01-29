@@ -118,9 +118,9 @@ var reqQMaxLength = 0
 // Main entry point for app
 func main() {
 
-	// Remember boot time
-	TTServerBootTime = time.Now()
-	
+    // Remember boot time
+    TTServerBootTime = time.Now()
+
     // Get our external IP address
     rsp, err := http.Get("http://checkip.amazonaws.com")
     if err != nil {
@@ -163,8 +163,8 @@ func main() {
     iAmTTServerFTP = TTServerFTPAddressIPv4 == TTServerIP
     iAmTTServerMonitor = iAmTTServerFTP
 
-	// Get the date/time of the file that will indicate "reboot"
-	TTServerRestartAllTime = RestartAllTime("")
+    // Get the date/time of the file that will indicate "reboot"
+    TTServerRestartAllTime = RestartAllTime("")
 
     // Set up our signal handler
     go signalHandler()
@@ -207,12 +207,6 @@ func main() {
 func timer1m() {
     for {
         time.Sleep(1 * 60 * time.Second)
-
-		// Restart this instance if instructed to do so
-		if (RestartAllTime("") != TTServerRestartAllTime) {
-	        fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
-	        os.Exit(0)
-		}
     }
 }
 
@@ -254,6 +248,15 @@ func timer15m() {
             }
         }
 
+        // Restart this instance if instructed to do so
+        if (!iAmTTServerMonitor) {
+            if (RestartAllTime("") != TTServerRestartAllTime) {
+                sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServerIP))
+                fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
+                os.Exit(0)
+            }
+        }
+
     }
 
 }
@@ -274,9 +277,9 @@ func ftpInboundHandler() {
 // Upload a Safecast data structure the load balancer for the web service
 func doUploadToWebLoadBalancer(data []byte, datalen int, addr string) {
 
-	if false {
-	    fmt.Printf("\n%s Received %d-byte UDP payload from %s, routing to LB\n", time.Now().Format(logDateFormat), datalen, addr)
-	}
+    if false {
+        fmt.Printf("\n%s Received %d-byte UDP payload from %s, routing to LB\n", time.Now().Format(logDateFormat), datalen, addr)
+    }
 
     url := "http://" + TTServerHTTPAddress + TTServerHTTPPort + TTServerTopicSend
 
@@ -385,22 +388,22 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
     switch (req.UserAgent()) {
 
-		// UDP messages that were relayed to the TTSERVE HTTP load balancer, JSON-formatted
+        // UDP messages that were relayed to the TTSERVE HTTP load balancer, JSON-formatted
     case "TTSERVE": {
         var ttg TTGateReq
 
         err = json.Unmarshal(body, &ttg)
         if err != nil {
-			fmt.Printf("*** Received badly formatted HTTP request from %s: \n%v\n", req.UserAgent(), body)
+            fmt.Printf("*** Received badly formatted HTTP request from %s: \n%v\n", req.UserAgent(), body)
             return
         }
 
-		// Process it.  Note there is no possibility of a reply.
-		processBuffer(AppReq, "device using UDP on cellular", ttg.Transport, ttg.Payload)
+        // Process it.  Note there is no possibility of a reply.
+        processBuffer(AppReq, "device using UDP on cellular", ttg.Transport, ttg.Payload)
 
-	}
+    }
 
-	// Messages that come from TTGATE are JSON-formatted
+        // Messages that come from TTGATE are JSON-formatted
     case "TTGATE": {
         var ttg TTGateReq
 
@@ -416,23 +419,23 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq.Snr = ttg.Snr
         AppReq.Location = ttg.Location
 
-		// Process it
-		ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", ttg.Transport, ttg.Payload)
-		
+        // Process it
+        ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", ttg.Transport, ttg.Payload)
+
     }
 
         // Messages directly from devices are hexified
     case "TTNODE": {
 
-		// The buffer format is hexified
+        // The buffer format is hexified
         buf, err := hex.DecodeString(string(body))
         if err != nil {
             fmt.Printf("Hex decoding error: ", err)
             return
         }
 
-		// Process it
-		ReplyToDeviceID = processBuffer(AppReq, "device using HTTP on cellular", "http:"+req.RemoteAddr, buf)
+        // Process it
+        ReplyToDeviceID = processBuffer(AppReq, "device using HTTP on cellular", "http:"+req.RemoteAddr, buf)
 
     }
 
@@ -649,9 +652,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         // Convert to V2 format
         sV2 = SafecastV1toV2(sV1)
         fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sV2.DeviceID, "http:"+req.RemoteAddr)
-		if true {
-	        fmt.Printf("%s\n", body)
-		}
+        if true {
+            fmt.Printf("%s\n", body)
+        }
 
         // For backward compatibility,post it to V1 with an URL that is preserved.  Also post to V2
         urlV1 := SafecastV1UploadURL
@@ -991,20 +994,20 @@ func RestartAllTime(message string) (restartTime time.Time) {
 
     filename := SafecastDirectory() + TTServerControlPath + "/" + "restart_all.txt"
 
-	// Overwrite the file if requested to do so
-	if (message != "") {
-	    fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
-	    if (err == nil) {
-		    fd.WriteString(message);
-		    fd.Close();
-		}
-	}
+    // Overwrite the file if requested to do so
+    if (message != "") {
+        fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
+        if (err == nil) {
+            fd.WriteString(message);
+            fd.Close();
+        }
+    }
 
-	// Get the file date/time, returning a stable time if we fail
-	file, err := os.Stat(filename)
-	if err != nil {
-		return TTServerBootTime
-	}
+    // Get the file date/time, returning a stable time if we fail
+    file, err := os.Stat(filename)
+    if err != nil {
+        return TTServerBootTime
+    }
 
-	return file.ModTime()
+    return file.ModTime()
 }
