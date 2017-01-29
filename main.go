@@ -41,6 +41,7 @@ var SafecastV2UploadURLs = [...]string {
 // File system related paths relative to the server's HomeDir
 const TTServerLogPath = "/safecast/log"
 const TTServerCommandPath = "/safecast/command"
+const TTServerControlPath = "/safecast/control"
 const TTServerBuildPath = "/safecast/build"
 const TTServerFTPCertPath = "/safecast/cert/ftp"
 
@@ -74,6 +75,10 @@ var   iAmTTServerMonitor = false
 // Our server
 var TTServer string
 var TTServerIP string
+
+// Auto-reboot
+var TTServerBootTime time.Time
+var TTServerRestartAllTime time.Time
 
 // Constants
 const logDateFormat string = "2006-01-02 15:04:05"
@@ -113,6 +118,9 @@ var reqQMaxLength = 0
 // Main entry point for app
 func main() {
 
+	// Remember boot time
+	TTServerBootTime = time.Now()
+	
     // Get our external IP address
     rsp, err := http.Get("http://checkip.amazonaws.com")
     if err != nil {
@@ -155,6 +163,9 @@ func main() {
     iAmTTServerFTP = TTServerFTPAddressIPv4 == TTServerIP
     iAmTTServerMonitor = iAmTTServerFTP
 
+	// Get the date/time of the file that will indicate "reboot"
+	TTServerRestartAllTime = RestartAllTime("")
+
     // Set up our signal handler
     go signalHandler()
 
@@ -196,6 +207,12 @@ func main() {
 func timer1m() {
     for {
         time.Sleep(1 * 60 * time.Second)
+
+		// Restart this instance if instructed to do so
+		if (RestartAllTime("") != TTServerRestartAllTime) {
+	        fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
+	        os.Exit(0)
+		}
     }
 }
 
@@ -631,7 +648,10 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Convert to V2 format
         sV2 = SafecastV1toV2(sV1)
-        fmt.Printf("\n%s Received redirect payload for %d from %s\n%s\n", time.Now().Format(logDateFormat), sV2.DeviceID, "http:"+req.RemoteAddr, body)
+        fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sV2.DeviceID, "http:"+req.RemoteAddr)
+		if true {
+	        fmt.Printf("%s\n", body)
+		}
 
         // For backward compatibility,post it to V1 with an URL that is preserved.  Also post to V2
         urlV1 := SafecastV1UploadURL
@@ -964,4 +984,27 @@ func signalHandler() {
             break
         }
     }
+}
+
+// Get the modified time of a special file indicating "restart all"
+func RestartAllTime(message string) (restartTime time.Time) {
+
+    filename := SafecastDirectory() + TTServerControlPath + "/" + "restart_all.txt"
+
+	// Overwrite the file if requested to do so
+	if (message != "") {
+	    fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
+	    if (err == nil) {
+		    fd.WriteString(message);
+		    fd.Close();
+		}
+	}
+
+	// Get the file date/time, returning a stable time if we fail
+	file, err := os.Stat("example.txt")
+	if err != nil {
+		return TTServerBootTime
+	}
+
+	return file.ModTime()
 }

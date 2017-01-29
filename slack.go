@@ -93,6 +93,10 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart' command\n***\n***\n\n")
         os.Exit(0)
 
+    case "restart-all":
+        sendToSafecastOps(fmt.Sprintf("** Restarting All Instances **"))
+		RestartAllTime(user)
+
     case "send":
         if len(args) < 3 {
             sendToSafecastOps("Command format: send <deviceID> <message>")
