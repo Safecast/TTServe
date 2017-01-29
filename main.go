@@ -363,10 +363,10 @@ func udpInboundHandler() {
 
             ttg := &TTGateReq{}
             ttg.Payload = buf[0:n]
-            ttg.Transport = "udp:" + addr.String()
+            ttg.Transport = "udp:" + ipv4(addr.String())
             data, err := json.Marshal(ttg)
             if err == nil {
-                go doUploadToWebLoadBalancer(data, n, addr.String())
+                go doUploadToWebLoadBalancer(data, n, ipv4(addr.String()))
             }
 
         }
@@ -420,7 +420,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq.Location = ttg.Location
 
         // Process it
-        ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", "ttgate:"+req.RemoteAddr, ttg.Payload)
+        ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", "ttgate:"+ipv4(req.RemoteAddr), ttg.Payload)
 
     }
 
@@ -435,7 +435,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         // Process it
-        ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "http:"+req.RemoteAddr, buf)
+        ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "http:"+ipv4(req.RemoteAddr), buf)
 
     }
 
@@ -651,7 +651,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Convert to V2 format
         sV2 = SafecastV1toV2(sV1)
-        fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sV2.DeviceID, "http:"+req.RemoteAddr)
+        fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sV2.DeviceID, "http:"+ipv4(req.RemoteAddr))
         if true {
             fmt.Printf("%s\n", body)
         }
@@ -987,6 +987,15 @@ func signalHandler() {
             break
         }
     }
+}
+
+// Extract just the IPV4 address, eliminating the port
+func ipv4(Str1 string) string {
+	Str2 := strings.Split(Str1, ":")
+	if len(Str2) > 0 {
+		return Str2[0]
+	}
+	return Str1
 }
 
 // Get the modified time of a special file indicating "restart all"
