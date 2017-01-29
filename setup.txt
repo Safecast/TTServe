@@ -1,96 +1,92 @@
-// 1. Create the instance of UBUNTU
-// 2. Make sure it has a public IP address
+##
+## TO CREATE A NEW INSTANCE
+##
+## 1. Create the instance of UBUNTU using default settings so that it has a public IP address, using safecastdev key
+## 2. Assign the correct security group, i.e.
+##    In Actions / Networking / Change Security Groups, select the TTSERVE security group and Assign Security Groups
+## 3. Add the instance to both the 80 and 8080 load balancer Target Groups
+## 4. Make sure that locally you have the safecastdev.pem key on your keychain ie
+##    ssh-add -K /keybase/private/rozzie,matschaffer/safecastdev.pem
+## 5. SSH into the instance using ubuntu@<instance-domain-name>
+##
 
-// On Google Compute
-// .. In VM Instances
-// .. Click the name to go into an instance
-// .. Scroll down and click the Network (usually "default")
-// ..Add an "allow-8080" firewall rule for tcp:8080 that applies to all targets
-// ..Add an "allow-8081" firewall rule for udp:8081 that applies to all targets
-// ..Add an "allow-8082" firewall rule for tcp:8082 that applies to all targets
+##
+## FIRST TIME INSTANCE SETUP PROCEDURE
+##
 
-// On Amazon AWS
-// In Network & Security / Security Groups
-// Create or Edit the rules of the security group attached to the instance
-
-// On Amazon Lightsail
-// - create the above allow rules in networking
-// - create a static ip address
-
-// Now install required tools
+## Update the updater
 sudo apt update
+## Install GIT so we can pull new versions
 sudo apt install git --assume-yes
+## Install GOLANG so we can rebuild our code
 sudo apt install golang-go --assume-yes
-
-// So that we can mount an EFS filesystem on amazon
+## Install NFS so we can mount an EFS filesystem on amazon
 sudo apt-get install nfs-common --assume-yes
-
-// Make sure you have the right security groups
-1. From EC2 menu, select the instance and do Actions / Networking / Change Security Groups
-2.Select the TTSERVE security group, and select Assign Security Groups
-
-
-// Make sure that the version of golang is up to date by seeing if it says at least go1.6.2
+## Verify that the version of GOLANG is at least go1.6.2
 go version
 
-// Add this to .profile with NANO editor, so that this is what should be at the end
-// (not sure if this path mod is needed if apt install is used to load golang)
-cd ~
-nano .profile
-add:
-# Add what's needed for golang programs
+## Add these to the end of ~/.profile with NANO editor
 export PATH=$PATH:$HOME/go/bin
 export GOPATH=$HOME/go
 export TT=$GOPATH/src/github.com/rayozzie/teletype-ttserve
 
-// Create our app workspace
-mkdir $HOME/go && cd $HOME/go && mkdir src && cd src && mkdir github.com && cd github.com && mkdir rayozzie && cd rayozzie
+## Fetch our app package
+mkdir $HOME/go && mkdir $HOME/go/src && mkdir $HOME/go/src/github.com && mkdir $HOME/go/src/github.com/rayozzie && cd $HOME/go/src/github.com/rayozzie
 git clone https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
 
-// Refresh the environment by REBOOTING THE AWS INSTANCE
-<come back in via ssh>
+## Refresh the env vars by REBOOTING THE AWS INSTANCE
+## Then come back here via SSH
 
-// Whenever coming back in via ssh, do this to see if our screen is already running:
+##
+## ANYTIME SSH'ING INTO THE INSTANCE AFTER SETUP
+##
+## Note that we keep the server running in a background process by using
+## the "screen" command to create and maintain it.  This means that
+## the first time you come into an instance not running TTSERVE you
+## must create it, and after that point you need to make sure that
+## you don't accidentally delete it.  Following are commands that
+## will help you understand how to do this.
+##
+
+## Do this to see if our screen is already running:
 screen -ls
-// If you see the teletype instance, do a
+## If you see the 'teletype' instance, do:
 screen -r
-// If you don't see the teletype instance, do
+## If you do NOT see the teletype instance, do:
 screen -S teletype
-
-// Go to the right place, and run
-cd $TT
-./run.sh
-
-// Detach to return to main console
+cd $TT && ./run.sh
+## If, while watching console, you want to force a restart/refresh from git, press:
+^c
+## If, while watching console, you want to return to main screen console, press:
 ^a d
-
-
-///// that is all
-
-// Running in background
-//   create a new screen and switch to it
-screen -S teletype
-//   list screens
-screen -ls
-//   delete the current screen and logout
+## If, while watching the console, you want to exit SSH, press:
+^a d
 exit
-//   detach screen (leave and go back to main shell)
+
+## Note that if you STOP the any instance except for TTSERVE0, the address will change
+## so that you will need to SSH into a different domain name.  Other than that, the
+## "ANYTIME SSH'ING" procedure above will work to get it going again after Start.
+
+## SCREEN COMMAND REFERENCE
+## Running in background
+##   create a new screen and switch to it
+screen -S teletype
+##   list screens
+screen -ls
+##   delete the current screen and logout
+exit
+##   detach screen (leave and go back to main shell)
 screen -d
-//   detach screen when not at a command line
+##   detach screen when not at a command line
 ^a d
-//   go back to the one other detached screen
+##   go back to the one other detached screen
 screen -R
-//   go back to detached screen
+##   go back to detached screen
 screen -r <pid# or name>
-//   detach a specific attached screen
+##   detach a specific attached screen
 screen -d  <pid# or name>
-//   go back to a specific attached screen
+##   go back to a specific attached screen
 screen -d -r <pid# or name>
-//   kill all screens and current window
+##   kill all screens and current window
 screen -X quit
 
-// Note for posterity that if the Github "pull" methodology
-// fails for whatever reason, that the method to push files
-// to gcloud is:
-gcloud compute copy-files *.go rozzie@teletype-1:~/go/src/ttserve
-gcloud compute copy-files *.sh rozzie@teletype-1:~/go/src/ttserve
