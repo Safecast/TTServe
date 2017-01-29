@@ -22,6 +22,9 @@ import (
     ftp "github.com/fclairamb/ftpserver/server"
 )
 
+// Global debugging
+const restartQuickly bool = true
+
 // Derived from "ttnctl applications", the AppEUI and its Access Key
 const appEui string = "70B3D57ED0000420"
 const appAccessKey string = "bgCzOOs/5K16cuwP3/sGP9sea/4jKFwFEdTbYHw2fRE="
@@ -208,6 +211,12 @@ func main() {
 func timer1m() {
     for {
         time.Sleep(1 * 60 * time.Second)
+
+        // Restart this instance if instructed to do so
+		if (restartQuickly) {
+	        restartCheck()
+		}
+		
     }
 }
 
@@ -250,16 +259,21 @@ func timer15m() {
         }
 
         // Restart this instance if instructed to do so
-        if (!iAmTTServerMonitor) {
-            if (RestartAllTime("") != TTServerRestartAllTime) {
-                sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServerIP))
-                fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
-                os.Exit(0)
-            }
-        }
+        restartCheck()
 
     }
 
+}
+
+// Check to see if we should restart
+func restartCheck() {
+    if (!iAmTTServerMonitor) {
+        if (RestartAllTime("") != TTServerRestartAllTime) {
+            sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServerIP))
+            fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
+            os.Exit(0)
+        }
+    }
 }
 
 // Kick off inbound messages coming from all sources, then serve HTTP
@@ -524,13 +538,13 @@ func processBuffer(req IncomingReq, from string, transport string, buf []byte) (
             // Extract the device ID from the message, which we will need later
             _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
 
-	        // Add ServerTime in case the payload lacked CapturedAt
+            // Add ServerTime in case the payload lacked CapturedAt
             AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
             fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload),
                 i+1, count, from, AppReq.Transport)
 
-            // Enqueue AppReq 
+            // Enqueue AppReq
             AppReq.UploadedAt = UploadedAt
             reqQ <- AppReq
             monitorReqQ()
@@ -978,11 +992,11 @@ func signalHandler() {
 
 // Extract just the IPV4 address, eliminating the port
 func ipv4(Str1 string) string {
-	Str2 := strings.Split(Str1, ":")
-	if len(Str2) > 0 {
-		return Str2[0]
-	}
-	return Str1
+    Str2 := strings.Split(Str1, ":")
+    if len(Str2) > 0 {
+        return Str2[0]
+    }
+    return Str1
 }
 
 // Get the modified time of a special file indicating "restart all"
