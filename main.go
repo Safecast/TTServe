@@ -255,11 +255,11 @@ func ftpInboundHandler() {
 }
 
 // Upload a Safecast data structure the load balancer for the web service
-func doUploadToWebLoadBalancer(data []byte, datalen uint16, addr string) {
+func doUploadToWebLoadBalancer(data []byte, datalen int, addr string) {
 
     fmt.Printf("\n%s Received %d-byte UDP payload from %s, routing to LB\n", time.Now().Format(logDateFormat), datalen, addr)
 
-	url := "http://" + TTServerHTTPAddress + TTServerHTTPPort + TTServerTopicSend
+    url := "http://" + TTServerHTTPAddress + TTServerHTTPPort + TTServerTopicSend
 
     req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
     req.Header.Set("User-Agent", "TTSERVE")
@@ -270,9 +270,9 @@ func doUploadToWebLoadBalancer(data []byte, datalen uint16, addr string) {
     resp, err := httpclient.Do(req)
     if err != nil {
         fmt.Printf("HTTP POST error: %v\n", err);
-	} else {
+    } else {
         resp.Body.Close()
-	}
+    }
 
 }
 
@@ -339,13 +339,13 @@ func udpInboundHandler() {
             time.Sleep(1 * 60 * time.Second)
         } else {
 
-	        ttg := &TTGateReq{}
-	        ttg.Payload = buf[0:n]
-			ttg.Transport = "udp:" + addr.String()
-	        data, err := json.Marshal(ttg)
-			if err == nil {
-				go doUploadToWebLoadBalancer(data, n, addr.String())
-			}
+            ttg := &TTGateReq{}
+            ttg.Payload = buf[0:n]
+            ttg.Transport = "udp:" + addr.String()
+            data, err := json.Marshal(ttg)
+            if err == nil {
+                go doUploadToWebLoadBalancer(data, n, addr.String())
+            }
 
         }
 
@@ -366,147 +366,56 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
     switch (req.UserAgent()) {
 
-    case "TTSERVE":
-		// TTSERVE messages are UDP-relayed
-		fallthrough
+		// UDP messages that were relayed to the TTSERVE HTTP load balancer, JSON-formatted
+    case "TTSERVE": {
+        var ttg TTGateReq
+
+        err = json.Unmarshal(body, &ttg)
+        if err != nil {
+			fmt.Printf("*** Received badly formatted HTTP request from %s: \n%v\n", req.UserAgent(), body)
+            return
+        }
+
+		// Process it.  Note there is no possibility of a reply.
+		processBuffer(AppReq, "UDP relay", ttg.Transport, ttg.Payload)
+
+	}
+
+	// Messages that come from TTGATE are JSON-formatted
     case "TTGATE": {
         var ttg TTGateReq
 
         err = json.Unmarshal(body, &ttg)
         if err != nil {
-            io.WriteString(rw, "Hello.")
-            // Very common case where anyone comes to web page, such as a google health check or our own TTGATE health check
+			fmt.Printf("*** Received badly formatted HTTP request from %s: \n%v\n", req.UserAgent(), body)
             return
         }
 
         // Copy into the app req structure
-        AppReq.Payload = ttg.Payload
         AppReq.Latitude = ttg.Latitude
         AppReq.Longitude = ttg.Longitude
         AppReq.Altitude = float32(ttg.Altitude)
         AppReq.Snr = ttg.Snr
         AppReq.Location = ttg.Location
-		AppReq.Transport = ttg.Transport
+
+		// Process it
+		ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", ttg.Transport, ttg.Payload)
 		
-        // For now we only handle single-PB format from TTGATE
-        if (AppReq.Payload[0] != BUFF_FORMAT_SINGLE_PB) {
-            return
-        }
-
-        fmt.Printf("\n%s Received %d-byte HTTP payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), req.UserAgent())
-		if (true) {
-			fmt.Printf("%v\n", ttg)
-		}
-
-        // Extract the device ID from the message, which we will need later if replying
-		if (req.UserAgent() != "TTSERVE") {
-	        _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
-		}
-		
-        // We now have a TTN-like message, constructed as follows:
-        //  1) the Payload came from the device itself
-        //  2) TTGATE filled in the lat/lon/alt metadata, just in case the payload doesn't have location
-        //  3) TTGATE filled in SNR if it had access to it
-        //  4) We'll add the server's time, in case the payload lacked CapturedAt
-        AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
-
-		// For TTSERVE, the transport will have been figured out at the UDP relay
-		if (AppReq.Transport == "") {
-	        AppReq.Transport = "http:" + req.RemoteAddr
-		}
-
-        // Enqueue AppReq for TTN-like processing
-        AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
-        reqQ <- AppReq
-        monitorReqQ()
-
     }
 
-        // Messages from devices are hexified
+        // Messages directly from devices are hexified
     case "TTNODE": {
 
+		// The buffer format is hexified
         buf, err := hex.DecodeString(string(body))
         if err != nil {
             fmt.Printf("Hex decoding error: ", err)
             return
         }
 
-        buf_format := buf[0]
-        buf_length := len(buf)
+		// Process it
+		ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "http:"+req.RemoteAddr, buf)
 
-        switch (buf_format) {
-
-        case BUFF_FORMAT_SINGLE_PB: {
-
-            fmt.Printf("\n%s Received %d-byte HTTP payload from DEVICE\n", time.Now().Format(logDateFormat), buf_length)
-
-            // We now have a TTN-like message, constructed as follws:
-            //  1) the Payload came from the device itself
-            //  2) We'll add the server's time, in case the payload lacked CapturedAt
-            AppReq.Payload = buf
-            AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
-
-            // Extract the device ID from the message, which we will need later
-            _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
-
-            // Enqueue AppReq for TTN-like processing
-            AppReq.Transport = "http:" + req.RemoteAddr
-            AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
-            reqQ <- AppReq
-            monitorReqQ()
-        }
-
-        case BUFF_FORMAT_PB_ARRAY: {
-
-            fmt.Printf("\n%s Received %d-byte HTTP BUFFERED payload from DEVICE\n", time.Now().Format(logDateFormat), buf_length)
-
-            if !validBulkPayload(buf, buf_length) {
-                return
-            }
-
-            // Loop over the various things in the buffer
-            UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
-            count := int(buf[1])
-            lengthArrayOffset := 2
-            payloadOffset := lengthArrayOffset + count
-
-            for i:=0; i<count; i++ {
-
-                // Extract the length
-                length := int(buf[lengthArrayOffset+i])
-
-                // Construct the TTN-like messager
-                AppReq.Payload = buf[payloadOffset:payloadOffset+length]
-
-                // Extract the device ID from the message, which we will need later
-                _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
-
-                // We now have a TTN-like message, constructed as follws:
-                //  1) the Payload came from the device itself
-                //  2) We'll add the server's time, in case the payload lacked CapturedAt
-                AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
-
-                fmt.Printf("\n%s Received %d-byte HTTP (%d/%d) payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload),
-                    i+1, count, req.RemoteAddr)
-
-                // Enqueue AppReq for TTN-like processing
-                AppReq.Transport = "http:" + req.RemoteAddr
-                AppReq.UploadedAt = UploadedAt
-                reqQ <- AppReq
-                monitorReqQ()
-
-                // Bump the payload offset
-                payloadOffset += length;
-
-            }
-
-        }
-
-        default: {
-            fmt.Printf("\n%s Received INVALID %d-byte HTTP buffered payload from DEVICE\n", time.Now().Format(logDateFormat), buf_length)
-        }
-
-        }
     }
 
     default: {
@@ -535,6 +444,90 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
     }
+
+}
+
+// Process a payload buffer
+func processBuffer(req IncomingReq, from string, transport string, buf []byte) (DeviceID uint32) {
+    var ReplyToDeviceID uint32 = 0
+    var AppReq IncomingReq = req
+
+    AppReq.Transport = transport
+
+    buf_format := buf[0]
+    buf_length := len(buf)
+
+    switch (buf_format) {
+
+    case BUFF_FORMAT_SINGLE_PB: {
+
+        fmt.Printf("\n%s Received %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.Transport)
+
+        // We now have a TTN-like message, constructed as follws:
+        //  1) the Payload came from the device itself
+        //  2) We'll add the server's time, in case the payload lacked CapturedAt
+        AppReq.Payload = buf
+        AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+
+        // Extract the device ID from the message, which we will need later
+        _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
+
+        // Enqueue AppReq for TTN-like processing
+        AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+        reqQ <- AppReq
+        monitorReqQ()
+    }
+
+    case BUFF_FORMAT_PB_ARRAY: {
+
+        fmt.Printf("\n%s Received %d-byte BUFFERED payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.Transport)
+
+        if !validBulkPayload(buf, buf_length) {
+            return 0
+        }
+
+        // Loop over the various things in the buffer
+        UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+        count := int(buf[1])
+        lengthArrayOffset := 2
+        payloadOffset := lengthArrayOffset + count
+
+        for i:=0; i<count; i++ {
+
+            // Extract the length
+            length := int(buf[lengthArrayOffset+i])
+
+            // Construct the TTN-like messager
+            AppReq.Payload = buf[payloadOffset:payloadOffset+length]
+
+            // Extract the device ID from the message, which we will need later
+            _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
+
+            // We now have a TTN-like message, constructed as follws:
+            //  1) the Payload came from the device itself
+            //  2) We'll add the server's time, in case the payload lacked CapturedAt
+            AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+
+            fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload),
+                i+1, count, from, AppReq.Transport)
+
+            // Enqueue AppReq for TTN-like processing
+            AppReq.UploadedAt = UploadedAt
+            reqQ <- AppReq
+            monitorReqQ()
+
+            // Bump the payload offset
+            payloadOffset += length;
+
+        }
+    }
+
+    default: {
+        fmt.Printf("\n%s Received INVALID %d-byte HTTP buffered payload from DEVICE\n", time.Now().Format(logDateFormat), buf_length)
+    }
+    }
+
+    return ReplyToDeviceID
 
 }
 
