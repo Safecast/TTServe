@@ -64,7 +64,8 @@ const TTServerHTTPPortAlternate string = ":80"
 const TTServerUDPPort string = ":8081"
 const TTServerFTPPort int = 8083    // plus 8084 plus the entire passive range
 const TTServerTopicSend string = "/send"
-const TTServerTopicRoot string = "/index.html"
+const TTServerTopicRoot1 string = "/index.html"
+const TTServerTopicRoot2 string = "/index.htm"
 const TTServerTopicLog string = "/log/"
 const TTServerTopicGithub string = "/github"
 const TTServerTopicSlack string = "/slack"
@@ -310,7 +311,8 @@ func webInboundHandler() {
         http.HandleFunc(TTServerTopicSlack, inboundWebSlackHandler)
         fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicSlack)
 
-        http.HandleFunc(TTServerTopicRoot, inboundWebRootHandler)
+        http.HandleFunc(TTServerTopicRoot1, inboundWebRootHandler)
+        http.HandleFunc(TTServerTopicRoot2, inboundWebRootHandler)
 
         http.HandleFunc(TTServerTopicLog, inboundWebLogHandler)
 
