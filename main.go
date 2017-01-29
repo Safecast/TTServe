@@ -399,7 +399,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         // Process it.  Note there is no possibility of a reply.
-        processBuffer(AppReq, "device using UDP on cellular", ttg.Transport, ttg.Payload)
+        processBuffer(AppReq, "device on cellular", ttg.Transport, ttg.Payload)
 
     }
 
@@ -435,7 +435,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         // Process it
-        ReplyToDeviceID = processBuffer(AppReq, "device using HTTP on cellular", "http:"+req.RemoteAddr, buf)
+        ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "http:"+req.RemoteAddr, buf)
 
     }
 
