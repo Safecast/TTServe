@@ -182,14 +182,6 @@ func main() {
 
     // Init our web request inbound server
     go webInboundHandler()
-
-    // Spawn the TTN inbound message handler.
-	// For NOW, only do this on the UDP handler so we don't get duplicates.
-	// In the future, we will convert from MQQT to HTTP that will go directly
-	// to the entire LB pool, and thus this won't be necessary.
-    if iAmTTServerUDP {
-	    go ttnInboundHandler()
-	}
 			
     // Init our UDP single-sample upload request inbound server
     if iAmTTServerUDP {
@@ -201,14 +193,18 @@ func main() {
         go ftpInboundHandler()
     }
 
-    // Init our housekeeping process
-    go timer1m()
+    // Spawn the TTNhandlers
+	// For NOW, only do this on the UDP handler so we don't get duplicates.
+	// In the future, we will convert from MQQT to HTTP that will go directly
+	// to the entire LB pool, and thus this won't be necessary.
+    if iAmTTServerUDP {
+	    go ttnInboundHandler()
+	    go ttnSubscriptionMonitor()
+	}
 
-    // Init our housekeeping process
+    // Spawn timer tasks, and do the final one in-line
     go timer15m()
-
-    // Handle the inboound subscriber.  (This never returns.)
-    ttnSubscriptionMonitor()
+    timer1m()
 
 }
 
