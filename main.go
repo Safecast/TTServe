@@ -182,7 +182,7 @@ func main() {
 
     // Init our web request inbound server
     go webInboundHandler()
-			
+
     // Init our UDP single-sample upload request inbound server
     if iAmTTServerUDP {
         go udpInboundHandler()
@@ -194,13 +194,13 @@ func main() {
     }
 
     // Spawn the TTNhandlers
-	// For NOW, only do this on the UDP handler so we don't get duplicates.
-	// In the future, we will convert from MQQT to HTTP that will go directly
-	// to the entire LB pool, and thus this won't be necessary.
+    // For NOW, only do this on the UDP handler so we don't get duplicates.
+    // In the future, we will convert from MQQT to HTTP that will go directly
+    // to the entire LB pool, and thus this won't be necessary.
     if iAmTTServerUDP {
-	    go ttnInboundHandler()
-	    go ttnSubscriptionMonitor()
-	}
+        go ttnInboundHandler()
+        go ttnSubscriptionMonitor()
+    }
 
     // Spawn timer tasks, and do the final one in-line
     go timer15m()
@@ -214,10 +214,10 @@ func timer1m() {
         time.Sleep(1 * 60 * time.Second)
 
         // Restart this instance if instructed to do so
-		if (restartQuickly) {
-	        restartCheck()
-		}
-		
+        if (restartQuickly) {
+            restartCheck()
+        }
+
     }
 }
 
@@ -247,16 +247,8 @@ func timer15m() {
         sendSafecastCommsErrorsToSlack(15)
 
         // Post long TTN outages
-        if (!ttnFullyConnected) {
-            minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
-            if (minutesOffline > 15) {
-                sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
-            }
-        } else {
-            if (ttnOutages > 1) {
-                sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m", ttnOutages))
-                ttnOutages = 0;
-            }
+        if iAmTTServerUDP {
+            ttnSubscriptionNotifier()
         }
 
         // Restart this instance if instructed to do so
@@ -688,6 +680,21 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
 
+// Notify Slack if there is an outage
+func ttnSubscriptionNotifier() {
+    if (!ttnFullyConnected) {
+        minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
+        if (minutesOffline > 15) {
+            sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
+        }
+    } else {
+        if (ttnOutages > 1) {
+            sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m", ttnOutages))
+            ttnOutages = 0;
+        }
+    }
+}
+
 // Subscribe to TTN inbound messages, then monitor connection status
 func ttnSubscriptionMonitor() {
 
@@ -985,9 +992,9 @@ func signalHandler() {
     signal.Notify(ch, syscall.SIGINT)
     for {
         switch <-ch {
-		case syscall.SIGINT:
-		    fmt.Printf("\n***\n***\n*** Exiting at user's request \n***\n***\n\n")
-			os.Exit(0)
+        case syscall.SIGINT:
+            fmt.Printf("\n***\n***\n*** Exiting at user's request \n***\n***\n\n")
+            os.Exit(0)
         case syscall.SIGTERM:
             ftpServer.Stop()
             break
