@@ -619,7 +619,7 @@ func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
 // Handle inbound HTTP requests for root
 func inboundWebRootHandler(rw http.ResponseWriter, req *http.Request) {
 
-    io.WriteString(rw, "Hello.\n")
+    io.WriteString(rw, fmt.Sprintf("Hello. (%s)\n", TTServerIP))
 
 }
 
@@ -642,7 +642,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
             fmt.Printf("\n%s HTTP request '%s' does not contain valid Safecast JSON\n", time.Now().Format(logDateFormat), req.RequestURI);
         }
         if (req.RequestURI == "/") {
-            io.WriteString(rw, "Live Free or Die.\n")
+            io.WriteString(rw, fmt.Sprintf("Live Free or Die. (%s)\n", TTServerIP))
         }
     } else {
 
