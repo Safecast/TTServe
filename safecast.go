@@ -42,7 +42,7 @@ var httpTransactionErrorFirst bool = true
 type seenDevice struct {
     deviceid            uint32
     seen                time.Time
-	everRecentlySeen	bool
+    everRecentlySeen    bool
     notifiedAsUnseen    bool
     minutesAgo          int64
 }
@@ -750,30 +750,31 @@ func trackDevice(DeviceID uint32, whenSeen time.Time) {
     found := false
     for i := 0; i < len(seenDevices); i++ {
         if dev.deviceid == seenDevices[i].deviceid {
-			// Update the "recently seen" flag
-	        minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
-			if (minutesAgo < deviceWarningAfterMinutes) {
-				seenDevices[i].everRecentlySeen = true
-			}
-            // Notify when the device comes back
-            if seenDevices[i].notifiedAsUnseen {
-                minutesAgo := int64(whenSeen.Sub(seenDevices[i].seen) / time.Minute)
-                hoursAgo := minutesAgo / 60
-                daysAgo := hoursAgo / 24
-                message := fmt.Sprintf("%d minutes", minutesAgo)
-                switch {
-                case daysAgo >= 2:
-                    message = fmt.Sprintf("~%d days", daysAgo)
-                case minutesAgo >= 120:
-                    message = fmt.Sprintf("~%d hours", hoursAgo)
+            // Only pay attention to things that have truly recently come or gone
+            minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
+            if (minutesAgo < deviceWarningAfterMinutes) {
+                seenDevices[i].everRecentlySeen = true
+                // Notify when the device comes back
+                if seenDevices[i].notifiedAsUnseen {
+                    minutesAgo := int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
+                    hoursAgo := minutesAgo / 60
+                    daysAgo := hoursAgo / 24
+                    message := fmt.Sprintf("%d minutes", minutesAgo)
+                    switch {
+                    case daysAgo >= 2:
+                        message = fmt.Sprintf("~%d days", daysAgo)
+                    case minutesAgo >= 120:
+                        message = fmt.Sprintf("~%d hours", hoursAgo)
+                    }
+                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after %s away", seenDevices[i].deviceid, message))
                 }
-                sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after %s away", seenDevices[i].deviceid, message))
+                // Mark as having been seen on the latest date of any file having that time
+                seenDevices[i].notifiedAsUnseen = false;
             }
-            // Mark as having been seen on the latest date of any file having that time
+			// Always track the most recent seen date
             if (seenDevices[i].seen.Before(whenSeen)) {
                 seenDevices[i].seen = whenSeen
             }
-            seenDevices[i].notifiedAsUnseen = false;
             found = true
             break
         }
@@ -783,7 +784,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time) {
     if !found {
         dev.seen = whenSeen
         minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
-		dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes
+        dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes
         dev.notifiedAsUnseen = false
         seenDevices = append(seenDevices, dev)
     }

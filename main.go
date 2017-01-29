@@ -682,15 +682,17 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
 // Notify Slack if there is an outage
 func ttnSubscriptionNotifier() {
-    if (!ttnFullyConnected) {
-        minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
-        if (minutesOffline > 15) {
-            sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
-        }
-    } else {
-        if (ttnOutages > 1) {
-            sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m", ttnOutages))
-            ttnOutages = 0;
+    if (ttnEverConnected) {
+        if (!ttnFullyConnected) {
+            minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
+            if (minutesOffline > 15) {
+                sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
+            }
+        } else {
+            if (ttnOutages > 1) {
+                sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m", ttnOutages))
+                ttnOutages = 0;
+            }
         }
     }
 }
