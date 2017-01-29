@@ -23,32 +23,52 @@ sudo apt install git --assume-yes
 sudo apt install golang-go --assume-yes
 
 // So that we can mount an EFS filesystem on amazon
-sudo apt-get install nfs-common
-cd $HOME
-sudo mkdir efs
-sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-dd1ad674.efs.us-west-2.amazonaws.com:/ efs
+sudo apt-get install nfs-common --assume-yes
 
-// Make sure that the version of golang is up to date
+// Make sure you have the right security groups
+1. From EC2 menu, select the instance and do Actions / Networking / Change Security Groups
+2.Select the TTSERVE security group, and select Assign Security Groups
+
+// Mount the EFS drive.  This will take a long time and time out unless the above security groups are set properly
+cd $HOME && sudo mkdir efs
+echo >remount.sh "cd $HOME && sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-dd1ad674.efs.us-west-2.amazonaws.com:/ efs" && chmod +x remount.sh
+./remount.sh
+
+// Make sure that the version of golang is up to date by seeing if it says at least go1.6.2
+go version
 
 // Create our app workspace
 mkdir $HOME/go
-// Add it to .profile with NANO editor, so that this is what should be at the end
+
+// Add this to .profile with NANO editor, so that this is what should be at the end
 // (not sure if this path mod is needed if apt install is used to load golang)
-export PATH=$PATH:/usr/local/go/bin
+cd ~
+nano .profile
+add:
+# Add what's needed for golang programs
+export PATH=$PATH:$HOME/go/bin
 export GOPATH=$HOME/go
 
 // bring down our stuff
 cd ~/go
-mkdir src
-cd src
-mkdir github.com
-cd github.com
-mkdir rayozzie
-cd rayozzie
+mkdir src && cd src && mkdir github.com && cd github.com && mkdir rayozzie && cd rayozzie
 git clone https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
-cd teletype-ttserve
-go get
-./run.sh
+
+// Refresh the environment by doing
+exit
+<come back in via ssh>
+
+// Whenever coming back in, re-do the EFS drive mount above
+// Create the first screen session
+cd $HOME && ./remount.sh
+screen -S teletype
+cd ~/go/src/github.com/rayozzie/teletype-ttserve && ./run.sh
+
+// Detach to return to main console
+^a d
+
+
+///// that is all
 
 // Running in background
 //   create a new screen and switch to it
