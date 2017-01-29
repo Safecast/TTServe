@@ -981,8 +981,12 @@ func impossibleError() {
 func signalHandler() {
     ch := make(chan os.Signal)
     signal.Notify(ch, syscall.SIGTERM)
+    signal.Notify(ch, syscall.SIGINT)
     for {
         switch <-ch {
+		case syscall.SIGINT:
+		    fmt.Printf("\n***\n***\n*** Exiting at user's request \n***\n***\n\n")
+			os.Exit(0)
         case syscall.SIGTERM:
             ftpServer.Stop()
             break
