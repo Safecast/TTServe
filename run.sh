@@ -5,7 +5,7 @@
 # we are executing this one that is perpetually in-use.
 
 # Trap Signal 2 (Ctrl+c)
-#trap '' 2
+trap '' 2
 
 # Loop forever
 while [ : ]; do
