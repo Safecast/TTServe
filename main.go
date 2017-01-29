@@ -42,11 +42,11 @@ var SafecastV2UploadURLs = [...]string {
 }
 
 // File system related paths relative to the server's HomeDir
-const TTServerLogPath = "/safecast/log"
-const TTServerCommandPath = "/safecast/command"
-const TTServerControlPath = "/safecast/control"
-const TTServerBuildPath = "/safecast/build"
-const TTServerFTPCertPath = "/safecast/cert/ftp"
+const TTServerLogPath = "/log"
+const TTServerCommandPath = "/command"
+const TTServerControlPath = "/control"
+const TTServerBuildPath = "/build"
+const TTServerFTPCertPath = "/cert/ftp"
 
 // Buffered I/O header formats.  Note that although we are now starting with version number 0, we
 // special case version number 8 because of the old style "single protocl buffer" message format that

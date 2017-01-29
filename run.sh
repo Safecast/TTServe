@@ -1,21 +1,14 @@
 #! /bin/bash
 
-# The assumption is that we are running in the folder
-#     $GOPATH/src/github.com/rayozzie/teletype-ttserve
+# Note that by placing the body of this procedure into
+# a separate shell script, github can updated it even while
+# we are executing this one that is perpetually in-use.
 
-# First, ensure that GOPATH is set to the folder containing "src"
-export GOPATH=$(readlink -m ../../../..)
+# Trap Signal 2 (Ctrl+c)
+#trap '' 2
 
+# Loop forever
 while [ : ]; do
-    echo "Updating from GitHub..."
-    git pull https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
-    echo "Rebuilding..."
-    go get -u
-    go build
-    echo "Starting..."
-    # Note that we must "sudo" so we can listen on port # less than 1024
-    # Note that we must use the "efs" subfolder because we mount EFS in AWS
-    sudo ./teletype-ttserve $HOME/efs
-    echo "Restarting..."
-    sleep 2s
+    ./run-this.sh
+    sleep 1s
 done
