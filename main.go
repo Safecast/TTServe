@@ -420,7 +420,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq.Location = ttg.Location
 
         // Process it
-        ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", ttg.Transport, ttg.Payload)
+        ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", "ttgate:"+req.RemoteAddr, ttg.Payload)
 
     }
 
