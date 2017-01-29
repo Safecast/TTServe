@@ -278,7 +278,7 @@ func ftpInboundHandler() {
 // Upload a Safecast data structure the load balancer for the web service
 func doUploadToWebLoadBalancer(data []byte, datalen int, addr string) {
 
-    if false {
+    if true {
         fmt.Printf("\n%s Received %d-byte UDP payload from %s, routing to LB\n", time.Now().Format(logDateFormat), datalen, addr)
     }
 
