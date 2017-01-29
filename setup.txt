@@ -29,16 +29,9 @@ sudo apt-get install nfs-common --assume-yes
 1. From EC2 menu, select the instance and do Actions / Networking / Change Security Groups
 2.Select the TTSERVE security group, and select Assign Security Groups
 
-// Mount the EFS drive.  This will take a long time and time out unless the above security groups are set properly
-cd $HOME && sudo mkdir efs
-echo >remount.sh "cd $HOME && sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 fs-dd1ad674.efs.us-west-2.amazonaws.com:/ efs" && chmod +x remount.sh
-./remount.sh
 
 // Make sure that the version of golang is up to date by seeing if it says at least go1.6.2
 go version
-
-// Create our app workspace
-mkdir $HOME/go
 
 // Add this to .profile with NANO editor, so that this is what should be at the end
 // (not sure if this path mod is needed if apt install is used to load golang)
@@ -48,21 +41,25 @@ add:
 # Add what's needed for golang programs
 export PATH=$PATH:$HOME/go/bin
 export GOPATH=$HOME/go
+export TT=$GOPATH/src/github.com/rayozzie/teletype-ttserve
 
-// bring down our stuff
-cd ~/go
-mkdir src && cd src && mkdir github.com && cd github.com && mkdir rayozzie && cd rayozzie
+// Create our app workspace
+mkdir $HOME/go && cd $HOME/go && mkdir src && cd src && mkdir github.com && cd github.com && mkdir rayozzie && cd rayozzie
 git clone https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
 
-// Refresh the environment by doing
-exit
+// Refresh the environment by REBOOTING THE AWS INSTANCE
 <come back in via ssh>
 
-// Whenever coming back in, re-do the EFS drive mount above
-// Create the first screen session
-cd $HOME && ./remount.sh
+// Whenever coming back in via ssh, do this to see if our screen is already running:
+screen -ls
+// If you see the teletype instance, do a
+screen -r
+// If you don't see the teletype instance, do
 screen -S teletype
-cd ~/go/src/github.com/rayozzie/teletype-ttserve && ./run.sh
+
+// Go to the right place, and run
+cd $TT
+./run.sh
 
 // Detach to return to main console
 ^a d

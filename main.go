@@ -183,9 +183,14 @@ func main() {
     // Init our web request inbound server
     go webInboundHandler()
 
-    // Spawn the TTN inbound message handler
-    go ttnInboundHandler()
-
+    // Spawn the TTN inbound message handler.
+	// For NOW, only do this on the UDP handler so we don't get duplicates.
+	// In the future, we will convert from MQQT to HTTP that will go directly
+	// to the entire LB pool, and thus this won't be necessary.
+    if iAmTTServerUDP {
+	    go ttnInboundHandler()
+	}
+			
     // Init our UDP single-sample upload request inbound server
     if iAmTTServerUDP {
         go udpInboundHandler()
