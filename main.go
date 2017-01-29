@@ -255,9 +255,9 @@ func ftpInboundHandler() {
 }
 
 // Upload a Safecast data structure the load balancer for the web service
-func doUploadToWebLoadBalancer(data []byte, addr string) {
+func doUploadToWebLoadBalancer(data []byte, datalen uint16, addr string) {
 
-    fmt.Printf("\n%s Received %d-byte UDP payload from %s, routing to LB\n", time.Now().Format(logDateFormat), len(data), addr)
+    fmt.Printf("\n%s Received %d-byte UDP payload from %s, routing to LB\n", time.Now().Format(logDateFormat), datalen, addr)
 
 	url := "http://" + TTServerHTTPAddress + TTServerHTTPPort + TTServerTopicSend
 
@@ -268,7 +268,9 @@ func doUploadToWebLoadBalancer(data []byte, addr string) {
         Timeout: time.Second * 15,
     }
     resp, err := httpclient.Do(req)
-    if (err == nil) {
+    if err != nil {
+        fmt.Printf("HTTP POST error: %v\n", err);
+	} else {
         resp.Body.Close()
 	}
 
@@ -342,7 +344,7 @@ func udpInboundHandler() {
 			ttg.Transport = "udp:" + addr.String()
 	        data, err := json.Marshal(ttg)
 			if err == nil {
-				go doUploadToWebLoadBalancer(data, addr.String())
+				go doUploadToWebLoadBalancer(data, n, addr.String())
 			}
 
         }
@@ -854,7 +856,7 @@ func commonRequestHandler() {
         msg := &teletype.Telecast{}
         err := proto.Unmarshal(AppReq.Payload, msg)
         if err != nil {
-            fmt.Printf("*** PB unmarshaling error: \n", err)
+            fmt.Printf("*** PB unmarshaling error: ", err)
             fmt.Printf("*** ");
             for i:=0; i<len(AppReq.Payload); i++ {
                 fmt.Printf("%02x", AppReq.Payload[i]);
