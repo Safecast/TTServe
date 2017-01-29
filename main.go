@@ -257,7 +257,9 @@ func ftpInboundHandler() {
 // Upload a Safecast data structure the load balancer for the web service
 func doUploadToWebLoadBalancer(data []byte, datalen int, addr string) {
 
-    fmt.Printf("\n%s Received %d-byte UDP payload from %s, routing to LB\n", time.Now().Format(logDateFormat), datalen, addr)
+	if false {
+	    fmt.Printf("\n%s Received %d-byte UDP payload from %s, routing to LB\n", time.Now().Format(logDateFormat), datalen, addr)
+	}
 
     url := "http://" + TTServerHTTPAddress + TTServerHTTPPort + TTServerTopicSend
 
@@ -387,7 +389,6 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         err = json.Unmarshal(body, &ttg)
         if err != nil {
-			fmt.Printf("*** Received badly formatted HTTP request from %s: \n%v\n", req.UserAgent(), body)
             return
         }
 
@@ -630,7 +631,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Convert to V2 format
         sV2 = SafecastV1toV2(sV1)
-        fmt.Printf("\n%s Received redirect payload from Device ID %d\n%s\n", time.Now().Format(logDateFormat), sV2.DeviceID, body)
+        fmt.Printf("\n%s Received redirect payload for %d from %s\n%s\n", time.Now().Format(logDateFormat), sV2.DeviceID, "http:"+req.RemoteAddr, body)
 
         // For backward compatibility,post it to V1 with an URL that is preserved.  Also post to V2
         urlV1 := SafecastV1UploadURL
