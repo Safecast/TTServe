@@ -1001,7 +1001,7 @@ func RestartAllTime(message string) (restartTime time.Time) {
 	}
 
 	// Get the file date/time, returning a stable time if we fail
-	file, err := os.Stat("example.txt")
+	file, err := os.Stat(filename)
 	if err != nil {
 		return TTServerBootTime
 	}
