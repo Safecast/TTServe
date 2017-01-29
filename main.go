@@ -64,7 +64,7 @@ const TTServerHTTPPortAlternate string = ":80"
 const TTServerUDPPort string = ":8081"
 const TTServerFTPPort int = 8083    // plus 8084 plus the entire passive range
 const TTServerTopicSend string = "/send"
-const TTServerTopicTest string = "/test"
+const TTServerTopicRoot string = "/index.html"
 const TTServerTopicLog string = "/log/"
 const TTServerTopicGithub string = "/github"
 const TTServerTopicSlack string = "/slack"
@@ -310,9 +310,9 @@ func webInboundHandler() {
         http.HandleFunc(TTServerTopicSlack, inboundWebSlackHandler)
         fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicSlack)
 
-        http.HandleFunc(TTServerTopicLog, inboundWebLogHandler)
+        http.HandleFunc(TTServerTopicRoot, inboundWebRootHandler)
 
-        http.HandleFunc(TTServerTopicTest, inboundWebTestHandler)
+        http.HandleFunc(TTServerTopicLog, inboundWebLogHandler)
 
     }
 
@@ -614,11 +614,10 @@ func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-// Handle inbound HTTP requests to test
-func inboundWebTestHandler(rw http.ResponseWriter, req *http.Request) {
+// Handle inbound HTTP requests for root
+func inboundWebRootHandler(rw http.ResponseWriter, req *http.Request) {
 
-    fmt.Printf("***** Test *****\n")
-    io.WriteString(rw, "This is a test of the emergency broadcast system.\n")
+    io.WriteString(rw, "Hello.\n")
 
 }
 
