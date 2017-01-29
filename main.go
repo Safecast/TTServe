@@ -420,7 +420,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq.Location = ttg.Location
 
         // Process it
-        ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", "ttgate:"+ipv4(req.RemoteAddr), ttg.Payload)
+        ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", "lora-http:"+ipv4(req.RemoteAddr), ttg.Payload)
 
     }
 
@@ -484,16 +484,14 @@ func processBuffer(req IncomingReq, from string, transport string, buf []byte) (
 
         fmt.Printf("\n%s Received %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.Transport)
 
-        // We now have a TTN-like message, constructed as follws:
-        //  1) the Payload came from the device itself
-        //  2) We'll add the server's time, in case the payload lacked CapturedAt
+        // Construct an app request, with ServerTime in case the payload lacked CapturedAt
         AppReq.Payload = buf
         AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
         // Extract the device ID from the message, which we will need later
         _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
 
-        // Enqueue AppReq for TTN-like processing
+        // Enqueue the app request
         AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
         reqQ <- AppReq
         monitorReqQ()
@@ -518,21 +516,19 @@ func processBuffer(req IncomingReq, from string, transport string, buf []byte) (
             // Extract the length
             length := int(buf[lengthArrayOffset+i])
 
-            // Construct the TTN-like messager
+            // Construct the app request
             AppReq.Payload = buf[payloadOffset:payloadOffset+length]
 
             // Extract the device ID from the message, which we will need later
             _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
 
-            // We now have a TTN-like message, constructed as follws:
-            //  1) the Payload came from the device itself
-            //  2) We'll add the server's time, in case the payload lacked CapturedAt
+	        // Add ServerTime in case the payload lacked CapturedAt
             AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
             fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload),
                 i+1, count, from, AppReq.Transport)
 
-            // Enqueue AppReq for TTN-like processing
+            // Enqueue AppReq 
             AppReq.UploadedAt = UploadedAt
             reqQ <- AppReq
             monitorReqQ()
@@ -651,7 +647,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Convert to V2 format
         sV2 = SafecastV1toV2(sV1)
-        fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sV2.DeviceID, "http:"+ipv4(req.RemoteAddr))
+        fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sV2.DeviceID, "pnt-http:"+ipv4(req.RemoteAddr))
         if true {
             fmt.Printf("%s\n", body)
         }
@@ -817,18 +813,8 @@ func ttnInboundHandler() {
         if err != nil {
             fmt.Printf("*** Payload doesn't have TTN data ***\n")
         } else {
-            fmt.Printf("\n%s Received %d-byte payload from TTN\n", time.Now().Format(logDateFormat), len(AppReq.Payload))
-            // Note that there is some missing code here.  Ideally, in the appreq
-            // we supply json-formatted IPINFO.  TTGATE tunneled this through
-            // the GatewayEUI field of the DataUpAppReq, but in the TTN case we don't
-            // have such a luxury.  That said, the DataUpAppReq for TTN DOES have the
-            // Latitude/Longitude fields to work with.  Ideally we would then use
-            // TinyGeocoder (or Yahoo or Google) *here* and would then encode the results
-            // in the GatewayEUI field in a way that is compatible with TTGATE.
-            // I haven't written this code simply because this requires registering
-            // for a Yahoo/Google account, and potentially paying.  Since none of the
-            // code here is actually utilizing geo, we'll wait until then.
             AppReq.Transport = "ttn:" + AppReq.TTNDevEUI
+            fmt.Printf("\n%s Received %d-byte payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), AppReq.Transport)
             AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
             reqQ <- AppReq
             monitorReqQ()
