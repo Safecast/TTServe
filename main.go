@@ -656,8 +656,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-	CountHTTPRedirect++
-
     // postSafecastV1ToSafecast
     // Attempt to unmarshal it as a Safecast V1 data structure
     err = json.Unmarshal(body, &sV1)
@@ -669,6 +667,8 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
             io.WriteString(rw, fmt.Sprintf("Live Free or Die. (%s)\n", TTServerIP))
         }
     } else {
+
+		CountHTTPRedirect++
 
         // Convert to V2 format
         sV2 = SafecastV1toV2(sV1)
