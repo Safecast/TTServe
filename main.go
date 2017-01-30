@@ -84,6 +84,14 @@ var TTServerIP string
 var TTServerBootTime time.Time
 var TTServerRestartAllTime time.Time
 
+// Stats
+var CountUDP = 0
+var CountHTTPDevice = 0
+var CountHTTPGateway = 0
+var CountHTTPRelay = 0
+var CountHTTPRedirect = 0
+var CountTTN = 0
+
 // Constants
 const logDateFormat string = "2006-01-02 15:04:05"
 
@@ -251,6 +259,10 @@ func timer15m() {
             ttnSubscriptionNotifier()
         }
 
+		// Post stats
+        fmt.Printf("\n%s Stats: UDP:%d HTTPDevice:%d HTTPGateway:%d HTTPRelay:%d HTTPRedirect:%d TTN:%d\n\n", time.Now().Format(logDateFormat),
+			CountUDP, CountHTTPDevice, CountHTTPGateway, CountHTTPRelay, CountHTTPRedirect, CountTTN)
+
         // Restart this instance if instructed to do so
         restartCheck()
 
@@ -346,7 +358,7 @@ func webInboundHandler() {
 // Kick off UDP single-upload request server
 func udpInboundHandler() {
 
-    fmt.Printf("Now handling inbound UDP single-uploads on: %s%s\n", TTServer, TTServerUDPPort)
+    fmt.Printf("Now handling inbound UDP on: %s%s\n", TTServer, TTServerUDPPort)
 
     ServerAddr, err := net.ResolveUDPAddr("udp", TTServerUDPPort)
     if err != nil {
@@ -409,6 +421,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Process it.  Note there is no possibility of a reply.
         processBuffer(AppReq, "device on cellular", ttg.Transport, ttg.Payload)
+		CountHTTPRelay++;
 
     }
 
@@ -430,6 +443,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Process it
         ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", "lora-http:"+ipv4(req.RemoteAddr), ttg.Payload)
+		CountHTTPGateway++;
 
     }
 
@@ -445,6 +459,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Process it
         ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "http:"+ipv4(req.RemoteAddr), buf)
+		CountHTTPDevice++;
 
     }
 
@@ -640,6 +655,8 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         fmt.Printf("Error reading HTTP request body: \n%v\n", req)
         return
     }
+
+	CountHTTPRedirect++
 
     // postSafecastV1ToSafecast
     // Attempt to unmarshal it as a Safecast V1 data structure
@@ -843,7 +860,8 @@ func ttnInboundHandler() {
             AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
             reqQ <- AppReq
             monitorReqQ()
-
+			CountTTN++
+			
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.
             isAvailable, deviceID := getDeviceIDFromPayload(AppReq.Payload)
