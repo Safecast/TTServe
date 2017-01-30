@@ -388,6 +388,7 @@ func udpInboundHandler() {
             data, err := json.Marshal(ttg)
             if err == nil {
                 go doUploadToWebLoadBalancer(data, n, ipv4(addr.String()))
+				CountUDP++;
             }
 
         }
@@ -668,8 +669,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         }
     } else {
 
-		CountHTTPRedirect++
-
         // Convert to V2 format
         sV2 = SafecastV1toV2(sV1)
         fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sV2.DeviceID, "pnt-http:"+ipv4(req.RemoteAddr))
@@ -686,6 +685,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         SafecastV1Upload(sV1, urlV1)
         SafecastV2Upload(UploadedAt, sV2)
         SafecastV2Log(UploadedAt, sV2)
+		CountHTTPRedirect++
 
         // It is an error if there is a pending outbound payload for this device, so remove it and report it
         isAvailable, _ := TelecastOutboundPayload(sV2.DeviceID)
