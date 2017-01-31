@@ -935,12 +935,11 @@ func commonRequestHandler() {
         }
 
         // Compute the checksum on a payload normalized by removing all the relay information
-        var nullDeviceID uint32 = 0
-        msg.RelayDevice1 = &nullDeviceID
-        msg.RelayDevice2 = &nullDeviceID
-        msg.RelayDevice3 = &nullDeviceID
-        msg.RelayDevice4 = &nullDeviceID
-        msg.RelayDevice5 = &nullDeviceID
+        msg.RelayDevice1 = nil
+        msg.RelayDevice2 = nil
+        msg.RelayDevice3 = nil
+        msg.RelayDevice4 = nil
+        msg.RelayDevice5 = nil
         normalizedPayload, err := proto.Marshal(msg)
         if err != nil {
             fmt.Printf("*** PB marshaling error: ", err)
