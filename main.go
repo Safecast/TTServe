@@ -260,9 +260,9 @@ func timer15m() {
             ttnSubscriptionNotifier()
         }
 
-		// Post stats
+        // Post stats
         fmt.Printf("\n%s Stats: UDP:%d HTTPDevice:%d HTTPGateway:%d HTTPRelay:%d HTTPRedirect:%d TTN:%d\n\n", time.Now().Format(logDateFormat),
-			CountUDP, CountHTTPDevice, CountHTTPGateway, CountHTTPRelay, CountHTTPRedirect, CountTTN)
+            CountUDP, CountHTTPDevice, CountHTTPGateway, CountHTTPRelay, CountHTTPRedirect, CountTTN)
 
         // Restart this instance if instructed to do so
         restartCheck()
@@ -273,12 +273,10 @@ func timer15m() {
 
 // Check to see if we should restart
 func restartCheck() {
-    if (!iAmTTServerMonitor) {
-        if (RestartAllTime("") != TTServerRestartAllTime) {
-            sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServerIP))
-            fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
-            os.Exit(0)
-        }
+    if (RestartAllTime("") != TTServerRestartAllTime) {
+        sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServerIP))
+        fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
+        os.Exit(0)
     }
 }
 
@@ -389,7 +387,7 @@ func udpInboundHandler() {
             data, err := json.Marshal(ttg)
             if err == nil {
                 go doUploadToWebLoadBalancer(data, n, ipv4(addr.String()))
-				CountUDP++;
+                CountUDP++;
             }
 
         }
@@ -423,7 +421,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Process it.  Note there is no possibility of a reply.
         processBuffer(AppReq, "device on cellular", ttg.Transport, ttg.Payload)
-		CountHTTPRelay++;
+        CountHTTPRelay++;
 
     }
 
@@ -445,7 +443,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Process it
         ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", "lora-http:"+ipv4(req.RemoteAddr), ttg.Payload)
-		CountHTTPGateway++;
+        CountHTTPGateway++;
 
     }
 
@@ -461,7 +459,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Process it
         ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "http:"+ipv4(req.RemoteAddr), buf)
-		CountHTTPDevice++;
+        CountHTTPDevice++;
 
     }
 
@@ -686,7 +684,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         SafecastV1Upload(sV1, urlV1)
         SafecastV2Upload(UploadedAt, sV2)
         SafecastV2Log(UploadedAt, sV2)
-		CountHTTPRedirect++
+        CountHTTPRedirect++
 
         // It is an error if there is a pending outbound payload for this device, so remove it and report it
         isAvailable, _ := TelecastOutboundPayload(sV2.DeviceID)
@@ -861,8 +859,8 @@ func ttnInboundHandler() {
             AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
             reqQ <- AppReq
             monitorReqQ()
-			CountTTN++
-			
+            CountTTN++
+
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.
             isAvailable, deviceID := getDeviceIDFromPayload(AppReq.Payload)
