@@ -99,7 +99,7 @@ func stampSet(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (isVa
     // Generate the contents for the cache file
     sf := &stampFile{}
     sf.Version = message.GetStampVersion()
-	
+
     // Pack the new structure based on version #
     switch sf.Version {
 
@@ -149,11 +149,11 @@ func stampSet(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (isVa
     }
     }
 
-	// Remove the stamp fields so they're no longer part of the message
-	message.Stamp = nil
-	message.StampVersion = nil
+    // Remove the stamp fields so they're no longer part of the message
+    message.Stamp = nil
+    message.StampVersion = nil
 
-	// Done
+    // Done
     return true
 
 }
@@ -198,9 +198,6 @@ func stampApply(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (is
         return false
     }
 
-    // Remove the stamp field so that it's no longer part of the message
-    message.Stamp = nil
-
     // If there's a valid cache but it is incorrect, do the best we can by using cache as Last Known Good
     if (cachedDevices[CacheEntry].cache.Stamp != message.GetStamp()) {
 
@@ -224,6 +221,9 @@ func stampApply(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (is
             message.CapturedAtDate = nil
             message.CapturedAtTime = nil
             message.CapturedAtOffset = nil
+
+            // Remove the stamp field so that it's no longer part of the message
+            message.Stamp = nil
 
             // Done
             if debug {
@@ -266,6 +266,9 @@ func stampApply(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (is
     }
 
     }
+
+    // Remove the stamp field so that it's no longer part of the message
+    message.Stamp = nil
 
     // Done
     return true
