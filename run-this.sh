@@ -1,7 +1,8 @@
 #! /bin/bash
 
-# Echo commands as we execute them
-set -v
+# Note that when we run the server we use sudo because it is a Linux
+# design constraint that non-supervisors cannot listen on ports
+# less than 1024.  We need this.
 
 # Mount the EFS volume, assuming that we're running under AWS
 while [ ! -d "$HOME/efs/safecast" ]; do
@@ -11,14 +12,8 @@ while [ ! -d "$HOME/efs/safecast" ]; do
     sleep 5s
 done
 
-# Update from github
+set -v
 git pull https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
-# Update dependencies
 go get -u
-# Build executables
 go build
-
-# Run the server.  Note that we use sudo because it is a Linux
-# design constraint that non-supervisors cannot listen on ports
-# less than 1024.  We need this.
 sudo ./teletype-ttserve $HOME/efs/safecast
