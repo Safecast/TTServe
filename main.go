@@ -43,6 +43,7 @@ var SafecastV2UploadURLs = [...]string {
 
 // File system related paths relative to the server's HomeDir
 const TTServerLogPath = "/log"
+const TTServerStampPath = "/stamp"
 const TTServerCommandPath = "/command"
 const TTServerControlPath = "/control"
 const TTServerBuildPath = "/build"

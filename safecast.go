@@ -106,6 +106,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         fmt.Printf("%s from %s/%s/%s\n", time.Now().Format(logDateFormat), info.City, info.Region, info.Country)
     }
 
+	// Process stamps by adding or removing fields from the message
+	if (!stampSetOrApply(msg)) {
+        fmt.Printf("%s DISCARDING un-stampable message\n", time.Now().Format(logDateFormat));
+        return
+	}
+	
     // Generate the fields common to all uploads to safecast
     scV1 := SafecastDataV1{}
     scV2 := SafecastDataV2{}
