@@ -69,9 +69,6 @@ func stampSetOrApply(message *teletype.Telecast) (isValidMessage bool) {
         entry.valid = false
         cachedDevices = append(cachedDevices, entry)
         CacheEntry = len(cachedDevices)-1
-        if debug {
-            fmt.Printf("Added new device cache entry for never-before seen %d: %d\n", DeviceID, CacheEntry)
-        }
     }
 
     // If this is a "set stamp" operation, do it
