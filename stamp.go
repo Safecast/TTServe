@@ -11,7 +11,7 @@ import (
 )
 
 // Debugging
-const debug = true
+const debugStamp = true
 
 // Stamp versions.  Unlike the client, the support
 // for downlevel stamp version must be kept here forever.
@@ -69,7 +69,7 @@ func stampSetOrApply(message *teletype.Telecast) (isValidMessage bool) {
         entry.valid = false
         cachedDevices = append(cachedDevices, entry)
         CacheEntry = len(cachedDevices)-1
-        if debug {
+        if debugStamp {
             fmt.Printf("Added new device cache entry for never-before seen %d: %d\n", DeviceID, CacheEntry)
         }
     }
@@ -140,7 +140,7 @@ func stampSet(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (isVa
                 cachedDevices[CacheEntry].valid = true
 
                 // Done
-                if debug {
+                if debugStamp {
                     fmt.Printf("Saved and cached new stamp for %d\n%s\n", DeviceID, string(sfJSON))
                 }
 
@@ -182,7 +182,7 @@ func stampApply(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (is
                 cachedDevices[CacheEntry].valid = true
 
                 // Done
-                if debug {
+                if debugStamp {
                     fmt.Printf("Read stamp for %d from file\n", DeviceID)
                 }
 
@@ -226,7 +226,7 @@ func stampApply(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (is
             message.Stamp = nil
 
             // Done
-            if debug {
+            if debugStamp {
                 fmt.Printf("Stamp message required by this message must've been lost, so faking it:\n%v\n", message)
             }
             return true
@@ -259,7 +259,7 @@ func stampApply(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (is
         }
 
         // Done
-        if debug {
+        if debugStamp {
             fmt.Printf("Stamped: %v\n", message)
         }
 
@@ -269,11 +269,6 @@ func stampApply(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (is
 
     // Remove the stamp field so that it's no longer part of the message
     message.Stamp = nil
-
-    // Done
-    if debug {
-        fmt.Printf("Message stamped successfully:\n%v\n", message)
-    }
 
     return true
 
