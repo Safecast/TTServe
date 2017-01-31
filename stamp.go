@@ -75,9 +75,6 @@ func stampSetOrApply(message *teletype.Telecast) (isValidMessage bool) {
     }
 
     // If this is a "set stamp" operation, do it
-if debug {
-        return(stampSet(message, DeviceID, CacheEntry))
-}
     if message.StampVersion != nil {
         return(stampSet(message, DeviceID, CacheEntry))
     }
@@ -101,11 +98,7 @@ func stampSet(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (isVa
 
     // Generate the contents for the cache file
     sf := &stampFile{}
-	if debug {
-		sf.Version = STAMP_VERSION_1
-	} else {
     sf.Version = message.GetStampVersion()
-	}
 	
     // Pack the new structure based on version #
     switch sf.Version {
