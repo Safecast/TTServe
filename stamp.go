@@ -271,6 +271,10 @@ func stampApply(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (is
     message.Stamp = nil
 
     // Done
+    if debug {
+        fmt.Printf("Message stamped successfully:\n%v\n", message)
+    }
+
     return true
 
 }
