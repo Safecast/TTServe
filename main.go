@@ -275,6 +275,7 @@ func timer15m() {
 func restartCheck() {
     if (RestartAllTime("") != TTServerRestartAllTime) {
         sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServerIP))
+        time.Sleep(10 * time.Second)
         fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
         os.Exit(0)
     }
