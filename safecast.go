@@ -918,9 +918,9 @@ func sendSafecastDeviceSummaryToSlack() {
 			minutesAgo -= hoursAgo * 60
 			hoursAgo -= daysAgo * 24
 			if daysAgo != 0 {
-	            s = fmt.Sprintf("%s last seen %dd%dh%dm ago", s, daysAgo, hoursAgo, minutesAgo)
+	            s = fmt.Sprintf("%s last seen %dd %dh %dm ago", s, daysAgo, hoursAgo, minutesAgo)
 			} else if hoursAgo != 0 {
-	            s = fmt.Sprintf("%s last seen %dh%dm ago", s, hoursAgo, minutesAgo)
+	            s = fmt.Sprintf("%s last seen %dh %dm ago", s, hoursAgo, minutesAgo)
 			} else {
 	            s = fmt.Sprintf("%s last seen %dm ago", s, minutesAgo)
 			}
