@@ -277,20 +277,33 @@ func timer15m() {
 
 // Server health check
 func healthCheck() string {
-	return(fmt.Sprintf("%s alive since %s", TTServerIP, TTServerBootTime.Format("2006-01-02 15:04:05 UTC")))
+    s := ""
+    var minutesAgo uint32 = uint32(int64(time.Now().Sub(TTServerBootTime) / time.Minute))
+    var hoursAgo uint32 = minutesAgo / 60
+    var daysAgo uint32 = hoursAgo / 24
+    minutesAgo -= hoursAgo * 60
+    hoursAgo -= daysAgo * 24
+    if daysAgo != 0 {
+        s = fmt.Sprintf("%s last restarted %dd %dh %dm ago", TTServerIP, daysAgo, hoursAgo, minutesAgo)
+    } else if hoursAgo != 0 {
+        s = fmt.Sprintf("%s last restarted %dh %dm ago", TTServerIP, hoursAgo, minutesAgo)
+    } else {
+        s = fmt.Sprintf("%s last restarted %dm ago", TTServerIP, minutesAgo)
+    }
+	return s
 }
 
 // Check to see if we should restart
 func ControlFileCheck() {
 
-	// Restarts
+    // Restarts
     if (ControlFileTime(TTServerRestartAllControlFile, "") != TTServerRestartAllTime) {
         sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServerIP))
         fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
         os.Exit(0)
     }
 
-	// Heath
+    // Heath
     if (ControlFileTime(TTServerHealthControlFile, "") != TTServerHealthTime) {
         sendToSafecastOps(healthCheck())
     }
@@ -348,11 +361,11 @@ func webInboundHandler() {
 
     }
 
-	// Spin up handler to handle misc web ping requests
+    // Spin up handler to handle misc web ping requests
     http.HandleFunc(TTServerTopicRoot1, inboundWebRootHandler)
     http.HandleFunc(TTServerTopicRoot2, inboundWebRootHandler)
 
-	// Spin up log handler
+    // Spin up log handler
     http.HandleFunc(TTServerTopicLog, inboundWebLogHandler)
 
     // Spin up functions available on all roles
@@ -639,7 +652,7 @@ func errorString(err error) string {
 // Handle inbound HTTP requests to fetch log files
 func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
 
-	// Set response mime type
+    // Set response mime type
     rw.Header().Set("Content-Type", "application/json")
 
     // Log it
@@ -1052,7 +1065,7 @@ func ipv4(Str1 string) string {
     return Str1
 }
 
-// Get the modified time of a special file 
+// Get the modified time of a special file
 func ControlFileTime(controlfilename string, message string) (restartTime time.Time) {
 
     filename := SafecastDirectory() + TTServerControlPath + "/" + controlfilename
