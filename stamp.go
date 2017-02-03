@@ -60,6 +60,7 @@ func stampSetOrApply(message *teletype.Telecast) (isValidMessage bool) {
     found := false
     for CacheEntry = 0; CacheEntry < len(cachedDevices); CacheEntry++ {
         if DeviceID == cachedDevices[CacheEntry].deviceid {
+			found = true
             break;
         }
     }

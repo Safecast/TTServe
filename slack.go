@@ -94,8 +94,12 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         os.Exit(0)
 
     case "restart-all":
-        sendToSafecastOps(fmt.Sprintf("Restarting All Instances..."))
-		RestartAllTime(user)
+        sendToSafecastOps(fmt.Sprintf("Restarting all instances..."))
+		ControlFileTime(TTServerRestartAllControlFile, user)
+
+    case "health":
+        sendToSafecastOps(fmt.Sprintf("Checking health of all instances..."))
+		ControlFileTime(TTServerHealthControlFile, user)
 
     case "send":
         if len(args) < 3 {

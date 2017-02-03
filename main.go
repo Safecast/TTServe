@@ -48,6 +48,8 @@ const TTServerCommandPath = "/command"
 const TTServerControlPath = "/control"
 const TTServerBuildPath = "/build"
 const TTServerFTPCertPath = "/cert/ftp"
+const TTServerRestartAllControlFile = "restart_all.txt"
+const TTServerHealthControlFile = "health.txt"
 
 // Buffered I/O header formats.  Note that although we are now starting with version number 0, we
 // special case version number 8 because of the old style "single protocl buffer" message format that
@@ -84,6 +86,7 @@ var TTServerIP string
 // Auto-reboot
 var TTServerBootTime time.Time
 var TTServerRestartAllTime time.Time
+var TTServerHealthTime time.Time
 
 // Stats
 var CountUDP = 0
@@ -176,8 +179,9 @@ func main() {
     iAmTTServerFTP = TTServerFTPAddressIPv4 == TTServerIP
     iAmTTServerMonitor = iAmTTServerFTP
 
-    // Get the date/time of the file that will indicate "reboot"
-    TTServerRestartAllTime = RestartAllTime("")
+    // Get the date/time of the special files that we monitor
+    TTServerRestartAllTime = ControlFileTime(TTServerRestartAllControlFile, "")
+    TTServerHealthTime = ControlFileTime(TTServerHealthControlFile, "")
 
     // Set up our signal handler
     go signalHandler()
@@ -224,7 +228,7 @@ func timer1m() {
 
         // Restart this instance if instructed to do so
         if (restartQuickly) {
-            restartCheck()
+            ControlFileCheck()
         }
 
     }
@@ -265,19 +269,32 @@ func timer15m() {
             CountUDP, CountHTTPDevice, CountHTTPGateway, CountHTTPRelay, CountHTTPRedirect, CountTTN)
 
         // Restart this instance if instructed to do so
-        restartCheck()
+        ControlFileCheck()
 
     }
 
 }
 
+// Server health check
+func healthCheck() string {
+	return(fmt.Sprintf("%s alive since %s", TTServerIP, TTServerBootTime.Format("2006-01-02 15:04:05 UTC")))
+}
+
 // Check to see if we should restart
-func restartCheck() {
-    if (RestartAllTime("") != TTServerRestartAllTime) {
+func ControlFileCheck() {
+
+	// Restarts
+    if (ControlFileTime(TTServerRestartAllControlFile, "") != TTServerRestartAllTime) {
         sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServerIP))
         fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
         os.Exit(0)
     }
+
+	// Heath
+    if (ControlFileTime(TTServerHealthControlFile, "") != TTServerHealthTime) {
+        sendToSafecastOps(healthCheck())
+    }
+
 }
 
 // Kick off inbound messages coming from all sources, then serve HTTP
@@ -1035,10 +1052,10 @@ func ipv4(Str1 string) string {
     return Str1
 }
 
-// Get the modified time of a special file indicating "restart all"
-func RestartAllTime(message string) (restartTime time.Time) {
+// Get the modified time of a special file 
+func ControlFileTime(message string, controlfilename string) (restartTime time.Time) {
 
-    filename := SafecastDirectory() + TTServerControlPath + "/" + "restart_all.txt"
+    filename := SafecastDirectory() + TTServerControlPath + "/" + controlfilename
 
     // Overwrite the file if requested to do so
     if (message != "") {
