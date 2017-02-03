@@ -1053,7 +1053,7 @@ func ipv4(Str1 string) string {
 }
 
 // Get the modified time of a special file 
-func ControlFileTime(message string, controlfilename string) (restartTime time.Time) {
+func ControlFileTime(controlfilename string, message string) (restartTime time.Time) {
 
     filename := SafecastDirectory() + TTServerControlPath + "/" + controlfilename
 
