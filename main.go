@@ -329,12 +329,14 @@ func webInboundHandler() {
         http.HandleFunc(TTServerTopicSlack, inboundWebSlackHandler)
         fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicSlack)
 
-        http.HandleFunc(TTServerTopicRoot1, inboundWebRootHandler)
-        http.HandleFunc(TTServerTopicRoot2, inboundWebRootHandler)
-
-        http.HandleFunc(TTServerTopicLog, inboundWebLogHandler)
-
     }
+
+	// Spin up handler to handle misc web ping requests
+    http.HandleFunc(TTServerTopicRoot1, inboundWebRootHandler)
+    http.HandleFunc(TTServerTopicRoot2, inboundWebRootHandler)
+
+	// Spin up log handler
+    http.HandleFunc(TTServerTopicLog, inboundWebLogHandler)
 
     // Spin up functions available on all roles
     http.HandleFunc(TTServerTopicSend, inboundWebSendHandler)
