@@ -1046,7 +1046,7 @@ func SafecastV2Log(UploadedAt string, scV2 SafecastDataV2) {
     scV2.UploadedAt = UploadedAt
     scJSON, _ := json.Marshal(scV2)
     fd.WriteString(string(scJSON));
-    fd.WriteString("\r\n\r\n");
+    fd.WriteString("\r\n,\r\n");
 
     // Close and exit
     fd.Close();
