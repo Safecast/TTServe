@@ -306,6 +306,7 @@ func ControlFileCheck() {
     // Heath
     if (ControlFileTime(TTServerHealthControlFile, "") != TTServerHealthTime) {
         sendToSafecastOps(healthCheck())
+	    TTServerHealthTime = ControlFileTime(TTServerHealthControlFile, "")
     }
 
 }
