@@ -1008,6 +1008,7 @@ func signalHandler() {
     ch := make(chan os.Signal)
     signal.Notify(ch, syscall.SIGTERM)
     signal.Notify(ch, syscall.SIGINT)
+    signal.Notify(ch, syscall.SIGSEGV)
     for {
         switch <-ch {
         case syscall.SIGINT:
