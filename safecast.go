@@ -896,18 +896,7 @@ func sendSafecastDeviceSummaryToSlack() {
             s = fmt.Sprintf("%s\n", s)
         }
 
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc|%010d>", s, id, id)
-
-        s = fmt.Sprintf("%s (", s)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=bat_voltage|V>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=bat_soc|%%>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=bat_current|I>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_temp|T>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_humid|H>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=env_press|P>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=wireless_snr|S>", s, id)
-        s = fmt.Sprintf("%s<http://dev.safecast.org/en-US/devices/%d/measurements?order=captured_at+desc&unit=stats|X>", s, id)
-        s = fmt.Sprintf("%s)", s)
+		s = fmt.Sprintf("%s<http://%s%s%s%d.json>", s, id, TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
 
         if sortedDevices[i].minutesAgo == 0 {
             s = fmt.Sprintf("%s last seen just now", s)
