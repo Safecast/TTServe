@@ -19,7 +19,7 @@ import (
 const deviceWarningAfterMinutes = 90
 
 // Upload Behavior
-var uploadToSafecastV1 = true
+var uploadToSafecastV1 = false
 var uploadToSafecastV2 = true
 
 // For V1, We've found that in certain cases the server gets overloaded.  When we run into those cases,
