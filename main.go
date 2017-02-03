@@ -622,8 +622,8 @@ func errorString(err error) string {
 // Handle inbound HTTP requests to fetch log files
 func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
 
-	// Set response mime type so browser doesn't try to parse it
-    rw.Header().Set("Content-Type", "text/plain")
+	// Set response mime type
+    rw.Header().Set("Content-Type", "application/json")
 
     // Log it
     filename := req.RequestURI[len(TTServerTopicLog):]
