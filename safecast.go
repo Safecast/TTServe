@@ -106,12 +106,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         fmt.Printf("%s from %s/%s/%s\n", time.Now().Format(logDateFormat), info.City, info.Region, info.Country)
     }
 
-	// Process stamps by adding or removing fields from the message
-	if (!stampSetOrApply(msg)) {
+    // Process stamps by adding or removing fields from the message
+    if (!stampSetOrApply(msg)) {
         fmt.Printf("%s DISCARDING un-stampable message\n", time.Now().Format(logDateFormat));
         return
-	}
-	
+    }
+
     // Generate the fields common to all uploads to safecast
     scV1 := SafecastDataV1{}
     scV2 := SafecastDataV2{}
@@ -406,21 +406,26 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
         // Either an old-style upload, and the kind used by bGeigies,
         // or an upload of metadata without any kind of CPM
-        SafecastV1Upload(scV1a, "")
+        V1Upload(scV1a, "")
 
         // Write a new-style entry to the log
         scV1b := scV1a
         scV2b := scV2a
         if msg.StatsUptimeMinutes == nil {
             did := uint64(msg.GetDeviceIDNumber())
-            if ((did & 0x01) == 0) {
+            if (false) { // old style device id removed 2017-02
+                if ((did & 0x01) == 0) {
+                    scV1b.Cpm0 = scV1a.Value
+                    scV2b.Cpm0 = float32(msg.GetValue())
+                } else {
+                    scV1b.DeviceID = strconv.FormatUint(did & 0xfffffffe, 10)
+                    scV1b.Cpm1 = scV1a.Value
+                    scV2b.DeviceID = uint32(did & 0xfffffffe)
+                    scV2b.Cpm1 = float32(msg.GetValue())
+                }
+            } else {
                 scV1b.Cpm0 = scV1a.Value
                 scV2b.Cpm0 = float32(msg.GetValue())
-            } else {
-                scV1b.DeviceID = strconv.FormatUint(did & 0xfffffffe, 10)
-                scV1b.Cpm1 = scV1a.Value
-                scV2b.DeviceID = uint32(did & 0xfffffffe)
-                scV2b.Cpm1 = float32(msg.GetValue())
             }
             scV1b.Unit = ""
             scV1b.Value = ""
@@ -439,14 +444,14 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1b.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() & 0xfffffffe), 10)
             scV1b.Unit = UnitCPM
             scV1b.Value = fmt.Sprintf("%d", msg.GetCpm0())
-            SafecastV1Upload(scV1b, "")
+            V1Upload(scV1b, "")
         }
         if msg.Cpm1 != nil {
             scV1b := scV1
             scV1b.DeviceID = strconv.FormatUint(uint64(msg.GetDeviceIDNumber() | 0x00000001), 10)
             scV1b.Unit = UnitCPM
             scV1b.Value = fmt.Sprintf("%d", msg.GetCpm1())
-            SafecastV1Upload(scV1b, "")
+            V1Upload(scV1b, "")
         }
 
         scV1c := scV1a
@@ -473,37 +478,37 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitBatVoltage
         scV1b.Value = scV1a.BatVoltage
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.BatterySOC != nil {
         scV1b := scV1
         scV1b.Unit = UnitBatSOC
         scV1b.Value = scV1a.BatSOC
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.BatteryCurrent != nil {
         scV1b := scV1
         scV1b.Unit = UnitBatCurrent
         scV1b.Value = scV1a.BatCurrent
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.EnvTemperature != nil {
         scV1b := scV1
         scV1b.Unit = UnitEnvTemp
         scV1b.Value = scV1a.EnvTemp
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.EnvHumidity != nil {
         scV1b := scV1
         scV1b.Unit = UnitEnvHumid
         scV1b.Value = scV1a.EnvHumid
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.EnvPressure != nil {
         scV1b := scV1
         scV1b.Unit = UnitEnvPress
         scV1b.Value = scV1a.EnvPress
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
 
     // Only bother uploading certain values if they coincides with another
@@ -516,13 +521,13 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1b := scV1
             scV1b.Unit = UnitWirelessSNR
             scV1b.Value = scV1a.WirelessSNR
-            SafecastV1Upload(scV1b, "")
+            V1Upload(scV1b, "")
         }
 
         scV1b := scV1
         scV1b.Unit = UnitTransport
         scV1b.Value = scV1a.Transport
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
 
     }
 
@@ -530,122 +535,122 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV1b := scV1
         scV1b.Unit = UnitPmsPm01_0
         scV1b.Value = scV1a.PmsPm01_0
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.PmsPm02_5 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsPm02_5
         scV1b.Value = scV1a.PmsPm02_5
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.PmsPm10_0 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsPm10_0
         scV1b.Value = scV1a.PmsPm10_0
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.PmsC00_30 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC00_30
         scV1b.Value = scV1a.PmsC00_30
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.PmsC00_50 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC00_50
         scV1b.Value = scV1a.PmsC00_50
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.PmsC01_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC01_00
         scV1b.Value = scV1a.PmsC01_00
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.PmsC02_50 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC02_50
         scV1b.Value = scV1a.PmsC02_50
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.PmsC05_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC05_00
         scV1b.Value = scV1a.PmsC05_00
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.PmsC10_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsC10_00
         scV1b.Value = scV1a.PmsC10_00
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.PmsCsecs != nil {
         scV1b := scV1
         scV1b.Unit = UnitPmsCsecs
         scV1b.Value = scV1a.PmsCsecs
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
 
     if msg.OpcPm01_0 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcPm01_0
         scV1b.Value = scV1a.OpcPm01_0
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.OpcPm02_5 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcPm02_5
         scV1b.Value = scV1a.OpcPm02_5
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.OpcPm10_0 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcPm10_0
         scV1b.Value = scV1a.OpcPm10_0
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.OpcC00_38 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC00_38
         scV1b.Value = scV1a.OpcC00_38
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.OpcC00_54 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC00_54
         scV1b.Value = scV1a.OpcC00_54
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.OpcC01_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC01_00
         scV1b.Value = scV1a.OpcC01_00
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.OpcC02_10 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC02_10
         scV1b.Value = scV1a.OpcC02_10
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.OpcC05_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC05_00
         scV1b.Value = scV1a.OpcC05_00
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.OpcC10_00 != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcC10_00
         scV1b.Value = scV1a.OpcC10_00
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
     if msg.OpcCsecs != nil {
         scV1b := scV1
         scV1b.Unit = UnitOpcCsecs
         scV1b.Value = scV1a.OpcCsecs
-        SafecastV1Upload(scV1b, "")
+        V1Upload(scV1b, "")
     }
 
 }
@@ -777,7 +782,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time) {
                 // Mark as having been seen on the latest date of any file having that time
                 seenDevices[i].notifiedAsUnseen = false;
             }
-			// Always track the most recent seen date
+            // Always track the most recent seen date
             if (seenDevices[i].seen.Before(whenSeen)) {
                 seenDevices[i].seen = whenSeen
             }
@@ -896,7 +901,7 @@ func sendSafecastDeviceSummaryToSlack() {
             s = fmt.Sprintf("%s\n", s)
         }
 
-		s = fmt.Sprintf("%s<http://%s%s%s%d.json|%010d>", s, TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id, id)
+        s = fmt.Sprintf("%s<http://%s%s%s%d.json|%010d>", s, TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id, id)
 
         if sortedDevices[i].minutesAgo == 0 {
             s = fmt.Sprintf("%s last seen just now", s)
@@ -904,15 +909,15 @@ func sendSafecastDeviceSummaryToSlack() {
             var minutesAgo uint32 = uint32(sortedDevices[i].minutesAgo)
             var hoursAgo uint32 = minutesAgo / 60
             var daysAgo uint32 = hoursAgo / 24
-			minutesAgo -= hoursAgo * 60
-			hoursAgo -= daysAgo * 24
-			if daysAgo != 0 {
-	            s = fmt.Sprintf("%s last seen %dd %dh %dm ago", s, daysAgo, hoursAgo, minutesAgo)
-			} else if hoursAgo != 0 {
-	            s = fmt.Sprintf("%s last seen %dh %dm ago", s, hoursAgo, minutesAgo)
-			} else {
-	            s = fmt.Sprintf("%s last seen %dm ago", s, minutesAgo)
-			}
+            minutesAgo -= hoursAgo * 60
+            hoursAgo -= daysAgo * 24
+            if daysAgo != 0 {
+                s = fmt.Sprintf("%s last seen %dd %dh %dm ago", s, daysAgo, hoursAgo, minutesAgo)
+            } else if hoursAgo != 0 {
+                s = fmt.Sprintf("%s last seen %dh %dm ago", s, hoursAgo, minutesAgo)
+            } else {
+                s = fmt.Sprintf("%s last seen %dm ago", s, minutesAgo)
+            }
         }
 
     }
@@ -1166,12 +1171,19 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 }
 
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
-func SafecastV1Upload(scV1 SafecastDataV1, url string) bool {
+func V1Upload(scV1 SafecastDataV1, url string) bool {
 
     // If not configured, make it appear as though we succeeded
     if (!uploadToSafecastV1) {
         return true
     }
+
+	return(SafecastV1Upload(scV1, url))
+
+}
+
+// Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
+func SafecastV1Upload(scV1 SafecastDataV1, url string) bool {
 
     if (parallelV1Uploads) {
         go doUploadToSafecastV1(scV1, url)
