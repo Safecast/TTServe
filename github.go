@@ -37,6 +37,9 @@ func inboundWebGithubHandler(rw http.ResponseWriter, req *http.Request) {
                 p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
     }
 
+	// Modify restart-all control file so that all other instances reboot
+	ControlFileTime(TTServerRestartAllControlFile, p.Pusher.Name)
+
     os.Exit(0)
 
 }
