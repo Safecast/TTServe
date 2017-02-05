@@ -34,8 +34,8 @@ export TT=$GOPATH/src/github.com/rayozzie/teletype-ttserve
 mkdir $HOME/go && mkdir $HOME/go/src && mkdir $HOME/go/src/github.com && mkdir $HOME/go/src/github.com/rayozzie && cd $HOME/go/src/github.com/rayozzie
 git clone https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
 
-## Add an Upstart job so that it automatically starts1
-sudo cp $HOME/go/src/github.com/rayozzie/teletype-ttserve/ttserve.conf /etc/init
+## Use "crontab -e" and add this line
+@reboot screen -dmS teletype $HOME/go/src/github.com/rayozzie/teletype-ttserve/run.sh
 
 ## Reboot the instance and re-enter via SSH
 
