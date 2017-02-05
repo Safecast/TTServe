@@ -48,6 +48,7 @@ const TTServerCommandPath = "/command"
 const TTServerControlPath = "/control"
 const TTServerBuildPath = "/build"
 const TTServerFTPCertPath = "/cert/ftp"
+const TTServerRestartGithubControlFile = "restart_github.txt"
 const TTServerRestartAllControlFile = "restart_all.txt"
 const TTServerHealthControlFile = "health.txt"
 
@@ -86,6 +87,7 @@ var TTServerIP string
 // Auto-reboot
 var TTServerBootTime time.Time
 var TTServerRestartAllTime time.Time
+var TTServerRestartGithubTime time.Time
 var TTServerHealthTime time.Time
 
 // Stats
@@ -181,6 +183,7 @@ func main() {
 
     // Get the date/time of the special files that we monitor
     TTServerRestartAllTime = ControlFileTime(TTServerRestartAllControlFile, "")
+    TTServerRestartGithubTime = ControlFileTime(TTServerRestartGithubControlFile, "")
     TTServerHealthTime = ControlFileTime(TTServerHealthControlFile, "")
 
     // Set up our signal handler
@@ -296,10 +299,16 @@ func healthCheck() string {
 // Check to see if we should restart
 func ControlFileCheck() {
 
-    // Restarts
+    // Slack restart
     if (ControlFileTime(TTServerRestartAllControlFile, "") != TTServerRestartAllTime) {
         sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServerIP))
         fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
+        os.Exit(0)
+    }
+
+    // Github restart
+    if (ControlFileTime(TTServerRestartGithubControlFile, "") != TTServerRestartGithubTime) {
+        fmt.Printf("\n***\n***\n*** RESTARTING because of Github push command\n***\n***\n\n")
         os.Exit(0)
     }
 

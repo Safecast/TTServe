@@ -38,7 +38,7 @@ func inboundWebGithubHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
 	// Modify restart-all control file so that all other instances reboot
-	ControlFileTime(TTServerRestartAllControlFile, p.Pusher.Name)
+	ControlFileTime(TTServerRestartGithubControlFile, p.Pusher.Name)
 
     os.Exit(0)
 
