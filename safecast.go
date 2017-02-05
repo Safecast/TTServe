@@ -1039,18 +1039,54 @@ func SafecastCSVLog(UploadedAt string, scV2 SafecastDataV2) {
     s = s + fmt.Sprintf(",%d", scV2.DeviceID)
     s = s + fmt.Sprintf(",%s", stats)
     s = s + fmt.Sprintf(",%s", "")			// Value
-    s = s + fmt.Sprintf(",%f", scV2.Cpm0)
-    s = s + fmt.Sprintf(",%f", scV2.Cpm1)
+	if scV2.Cpm0 == 0 {
+	    s = s + fmt.Sprintf(",%s", "")
+	} else {
+	    s = s + fmt.Sprintf(",%f", scV2.Cpm0)
+	}
+	if scV2.Cpm1 == 0 {
+	    s = s + fmt.Sprintf(",%s", "")
+	} else {
+	    s = s + fmt.Sprintf(",%f", scV2.Cpm1)
+	}
     s = s + fmt.Sprintf(",%f", scV2.Latitude)
     s = s + fmt.Sprintf(",%f", scV2.Longitude)
     s = s + fmt.Sprintf(",%f", scV2.Height)
-    s = s + fmt.Sprintf(",%f", scV2.BatVoltage)
-    s = s + fmt.Sprintf(",%f", scV2.BatSOC)
-    s = s + fmt.Sprintf(",%f", scV2.BatCurrent)
-    s = s + fmt.Sprintf(",%f", scV2.WirelessSNR)
-    s = s + fmt.Sprintf(",%f", scV2.EnvTemp)
-    s = s + fmt.Sprintf(",%f", scV2.EnvHumid)
-    s = s + fmt.Sprintf(",%f", scV2.EnvPress)
+	if scV2.BatVoltage == 0 {
+	    s = s + fmt.Sprintf(",%s", "")
+	} else {
+	    s = s + fmt.Sprintf(",%f", scV2.BatVoltage)
+	}
+	if scV2.BatSOC == 0 {
+	    s = s + fmt.Sprintf(",%s", "")
+	} else {
+	    s = s + fmt.Sprintf(",%f", scV2.BatSOC)
+	}
+	if scV2.BatCurrent == 0 {
+	    s = s + fmt.Sprintf(",%s", "")
+	} else {
+	    s = s + fmt.Sprintf(",%f", scV2.BatCurrent)
+	}
+	if scV2.WirelessSNR == 0 {
+	    s = s + fmt.Sprintf(",%s", "")
+	} else {
+	    s = s + fmt.Sprintf(",%f", scV2.WirelessSNR)
+	}
+	if scV2.EnvTemp == 0 {
+	    s = s + fmt.Sprintf(",%s", "")
+	} else {
+	    s = s + fmt.Sprintf(",%f", scV2.EnvTemp)
+	}
+	if scV2.EnvHumid == 0 {
+	    s = s + fmt.Sprintf(",%s", "")
+	} else {
+	    s = s + fmt.Sprintf(",%f", scV2.EnvHumid)
+	}
+	if scV2.EnvPress == 0 {
+	    s = s + fmt.Sprintf(",%s", "")
+	} else {
+	    s = s + fmt.Sprintf(",%f", scV2.EnvPress)
+	}
     s = s + fmt.Sprintf(",%f", scV2.PmsPm01_0)
     s = s + fmt.Sprintf(",%f", scV2.PmsPm02_5)
     s = s + fmt.Sprintf(",%f", scV2.PmsPm10_0)
