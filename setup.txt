@@ -35,7 +35,7 @@ mkdir $HOME/go && mkdir $HOME/go/src && mkdir $HOME/go/src/github.com && mkdir $
 git clone https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
 
 ## Add an Upstart job so that it automatically starts1
-cp $HOME/go/src/github.com/rayozzie/teletype-ttserve/ttserve.conf /etc/init
+sudo cp $HOME/go/src/github.com/rayozzie/teletype-ttserve/ttserve.conf /etc/init
 
 ## Reboot the instance and re-enter via SSH
 
