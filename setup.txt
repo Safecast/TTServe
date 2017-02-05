@@ -34,6 +34,11 @@ export TT=$GOPATH/src/github.com/rayozzie/teletype-ttserve
 mkdir $HOME/go && mkdir $HOME/go/src && mkdir $HOME/go/src/github.com && mkdir $HOME/go/src/github.com/rayozzie && cd $HOME/go/src/github.com/rayozzie
 git clone https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
 
+## Add an Upstart job so that it automatically starts1
+cp $HOME/go/src/github.com/rayozzie/teletype-ttserve/ttserve.conf /etc/init
+
+## Reboot the instance and re-enter via SSH
+
 ## Refresh the env vars by REBOOTING THE AWS INSTANCE
 ## Then come back here via SSH
 

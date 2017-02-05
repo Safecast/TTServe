@@ -12,6 +12,7 @@ while [ ! -d "$HOME/efs/safecast" ]; do
     sleep 5s
 done
 
+cd $TT
 set -v
 git pull https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
 go get -u
