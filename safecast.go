@@ -975,138 +975,164 @@ func SafecastCSVLog(UploadedAt string, scV2 SafecastDataV2) {
 
     // Turn stats into a safe string for CSV
     stats := ""
-	if (scV2.StatsUptimeMinutes != 0) {
-		stats += fmt.Sprintf("Uptime:%d ", scV2.StatsUptimeMinutes)
-	}
-	if (scV2.StatsAppVersion != "") {
-		stats += fmt.Sprintf("AppVersion:%s ", scV2.StatsAppVersion)
-	}
-	if (scV2.StatsDeviceParams != "") {
-		stats += fmt.Sprintf("AppVersion:%s ", scV2.StatsDeviceParams)
-	}
-	if (scV2.StatsTransmittedBytes != 0) {
-		stats += fmt.Sprintf("Sent:%d ", scV2.StatsTransmittedBytes)
-	}
-	if (scV2.StatsReceivedBytes != 0) {
-		stats += fmt.Sprintf("Rcvd:%d ", scV2.StatsReceivedBytes)
-	}
-	if (scV2.StatsCommsResets != 0) {
-		stats += fmt.Sprintf("CommsResets:%d ", scV2.StatsCommsResets)
-	}
-	if (scV2.StatsCommsFails != 0) {
-		stats += fmt.Sprintf("CommsFails:%d ", scV2.StatsCommsFails)
-	}
-	if (scV2.StatsCommsPowerFails != 0) {
-		stats += fmt.Sprintf("CommsPowerFails:%d ", scV2.StatsCommsPowerFails)
-	}
-	if (scV2.StatsDeviceRestarts != 0) {
-		stats += fmt.Sprintf("Restarts:%d ", scV2.StatsDeviceRestarts)
-	}
-	if (scV2.StatsMotiondrops != 0) {
-		stats += fmt.Sprintf("Motiondrops:%d ", scV2.StatsMotiondrops)
-	}
-	if (scV2.StatsOneshots != 0) {
-		stats += fmt.Sprintf("Oneshots:%d ", scV2.StatsOneshots)
-	}
-	if (scV2.StatsOneshotSeconds != 0) {
-		stats += fmt.Sprintf("OneshotSecs:%d ", scV2.StatsOneshotSeconds)
-	}
-	if (scV2.StatsCell != "") {
-		stats += fmt.Sprintf("Cell:%s ", scV2.StatsCell)
-	}
-	if (scV2.StatsDfu != "") {
-		stats += fmt.Sprintf("DFU:%s ", scV2.StatsDfu)
-	}
-	if (scV2.Message != "") {
-		stats += fmt.Sprintf("Msg:%s ", scV2.Message)
-	}
-	if (scV2.StatsFreeMem != 0) {
-		stats += fmt.Sprintf("FreeMem:%d ", scV2.StatsFreeMem)
-	}
-	if (scV2.StatsNTPCount != 0) {
-		stats += fmt.Sprintf("NTPCount:%d ", scV2.StatsNTPCount)
-	}
-	if (scV2.StatsLastFailure != "") {
-		stats += fmt.Sprintf("LastFailure:%s ", scV2.StatsLastFailure)
-	}
-	if (scV2.StatsStatus != "") {
-		stats += fmt.Sprintf("Status:%s ", scV2.StatsStatus)
-	}
+    if (scV2.StatsUptimeMinutes != 0) {
+        stats += fmt.Sprintf("Uptime:%d ", scV2.StatsUptimeMinutes)
+    }
+    if (scV2.StatsAppVersion != "") {
+        stats += fmt.Sprintf("AppVersion:%s ", scV2.StatsAppVersion)
+    }
+    if (scV2.StatsDeviceParams != "") {
+        stats += fmt.Sprintf("AppVersion:%s ", scV2.StatsDeviceParams)
+    }
+    if (scV2.StatsTransmittedBytes != 0) {
+        stats += fmt.Sprintf("Sent:%d ", scV2.StatsTransmittedBytes)
+    }
+    if (scV2.StatsReceivedBytes != 0) {
+        stats += fmt.Sprintf("Rcvd:%d ", scV2.StatsReceivedBytes)
+    }
+    if (scV2.StatsCommsResets != 0) {
+        stats += fmt.Sprintf("CommsResets:%d ", scV2.StatsCommsResets)
+    }
+    if (scV2.StatsCommsFails != 0) {
+        stats += fmt.Sprintf("CommsFails:%d ", scV2.StatsCommsFails)
+    }
+    if (scV2.StatsCommsPowerFails != 0) {
+        stats += fmt.Sprintf("CommsPowerFails:%d ", scV2.StatsCommsPowerFails)
+    }
+    if (scV2.StatsDeviceRestarts != 0) {
+        stats += fmt.Sprintf("Restarts:%d ", scV2.StatsDeviceRestarts)
+    }
+    if (scV2.StatsMotiondrops != 0) {
+        stats += fmt.Sprintf("Motiondrops:%d ", scV2.StatsMotiondrops)
+    }
+    if (scV2.StatsOneshots != 0) {
+        stats += fmt.Sprintf("Oneshots:%d ", scV2.StatsOneshots)
+    }
+    if (scV2.StatsOneshotSeconds != 0) {
+        stats += fmt.Sprintf("OneshotSecs:%d ", scV2.StatsOneshotSeconds)
+    }
+    if (scV2.StatsCell != "") {
+        stats += fmt.Sprintf("Cell:%s ", scV2.StatsCell)
+    }
+    if (scV2.StatsDfu != "") {
+        stats += fmt.Sprintf("DFU:%s ", scV2.StatsDfu)
+    }
+    if (scV2.Message != "") {
+        stats += fmt.Sprintf("Msg:%s ", scV2.Message)
+    }
+    if (scV2.StatsFreeMem != 0) {
+        stats += fmt.Sprintf("FreeMem:%d ", scV2.StatsFreeMem)
+    }
+    if (scV2.StatsNTPCount != 0) {
+        stats += fmt.Sprintf("NTPCount:%d ", scV2.StatsNTPCount)
+    }
+    if (scV2.StatsLastFailure != "") {
+        stats += fmt.Sprintf("LastFailure:%s ", scV2.StatsLastFailure)
+    }
+    if (scV2.StatsStatus != "") {
+        stats += fmt.Sprintf("Status:%s ", scV2.StatsStatus)
+    }
 
     // Write the stuff
     s := UploadedAt
     s = s + fmt.Sprintf(",%s", scV2.CapturedAt)
     s = s + fmt.Sprintf(",%d", scV2.DeviceID)
     s = s + fmt.Sprintf(",%s", stats)
-    s = s + fmt.Sprintf(",%s", "")			// Value
-	if scV2.Cpm0 == 0 {
-	    s = s + fmt.Sprintf(",%s", "")
-	} else {
-	    s = s + fmt.Sprintf(",%f", scV2.Cpm0)
-	}
-	if scV2.Cpm1 == 0 {
-	    s = s + fmt.Sprintf(",%s", "")
-	} else {
-	    s = s + fmt.Sprintf(",%f", scV2.Cpm1)
-	}
+    s = s + fmt.Sprintf(",%s", "")          // Value
+    if scV2.Cpm0 == 0 {
+        s = s + fmt.Sprintf(",%s", "")
+    } else {
+        s = s + fmt.Sprintf(",%f", scV2.Cpm0)
+    }
+    if scV2.Cpm1 == 0 {
+        s = s + fmt.Sprintf(",%s", "")
+    } else {
+        s = s + fmt.Sprintf(",%f", scV2.Cpm1)
+    }
     s = s + fmt.Sprintf(",%f", scV2.Latitude)
     s = s + fmt.Sprintf(",%f", scV2.Longitude)
     s = s + fmt.Sprintf(",%f", scV2.Height)
-	if scV2.BatVoltage == 0 {
-	    s = s + fmt.Sprintf(",%s", "")
-	} else {
-	    s = s + fmt.Sprintf(",%f", scV2.BatVoltage)
-	}
-	if scV2.BatSOC == 0 {
-	    s = s + fmt.Sprintf(",%s", "")
-	} else {
-	    s = s + fmt.Sprintf(",%f", scV2.BatSOC)
-	}
-	if scV2.BatCurrent == 0 {
-	    s = s + fmt.Sprintf(",%s", "")
-	} else {
-	    s = s + fmt.Sprintf(",%f", scV2.BatCurrent)
-	}
-	if scV2.WirelessSNR == 0 {
-	    s = s + fmt.Sprintf(",%s", "")
-	} else {
-	    s = s + fmt.Sprintf(",%f", scV2.WirelessSNR)
-	}
-	if scV2.EnvTemp == 0 {
-	    s = s + fmt.Sprintf(",%s", "")
-	} else {
-	    s = s + fmt.Sprintf(",%f", scV2.EnvTemp)
-	}
-	if scV2.EnvHumid == 0 {
-	    s = s + fmt.Sprintf(",%s", "")
-	} else {
-	    s = s + fmt.Sprintf(",%f", scV2.EnvHumid)
-	}
-	if scV2.EnvPress == 0 {
-	    s = s + fmt.Sprintf(",%s", "")
-	} else {
-	    s = s + fmt.Sprintf(",%f", scV2.EnvPress)
-	}
-    s = s + fmt.Sprintf(",%f", scV2.PmsPm01_0)
-    s = s + fmt.Sprintf(",%f", scV2.PmsPm02_5)
-    s = s + fmt.Sprintf(",%f", scV2.PmsPm10_0)
-    s = s + fmt.Sprintf(",%d", scV2.PmsC00_30)
-    s = s + fmt.Sprintf(",%d", scV2.PmsC00_50)
-    s = s + fmt.Sprintf(",%d", scV2.PmsC01_00)
-    s = s + fmt.Sprintf(",%d", scV2.PmsC02_50)
-    s = s + fmt.Sprintf(",%d", scV2.PmsC05_00)
-    s = s + fmt.Sprintf(",%d", scV2.PmsC10_00)
-    s = s + fmt.Sprintf(",%d", scV2.PmsCsecs)
-    s = s + fmt.Sprintf(",%f", scV2.OpcPm01_0)
-    s = s + fmt.Sprintf(",%f", scV2.OpcPm02_5)
-    s = s + fmt.Sprintf(",%f", scV2.OpcPm10_0)
-    s = s + fmt.Sprintf(",%d", scV2.OpcC00_38)
-    s = s + fmt.Sprintf(",%d", scV2.OpcC00_54)
-    s = s + fmt.Sprintf(",%d", scV2.OpcC01_00)
-    s = s + fmt.Sprintf(",%d", scV2.OpcC02_10)
-    s = s + fmt.Sprintf(",%d", scV2.OpcC05_00)
-    s = s + fmt.Sprintf(",%d", scV2.OpcC10_00)
-    s = s + fmt.Sprintf(",%d", scV2.OpcCsecs)
+    if scV2.BatVoltage == 0 {
+        s = s + fmt.Sprintf(",%s", "")
+    } else {
+        s = s + fmt.Sprintf(",%f", scV2.BatVoltage)
+    }
+    if scV2.BatSOC == 0 {
+        s = s + fmt.Sprintf(",%s", "")
+    } else {
+        s = s + fmt.Sprintf(",%f", scV2.BatSOC)
+    }
+    if scV2.BatCurrent == 0 {
+        s = s + fmt.Sprintf(",%s", "")
+    } else {
+        s = s + fmt.Sprintf(",%f", scV2.BatCurrent)
+    }
+    if scV2.WirelessSNR == 0 {
+        s = s + fmt.Sprintf(",%s", "")
+    } else {
+        s = s + fmt.Sprintf(",%f", scV2.WirelessSNR)
+    }
+    if scV2.EnvTemp == 0 {
+        s = s + fmt.Sprintf(",%s", "")
+    } else {
+        s = s + fmt.Sprintf(",%f", scV2.EnvTemp)
+    }
+    if scV2.EnvHumid == 0 {
+        s = s + fmt.Sprintf(",%s", "")
+    } else {
+        s = s + fmt.Sprintf(",%f", scV2.EnvHumid)
+    }
+    if scV2.EnvPress == 0 {
+        s = s + fmt.Sprintf(",%s", "")
+    } else {
+        s = s + fmt.Sprintf(",%f", scV2.EnvPress)
+    }
+    if scV2.PmsCsecs == 0 {
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+    } else {
+        s = s + fmt.Sprintf(",%f", scV2.PmsPm01_0)
+        s = s + fmt.Sprintf(",%f", scV2.PmsPm02_5)
+        s = s + fmt.Sprintf(",%f", scV2.PmsPm10_0)
+        s = s + fmt.Sprintf(",%d", scV2.PmsC00_30)
+        s = s + fmt.Sprintf(",%d", scV2.PmsC00_50)
+        s = s + fmt.Sprintf(",%d", scV2.PmsC01_00)
+        s = s + fmt.Sprintf(",%d", scV2.PmsC02_50)
+        s = s + fmt.Sprintf(",%d", scV2.PmsC05_00)
+        s = s + fmt.Sprintf(",%d", scV2.PmsC10_00)
+        s = s + fmt.Sprintf(",%d", scV2.PmsCsecs)
+    }
+    if scV2.OpcCsecs == 0 {
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+        s = s + fmt.Sprintf(",%s", "")
+    } else {
+        s = s + fmt.Sprintf(",%f", scV2.OpcPm01_0)
+        s = s + fmt.Sprintf(",%f", scV2.OpcPm02_5)
+        s = s + fmt.Sprintf(",%f", scV2.OpcPm10_0)
+        s = s + fmt.Sprintf(",%d", scV2.OpcC00_38)
+        s = s + fmt.Sprintf(",%d", scV2.OpcC00_54)
+        s = s + fmt.Sprintf(",%d", scV2.OpcC01_00)
+        s = s + fmt.Sprintf(",%d", scV2.OpcC02_10)
+        s = s + fmt.Sprintf(",%d", scV2.OpcC05_00)
+        s = s + fmt.Sprintf(",%d", scV2.OpcC10_00)
+        s = s + fmt.Sprintf(",%d", scV2.OpcCsecs)
+    }
     s = s + "\r\n"
 
     fd.WriteString(s);
@@ -1265,7 +1291,7 @@ func V1Upload(scV1 SafecastDataV1, url string) bool {
         return true
     }
 
-	return(SafecastV1Upload(scV1, url))
+    return(SafecastV1Upload(scV1, url))
 
 }
 
