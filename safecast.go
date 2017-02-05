@@ -1020,6 +1020,18 @@ func SafecastCSVLog(UploadedAt string, scV2 SafecastDataV2) {
 	if (scV2.Message != "") {
 		stats += fmt.Sprintf("Msg:%s ", scV2.Message)
 	}
+	if (scV2.StatsFreeMem != 0) {
+		stats += fmt.Sprintf("FreeMem:%d ", scV2.StatsFreeMem)
+	}
+	if (scV2.StatsNTPCount != 0) {
+		stats += fmt.Sprintf("NTPCount:%d ", scV2.StatsNTPCount)
+	}
+	if (scV2.StatsLastFailure != "") {
+		stats += fmt.Sprintf("LastFailure:%s ", scV2.StatsLastFailure)
+	}
+	if (scV2.StatsStatus != "") {
+		stats += fmt.Sprintf("Status:%s ", scV2.StatsStatus)
+	}
 
     // Write the stuff
     s := UploadedAt
