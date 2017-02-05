@@ -35,35 +35,22 @@ mkdir $HOME/go && mkdir $HOME/go/src && mkdir $HOME/go/src/github.com && mkdir $
 git clone https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
 
 ## Use "crontab -e" and add this line
-@reboot screen -dmS teletype $HOME/go/src/github.com/rayozzie/teletype-ttserve/run.sh
+@reboot screen -dmS ttserve $HOME/go/src/github.com/rayozzie/teletype-ttserve/run.sh
 
-## Reboot the instance and re-enter via SSH
-
-## Refresh the env vars by REBOOTING THE AWS INSTANCE
-## Then come back here via SSH
-
-##
-## ANYTIME SSH'ING INTO THE INSTANCE AFTER SETUP
-##
-## Note that we keep the server running in a background process by using
-## the "screen" command to create and maintain it.  This means that
-## the first time you come into an instance not running TTSERVE you
-## must create it, and after that point you need to make sure that
-## you don't accidentally delete it.  Following are commands that
-## will help you understand how to do this.
-##
+## REBOOT THE AWS INSTANCE
+## You can then come back via SSH and use 'screen' to look around 
 
 ## Do this to see if our screen is already running:
 screen -ls
-## If you see the 'teletype' instance, do:
+## If you see the 'ttserve' instance, do:
 screen -r
-## If you do NOT see the teletype instance, do:
-screen -S teletype
+## If, while watching console, you want to return to main screen console, press:
+^a d
+## If you do NOT see the ttserve instance, do:
+screen -S ttserve
 cd $TT && ./run.sh
 ## If, while watching console, you want to force a restart/refresh from git, press:
 ^c
-## If, while watching console, you want to return to main screen console, press:
-^a d
 ## If, while watching the console, you want to exit SSH, press:
 ^a d
 exit
@@ -75,7 +62,7 @@ exit
 ## SCREEN COMMAND REFERENCE
 ## Running in background
 ##   create a new screen and switch to it
-screen -S teletype
+screen -S ttserve
 ##   list screens
 screen -ls
 ##   delete the current screen and logout
