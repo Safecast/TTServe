@@ -23,7 +23,7 @@ import (
 )
 
 // Global debugging
-const restartQuickly bool = true
+const pollControlFilesQuickly bool = true
 
 // Derived from "ttnctl applications", the AppEUI and its Access Key
 const appEui string = "70B3D57ED0000420"
@@ -230,7 +230,7 @@ func timer1m() {
         time.Sleep(1 * 60 * time.Second)
 
         // Restart this instance if instructed to do so
-        if (restartQuickly) {
+        if (pollControlFilesQuickly) {
             ControlFileCheck()
         }
 
