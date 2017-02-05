@@ -728,7 +728,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
         SafecastV1Upload(sV1, urlV1)
         SafecastV2Upload(UploadedAt, sV2)
-        SafecastJSONLog(UploadedAt, sV2)
+        SafecastWriteToLogs(UploadedAt, sV2)
         CountHTTPRedirect++
 
         // It is an error if there is a pending outbound payload for this device, so remove it and report it

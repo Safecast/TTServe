@@ -430,7 +430,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1b.Unit = ""
             scV1b.Value = ""
         }
-        writeToLogs(UploadedAt, scV2b)
+        SafecastWriteToLogs(UploadedAt, scV2b)
 
         // Post to the V2 api
         SafecastV2Upload(UploadedAt, scV2b)
@@ -467,7 +467,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         SafecastV2Upload(UploadedAt, scV2c)
 
         // Log it
-        writeToLogs(UploadedAt, scV2c)
+        SafecastWriteToLogs(UploadedAt, scV2c)
 
     }
 
@@ -928,7 +928,7 @@ func sendSafecastDeviceSummaryToSlack() {
 }
 
 // Write to both logs
-func writeToLogs(UploadedAt string, scV2 SafecastDataV2) {
+func SafecastWriteToLogs(UploadedAt string, scV2 SafecastDataV2) {
     SafecastJSONLog(UploadedAt, scV2)
     SafecastCSVLog(UploadedAt, scV2)
 }
