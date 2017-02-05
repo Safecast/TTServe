@@ -430,7 +430,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
             scV1b.Unit = ""
             scV1b.Value = ""
         }
-        writeToLogs(UploadedAt, scV1b, scV2b)
+        writeToLogs(UploadedAt, scV2b)
 
         // Post to the V2 api
         SafecastV2Upload(UploadedAt, scV2b)
@@ -467,7 +467,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         SafecastV2Upload(UploadedAt, scV2c)
 
         // Log it
-        writeToLogs(UploadedAt, scV1c, scV2c)
+        writeToLogs(UploadedAt, scV2c)
 
     }
 
@@ -928,9 +928,9 @@ func sendSafecastDeviceSummaryToSlack() {
 }
 
 // Write to both logs
-func writeToLogs(UploadedAt string, scV1 SafecastDataV1, scV2 SafecastDataV2) {
-    SafecastV1Log(UploadedAt, scV1)
-    SafecastV2Log(UploadedAt, scV2)
+func writeToLogs(UploadedAt string, scV2 SafecastDataV2) {
+    SafecastJSONLog(UploadedAt, scV2)
+    SafecastCSVLog(UploadedAt, scV2)
 }
 
 // Get path of the safecast directory
@@ -952,10 +952,10 @@ func SafecastLogFilename(DeviceID string, Extension string) string {
 }
 
 // Write the value to the log
-func SafecastV1Log(UploadedAt string, scV1 SafecastDataV1) {
+func SafecastCSVLog(UploadedAt string, scV2 SafecastDataV2) {
 
     // Extract the device number and form a filename
-    file := SafecastLogFilename(scV1.DeviceID, ".csv")
+    file := SafecastLogFilename(fmt.Sprintf("%d", scV2.DeviceID), ".csv")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
@@ -974,52 +974,91 @@ func SafecastV1Log(UploadedAt string, scV1 SafecastDataV1) {
     }
 
     // Turn stats into a safe string for CSV
-    stats := scV1.DeviceTypeID;
-    if (stats != "") {
-        stats = strings.Replace(stats, "\"", "", -1)
-        stats = strings.Replace(stats, ",", " ", -1)
-        stats = strings.Replace(stats, "{", "\"", -1)
-        stats = strings.Replace(stats, "}", "\"", -1)
-    }
+    stats := ""
+	if (scV2.StatsUptimeMinutes != 0) {
+		stats += fmt.Sprintf("Uptime:%d ", scV2.StatsUptimeMinutes)
+	}
+	if (scV2.StatsAppVersion != "") {
+		stats += fmt.Sprintf("AppVersion:%s ", scV2.StatsAppVersion)
+	}
+	if (scV2.StatsDeviceParams != "") {
+		stats += fmt.Sprintf("AppVersion:%s ", scV2.StatsDeviceParams)
+	}
+	if (scV2.StatsTransmittedBytes != 0) {
+		stats += fmt.Sprintf("Sent:%d ", scV2.StatsTransmittedBytes)
+	}
+	if (scV2.StatsReceivedBytes != 0) {
+		stats += fmt.Sprintf("Rcvd:%d ", scV2.StatsReceivedBytes)
+	}
+	if (scV2.StatsCommsResets != 0) {
+		stats += fmt.Sprintf("CommsResets:%d ", scV2.StatsCommsResets)
+	}
+	if (scV2.StatsCommsFails != 0) {
+		stats += fmt.Sprintf("CommsFails:%d ", scV2.StatsCommsFails)
+	}
+	if (scV2.StatsCommsPowerFails != 0) {
+		stats += fmt.Sprintf("CommsPowerFails:%d ", scV2.StatsCommsPowerFails)
+	}
+	if (scV2.StatsDeviceRestarts != 0) {
+		stats += fmt.Sprintf("Restarts:%d ", scV2.StatsDeviceRestarts)
+	}
+	if (scV2.StatsMotiondrops != 0) {
+		stats += fmt.Sprintf("Motiondrops:%d ", scV2.StatsMotiondrops)
+	}
+	if (scV2.StatsOneshots != 0) {
+		stats += fmt.Sprintf("Oneshots:%d ", scV2.StatsOneshots)
+	}
+	if (scV2.StatsOneshotSeconds != 0) {
+		stats += fmt.Sprintf("OneshotSecs:%d ", scV2.StatsOneshotSeconds)
+	}
+	if (scV2.StatsCell != "") {
+		stats += fmt.Sprintf("Cell:%s ", scV2.StatsCell)
+	}
+	if (scV2.StatsDfu != "") {
+		stats += fmt.Sprintf("DFU:%s ", scV2.StatsDfu)
+	}
+	if (scV2.Message != "") {
+		stats += fmt.Sprintf("Msg:%s ", scV2.Message)
+	}
 
     // Write the stuff
     s := UploadedAt
-    s = s + fmt.Sprintf(",%s", scV1.CapturedAt)
-    s = s + fmt.Sprintf(",%s", scV1.DeviceID)
+    s = s + fmt.Sprintf(",%s", scV2.CapturedAt)
+    s = s + fmt.Sprintf(",%d", scV2.DeviceID)
     s = s + fmt.Sprintf(",%s", stats)
-    s = s + fmt.Sprintf(",%s", scV1.Value)
-    s = s + fmt.Sprintf(",%s", scV1.Cpm0)
-    s = s + fmt.Sprintf(",%s", scV1.Cpm1)
-    s = s + fmt.Sprintf(",%s", scV1.Latitude)
-    s = s + fmt.Sprintf(",%s", scV1.Longitude)
-    s = s + fmt.Sprintf(",%s", scV1.Height)
-    s = s + fmt.Sprintf(",%s", scV1.BatVoltage)
-    s = s + fmt.Sprintf(",%s", scV1.BatSOC)
-    s = s + fmt.Sprintf(",%s", scV1.BatCurrent)
-    s = s + fmt.Sprintf(",%s", scV1.WirelessSNR)
-    s = s + fmt.Sprintf(",%s", scV1.EnvTemp)
-    s = s + fmt.Sprintf(",%s", scV1.EnvHumid)
-    s = s + fmt.Sprintf(",%s", scV1.EnvPress)
-    s = s + fmt.Sprintf(",%s", scV1.PmsPm01_0)
-    s = s + fmt.Sprintf(",%s", scV1.PmsPm02_5)
-    s = s + fmt.Sprintf(",%s", scV1.PmsPm10_0)
-    s = s + fmt.Sprintf(",%s", scV1.PmsC00_30)
-    s = s + fmt.Sprintf(",%s", scV1.PmsC00_50)
-    s = s + fmt.Sprintf(",%s", scV1.PmsC01_00)
-    s = s + fmt.Sprintf(",%s", scV1.PmsC02_50)
-    s = s + fmt.Sprintf(",%s", scV1.PmsC05_00)
-    s = s + fmt.Sprintf(",%s", scV1.PmsC10_00)
-    s = s + fmt.Sprintf(",%s", scV1.PmsCsecs)
-    s = s + fmt.Sprintf(",%s", scV1.OpcPm01_0)
-    s = s + fmt.Sprintf(",%s", scV1.OpcPm02_5)
-    s = s + fmt.Sprintf(",%s", scV1.OpcPm10_0)
-    s = s + fmt.Sprintf(",%s", scV1.OpcC00_38)
-    s = s + fmt.Sprintf(",%s", scV1.OpcC00_54)
-    s = s + fmt.Sprintf(",%s", scV1.OpcC01_00)
-    s = s + fmt.Sprintf(",%s", scV1.OpcC02_10)
-    s = s + fmt.Sprintf(",%s", scV1.OpcC05_00)
-    s = s + fmt.Sprintf(",%s", scV1.OpcC10_00)
-    s = s + fmt.Sprintf(",%s", scV1.OpcCsecs)
+    s = s + fmt.Sprintf(",%s", "")			// Value
+    s = s + fmt.Sprintf(",%d", scV2.Cpm0)
+    s = s + fmt.Sprintf(",%d", scV2.Cpm1)
+    s = s + fmt.Sprintf(",%f", scV2.Latitude)
+    s = s + fmt.Sprintf(",%f", scV2.Longitude)
+    s = s + fmt.Sprintf(",%f", scV2.Height)
+    s = s + fmt.Sprintf(",%f", scV2.BatVoltage)
+    s = s + fmt.Sprintf(",%f", scV2.BatSOC)
+    s = s + fmt.Sprintf(",%f", scV2.BatCurrent)
+    s = s + fmt.Sprintf(",%f", scV2.WirelessSNR)
+    s = s + fmt.Sprintf(",%f", scV2.EnvTemp)
+    s = s + fmt.Sprintf(",%f", scV2.EnvHumid)
+    s = s + fmt.Sprintf(",%f", scV2.EnvPress)
+    s = s + fmt.Sprintf(",%f", scV2.PmsPm01_0)
+    s = s + fmt.Sprintf(",%f", scV2.PmsPm02_5)
+    s = s + fmt.Sprintf(",%f", scV2.PmsPm10_0)
+    s = s + fmt.Sprintf(",%d", scV2.PmsC00_30)
+    s = s + fmt.Sprintf(",%d", scV2.PmsC00_50)
+    s = s + fmt.Sprintf(",%d", scV2.PmsC01_00)
+    s = s + fmt.Sprintf(",%d", scV2.PmsC02_50)
+    s = s + fmt.Sprintf(",%d", scV2.PmsC05_00)
+    s = s + fmt.Sprintf(",%d", scV2.PmsC10_00)
+    s = s + fmt.Sprintf(",%d", scV2.PmsCsecs)
+    s = s + fmt.Sprintf(",%f", scV2.OpcPm01_0)
+    s = s + fmt.Sprintf(",%f", scV2.OpcPm02_5)
+    s = s + fmt.Sprintf(",%f", scV2.OpcPm10_0)
+    s = s + fmt.Sprintf(",%d", scV2.OpcC00_38)
+    s = s + fmt.Sprintf(",%d", scV2.OpcC00_54)
+    s = s + fmt.Sprintf(",%d", scV2.OpcC01_00)
+    s = s + fmt.Sprintf(",%d", scV2.OpcC02_10)
+    s = s + fmt.Sprintf(",%d", scV2.OpcC05_00)
+    s = s + fmt.Sprintf(",%d", scV2.OpcC10_00)
+    s = s + fmt.Sprintf(",%d", scV2.OpcCsecs)
     s = s + "\r\n"
 
     fd.WriteString(s);
@@ -1030,7 +1069,7 @@ func SafecastV1Log(UploadedAt string, scV1 SafecastDataV1) {
 }
 
 // Write the value to the log
-func SafecastV2Log(UploadedAt string, scV2 SafecastDataV2) {
+func SafecastJSONLog(UploadedAt string, scV2 SafecastDataV2) {
 
     file := SafecastLogFilename(fmt.Sprintf("%d", scV2.DeviceID), ".json")
 
