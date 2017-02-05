@@ -1039,8 +1039,8 @@ func SafecastCSVLog(UploadedAt string, scV2 SafecastDataV2) {
     s = s + fmt.Sprintf(",%d", scV2.DeviceID)
     s = s + fmt.Sprintf(",%s", stats)
     s = s + fmt.Sprintf(",%s", "")			// Value
-    s = s + fmt.Sprintf(",%d", scV2.Cpm0)
-    s = s + fmt.Sprintf(",%d", scV2.Cpm1)
+    s = s + fmt.Sprintf(",%f", scV2.Cpm0)
+    s = s + fmt.Sprintf(",%f", scV2.Cpm1)
     s = s + fmt.Sprintf(",%f", scV2.Latitude)
     s = s + fmt.Sprintf(",%f", scV2.Longitude)
     s = s + fmt.Sprintf(",%f", scV2.Height)
