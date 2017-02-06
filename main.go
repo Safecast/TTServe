@@ -26,7 +26,7 @@ import (
 const pollControlFilesQuickly bool = true
 
 // TTN subscription info updated 2017-02-06 when upgrading to V2
-const appEui string = "70B3D57EF0003810"
+const appId string = "ttserve"
 const appAccessKey string = "ttn-account-v2.OFAp-VRdr1vrHqXf-iijSFaNdJSgIy5oVdmX2O2160g"
 const ttnServer string = "tcp://eu.thethings.network:1883"
 const ttnTopic string = "+/devices/+/up"
@@ -764,7 +764,7 @@ func ttnSubscriptionMonitor() {
         // Allocate and set up the options
         mqttOpts := MQTT.NewClientOptions()
         mqttOpts.AddBroker(ttnServer)
-        mqttOpts.SetUsername(appEui)
+        mqttOpts.SetUsername(appId)
         mqttOpts.SetPassword(appAccessKey)
 
         // Do NOT automatically reconnect upon failure
@@ -867,7 +867,7 @@ func ttnOutboundPublish(devEui string, payload []byte) {
         if jerr != nil {
             fmt.Printf("j marshaling error: ", jerr)
         }
-        topic := appEui + "/devices/" + devEui + "/down"
+        topic := appId + "/devices/" + devEui + "/down"
         fmt.Printf("Send %s: %s\n", topic, jdata)
         ttnMqttClient.Publish(topic, 0, false, jdata)
     }
