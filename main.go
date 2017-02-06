@@ -825,6 +825,7 @@ func ttnSubscriptionMonitor() {
         // Connect to the service
         if token := ttnMqttClient.Connect(); token.Wait() && token.Error() != nil {
             fmt.Printf("Error connecting to service: %s\n", token.Error())
+            time.Sleep(60 * time.Second);
         } else {
 
             fmt.Printf("Now handling inbound MQTT on: %s mqtt:%s\n", ttnServer, ttnTopic)
