@@ -26,8 +26,10 @@ import (
 const pollControlFilesQuickly bool = true
 
 // TTN subscription info updated 2017-02-06 when upgrading to V2
-const appId string = "ttserve"
-const appAccessKey string = "ttn-account-v2.OFAp-VRdr1vrHqXf-iijSFaNdJSgIy5oVdmX2O2160g"
+const ttnMQQTMode = false
+const ttnAppId string = "ttserve"
+const ttnProcessId string = "ttserve"
+const ttnAppAccessKey string = "ttn-account-v2.OFAp-VRdr1vrHqXf-iijSFaNdJSgIy5oVdmX2O2160g"
 const ttnServer string = "tcp://eu.thethings.network:1883"
 const ttnTopic string = "+/devices/+/up"
 
@@ -74,6 +76,7 @@ const TTServerTopicRoot2 string = "/index.htm"
 const TTServerTopicLog string = "/log/"
 const TTServerTopicGithub string = "/github"
 const TTServerTopicSlack string = "/slack"
+const TTServerTopicTTN string = "/ttn"
 const TTServerTopicRedirect1 string = "/scripts/"
 const TTServerTopicRedirect2 string = "/"
 var   iAmTTServerMonitor = false
@@ -208,12 +211,9 @@ func main() {
     }
 
     // Spawn the TTNhandlers
-    // For NOW, only do this on the UDP handler so we don't get duplicates.
-    // In the future, we will convert from MQQT to HTTP that will go directly
-    // to the entire LB pool, and thus this won't be necessary.
-    if iAmTTServerUDP {
-        go ttnInboundHandler()
-        go ttnSubscriptionMonitor()
+    if ttnMQQTMode && iAmTTServerUDP {
+        go ttnMQQTInboundHandler()
+        go ttnMQQTSubscriptionMonitor()
     }
 
     // Spawn timer tasks, and do the final one in-line
@@ -261,8 +261,8 @@ func timer15m() {
         sendSafecastCommsErrorsToSlack(15)
 
         // Post long TTN outages
-        if iAmTTServerUDP {
-            ttnSubscriptionNotifier()
+        if ttnMQQTMode && iAmTTServerUDP {
+            ttnMQQTSubscriptionNotifier()
         }
 
         // Post stats
@@ -366,6 +366,14 @@ func webInboundHandler() {
 
         http.HandleFunc(TTServerTopicSlack, inboundWebSlackHandler)
         fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicSlack)
+
+    }
+
+    // Spin up TTN
+    if !ttnMQQTMode {
+
+        http.HandleFunc(TTServerTopicTTN, inboundWebTTNHandler)
+        fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicTTN)
 
     }
 
@@ -526,6 +534,81 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
             hexPayload := hex.EncodeToString(payload)
             io.WriteString(rw, hexPayload)
             sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID))
+        }
+
+    }
+
+}
+
+// Handle inbound HTTP requests from TTN
+func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
+    var AppReq IncomingReq
+    var ttn UplinkMessage
+    var ReplyToDeviceID uint32 = 0
+
+    body, err := ioutil.ReadAll(req.Body)
+    if err != nil {
+        fmt.Printf("Error reading HTTP request body: \n%v\n", req)
+        return
+    }
+
+    // Unmarshal the payload and extract the base64 data
+    err = json.Unmarshal(body, &ttn)
+    if err != nil {
+        fmt.Printf("\n*** Web TTN payload doesn't have TTN data *** %v\n%s\n\n", err, body)
+        return
+    }
+
+    // Copy fields to the app request structure
+    AppReq.TTNDevID = ttn.DevID
+    AppReq.Longitude = ttn.Metadata.Longitude
+    AppReq.Latitude = ttn.Metadata.Latitude
+    AppReq.Altitude = float32(ttn.Metadata.Altitude)
+    if (len(ttn.Metadata.Gateways) >= 1) {
+        AppReq.Snr = ttn.Metadata.Gateways[0].SNR
+        AppReq.Location = ttn.Metadata.Gateways[0].GtwID
+    }
+
+    ReplyToDeviceID = processBuffer(AppReq, "TTN", "ttn-http:"+ttn.DevID, ttn.PayloadRaw)
+    CountTTN++
+
+    // Outbound message processing
+    if (ReplyToDeviceID != 0) {
+
+        // Delay just in case there's a chance that request processing may generate a reply
+        // to this request.  It's no big deal if we miss it, though, because it will just be
+        // picked up on the next call.
+        time.Sleep(1 * time.Second)
+
+        // See if there's an outbound message waiting for this device.
+        isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
+        if (isAvailable) {
+            jmsg := &DownlinkMessage{}
+            jmsg.PayloadRaw = payload
+            jmsg.FPort = 1
+            jdata, jerr := json.Marshal(jmsg)
+            if jerr != nil {
+                fmt.Printf("dl j marshaling error: ", jerr)
+            } else {
+
+                url := fmt.Sprintf("https://integrations.thethingsnetwork.org/ttn/api/v2/down/%s/%s?key=%s",
+                    ttnAppId, ttnProcessId, ttnAppAccessKey)
+
+                req, err := http.NewRequest("POST", url, bytes.NewBuffer(jdata))
+                req.Header.Set("User-Agent", "TTSERVE")
+                req.Header.Set("Content-Type", "text/plain")
+                httpclient := &http.Client{
+                    Timeout: time.Second * 15,
+                }
+                resp, err := httpclient.Do(req)
+                if err != nil {
+                    fmt.Printf("HTTP POST error: %v\n", err);
+                } else {
+                    resp.Body.Close()
+                }
+
+                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID))
+            }
         }
 
     }
@@ -740,7 +823,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 }
 
 // Notify Slack if there is an outage
-func ttnSubscriptionNotifier() {
+func ttnMQQTSubscriptionNotifier() {
     if (ttnEverConnected) {
         if (!ttnFullyConnected) {
             minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
@@ -757,15 +840,15 @@ func ttnSubscriptionNotifier() {
 }
 
 // Subscribe to TTN inbound messages, then monitor connection status
-func ttnSubscriptionMonitor() {
+func ttnMQQTSubscriptionMonitor() {
 
     for {
 
         // Allocate and set up the options
         mqttOpts := MQTT.NewClientOptions()
         mqttOpts.AddBroker(ttnServer)
-        mqttOpts.SetUsername(appId)
-        mqttOpts.SetPassword(appAccessKey)
+        mqttOpts.SetUsername(ttnAppId)
+        mqttOpts.SetPassword(ttnAppAccessKey)
 
         // Do NOT automatically reconnect upon failure
         mqttOpts.SetAutoReconnect(false)
@@ -867,14 +950,14 @@ func ttnOutboundPublish(devEui string, payload []byte) {
         if jerr != nil {
             fmt.Printf("j marshaling error: ", jerr)
         }
-        topic := appId + "/devices/" + devEui + "/down"
+        topic := ttnAppId + "/devices/" + devEui + "/down"
         fmt.Printf("Send %s: %s\n", topic, jdata)
         ttnMqttClient.Publish(topic, 0, false, jdata)
     }
 }
 
 // Handle inbound pulled from TTN's upstream mqtt message queue
-func ttnInboundHandler() {
+func ttnMQQTInboundHandler() {
 
     // Dequeue and process the messages as they're enqueued
     for msg := range ttnUpQ {
@@ -898,7 +981,7 @@ func ttnInboundHandler() {
                 AppReq.Location = ttn.Metadata.Gateways[0].GtwID
             }
 
-            AppReq.Transport = "ttn:" + AppReq.TTNDevID
+            AppReq.Transport = "ttn-mqqt:" + AppReq.TTNDevID
             fmt.Printf("\n%s Received %d-byte payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), AppReq.Transport)
             AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
             reqQ <- AppReq
@@ -912,6 +995,7 @@ func ttnInboundHandler() {
                 isAvailable, payload := TelecastOutboundPayload(deviceID)
                 if (isAvailable) {
                     ttnOutboundPublish(AppReq.TTNDevID, payload)
+                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", deviceID))
                 }
             }
         }
