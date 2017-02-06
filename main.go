@@ -29,7 +29,7 @@ const pollControlFilesQuickly bool = true
 const appEui string = "70B3D57EF0003810"
 const appAccessKey string = "ttn-account-v2.OFAp-VRdr1vrHqXf-iijSFaNdJSgIy5oVdmX2O2160g"
 const ttnServer string = "tcp://eu.thethings.network:1883"
-const ttnTopic string = "ttserve/devices/+/up"
+const ttnTopic string = "+/devices/+/up"
 
 // Safecast-related
 const SafecastV1UploadIP = "107.161.164.163"
@@ -824,7 +824,7 @@ func ttnSubscriptionMonitor() {
 
         // Connect to the service
         if token := ttnMqttClient.Connect(); token.Wait() && token.Error() != nil {
-            fmt.Printf("Error connecting to service: %s\n", token.Error())
+            fmt.Printf("Error connecting to TTN service: %s\n", token.Error())
             time.Sleep(60 * time.Second);
         } else {
 
