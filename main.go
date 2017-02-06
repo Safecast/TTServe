@@ -584,8 +584,10 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
         isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
         if (isAvailable) {
             jmsg := &DownlinkMessage{}
-            jmsg.PayloadRaw = payload
+			jmsg.DevID = ttn.DevID
             jmsg.FPort = 1
+			jmsg.Confirmed = false
+            jmsg.PayloadRaw = payload
             jdata, jerr := json.Marshal(jmsg)
             if jerr != nil {
                 fmt.Printf("dl j marshaling error: ", jerr)
