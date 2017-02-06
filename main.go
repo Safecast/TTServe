@@ -884,7 +884,7 @@ func ttnInboundHandler() {
         // Unmarshal the payload and extract the base64 data
         err := json.Unmarshal(msg.Payload(), &ttn)
         if err != nil {
-            fmt.Printf("\n*** Payload doesn't have TTN data ***\n%v\n%v\n\n", msg, msg.Payload())
+            fmt.Printf("\n*** Payload doesn't have TTN data *** %e\n%v\n%v\n\n", err, msg, msg.Payload())
         } else {
 
             // Copy fields to the app request structure
