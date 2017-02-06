@@ -594,6 +594,8 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
                 url := fmt.Sprintf("https://integrations.thethingsnetwork.org/ttn/api/v2/down/%s/%s?key=%s",
                     ttnAppId, ttnProcessId, ttnAppAccessKey)
 
+				fmt.Printf("\nHTTP POST to %s\n%s\n\n", url, jdata)
+
                 req, err := http.NewRequest("POST", url, bytes.NewBuffer(jdata))
                 req.Header.Set("User-Agent", "TTSERVE")
                 req.Header.Set("Content-Type", "text/plain")
