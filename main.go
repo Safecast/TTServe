@@ -593,7 +593,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
                 fmt.Printf("dl j marshaling error: ", jerr)
             } else {
 
-                url := fmt.Sprintf("https://integrations.thethingsnetwork.org/ttn/api/v2/down/%s/%s?key=%s",
+                url := fmt.Sprintf("http://integrations.thethingsnetwork.org/ttn/api/v2/down/%s/%s?key=%s",
                     ttnAppId, ttnProcessId, ttnAppAccessKey)
 
 				fmt.Printf("\nHTTP POST to %s\n%s\n\n", url, jdata)
