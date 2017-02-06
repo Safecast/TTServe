@@ -25,13 +25,11 @@ import (
 // Global debugging
 const pollControlFilesQuickly bool = true
 
-// Derived from "ttnctl applications", the AppEUI and its Access Key
-const appEui string = "70B3D57ED0000420"
-const appAccessKey string = "bgCzOOs/5K16cuwP3/sGP9sea/4jKFwFEdTbYHw2fRE="
-
-// Derived from https://staging.thethingsnetwork.org/wiki/Backend/Connect/Application
-const ttnServer string = "tcp://staging.thethingsnetwork.org:1883"
-const ttnTopic string = appEui + "/devices/+/up"
+// TTN subscription info updated 2017-02-06 when upgrading to V2
+const appEui string = "70B3D57EF0003810"
+const appAccessKey string = "ttn-account-v2.OFAp-VRdr1vrHqXf-iijSFaNdJSgIy5oVdmX2O2160g"
+const ttnServer string = "tcp://eu.thethings.network:1883"
+const ttnTopic string = "ttserve/devices/+/up"
 
 // Safecast-related
 const SafecastV1UploadIP = "107.161.164.163"
@@ -128,7 +126,7 @@ type IncomingReq struct {
     ServerTime string
     Transport  string
     UploadedAt string
-    TTNDevEUI  string
+    TTNDevID  string
 }
 var reqQ chan IncomingReq
 var reqQMaxLength = 0
@@ -861,10 +859,9 @@ func ttnSubscriptionMonitor() {
 // Send to a ttn device outbound
 func ttnOutboundPublish(devEui string, payload []byte) {
     if ttnFullyConnected {
-        jmsg := &DataDownAppReq{}
-        jmsg.Payload = payload
+        jmsg := &DownlinkMessage{}
+        jmsg.PayloadRaw = payload
         jmsg.FPort = 1
-        jmsg.TTL = "1h"
         jdata, jerr := json.Marshal(jmsg)
         if jerr != nil {
             fmt.Printf("j marshaling error: ", jerr)
@@ -880,26 +877,26 @@ func ttnInboundHandler() {
 
     // Dequeue and process the messages as they're enqueued
     for msg := range ttnUpQ {
-        var ttn DataUpAppReq
+        var ttn UplinkMessage
         var AppReq IncomingReq
 
         // Copy fields to the app request structure
-        AppReq.Payload = ttn.Payload
-        AppReq.TTNDevEUI = ttn.DevEUI
-        if (len(ttn.Metadata) >= 1) {
-            AppReq.Longitude = ttn.Metadata[0].Longitude
-            AppReq.Latitude = ttn.Metadata[0].Latitude
-            AppReq.Altitude = float32(ttn.Metadata[0].Altitude)
-            AppReq.Snr = ttn.Metadata[0].Lsnr
-            AppReq.Location = ttn.Metadata[0].GatewayEUI
-        }
+        AppReq.Payload = ttn.PayloadRaw
+        AppReq.TTNDevID = ttn.DevID
+        AppReq.Longitude = ttn.Metadata.Longitude
+        AppReq.Latitude = ttn.Metadata.Latitude
+        AppReq.Altitude = float32(ttn.Metadata.Altitude)
+		if (len(ttn.Metadata.Gateways) >= 1) {
+	        AppReq.Snr = ttn.Metadata.Gateways[0].SNR
+	        AppReq.Location = ttn.Metadata.Gateways[0].GtwID
+		}
 
         // Unmarshal the payload and extract the base64 data
         err := json.Unmarshal(msg.Payload(), &ttn)
         if err != nil {
             fmt.Printf("*** Payload doesn't have TTN data ***\n")
         } else {
-            AppReq.Transport = "ttn:" + AppReq.TTNDevEUI
+            AppReq.Transport = "ttn:" + AppReq.TTNDevID
             fmt.Printf("\n%s Received %d-byte payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), AppReq.Transport)
             AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
             reqQ <- AppReq
@@ -912,7 +909,7 @@ func ttnInboundHandler() {
             if isAvailable {
                 isAvailable, payload := TelecastOutboundPayload(deviceID)
                 if (isAvailable) {
-                    ttnOutboundPublish(AppReq.TTNDevEUI, payload)
+                    ttnOutboundPublish(AppReq.TTNDevID, payload)
                 }
             }
         }
@@ -1004,7 +1001,7 @@ func commonRequestHandler() {
 
             // Handle messages from non-safecast devices
         default:
-            ProcessTelecastMessage(msg, AppReq.TTNDevEUI)
+            ProcessTelecastMessage(msg, AppReq.TTNDevID)
         }
     }
 }

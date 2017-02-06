@@ -21,7 +21,7 @@ type SafecastDataV1 struct {
     BatVoltage		string `json:"bat_voltage,omitempty"`   // 0-N volts
     BatSOC			string `json:"bat_soc,omitempty"`       // 0%-100%
     BatCurrent		string `json:"bat_current,omitempty"`   // -N to +N amps
-    WirelessSNR		string `json:"wireless_snr,omitempty"`  // -127db to +127db
+    WirelessSNR		string `json:"wireless_snr,omitempty"`	// gateway signal strength
     EnvTemp			string `json:"env_temp,omitempty"`      // Degrees centigrade
     EnvHumid		string `json:"env_humid,omitempty"`     // Percent RH
     EnvPress		string `json:"env_press,omitempty"`     // Pascals
