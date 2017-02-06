@@ -291,7 +291,7 @@ func healthCheck() string {
     } else {
         s = fmt.Sprintf("%s last restarted %dm ago", TTServerIP, minutesAgo)
     }
-	return s
+    return s
 }
 
 // Check to see if we should restart
@@ -313,7 +313,7 @@ func ControlFileCheck() {
     // Heath
     if (ControlFileTime(TTServerHealthControlFile, "") != TTServerHealthTime) {
         sendToSafecastOps(healthCheck())
-	    TTServerHealthTime = ControlFileTime(TTServerHealthControlFile, "")
+        TTServerHealthTime = ControlFileTime(TTServerHealthControlFile, "")
     }
 
 }
@@ -881,22 +881,23 @@ func ttnInboundHandler() {
         var ttn UplinkMessage
         var AppReq IncomingReq
 
-        // Copy fields to the app request structure
-        AppReq.Payload = ttn.PayloadRaw
-        AppReq.TTNDevID = ttn.DevID
-        AppReq.Longitude = ttn.Metadata.Longitude
-        AppReq.Latitude = ttn.Metadata.Latitude
-        AppReq.Altitude = float32(ttn.Metadata.Altitude)
-		if (len(ttn.Metadata.Gateways) >= 1) {
-	        AppReq.Snr = ttn.Metadata.Gateways[0].SNR
-	        AppReq.Location = ttn.Metadata.Gateways[0].GtwID
-		}
-
         // Unmarshal the payload and extract the base64 data
         err := json.Unmarshal(msg.Payload(), &ttn)
         if err != nil {
-            fmt.Printf("*** Payload doesn't have TTN data ***\n")
+            fmt.Printf("*** Payload doesn't have TTN data ***\n%v\n%v", msg, msg.Payload())
         } else {
+
+            // Copy fields to the app request structure
+            AppReq.Payload = ttn.PayloadRaw
+            AppReq.TTNDevID = ttn.DevID
+            AppReq.Longitude = ttn.Metadata.Longitude
+            AppReq.Latitude = ttn.Metadata.Latitude
+            AppReq.Altitude = float32(ttn.Metadata.Altitude)
+            if (len(ttn.Metadata.Gateways) >= 1) {
+                AppReq.Snr = ttn.Metadata.Gateways[0].SNR
+                AppReq.Location = ttn.Metadata.Gateways[0].GtwID
+            }
+
             AppReq.Transport = "ttn:" + AppReq.TTNDevID
             fmt.Printf("\n%s Received %d-byte payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), AppReq.Transport)
             AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
