@@ -32,6 +32,7 @@ const ttnProcessId string = "ttserve"
 const ttnAppAccessKey string = "ttn-account-v2.OFAp-VRdr1vrHqXf-iijSFaNdJSgIy5oVdmX2O2160g"
 const ttnServer string = "tcp://eu.thethings.network:1883"
 const ttnTopic string = "+/devices/+/up"
+const ttnDownlinkURL = "https://integrations.thethingsnetwork.org/ttn-us-west/api/v2/down/%s/%s?key=%s"
 
 // Safecast-related
 const SafecastV1UploadIP = "107.161.164.163"
@@ -593,8 +594,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
                 fmt.Printf("dl j marshaling error: ", jerr)
             } else {
 
-                url := fmt.Sprintf("https://integrations.thethingsnetwork.org/ttn/api/v2/down/%s/%s?key=%s",
-                    ttnAppId, ttnProcessId, ttnAppAccessKey)
+                url := fmt.Sprintf(ttnDownlinkURL, ttnAppId, ttnProcessId, ttnAppAccessKey)
 
 				fmt.Printf("\nHTTP POST to %s\n%s\n\n", url, jdata)
 
