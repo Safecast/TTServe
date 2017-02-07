@@ -26,7 +26,7 @@ import (
 const pollControlFilesQuickly bool = true
 
 // TTN subscription info updated 2017-02-06 when upgrading to V2
-const ttnMQQTMode = false
+const ttnMQQTMode = true
 const ttnAppId string = "ttserve"
 const ttnProcessId string = "ttserve"
 const ttnAppAccessKey string = "ttn-account-v2.OFAp-VRdr1vrHqXf-iijSFaNdJSgIy5oVdmX2O2160g"
