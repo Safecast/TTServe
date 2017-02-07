@@ -22,13 +22,8 @@ type safecastCommand struct {
 
 // Get a Telecast Device ID number for this message
 func TelecastDeviceID (msg *teletype.Telecast) uint32 {
-    if msg.DeviceIDNumber != nil {
-        return msg.GetDeviceIDNumber()
-    } else if msg.DeviceIDString != nil {
-        i64, err := strconv.ParseInt(msg.GetDeviceIDString(), 10, 64)
-        if err == nil {
-            return uint32(i64)
-        }
+    if msg.DeviceID != nil {
+        return msg.GetDeviceID()
     }
     return 0
 }
@@ -192,7 +187,7 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
     // Marshal the command into a telecast message
     deviceType := teletype.Telecast_TTSERVE
     tmsg := &teletype.Telecast{}
-    tmsg.DeviceIDNumber = &deviceID;
+    tmsg.DeviceID = &deviceID;
     tmsg.DeviceType = &deviceType
     tmsg.Message = proto.String(cmd.Command)
     tdata, terr := proto.Marshal(tmsg)

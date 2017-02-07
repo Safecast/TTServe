@@ -23,7 +23,7 @@ type stampFile struct {
     Stamp           uint32  `json:"Stamp,omitempty"`
     Latitude        float32 `json:"Latitude,omitempty"`
     Longitude       float32 `json:"Longitude,omitempty"`
-    Altitude        uint32  `json:"Altitude,omitempty"`
+    Altitude        int32   `json:"Altitude,omitempty"`
     CapturedAtDate  uint32  `json:"CapturedAtDate,omitempty"`
     CapturedAtTime  uint32  `json:"CapturedAtTime,omitempty"`
 }
@@ -51,10 +51,10 @@ func stampSetOrApply(message *teletype.Telecast) (isValidMessage bool) {
     var CacheEntry int = 0
 
     // Device ID is required here, but that doesn't mean it's not a valid message
-    if message.DeviceIDNumber == nil {
+    if message.DeviceID == nil {
         return true;
     }
-    DeviceID := message.GetDeviceIDNumber()
+    DeviceID := message.GetDeviceID()
 
     // Find or create the cache entry for this device
     found := false
