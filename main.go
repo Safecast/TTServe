@@ -593,7 +593,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
                 fmt.Printf("dl j marshaling error: ", jerr)
             } else {
 
-                url := fmt.Sprintf("http://integrations.thethingsnetwork.org/ttn/api/v2/down/%s/%s?key=%s",
+                url := fmt.Sprintf("https://integrations.thethingsnetwork.org/ttn/api/v2/down/%s/%s?key=%s",
                     ttnAppId, ttnProcessId, ttnAppAccessKey)
 
 				fmt.Printf("\nHTTP POST to %s\n%s\n\n", url, jdata)
@@ -606,12 +606,13 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
                 }
                 resp, err := httpclient.Do(req)
                 if err != nil {
-                    fmt.Printf("HTTP POST error: %v\n", err);
+                    fmt.Printf("\n*** HTTPS POST error: %v\n\n", err);
+	                sendToSafecastOps(fmt.Sprintf("Error transmitting command to device %d: %v\n", ReplyToDeviceID, err))
                 } else {
                     resp.Body.Close()
+	                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID))
                 }
 
-                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID))
             }
         }
 
