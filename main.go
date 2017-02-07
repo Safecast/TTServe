@@ -498,16 +498,26 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Messages directly from devices are hexified
     case "TTNODE": {
+        var ttd TTNodeReq
 
-        // The buffer format is hexified
-        buf, err := hex.DecodeString(string(body))
+        err = json.Unmarshal(body, &ttd)
         if err != nil {
-            fmt.Printf("Hex decoding error: ", err)
-            return
-        }
 
+			// The old (pre 2017-02-07) way we used to encode is hex.
+			// After the single solarproto unit is upgraded, we can remove this.
+	        buf, err := hex.DecodeString(string(body))
+	        if err != nil {
+	            fmt.Printf("Hex decoding error: ", err)
+	            return
+	        }
+
+			// Simulate receipt of the new-style payload
+			ttd.Payload = buf
+			
+		}
+		
         // Process it
-        ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "http:"+ipv4(req.RemoteAddr), buf)
+        ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "http:"+ipv4(req.RemoteAddr), ttd.Payload)
         CountHTTPDevice++;
 
     }
