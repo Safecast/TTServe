@@ -498,26 +498,16 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Messages directly from devices are hexified
     case "TTNODE": {
-        var ttd TTNodeReq
 
-        err = json.Unmarshal(body, &ttd)
+        // After the single solarproto unit is upgraded, we can remove this.
+        buf, err := hex.DecodeString(string(body))
         if err != nil {
+            fmt.Printf("Hex decoding error: %v\n%v\n", err, string(body))
+            return
+        }
 
-			// The old (pre 2017-02-07) way we used to encode is hex.
-			// After the single solarproto unit is upgraded, we can remove this.
-	        buf, err := hex.DecodeString(string(body))
-	        if err != nil {
-	            fmt.Printf("Hex decoding error: ", err)
-	            return
-	        }
-
-			// Simulate receipt of the new-style payload
-			ttd.Payload = buf
-			
-		}
-		
         // Process it
-        ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "http:"+ipv4(req.RemoteAddr), ttd.Payload)
+        ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "http:"+ipv4(req.RemoteAddr), buf)
         CountHTTPDevice++;
 
     }
@@ -542,6 +532,8 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         // See if there's an outbound message waiting for this device.
         isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
         if (isAvailable) {
+
+			// Responses for now are always hex-encoded for easy device processing
             hexPayload := hex.EncodeToString(payload)
             io.WriteString(rw, hexPayload)
             sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID))
@@ -595,9 +587,9 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
         isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
         if (isAvailable) {
             jmsg := &DownlinkMessage{}
-			jmsg.DevID = ttn.DevID
+            jmsg.DevID = ttn.DevID
             jmsg.FPort = 1
-			jmsg.Confirmed = false
+            jmsg.Confirmed = false
             jmsg.PayloadRaw = payload
             jdata, jerr := json.Marshal(jmsg)
             if jerr != nil {
@@ -606,7 +598,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 
                 url := fmt.Sprintf(ttnDownlinkURL, ttnAppId, ttnProcessId, ttnAppAccessKey)
 
-				fmt.Printf("\nHTTP POST to %s\n%s\n\n", url, jdata)
+                fmt.Printf("\nHTTP POST to %s\n%s\n\n", url, jdata)
 
                 req, err := http.NewRequest("POST", url, bytes.NewBuffer(jdata))
                 req.Header.Set("User-Agent", "TTSERVE")
@@ -617,10 +609,10 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
                 resp, err := httpclient.Do(req)
                 if err != nil {
                     fmt.Printf("\n*** HTTPS POST error: %v\n\n", err);
-	                sendToSafecastOps(fmt.Sprintf("Error transmitting command to device %d: %v\n", ReplyToDeviceID, err))
+                    sendToSafecastOps(fmt.Sprintf("Error transmitting command to device %d: %v\n", ReplyToDeviceID, err))
                 } else {
                     resp.Body.Close()
-	                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID))
+                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID))
                 }
 
             }
