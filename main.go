@@ -32,7 +32,7 @@ const ttnProcessId string = "ttserve"
 const ttnAppAccessKey string = "ttn-account-v2.OFAp-VRdr1vrHqXf-iijSFaNdJSgIy5oVdmX2O2160g"
 const ttnServer string = "tcp://eu.thethings.network:1883"
 const ttnTopic string = "+/devices/+/up"
-const ttnDownlinkURL = "https://integrations.thethingsnetwork.org/ttn-us-west/api/v2/down/%s/%s?key=%s"
+const ttnDownlinkURL = "https://integrations.thethingsnetwork.org/ttn-eu/api/v2/down/%s/%s?key=%s"
 
 // Safecast-related
 const SafecastV1UploadIP = "107.161.164.163"
