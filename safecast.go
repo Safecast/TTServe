@@ -1347,18 +1347,22 @@ func SafecastGetSummary(DeviceID uint32) string {
 		s += fmt.Sprintf(" %.2fv", value.BatVoltage)
 	}
 	if value.Cpm0 != 0 {
-		s += fmt.Sprintf(" %dcpm", value.Cpm0)
+		s += fmt.Sprintf(" %.0fcpm", value.Cpm0)
 	}
 	if value.Cpm1 != 0 {
-		s += fmt.Sprintf(" %dcpm", value.Cpm1)
+		s += fmt.Sprintf(" %.1fcpm", value.Cpm1)
 	}
 	if value.OpcCsecs != 0 {
-		s += fmt.Sprintf(" %.0f/%.0f/%.0f", value.OpcPm01_0, value.OpcPm02_5, value.OpcPm10_0)
+		s += fmt.Sprintf(" %.2f/%.2f/%.2f", value.OpcPm01_0, value.OpcPm02_5, value.OpcPm10_0)
 	} else if value.PmsCsecs != 0 {
-		s += fmt.Sprintf(" %0.2f/%0.2f/%0.2f", value.PmsPm01_0, value.PmsPm02_5, value.PmsPm10_0)
+		// PMS only measures in integers, so display it more compactly
+		var a uint32 = uint32(value.PmsPm01_0)
+		var b uint32 = uint32(value.PmsPm02_5)
+		var c uint32 = uint32(value.PmsPm10_0)
+		s += fmt.Sprintf(" %d/%d/%d", a, b, c)
 	}
 	if value.Latitude != 0.0 {
-        s += fmt.Sprintf(" <http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps> ", value.Latitude, value.Longitude)
+        s += fmt.Sprintf(" <http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps>", value.Latitude, value.Longitude)
 	}
 	
 	if (s == "") {
