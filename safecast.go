@@ -35,7 +35,7 @@ var httpTransactionErrorFirst bool = true
 // Describes every device that has sent us a message
 type seenDevice struct {
     deviceid            uint32
-	deviceSummary	    string
+    deviceSummary       string
     seen                time.Time
     everRecentlySeen    bool
     notifiedAsUnseen    bool
@@ -149,21 +149,21 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     if msg.Latitude != nil {
         scV2.Latitude =  msg.GetLatitude()
     } else {
-		if (addFakeLocation) {
+        if (addFakeLocation) {
             scV2.Latitude = defaultLat
-		}
+        }
     }
     if msg.Longitude != nil {
         scV2.Longitude = msg.GetLongitude()
     } else {
-		if (addFakeLocation) {
+        if (addFakeLocation) {
             scV2.Longitude = defaultLon
         }
     }
     if msg.Altitude != nil {
         scV2.Height = float32(msg.GetAltitude())
     } else {
-		if (addFakeLocation) {
+        if (addFakeLocation) {
             scV2.Height = defaultAlt
         }
     }
@@ -173,59 +173,53 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     // after the Safecast service is upgraded.
     scV2a := scV2
 
-    // Process the most basic message types
-    if msg.StatsUptimeMinutes != nil {
+    // A stats message
+    scV2a.StatsUptimeMinutes = msg.GetStatsUptimeMinutes()
+    if (msg.StatsUptimeDays != nil) {
+        scV2a.StatsUptimeMinutes += msg.GetStatsUptimeDays() * 24 * 60
+    }
+    if (msg.StatsAppVersion != nil) {
+        scV2a.StatsAppVersion = msg.GetStatsAppVersion()
+    }
+    if (msg.StatsDeviceParams != nil) {
+        scV2a.StatsDeviceParams = msg.GetStatsDeviceParams()
+    }
+    if (msg.StatsTransmittedBytes != nil) {
+        scV2a.StatsTransmittedBytes = msg.GetStatsTransmittedBytes()
+    }
+    if (msg.StatsReceivedBytes != nil) {
+        scV2a.StatsReceivedBytes = msg.GetStatsReceivedBytes()
+    }
+    if (msg.StatsCommsResets != nil) {
+        scV2a.StatsCommsResets = msg.GetStatsCommsResets()
+    }
+    if (msg.StatsCommsPowerFails != nil) {
+        scV2a.StatsCommsPowerFails = msg.GetStatsCommsPowerFails()
+    }
+    if (msg.StatsOneshots != nil) {
+        scV2a.StatsOneshots = msg.GetStatsOneshots()
+    }
+    if (msg.StatsOneshotSeconds != nil) {
+        scV2a.StatsOneshotSeconds = msg.GetStatsOneshotSeconds()
+    }
+    if (msg.StatsMotiondrops != nil) {
+        scV2a.StatsMotiondrops = msg.GetStatsMotiondrops()
+    }
+    if (msg.StatsIccid != nil) {
+        scV2a.StatsIccid = msg.GetStatsIccid()
+    }
+    if (msg.StatsCpsi != nil) {
+        scV2a.StatsCpsi = msg.GetStatsCpsi()
+    }
+    if (msg.StatsDfu != nil) {
+        scV2a.StatsDfu = msg.GetStatsDfu()
+    }
+    if (msg.StatsDeviceInfo != nil) {
+        scV2a.StatsDeviceInfo = msg.GetStatsDeviceInfo()
+    }
 
-        // A stats message
-        scV2a.StatsUptimeMinutes = msg.GetStatsUptimeMinutes()
-        if (msg.StatsUptimeDays != nil) {
-            scV2a.StatsUptimeMinutes += msg.GetStatsUptimeDays() * 24 * 60
-        }
-        if (msg.StatsAppVersion != nil) {
-            scV2a.StatsAppVersion = msg.GetStatsAppVersion()
-        }
-        if (msg.StatsDeviceParams != nil) {
-            scV2a.StatsDeviceParams = msg.GetStatsDeviceParams()
-        }
-        if (msg.StatsTransmittedBytes != nil) {
-            scV2a.StatsTransmittedBytes = msg.GetStatsTransmittedBytes()
-        }
-        if (msg.StatsReceivedBytes != nil) {
-            scV2a.StatsReceivedBytes = msg.GetStatsReceivedBytes()
-        }
-        if (msg.StatsCommsResets != nil) {
-            scV2a.StatsCommsResets = msg.GetStatsCommsResets()
-        }
-        if (msg.StatsCommsPowerFails != nil) {
-            scV2a.StatsCommsPowerFails = msg.GetStatsCommsPowerFails()
-        }
-        if (msg.StatsOneshots != nil) {
-            scV2a.StatsOneshots = msg.GetStatsOneshots()
-        }
-        if (msg.StatsOneshotSeconds != nil) {
-            scV2a.StatsOneshotSeconds = msg.GetStatsOneshotSeconds()
-        }
-        if (msg.StatsMotiondrops != nil) {
-            scV2a.StatsMotiondrops = msg.GetStatsMotiondrops()
-        }
-        if (msg.StatsIccid != nil) {
-            scV2a.StatsIccid = msg.GetStatsIccid()
-        }
-        if (msg.StatsCpsi != nil) {
-            scV2a.StatsCpsi = msg.GetStatsCpsi()
-        }
-        if (msg.StatsDfu != nil) {
-            scV2a.StatsDfu = msg.GetStatsDfu()
-        }
-        if (msg.StatsDeviceInfo != nil) {
-            scV2a.StatsDeviceInfo = msg.GetStatsDeviceInfo()
-        }
-
-    } else if msg.Message != nil {
-
-        // A text message.
+    if msg.Message != nil {
         scV2a.Message = msg.GetMessage()
-
     }
 
     if msg.BatteryVoltage != nil {
@@ -254,9 +248,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     if msg.WirelessSNR != nil {
         scV2a.WirelessSNR = msg.GetWirelessSNR()
     } else {
-		if (defaultSNR != 0.0) {
-			scV2a.WirelessSNR = defaultSNR
-		}
+        if (defaultSNR != 0.0) {
+            scV2a.WirelessSNR = defaultSNR
+        }
     }
 
     if msg.PmsPm01_0 != nil {
@@ -321,15 +315,15 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV2a.OpcCsecs = msg.GetOpcCsecs()
     }
 
-	// Bring CPM over
+    // Bring CPM over
     if (msg.Cpm0 != nil) {
         scV2a.Cpm0 = float32(msg.GetCpm0())
-	}
+    }
     if (msg.Cpm1 != nil) {
         scV2a.Cpm1 = float32(msg.GetCpm1())
     }
-	
-	// Log and upload
+
+    // Log and upload
     SafecastWriteToLogs(UploadedAt, scV2a)
     SafecastV2Upload(UploadedAt, scV2a)
 
@@ -520,7 +514,7 @@ func sendExpiredSafecastDevicesToSlack() {
                 Str0 := file.Name()
                 Str1 := strings.Split(Str0, ".")[0]
                 i64, _ := strconv.ParseUint(Str1, 10, 32)
-				deviceID := uint32(i64)
+                deviceID := uint32(i64)
 
                 // Track the device
                 if (deviceID != 0) {
@@ -596,11 +590,11 @@ func sendSafecastDeviceSummaryToSlack() {
             }
         }
 
-		// Append device summary
-		summary := SafecastGetSummary(id)
-		if summary != "" {
-			s += " " + summary
-		}
+        // Append device summary
+        summary := SafecastGetSummary(id)
+        if summary != "" {
+            s += " " + summary
+        }
 
     }
 
@@ -975,10 +969,10 @@ func SafecastV1toV2(v1 SafecastDataV1) SafecastDataV2 {
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
 func SafecastV1Upload(scV1 SafecastDataV1, url string) bool {
 
-	// For V1, We've found that in certain cases the server gets overloaded.  When we run into those cases,
-	// turn this OFF and things will slow down.  (Obviously this is not the preferred mode of operation,
-	// because it creates a huge queue of things waiting to be uploaded.)
-	var parallelV1Uploads = false
+    // For V1, We've found that in certain cases the server gets overloaded.  When we run into those cases,
+    // turn this OFF and things will slow down.  (Obviously this is not the preferred mode of operation,
+    // because it creates a huge queue of things waiting to be uploaded.)
+    var parallelV1Uploads = false
 
     if (parallelV1Uploads) {
         go doUploadToSafecastV1(scV1, url)
@@ -1081,301 +1075,301 @@ func doUploadToSafecastV2(UploadedAt string, scV2 SafecastDataV2, url string) bo
 
 // Save the last value in a file
 func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
-	var ChangedLocation = false
-	var ChangedPms = false
-	var ChangedOpc = false
-	var ChangedGeiger = false
-	var ChangedTransport = false
+    var ChangedLocation = false
+    var ChangedPms = false
+    var ChangedOpc = false
+    var ChangedGeiger = false
+    var ChangedTransport = false
 
-	// Use the supplied upload time as our modification time
-	sc.UploadedAt = UploadedAt
-	
-	// Generate the filename, which we'll use twice
+    // Use the supplied upload time as our modification time
+    sc.UploadedAt = UploadedAt
+
+    // Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", sc.DeviceID) + ".json"
 
     // Read the file if it exists, else blank out value
     value := SafecastValue{}
     file, err := ioutil.ReadFile(filename)
     if err == nil {
-	    // Read it as JSON
-	    err = json.Unmarshal(file, &value)
-	    if err != nil {
-		    value = SafecastValue{}
-		}
+        // Read it as JSON
+        err = json.Unmarshal(file, &value)
+        if err != nil {
+            value = SafecastValue{}
+        }
     }
 
-	// Update the current values, but only if modified
-	value.DeviceID = sc.DeviceID;	
-	if sc.UploadedAt != "" {
-		value.UploadedAt = sc.UploadedAt
-	}
-	if sc.CapturedAt != "" {
-		value.CapturedAt = sc.CapturedAt
-	}
-	if sc.Latitude != 0 && sc.Longitude != 0 {
-		if (sc.Latitude != value.Latitude || sc.Longitude != value.Longitude) {
-			ChangedLocation = true
-		}
-		value.Latitude = sc.Latitude
-		value.Longitude = sc.Longitude
-		value.Height = sc.Height
-	}
-	if sc.BatVoltage != 0 {
-		value.BatVoltage = sc.BatVoltage
-		value.BatSOC = sc.BatSOC
-		value.BatCurrent = sc.BatCurrent
-	}
-	if sc.EnvTemp != 0 {
-		value.EnvTemp = sc.EnvTemp
-		value.EnvHumid = sc.EnvHumid
-		value.EnvPress = sc.EnvPress
-	}
+    // Update the current values, but only if modified
+    value.DeviceID = sc.DeviceID;
+    if sc.UploadedAt != "" {
+        value.UploadedAt = sc.UploadedAt
+    }
+    if sc.CapturedAt != "" {
+        value.CapturedAt = sc.CapturedAt
+    }
+    if sc.Latitude != 0 && sc.Longitude != 0 {
+        if (sc.Latitude != value.Latitude || sc.Longitude != value.Longitude) {
+            ChangedLocation = true
+        }
+        value.Latitude = sc.Latitude
+        value.Longitude = sc.Longitude
+        value.Height = sc.Height
+    }
+    if sc.BatVoltage != 0 {
+        value.BatVoltage = sc.BatVoltage
+        value.BatSOC = sc.BatSOC
+        value.BatCurrent = sc.BatCurrent
+    }
+    if sc.EnvTemp != 0 {
+        value.EnvTemp = sc.EnvTemp
+        value.EnvHumid = sc.EnvHumid
+        value.EnvPress = sc.EnvPress
+    }
     if (float32(sc.PmsCsecs) + sc.PmsPm01_0 + sc.PmsPm02_5 + sc.PmsPm10_0) != 0 {
-		if sc.PmsCsecs != value.PmsCsecs || sc.PmsPm01_0 != value.PmsPm01_0 || sc.PmsPm02_5 != value.PmsPm02_5 || sc.PmsPm10_0 != value.PmsPm10_0 {
-			ChangedPms = true
-		}
-		value.PmsPm01_0 = sc.PmsPm01_0
-		value.PmsPm02_5 = sc.PmsPm02_5
-		value.PmsPm10_0 = sc.PmsPm10_0
-		value.PmsC00_30 = sc.PmsC00_30
-		value.PmsC00_50 = sc.PmsC00_50
-		value.PmsC01_00 = sc.PmsC01_00
-		value.PmsC02_50 = sc.PmsC02_50
-		value.PmsC05_00 = sc.PmsC05_00
-		value.PmsC10_00 = sc.PmsC10_00
-		value.PmsCsecs = sc.PmsCsecs
-	}
+        if sc.PmsCsecs != value.PmsCsecs || sc.PmsPm01_0 != value.PmsPm01_0 || sc.PmsPm02_5 != value.PmsPm02_5 || sc.PmsPm10_0 != value.PmsPm10_0 {
+            ChangedPms = true
+        }
+        value.PmsPm01_0 = sc.PmsPm01_0
+        value.PmsPm02_5 = sc.PmsPm02_5
+        value.PmsPm10_0 = sc.PmsPm10_0
+        value.PmsC00_30 = sc.PmsC00_30
+        value.PmsC00_50 = sc.PmsC00_50
+        value.PmsC01_00 = sc.PmsC01_00
+        value.PmsC02_50 = sc.PmsC02_50
+        value.PmsC05_00 = sc.PmsC05_00
+        value.PmsC10_00 = sc.PmsC10_00
+        value.PmsCsecs = sc.PmsCsecs
+    }
     if (float32(sc.OpcCsecs) + sc.OpcPm01_0 + sc.OpcPm02_5 + sc.OpcPm10_0) != 0 {
-		if sc.OpcCsecs != value.OpcCsecs || sc.OpcPm01_0 != value.OpcPm01_0 || sc.OpcPm02_5 != value.OpcPm02_5 || sc.OpcPm10_0 != value.OpcPm10_0 {
-			ChangedOpc = true
-		}
-		value.OpcPm01_0 = sc.OpcPm01_0
-		value.OpcPm02_5 = sc.OpcPm02_5
-		value.OpcPm10_0 = sc.OpcPm10_0
-		value.OpcC00_38 = sc.OpcC00_38
-		value.OpcC00_54 = sc.OpcC00_54
-		value.OpcC01_00 = sc.OpcC01_00
-		value.OpcC02_10 = sc.OpcC02_10
-		value.OpcC05_00 = sc.OpcC05_00
-		value.OpcC10_00 = sc.OpcC10_00
-		value.OpcCsecs = sc.OpcCsecs
-	}
-	if sc.Cpm0 != 0 {
-		if sc.Cpm0 != value.Cpm0 {
-			ChangedGeiger = true
-		}
-		value.Cpm0 = sc.Cpm0
-	}
-	if sc.Cpm1 != 0 {
-		if sc.Cpm1 != value.Cpm1 {
-			ChangedGeiger = true
-		}
-		value.Cpm1 = sc.Cpm1
-	}
-	if sc.Transport != "" {
-		if sc.Transport != value.Transport {
-			ChangedTransport = true
-		}
-		value.Transport = sc.Transport
-	}
-	if sc.StatsUptimeMinutes != 0 {
-		value.StatsUptimeMinutes = sc.StatsUptimeMinutes
-	}
-	if sc.StatsAppVersion != "" {
-		value.StatsAppVersion = sc.StatsAppVersion
-	}
-	if sc.StatsDeviceParams != "" {
-		value.StatsDeviceParams = sc.StatsDeviceParams
-	}
-	if sc.StatsTransmittedBytes != 0 {
-		value.StatsTransmittedBytes = sc.StatsTransmittedBytes
-	}
-	if sc.StatsReceivedBytes != 0 {
-		value.StatsReceivedBytes = sc.StatsReceivedBytes
-	}
-	if sc.StatsCommsResets != 0 {
-		value.StatsCommsResets = sc.StatsCommsResets
-	}
-	if sc.StatsCommsFails != 0 {
-		value.StatsCommsFails = sc.StatsCommsFails
-	}
-	if sc.StatsCommsPowerFails != 0 {
-		value.StatsCommsPowerFails = sc.StatsCommsPowerFails
-	}
-	if sc.StatsDeviceRestarts != 0 {
-		value.StatsDeviceRestarts = sc.StatsDeviceRestarts
-	}
-	if sc.StatsMotiondrops != 0 {
-		value.StatsMotiondrops = sc.StatsMotiondrops
-	}
-	if sc.StatsOneshots != 0 {
-		value.StatsOneshots = sc.StatsOneshots
-	}
-	if sc.StatsOneshotSeconds != 0 {
-		value.StatsOneshotSeconds = sc.StatsOneshotSeconds
-	}
-	if sc.StatsIccid != "" {
-		value.StatsIccid = sc.StatsIccid
-	}
-	if sc.StatsCpsi != "" {
-		value.StatsCpsi = sc.StatsCpsi
-	}
-	if sc.StatsDfu != "" {
-		value.StatsDfu = sc.StatsDfu
-	}
-	if sc.StatsDeviceInfo != "" {
-		value.StatsDeviceInfo = sc.StatsDeviceInfo
-	}
-	if sc.StatsFreeMem != 0 {
-		value.StatsFreeMem = sc.StatsFreeMem
-	}
-	if sc.StatsNTPCount != 0 {
-		value.StatsNTPCount = sc.StatsNTPCount
-	}
-	if sc.StatsLastFailure != "" {
-		value.StatsLastFailure = sc.StatsLastFailure
-	}
-	if sc.StatsStatus != "" {
-		value.StatsStatus = sc.StatsStatus
-	}
-	if sc.Message != "" {
-		value.Message = sc.Message
-	}
+        if sc.OpcCsecs != value.OpcCsecs || sc.OpcPm01_0 != value.OpcPm01_0 || sc.OpcPm02_5 != value.OpcPm02_5 || sc.OpcPm10_0 != value.OpcPm10_0 {
+            ChangedOpc = true
+        }
+        value.OpcPm01_0 = sc.OpcPm01_0
+        value.OpcPm02_5 = sc.OpcPm02_5
+        value.OpcPm10_0 = sc.OpcPm10_0
+        value.OpcC00_38 = sc.OpcC00_38
+        value.OpcC00_54 = sc.OpcC00_54
+        value.OpcC01_00 = sc.OpcC01_00
+        value.OpcC02_10 = sc.OpcC02_10
+        value.OpcC05_00 = sc.OpcC05_00
+        value.OpcC10_00 = sc.OpcC10_00
+        value.OpcCsecs = sc.OpcCsecs
+    }
+    if sc.Cpm0 != 0 {
+        if sc.Cpm0 != value.Cpm0 {
+            ChangedGeiger = true
+        }
+        value.Cpm0 = sc.Cpm0
+    }
+    if sc.Cpm1 != 0 {
+        if sc.Cpm1 != value.Cpm1 {
+            ChangedGeiger = true
+        }
+        value.Cpm1 = sc.Cpm1
+    }
+    if sc.Transport != "" {
+        if sc.Transport != value.Transport {
+            ChangedTransport = true
+        }
+        value.Transport = sc.Transport
+    }
+    if sc.StatsUptimeMinutes != 0 {
+        value.StatsUptimeMinutes = sc.StatsUptimeMinutes
+    }
+    if sc.StatsAppVersion != "" {
+        value.StatsAppVersion = sc.StatsAppVersion
+    }
+    if sc.StatsDeviceParams != "" {
+        value.StatsDeviceParams = sc.StatsDeviceParams
+    }
+    if sc.StatsTransmittedBytes != 0 {
+        value.StatsTransmittedBytes = sc.StatsTransmittedBytes
+    }
+    if sc.StatsReceivedBytes != 0 {
+        value.StatsReceivedBytes = sc.StatsReceivedBytes
+    }
+    if sc.StatsCommsResets != 0 {
+        value.StatsCommsResets = sc.StatsCommsResets
+    }
+    if sc.StatsCommsFails != 0 {
+        value.StatsCommsFails = sc.StatsCommsFails
+    }
+    if sc.StatsCommsPowerFails != 0 {
+        value.StatsCommsPowerFails = sc.StatsCommsPowerFails
+    }
+    if sc.StatsDeviceRestarts != 0 {
+        value.StatsDeviceRestarts = sc.StatsDeviceRestarts
+    }
+    if sc.StatsMotiondrops != 0 {
+        value.StatsMotiondrops = sc.StatsMotiondrops
+    }
+    if sc.StatsOneshots != 0 {
+        value.StatsOneshots = sc.StatsOneshots
+    }
+    if sc.StatsOneshotSeconds != 0 {
+        value.StatsOneshotSeconds = sc.StatsOneshotSeconds
+    }
+    if sc.StatsIccid != "" {
+        value.StatsIccid = sc.StatsIccid
+    }
+    if sc.StatsCpsi != "" {
+        value.StatsCpsi = sc.StatsCpsi
+    }
+    if sc.StatsDfu != "" {
+        value.StatsDfu = sc.StatsDfu
+    }
+    if sc.StatsDeviceInfo != "" {
+        value.StatsDeviceInfo = sc.StatsDeviceInfo
+    }
+    if sc.StatsFreeMem != 0 {
+        value.StatsFreeMem = sc.StatsFreeMem
+    }
+    if sc.StatsNTPCount != 0 {
+        value.StatsNTPCount = sc.StatsNTPCount
+    }
+    if sc.StatsLastFailure != "" {
+        value.StatsLastFailure = sc.StatsLastFailure
+    }
+    if sc.StatsStatus != "" {
+        value.StatsStatus = sc.StatsStatus
+    }
+    if sc.Message != "" {
+        value.Message = sc.Message
+    }
 
-	// Shuffle
-	if ChangedLocation {
-		for i:=len(value.LocationHistory)-1; i>0; i-- {
-			value.LocationHistory[i] = value.LocationHistory[i-1]
-		}
-	    new := SafecastDataV2{}
-		new.CapturedAt = value.CapturedAt
-		new.Latitude = value.Latitude
-		new.Longitude = value.Longitude
-		new.Height = value.Height
-		value.LocationHistory[0] = new
-	}
+    // Shuffle
+    if ChangedLocation {
+        for i:=len(value.LocationHistory)-1; i>0; i-- {
+            value.LocationHistory[i] = value.LocationHistory[i-1]
+        }
+        new := SafecastDataV2{}
+        new.CapturedAt = value.CapturedAt
+        new.Latitude = value.Latitude
+        new.Longitude = value.Longitude
+        new.Height = value.Height
+        value.LocationHistory[0] = new
+    }
 
-	// Shuffle
-	if ChangedPms {
-		for i:=len(value.PmsHistory)-1; i>0; i-- {
-			value.PmsHistory[i] = value.PmsHistory[i-1]
-		}
-	    new := SafecastDataV2{}
-		new.CapturedAt = value.CapturedAt
-		new.PmsPm01_0 = value.PmsPm01_0
-		new.PmsPm02_5 = value.PmsPm02_5
-		new.PmsPm10_0 = value.PmsPm10_0
-		new.PmsC00_30 = value.PmsC00_30
-		new.PmsC00_50 = value.PmsC00_50
-		new.PmsC01_00 = value.PmsC01_00
-		new.PmsC02_50 = value.PmsC02_50
-		new.PmsC05_00 = value.PmsC05_00
-		new.PmsC10_00 = value.PmsC10_00
-		new.PmsCsecs = value.PmsCsecs
-		value.PmsHistory[0] = new
-	}
+    // Shuffle
+    if ChangedPms {
+        for i:=len(value.PmsHistory)-1; i>0; i-- {
+            value.PmsHistory[i] = value.PmsHistory[i-1]
+        }
+        new := SafecastDataV2{}
+        new.CapturedAt = value.CapturedAt
+        new.PmsPm01_0 = value.PmsPm01_0
+        new.PmsPm02_5 = value.PmsPm02_5
+        new.PmsPm10_0 = value.PmsPm10_0
+        new.PmsC00_30 = value.PmsC00_30
+        new.PmsC00_50 = value.PmsC00_50
+        new.PmsC01_00 = value.PmsC01_00
+        new.PmsC02_50 = value.PmsC02_50
+        new.PmsC05_00 = value.PmsC05_00
+        new.PmsC10_00 = value.PmsC10_00
+        new.PmsCsecs = value.PmsCsecs
+        value.PmsHistory[0] = new
+    }
 
-	// Shuffle
-	if ChangedOpc {
-		for i:=len(value.OpcHistory)-1; i>0; i-- {
-			value.OpcHistory[i] = value.OpcHistory[i-1]
-		}
-	    new := SafecastDataV2{}
-		new.CapturedAt = value.CapturedAt
-		new.OpcPm01_0 = value.OpcPm01_0
-		new.OpcPm02_5 = value.OpcPm02_5
-		new.OpcPm10_0 = value.OpcPm10_0
-		new.OpcC00_38 = value.OpcC00_38
-		new.OpcC00_54 = value.OpcC00_54
-		new.OpcC01_00 = value.OpcC01_00
-		new.OpcC02_10 = value.OpcC02_10
-		new.OpcC05_00 = value.OpcC05_00
-		new.OpcC10_00 = value.OpcC10_00
-		new.OpcCsecs = value.OpcCsecs
-		value.OpcHistory[0] = new
-	}
+    // Shuffle
+    if ChangedOpc {
+        for i:=len(value.OpcHistory)-1; i>0; i-- {
+            value.OpcHistory[i] = value.OpcHistory[i-1]
+        }
+        new := SafecastDataV2{}
+        new.CapturedAt = value.CapturedAt
+        new.OpcPm01_0 = value.OpcPm01_0
+        new.OpcPm02_5 = value.OpcPm02_5
+        new.OpcPm10_0 = value.OpcPm10_0
+        new.OpcC00_38 = value.OpcC00_38
+        new.OpcC00_54 = value.OpcC00_54
+        new.OpcC01_00 = value.OpcC01_00
+        new.OpcC02_10 = value.OpcC02_10
+        new.OpcC05_00 = value.OpcC05_00
+        new.OpcC10_00 = value.OpcC10_00
+        new.OpcCsecs = value.OpcCsecs
+        value.OpcHistory[0] = new
+    }
 
-	// Shuffle
-	if ChangedGeiger {
-		for i:=len(value.GeigerHistory)-1; i>0; i-- {
-			value.GeigerHistory[i] = value.GeigerHistory[i-1]
-		}
-	    new := SafecastDataV2{}
-		new.CapturedAt = value.CapturedAt
-		new.Cpm0 = value.Cpm0
-		new.Cpm1 = value.Cpm1
-		value.GeigerHistory[0] = new
-	}
+    // Shuffle
+    if ChangedGeiger {
+        for i:=len(value.GeigerHistory)-1; i>0; i-- {
+            value.GeigerHistory[i] = value.GeigerHistory[i-1]
+        }
+        new := SafecastDataV2{}
+        new.CapturedAt = value.CapturedAt
+        new.Cpm0 = value.Cpm0
+        new.Cpm1 = value.Cpm1
+        value.GeigerHistory[0] = new
+    }
 
-	// Shuffle
-	if ChangedTransport {
-		for i:=len(value.TransportHistory)-1; i>0; i-- {
-			value.TransportHistory[i] = value.TransportHistory[i-1]
-		}
-	    new := SafecastDataV2{}
-		new.CapturedAt = value.CapturedAt
-		new.Transport = value.Transport
-		value.TransportHistory[0] = new
-	}
+    // Shuffle
+    if ChangedTransport {
+        for i:=len(value.TransportHistory)-1; i>0; i-- {
+            value.TransportHistory[i] = value.TransportHistory[i-1]
+        }
+        new := SafecastDataV2{}
+        new.CapturedAt = value.CapturedAt
+        new.Transport = value.Transport
+        value.TransportHistory[0] = new
+    }
 
-	// Write it to the file
+    // Write it to the file
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
     fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
     if err == nil {
-	    fd.WriteString(string(valueJSON));
-	    fd.Close();
-	}
-	
+        fd.WriteString(string(valueJSON));
+        fd.Close();
+    }
+
 }
 
 // Get summary of a device
 func SafecastGetSummary(DeviceID uint32) string {
-	
-	// Generate the filename, which we'll use twice
+
+    // Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", DeviceID) + ".json"
 
     // Read the file if it exists, else blank out value
     value := SafecastValue{}
     file, err := ioutil.ReadFile(filename)
     if err != nil {
-		return ""
-	}
-	
+        return ""
+    }
+
     // Read it as JSON
     err = json.Unmarshal(file, &value)
     if err != nil {
-		return ""
-	}
+        return ""
+    }
 
-	// Build the summary
-	s := ""
-	
-	if value.StatsDeviceInfo != "" {
-		s += " " + value.StatsDeviceInfo
-	}
-	if value.BatVoltage != 0 {
-		s += fmt.Sprintf(" %.2fv", value.BatVoltage)
-	}
-	if value.Cpm0 != 0 {
-		s += fmt.Sprintf(" %.0fcpm", value.Cpm0)
-	}
-	if value.Cpm1 != 0 {
-		s += fmt.Sprintf(" %.0fcpm", value.Cpm1)
-	}
+    // Build the summary
+    s := ""
+
+    if value.StatsDeviceInfo != "" {
+        s += " " + value.StatsDeviceInfo
+    }
+    if value.BatVoltage != 0 {
+        s += fmt.Sprintf(" %.2fv", value.BatVoltage)
+    }
+    if value.Cpm0 != 0 {
+        s += fmt.Sprintf(" %.0fcpm", value.Cpm0)
+    }
+    if value.Cpm1 != 0 {
+        s += fmt.Sprintf(" %.0fcpm", value.Cpm1)
+    }
     if (float32(value.OpcCsecs) + value.OpcPm01_0 + value.OpcPm02_5 + value.OpcPm10_0) != 0   {
-		s += fmt.Sprintf(" %.2f/%.2f/%.2f", value.OpcPm01_0, value.OpcPm02_5, value.OpcPm10_0)
-	} else if (float32(value.PmsCsecs) + value.PmsPm01_0 + value.PmsPm02_5 + value.PmsPm10_0) != 0 {
-		s += fmt.Sprintf(" %.0f/%.0f/%.0f", value.PmsPm01_0, value.PmsPm02_5, value.PmsPm10_0)
-	}
-	if value.Latitude >= 2 {
+        s += fmt.Sprintf(" %.2f/%.2f/%.2f", value.OpcPm01_0, value.OpcPm02_5, value.OpcPm10_0)
+    } else if (float32(value.PmsCsecs) + value.PmsPm01_0 + value.PmsPm02_5 + value.PmsPm10_0) != 0 {
+        s += fmt.Sprintf(" %.0f/%.0f/%.0f", value.PmsPm01_0, value.PmsPm02_5, value.PmsPm10_0)
+    }
+    if value.Latitude >= 2 {
         s += fmt.Sprintf(" <http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps>", value.Latitude, value.Longitude)
-	}
-	
-	if (s == "") {
-		return ""
-	}
+    }
 
-	str := "(" + s + " )"
+    if (s == "") {
+        return ""
+    }
 
-	return str
+    str := "(" + s + " )"
+
+    return str
 }
