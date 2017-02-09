@@ -435,7 +435,7 @@ func udpInboundHandler() {
 
             ttg := &TTGateReq{}
             ttg.Payload = buf[0:n]
-            ttg.Transport = "udp:" + ipv4(addr.String())
+            ttg.Transport = "device-udp:" + ipv4(addr.String())
             data, err := json.Marshal(ttg)
             if err == nil {
                 go doUploadToWebLoadBalancer(data, n, ipv4(addr.String()))
@@ -510,7 +510,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         // Process it
-        ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "http:"+ipv4(req.RemoteAddr), buf)
+        ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "device-http:"+ipv4(req.RemoteAddr), buf)
         CountHTTPDevice++;
 
     }
