@@ -1158,6 +1158,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 		value.OpcC02_10 = sc.OpcC02_10
 		value.OpcC05_00 = sc.OpcC05_00
 		value.OpcC10_00 = sc.OpcC10_00
+		value.OpcCsecs = sc.OpcCsecs
 	}
 	if sc.Cpm0 != 0 {
 		if sc.Cpm0 != value.Cpm0 {
