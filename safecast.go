@@ -1248,7 +1248,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 			value.LocationHistory[i] = value.LocationHistory[i-1]
 		}
 	    new := SafecastDataV2{}
-		new.UploadedAt = value.UploadedAt
+		new.CapturedAt = value.CapturedAt
 		new.Latitude = value.Latitude
 		new.Longitude = value.Longitude
 		new.Height = value.Height
@@ -1261,7 +1261,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 			value.PmsHistory[i] = value.PmsHistory[i-1]
 		}
 	    new := SafecastDataV2{}
-		new.UploadedAt = value.UploadedAt
+		new.CapturedAt = value.CapturedAt
 		new.PmsPm01_0 = value.PmsPm01_0
 		new.PmsPm02_5 = value.PmsPm02_5
 		new.PmsPm10_0 = value.PmsPm10_0
@@ -1281,7 +1281,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 			value.OpcHistory[i] = value.OpcHistory[i-1]
 		}
 	    new := SafecastDataV2{}
-		new.UploadedAt = value.UploadedAt
+		new.CapturedAt = value.CapturedAt
 		new.OpcPm01_0 = value.OpcPm01_0
 		new.OpcPm02_5 = value.OpcPm02_5
 		new.OpcPm10_0 = value.OpcPm10_0
@@ -1301,7 +1301,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 			value.GeigerHistory[i] = value.GeigerHistory[i-1]
 		}
 	    new := SafecastDataV2{}
-		new.UploadedAt = value.UploadedAt
+		new.CapturedAt = value.CapturedAt
 		new.Cpm0 = value.Cpm0
 		new.Cpm1 = value.Cpm1
 		value.GeigerHistory[0] = new
@@ -1313,7 +1313,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 			value.TransportHistory[i] = value.TransportHistory[i-1]
 		}
 	    new := SafecastDataV2{}
-		new.UploadedAt = value.UploadedAt
+		new.CapturedAt = value.CapturedAt
 		new.Transport = value.Transport
 		value.TransportHistory[0] = new
 	}
