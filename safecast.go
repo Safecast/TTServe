@@ -1122,7 +1122,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 		value.EnvHumid = sc.EnvHumid
 		value.EnvPress = sc.EnvPress
 	}
-    if (float32(sc.PmsCsecs) + sc.PmsPm01_0 + sc.PmsPm02_5 + sc.PmsPm10_0) == 0   {
+    if (float32(sc.PmsCsecs) + sc.PmsPm01_0 + sc.PmsPm02_5 + sc.PmsPm10_0) != 0 {
 		if sc.PmsPm01_0 != value.PmsPm01_0 || sc.PmsPm02_5 != value.PmsPm02_5 || sc.PmsPm10_0 != value.PmsPm10_0 {
 			ChangedPms = true
 		}
@@ -1137,7 +1137,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 		value.PmsC10_00 = sc.PmsC10_00
 		value.PmsCsecs = sc.PmsCsecs
 	}
-    if (float32(sc.OpcCsecs) + sc.OpcPm01_0 + sc.OpcPm02_5 + sc.OpcPm10_0) == 0   {
+    if (float32(sc.OpcCsecs) + sc.OpcPm01_0 + sc.OpcPm02_5 + sc.OpcPm10_0) != 0 {
 		if sc.OpcPm01_0 != value.OpcPm01_0 || sc.OpcPm02_5 != value.OpcPm02_5 || sc.OpcPm10_0 != value.OpcPm10_0 {
 			ChangedOpc = true
 		}
