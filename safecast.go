@@ -321,6 +321,14 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV2a.OpcCsecs = msg.GetOpcCsecs()
     }
 
+	// Bring CPM over
+    if (msg.Cpm0 != nil) {
+        scV2a.Cpm0 = float32(msg.GetCpm0())
+	}
+    if (msg.Cpm1 != nil) {
+        scV2a.Cpm1 = float32(msg.GetCpm1())
+    }
+	
 	// Log and upload
     SafecastWriteToLogs(UploadedAt, scV2a)
     SafecastV2Upload(UploadedAt, scV2a)
