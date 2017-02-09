@@ -1350,18 +1350,14 @@ func SafecastGetSummary(DeviceID uint32) string {
 		s += fmt.Sprintf(" %.0fcpm", value.Cpm0)
 	}
 	if value.Cpm1 != 0 {
-		s += fmt.Sprintf(" %.1fcpm", value.Cpm1)
+		s += fmt.Sprintf(" %.0fcpm", value.Cpm1)
 	}
 	if value.OpcCsecs != 0 {
 		s += fmt.Sprintf(" %.2f/%.2f/%.2f", value.OpcPm01_0, value.OpcPm02_5, value.OpcPm10_0)
 	} else if value.PmsCsecs != 0 {
-		// PMS only measures in integers, so display it more compactly
-		var a uint32 = uint32(value.PmsPm01_0)
-		var b uint32 = uint32(value.PmsPm02_5)
-		var c uint32 = uint32(value.PmsPm10_0)
-		s += fmt.Sprintf(" %d/%d/%d", a, b, c)
+		s += fmt.Sprintf(" %.0f/%.0f/%.0f", value.PmsPm01_0, value.PmsPm02_5, value.PmsPm10_0)
 	}
-	if value.Latitude != 0.0 {
+	if value.Latitude >= 2 {
         s += fmt.Sprintf(" <http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps>", value.Latitude, value.Longitude)
 	}
 	
