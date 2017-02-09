@@ -768,7 +768,7 @@ func SafecastCSVLog(UploadedAt string, scV2 SafecastDataV2) {
     } else {
         s = s + fmt.Sprintf(",%f", scV2.EnvPress)
     }
-    if scV2.PmsCsecs == 0 {
+    if (float32(scV2.PmsCsecs) + scV2.PmsPm01_0 + scV2.PmsPm02_5 + scV2.PmsPm10_0) == 0   {
         s = s + fmt.Sprintf(",%s", "")
         s = s + fmt.Sprintf(",%s", "")
         s = s + fmt.Sprintf(",%s", "")
@@ -791,7 +791,7 @@ func SafecastCSVLog(UploadedAt string, scV2 SafecastDataV2) {
         s = s + fmt.Sprintf(",%d", scV2.PmsC10_00)
         s = s + fmt.Sprintf(",%d", scV2.PmsCsecs)
     }
-    if scV2.OpcCsecs == 0 {
+    if (float32(scV2.OpcCsecs) + scV2.OpcPm01_0 + scV2.OpcPm02_5 + scV2.OpcPm10_0) == 0   {
         s = s + fmt.Sprintf(",%s", "")
         s = s + fmt.Sprintf(",%s", "")
         s = s + fmt.Sprintf(",%s", "")
@@ -1122,7 +1122,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 		value.EnvHumid = sc.EnvHumid
 		value.EnvPress = sc.EnvPress
 	}
-	if sc.PmsCsecs != 0 {
+    if (float32(sc.PmsCsecs) + sc.PmsPm01_0 + sc.PmsPm02_5 + sc.PmsPm10_0) == 0   {
 		if sc.PmsPm01_0 != value.PmsPm01_0 || sc.PmsPm02_5 != value.PmsPm02_5 || sc.PmsPm10_0 != value.PmsPm10_0 {
 			ChangedPms = true
 		}
@@ -1137,7 +1137,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 		value.PmsC10_00 = sc.PmsC10_00
 		value.PmsCsecs = sc.PmsCsecs
 	}
-	if sc.OpcCsecs != 0 {
+    if (float32(sc.OpcCsecs) + sc.OpcPm01_0 + sc.OpcPm02_5 + sc.OpcPm10_0) == 0   {
 		if sc.OpcPm01_0 != value.OpcPm01_0 || sc.OpcPm02_5 != value.OpcPm02_5 || sc.OpcPm10_0 != value.OpcPm10_0 {
 			ChangedOpc = true
 		}
@@ -1353,9 +1353,9 @@ func SafecastGetSummary(DeviceID uint32) string {
 	if value.Cpm1 != 0 {
 		s += fmt.Sprintf(" %.0fcpm", value.Cpm1)
 	}
-	if value.OpcCsecs != 0 {
+    if (float32(value.OpcCsecs) + value.OpcPm01_0 + value.OpcPm02_5 + value.OpcPm10_0) != 0   {
 		s += fmt.Sprintf(" %.2f/%.2f/%.2f", value.OpcPm01_0, value.OpcPm02_5, value.OpcPm10_0)
-	} else if value.PmsCsecs != 0 {
+	} else if (float32(value.PmsCsecs) + value.PmsPm01_0 + value.PmsPm02_5 + value.PmsPm10_0) != 0 {
 		s += fmt.Sprintf(" %.0f/%.0f/%.0f", value.PmsPm01_0, value.PmsPm02_5, value.PmsPm10_0)
 	}
 	if value.Latitude >= 2 {
