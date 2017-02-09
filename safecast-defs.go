@@ -89,7 +89,11 @@ type SafecastDataV2 struct {
     Transport		string `json:"transport,omitempty"`
     StatsUptimeMinutes    uint32 `json:"uptime_min,omitempty"`
     StatsAppVersion       string `json:"version,omitempty"`
-    StatsDeviceParams     string `json:"config,omitempty"`
+    StatsDeviceParams     string `json:"cfgdev,omitempty"`
+    StatsServiceParams    string `json:"cfgsvc,omitempty"`
+    StatsTtnParams		  string `json:"cfgttn,omitempty"`
+    StatsGpsParams        string `json:"cfggps,omitempty"`
+    StatsSensorParams     string `json:"cfgsen,omitempty"`
     StatsTransmittedBytes uint32 `json:"transmitted_bytes,omitempty"`
     StatsReceivedBytes    uint32 `json:"received_bytes,omitempty"`
     StatsCommsResets      uint32 `json:"comms_resets,omitempty"`

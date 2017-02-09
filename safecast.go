@@ -217,6 +217,18 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     if (msg.StatsDeviceInfo != nil) {
         scV2a.StatsDeviceInfo = msg.GetStatsDeviceInfo()
     }
+    if (msg.StatsGpsParams != nil) {
+        scV2a.StatsGpsParams = msg.GetStatsGpsParams()
+    }
+    if (msg.StatsServiceParams != nil) {
+        scV2a.StatsServiceParams = msg.GetStatsServiceParams()
+    }
+    if (msg.StatsTtnParams != nil) {
+        scV2a.StatsTtnParams = msg.GetStatsTtnParams()
+    }
+    if (msg.StatsSensorParams != nil) {
+        scV2a.StatsSensorParams = msg.GetStatsSensorParams()
+    }
 
     if msg.Message != nil {
         scV2a.Message = msg.GetMessage()
@@ -659,7 +671,19 @@ func SafecastCSVLog(UploadedAt string, scV2 SafecastDataV2) {
         stats += fmt.Sprintf("AppVersion:%s ", scV2.StatsAppVersion)
     }
     if (scV2.StatsDeviceParams != "") {
-        stats += fmt.Sprintf("AppVersion:%s ", scV2.StatsDeviceParams)
+        stats += fmt.Sprintf("DevParams:%s ", scV2.StatsDeviceParams)
+    }
+    if (scV2.StatsGpsParams != "") {
+        stats += fmt.Sprintf("GpsParams:%s ", scV2.StatsGpsParams)
+    }
+    if (scV2.StatsServiceParams != "") {
+        stats += fmt.Sprintf("ServiceParams:%s ", scV2.StatsServiceParams)
+    }
+    if (scV2.StatsTtnParams != "") {
+        stats += fmt.Sprintf("TtnParams:%s ", scV2.StatsTtnParams)
+    }
+    if (scV2.StatsSensorParams != "") {
+        stats += fmt.Sprintf("SensorParams:%s ", scV2.StatsSensorParams)
     }
     if (scV2.StatsTransmittedBytes != 0) {
         stats += fmt.Sprintf("Sent:%d ", scV2.StatsTransmittedBytes)
@@ -1181,6 +1205,18 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
     if sc.StatsDeviceParams != "" {
         value.StatsDeviceParams = sc.StatsDeviceParams
     }
+    if sc.StatsGpsParams != "" {
+        value.StatsGpsParams = sc.StatsGpsParams
+    }
+    if sc.StatsServiceParams != "" {
+        value.StatsServiceParams = sc.StatsServiceParams
+    }
+    if sc.StatsTtnParams != "" {
+        value.StatsTtnParams = sc.StatsTtnParams
+    }
+    if sc.StatsSensorParams != "" {
+        value.StatsSensorParams = sc.StatsSensorParams
+    }
     if sc.StatsTransmittedBytes != 0 {
         value.StatsTransmittedBytes = sc.StatsTransmittedBytes
     }
@@ -1345,7 +1381,7 @@ func SafecastGetSummary(DeviceID uint32) string {
     s := ""
 
     if value.StatsDeviceInfo != "" {
-        s += " " + value.StatsDeviceInfo
+        s += " \"" + value.StatsDeviceInfo + "\""
     }
     if value.BatVoltage != 0 {
         s += fmt.Sprintf(" %.2fv", value.BatVoltage)
