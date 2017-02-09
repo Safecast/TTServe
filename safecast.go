@@ -1216,7 +1216,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 
 	// Shuffle
 	if ChangedLocation {
-		for i:=len(value.LocationHistory); i>=1; i-- {
+		for i:=len(value.LocationHistory)-1; i>0; i-- {
 			fmt.Printf("\nl i=%d\n\n", i)
 			value.LocationHistory[i-1] = value.LocationHistory[i]
 		}
@@ -1230,7 +1230,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 
 	// Shuffle
 	if ChangedPms {
-		for i:=len(value.PmsHistory); i>=1; i-- {
+		for i:=len(value.PmsHistory)-1; i>0; i-- {
 			fmt.Printf("\np i=%d\n\n", i)
 			value.PmsHistory[i-1] = value.PmsHistory[i]
 		}
@@ -1251,7 +1251,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 
 	// Shuffle
 	if ChangedOpc {
-		for i:=len(value.OpcHistory); i>=1; i-- {
+		for i:=len(value.OpcHistory)-1; i>0; i-- {
 			fmt.Printf("\no i=%d\n\n", i)
 			value.OpcHistory[i-1] = value.OpcHistory[i]
 		}
@@ -1271,7 +1271,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 
 	// Shuffle
 	if ChangedGeiger {
-		for i:=len(value.GeigerHistory); i>=1; i-- {
+		for i:=len(value.GeigerHistory)-1; i>0; i-- {
 			fmt.Printf("\ng i=%d\n\n", i)
 			value.GeigerHistory[i-1] = value.GeigerHistory[i]
 		}
@@ -1284,7 +1284,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 
 	// Shuffle
 	if ChangedTransport {
-		for i:=len(value.TransportHistory); i>=1; i-- {
+		for i:=len(value.TransportHistory)-1; i>0; i-- {
 			fmt.Printf("\nt i=%d\n\n", i)
 			value.TransportHistory[i-1] = value.TransportHistory[i]
 		}
