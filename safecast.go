@@ -16,7 +16,7 @@ import (
 )
 
 // Lat/Lon/Alt behavior at the API
-const addFakeLocation = true
+const addFakeLocation = false
 
 // Warning behavior
 const deviceWarningAfterMinutes = 90
@@ -1144,11 +1144,16 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 		value.OpcC05_00 = sc.OpcC05_00
 		value.OpcC10_00 = sc.OpcC10_00
 	}
-	if sc.Cpm0 != 0 || sc.Cpm1 != 0 {
-		if sc.Cpm0 != value.Cpm0 || sc.Cpm1 != value.Cpm1 {
+	if sc.Cpm0 != 0 {
+		if sc.Cpm0 != value.Cpm0 {
 			ChangedGeiger = true
 		}
 		value.Cpm0 = sc.Cpm0
+	}
+	if sc.Cpm1 != 0 {
+		if sc.Cpm1 != value.Cpm1 {
+			ChangedGeiger = true
+		}
 		value.Cpm1 = sc.Cpm1
 	}
 	if sc.Transport != "" {
