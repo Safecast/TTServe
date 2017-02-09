@@ -1216,6 +1216,8 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 
 	// Shuffle
 	if ChangedLocation {
+		fmt.Printf("len=%d\n", len(value.LocationHistory))
+		return
 		for i:=len(value.LocationHistory); i>=1; i-- {
 			value.LocationHistory[i-1] = value.LocationHistory[i]
 		}
