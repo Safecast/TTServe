@@ -76,6 +76,7 @@ const TTServerTopicSend string = "/send"
 const TTServerTopicRoot1 string = "/index.html"
 const TTServerTopicRoot2 string = "/index.htm"
 const TTServerTopicLog string = "/log/"
+const TTServerTopicValue string = "/device/"
 const TTServerTopicGithub string = "/github"
 const TTServerTopicSlack string = "/slack"
 const TTServerTopicTTN string = "/ttn"
@@ -383,8 +384,9 @@ func webInboundHandler() {
     http.HandleFunc(TTServerTopicRoot1, inboundWebRootHandler)
     http.HandleFunc(TTServerTopicRoot2, inboundWebRootHandler)
 
-    // Spin up log handler
+    // Spin up log handlers
     http.HandleFunc(TTServerTopicLog, inboundWebLogHandler)
+    http.HandleFunc(TTServerTopicValue, inboundWebValueHandler)
 
     // Spin up functions available on all roles
     http.HandleFunc(TTServerTopicSend, inboundWebSendHandler)
@@ -760,6 +762,30 @@ func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Open the file
     file := SafecastDirectory() + TTServerLogPath + "/" + filename
+    fd, err := os.Open(file)
+    if err != nil {
+        io.WriteString(rw, errorString(err))
+        return
+    }
+    defer fd.Close()
+
+    // Copy the file to output
+    io.Copy(rw, fd)
+
+}
+
+// Handle inbound HTTP requests to fetch log files
+func inboundWebValueHandler(rw http.ResponseWriter, req *http.Request) {
+
+    // Set response mime type
+    rw.Header().Set("Content-Type", "application/json")
+
+    // Log it
+    filename := req.RequestURI[len(TTServerTopicValue):]
+    fmt.Printf("%s WEB REQUEST for %s\n", time.Now().Format(logDateFormat), filename)
+
+    // Open the file
+    file := SafecastDirectory() + TTServerValuePath + "/" + filename + ".json"
     fd, err := os.Open(file)
     if err != nil {
         io.WriteString(rw, errorString(err))
