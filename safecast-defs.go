@@ -110,4 +110,14 @@ type SafecastDataV2 struct {
     Message				  string `json:"message,omitempty"`
 }
 
+
+type SafecastValue struct {
+	SafecastDataV2			`json:"last_known,omitempty"`
+	LocationHistory			[5]SafecastDataV2 `json:"location_history,omitempty"`
+	GeigerHistory			[5]SafecastDataV2 `json:"geiger_history,omitempty"`
+	OpcHistory				[5]SafecastDataV2 `json:"opc_history,omitempty"`
+	PmsHistory				[5]SafecastDataV2 `json:"pms_history,omitempty"`
+    TransportHistory		[5]SafecastDataV2 `json:"transport_history,omitempty"`
+}
+
 //

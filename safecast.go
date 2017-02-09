@@ -499,7 +499,7 @@ func sendExpiredSafecastDevicesToSlack() {
 
     // Loop over the file system, tracking all devices
     // Open the directory
-    files, err := ioutil.ReadDir(SafecastDirectory() + TTServerLogPath)
+    files, err := ioutil.ReadDir(SafecastDirectory() + TTServerValuePath)
     if err == nil {
 
         // Iterate over each of the pending commands
@@ -508,17 +508,10 @@ func sendExpiredSafecastDevicesToSlack() {
             if !file.IsDir() {
 
                 // Extract device ID from filename
-                // Extract device ID from filename
                 Str0 := file.Name()
                 Str1 := strings.Split(Str0, ".")[0]
-                Str2 := strings.Split(Str1, "-")
-                Str3 := ""
-                deviceID := uint32(0)
-                if (len(Str2) >= 3) {
-                    Str3 = Str2[2]
-                    i64, _ := strconv.ParseUint(Str3, 10, 32)
-                    deviceID = uint32(i64)
-                }
+                i64, _ := strconv.ParseUint(Str1, 10, 32)
+				deviceID := uint32(i64)
 
                 // Track the device
                 if (deviceID != 0) {
@@ -602,6 +595,7 @@ func sendSafecastDeviceSummaryToSlack() {
 func SafecastWriteToLogs(UploadedAt string, scV2 SafecastDataV2) {
     SafecastJSONLog(UploadedAt, scV2)
     SafecastCSVLog(UploadedAt, scV2)
+    SafecastWriteValue(UploadedAt, scV2)
 }
 
 // Get path of the safecast directory
@@ -1065,4 +1059,242 @@ func doUploadToSafecastV2(UploadedAt string, scV2 SafecastDataV2, url string) bo
     endTransaction(transaction, errString)
 
     return errString == ""
+}
+
+// Save the last value in a file
+func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
+	var ChangedLocation = false
+	var ChangedPms = false
+	var ChangedOpc = false
+	var ChangedGeiger = false
+	var ChangedTransport = false
+
+    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", sc.DeviceID) + ".json"
+
+    // Read the file if it exists, else blank out value
+    value := SafecastValue{}
+    file, err := ioutil.ReadFile(filename)
+    if err == nil {
+	    // Read it as JSON
+	    err = json.Unmarshal(file, &value)
+	    if err != nil {
+		    value = SafecastValue{}
+		}
+    }
+
+	// Update the current values, but only if modified
+	value.DeviceID = sc.DeviceID;	
+	if sc.UploadedAt != "" {
+		value.UploadedAt = sc.UploadedAt
+	}
+	if sc.CapturedAt != "" {
+		value.CapturedAt = sc.CapturedAt
+	}
+	if sc.Latitude != 0 && sc.Longitude != 0 {
+		if (sc.Latitude != value.Latitude || sc.Longitude != value.Longitude) {
+			ChangedLocation = true
+		}
+		value.Latitude = sc.Latitude
+		value.Longitude = sc.Longitude
+		value.Height = sc.Height
+	}
+	if sc.BatVoltage != 0 {
+		value.BatVoltage = sc.BatVoltage
+		value.BatSOC = sc.BatSOC
+		value.BatCurrent = sc.BatCurrent
+	}
+	if sc.EnvTemp != 0 {
+		value.EnvTemp = sc.EnvTemp
+		value.EnvHumid = sc.EnvHumid
+		value.EnvPress = sc.EnvPress
+	}
+	if sc.PmsCsecs != 0 {
+		if sc.PmsPm01_0 != value.PmsPm01_0 || sc.PmsPm02_5 != value.PmsPm02_5 || sc.PmsPm10_0 != value.PmsPm10_0 {
+			ChangedPms = true
+		}
+		value.PmsPm01_0 = sc.PmsPm01_0
+		value.PmsPm02_5 = sc.PmsPm02_5
+		value.PmsPm10_0 = sc.PmsPm10_0
+		value.PmsC00_30 = sc.PmsC00_30
+		value.PmsC00_50 = sc.PmsC00_50
+		value.PmsC01_00 = sc.PmsC01_00
+		value.PmsC02_50 = sc.PmsC02_50
+		value.PmsC05_00 = sc.PmsC05_00
+		value.PmsC10_00 = sc.PmsC10_00
+		value.PmsCsecs = sc.PmsCsecs
+	}
+	if sc.OpcCsecs != 0 {
+		if sc.OpcPm01_0 != value.OpcPm01_0 || sc.OpcPm02_5 != value.OpcPm02_5 || sc.OpcPm10_0 != value.OpcPm10_0 {
+			ChangedOpc = true
+		}
+		value.OpcPm01_0 = sc.OpcPm01_0
+		value.OpcPm02_5 = sc.OpcPm02_5
+		value.OpcPm10_0 = sc.OpcPm10_0
+		value.OpcC00_38 = sc.OpcC00_38
+		value.OpcC00_54 = sc.OpcC00_54
+		value.OpcC01_00 = sc.OpcC01_00
+		value.OpcC02_10 = sc.OpcC02_10
+		value.OpcC05_00 = sc.OpcC05_00
+		value.OpcC10_00 = sc.OpcC10_00
+	}
+	if sc.Cpm0 != 0 || sc.Cpm1 != 0 {
+		if sc.Cpm0 != value.Cpm0 || sc.Cpm1 != value.Cpm1 {
+			ChangedGeiger = true
+		}
+		value.Cpm0 = sc.Cpm0
+		value.Cpm1 = sc.Cpm1
+	}
+	if sc.Transport != "" {
+		if sc.Transport != value.Transport {
+			ChangedTransport = true
+		}
+		value.Transport = sc.Transport
+	}
+	if sc.StatsUptimeMinutes != 0 {
+		value.StatsUptimeMinutes = sc.StatsUptimeMinutes
+	}
+	if sc.StatsAppVersion != "" {
+		value.StatsAppVersion = sc.StatsAppVersion
+	}
+	if sc.StatsDeviceParams != "" {
+		value.StatsDeviceParams = sc.StatsDeviceParams
+	}
+	if sc.StatsTransmittedBytes != 0 {
+		value.StatsTransmittedBytes = sc.StatsTransmittedBytes
+	}
+	if sc.StatsReceivedBytes != 0 {
+		value.StatsReceivedBytes = sc.StatsReceivedBytes
+	}
+	if sc.StatsCommsResets != 0 {
+		value.StatsCommsResets = sc.StatsCommsResets
+	}
+	if sc.StatsCommsFails != 0 {
+		value.StatsCommsFails = sc.StatsCommsFails
+	}
+	if sc.StatsCommsPowerFails != 0 {
+		value.StatsCommsPowerFails = sc.StatsCommsPowerFails
+	}
+	if sc.StatsDeviceRestarts != 0 {
+		value.StatsDeviceRestarts = sc.StatsDeviceRestarts
+	}
+	if sc.StatsMotiondrops != 0 {
+		value.StatsMotiondrops = sc.StatsMotiondrops
+	}
+	if sc.StatsOneshots != 0 {
+		value.StatsOneshots = sc.StatsOneshots
+	}
+	if sc.StatsOneshotSeconds != 0 {
+		value.StatsOneshotSeconds = sc.StatsOneshotSeconds
+	}
+	if sc.StatsIccid != "" {
+		value.StatsIccid = sc.StatsIccid
+	}
+	if sc.StatsCpsi != "" {
+		value.StatsCpsi = sc.StatsCpsi
+	}
+	if sc.StatsDfu != "" {
+		value.StatsDfu = sc.StatsDfu
+	}
+	if sc.StatsDeviceInfo != "" {
+		value.StatsDeviceInfo = sc.StatsDeviceInfo
+	}
+	if sc.StatsFreeMem != 0 {
+		value.StatsFreeMem = sc.StatsFreeMem
+	}
+	if sc.StatsNTPCount != 0 {
+		value.StatsNTPCount = sc.StatsNTPCount
+	}
+	if sc.StatsLastFailure != "" {
+		value.StatsLastFailure = sc.StatsLastFailure
+	}
+	if sc.StatsStatus != "" {
+		value.StatsStatus = sc.StatsStatus
+	}
+	if sc.Message != "" {
+		value.Message = sc.Message
+	}
+
+	// Shuffle
+	if ChangedLocation {
+		for i:=len(value.LocationHistory); i>=1; i-- {
+			value.LocationHistory[i-1] = value.LocationHistory[i]
+		}
+	    new := SafecastDataV2{}
+		new.UploadedAt = value.UploadedAt
+		new.Latitude = value.Latitude
+		new.Longitude = value.Longitude
+		new.Height = value.Height
+		value.LocationHistory[0] = new
+	}
+
+	// Shuffle
+	if ChangedPms {
+		for i:=len(value.PmsHistory); i>=1; i-- {
+			value.PmsHistory[i-1] = value.PmsHistory[i]
+		}
+	    new := SafecastDataV2{}
+		new.UploadedAt = value.UploadedAt
+		new.PmsPm01_0 = value.PmsPm01_0
+		new.PmsPm02_5 = value.PmsPm02_5
+		new.PmsPm10_0 = value.PmsPm10_0
+		new.PmsC00_30 = value.PmsC00_30
+		new.PmsC00_50 = value.PmsC00_50
+		new.PmsC01_00 = value.PmsC01_00
+		new.PmsC02_50 = value.PmsC02_50
+		new.PmsC05_00 = value.PmsC05_00
+		new.PmsC10_00 = value.PmsC10_00
+		new.PmsCsecs = value.PmsCsecs
+		value.PmsHistory[0] = new
+	}
+
+	// Shuffle
+	if ChangedOpc {
+		for i:=len(value.OpcHistory); i>=1; i-- {
+			value.OpcHistory[i-1] = value.OpcHistory[i]
+		}
+	    new := SafecastDataV2{}
+		new.UploadedAt = value.UploadedAt
+		new.OpcPm01_0 = value.OpcPm01_0
+		new.OpcPm02_5 = value.OpcPm02_5
+		new.OpcPm10_0 = value.OpcPm10_0
+		new.OpcC00_38 = value.OpcC00_38
+		new.OpcC00_54 = value.OpcC00_54
+		new.OpcC01_00 = value.OpcC01_00
+		new.OpcC02_10 = value.OpcC02_10
+		new.OpcC05_00 = value.OpcC05_00
+		new.OpcC10_00 = value.OpcC10_00
+		value.OpcHistory[0] = new
+	}
+
+	// Shuffle
+	if ChangedGeiger {
+		for i:=len(value.GeigerHistory); i>=1; i-- {
+			value.GeigerHistory[i-1] = value.GeigerHistory[i]
+		}
+	    new := SafecastDataV2{}
+		new.UploadedAt = value.UploadedAt
+		new.Cpm0 = value.Cpm0
+		new.Cpm1 = value.Cpm1
+		value.GeigerHistory[0] = new
+	}
+
+	// Shuffle
+	if ChangedTransport {
+		for i:=len(value.TransportHistory); i>=1; i-- {
+			value.TransportHistory[i-1] = value.TransportHistory[i]
+		}
+	    new := SafecastDataV2{}
+		new.UploadedAt = value.UploadedAt
+		new.Transport = value.Transport
+		value.TransportHistory[0] = new
+	}
+
+	// Write it to the file
+    valueJSON, _ := json.MarshalIndent(value, "", "    ")
+    fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
+    if err == nil {
+	    fd.WriteString(string(valueJSON));
+	    fd.Close();
+	}
+	
 }
