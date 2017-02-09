@@ -112,7 +112,7 @@ type SafecastDataV2 struct {
 
 
 type SafecastValue struct {
-	SafecastDataV2			`json:"last_known,omitempty"`
+	SafecastDataV2			`json:"current_values,omitempty"`
 	LocationHistory			[5]SafecastDataV2 `json:"location_history,omitempty"`
 	GeigerHistory			[5]SafecastDataV2 `json:"geiger_history,omitempty"`
 	OpcHistory				[5]SafecastDataV2 `json:"opc_history,omitempty"`
