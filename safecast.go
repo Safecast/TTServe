@@ -565,7 +565,11 @@ func sendSafecastDeviceSummaryToSlack() {
             s = fmt.Sprintf("%s\n", s)
         }
 
-        s = fmt.Sprintf("%s<http://%s%s%s%d.json|%010d>", s, TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id, id)
+        s += fmt.Sprintf("%010d> (", id)
+        s += fmt.Sprintf("<http://%s%s%d.json|now>,", TTServerHTTPAddress, TTServerTopicValue, id)
+        s += fmt.Sprintf("<http://%s%s%s%d.json|log>,", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
+        s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>,", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
+        s += fmt.Sprintf(") ")
 
         if sortedDevices[i].minutesAgo == 0 {
             s = fmt.Sprintf("%s last seen just now", s)
