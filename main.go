@@ -830,7 +830,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Convert to V2 format
         sV2 = SafecastV1toV2(sV1)
-        fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sV2.DeviceID, "pnt-http:"+ipv4(req.RemoteAddr))
+        sV2.Transport = "pnt-http:"+ipv4(req.RemoteAddr)
+
+        fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sV2.DeviceID, sV2.Transport)
         if true {
             fmt.Printf("%s\n", body)
         }
