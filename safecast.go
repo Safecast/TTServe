@@ -15,6 +15,9 @@ import (
     "github.com/rayozzie/teletype-proto/golang"
 )
 
+// Lat/Lon/Alt behavior at the API
+const addFakeLocation = true
+
 // Warning behavior
 const deviceWarningAfterMinutes = 90
 
@@ -145,21 +148,21 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
     if msg.Latitude != nil {
         scV2.Latitude =  msg.GetLatitude()
     } else {
-        if defaultLat != 0.0 {
+		if (addFakeLocation) {
             scV2.Latitude = defaultLat
-        }
+		}
     }
     if msg.Longitude != nil {
         scV2.Longitude = msg.GetLongitude()
     } else {
-        if defaultLon != 0.0 {
+		if (addFakeLocation) {
             scV2.Longitude = defaultLon
         }
     }
     if msg.Altitude != nil {
         scV2.Height = float32(msg.GetAltitude())
     } else {
-        if defaultAlt != 0.0 {
+		if (addFakeLocation) {
             scV2.Height = defaultAlt
         }
     }
@@ -174,6 +177,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
 
         // A stats message
         scV2a.StatsUptimeMinutes = msg.GetStatsUptimeMinutes()
+        if (msg.StatsUptimeDays != nil) {
+            scV2a.StatsUptimeMinutes += msg.GetStatsUptimeDays() * 24 * 60
+        }
         if (msg.StatsAppVersion != nil) {
             scV2a.StatsAppVersion = msg.GetStatsAppVersion()
         }
@@ -201,8 +207,11 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         if (msg.StatsMotiondrops != nil) {
             scV2a.StatsMotiondrops = msg.GetStatsMotiondrops()
         }
-        if (msg.StatsCell != nil) {
-            scV2a.StatsCell = msg.GetStatsCell()
+        if (msg.StatsIccid != nil) {
+            scV2a.StatsIccid = msg.GetStatsIccid()
+        }
+        if (msg.StatsCpsi != nil) {
+            scV2a.StatsCpsi = msg.GetStatsCpsi()
         }
         if (msg.StatsDfu != nil) {
             scV2a.StatsDfu = msg.GetStatsDfu()
@@ -670,8 +679,11 @@ func SafecastCSVLog(UploadedAt string, scV2 SafecastDataV2) {
     if (scV2.StatsOneshotSeconds != 0) {
         stats += fmt.Sprintf("OneshotSecs:%d ", scV2.StatsOneshotSeconds)
     }
-    if (scV2.StatsCell != "") {
-        stats += fmt.Sprintf("Cell:%s ", scV2.StatsCell)
+    if (scV2.StatsIccid != "") {
+        stats += fmt.Sprintf("Iccid:%s ", scV2.StatsIccid)
+    }
+    if (scV2.StatsCpsi != "") {
+        stats += fmt.Sprintf("Cpsi:%s ", scV2.StatsCpsi)
     }
     if (scV2.StatsDfu != "") {
         stats += fmt.Sprintf("DFU:%s ", scV2.StatsDfu)

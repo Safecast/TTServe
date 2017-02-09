@@ -62,7 +62,8 @@ type safecastStatsV1 struct {
     StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
     StatsOneshots         uint32 `json:"oneshots,omitempty"`
     StatsOneshotSeconds   uint32 `json:"oneshot_seconds,omitempty"`
-    StatsCell             string `json:"cell,omitempty"`
+    StatsIccid            string `json:"iccid,omitempty"`
+    StatsCpsi             string `json:"cpsi,omitempty"`
     StatsDfu              string `json:"dfu,omitempty"`
 }
 
@@ -115,7 +116,8 @@ type SafecastDataV2 struct {
     StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
     StatsOneshots         uint32 `json:"oneshots,omitempty"`
     StatsOneshotSeconds   uint32 `json:"oneshot_seconds,omitempty"`
-    StatsCell             string `json:"cell,omitempty"`
+    StatsIccid            string `json:"iccid,omitempty"`
+    StatsCpsi             string `json:"cpsi,omitempty"`
     StatsDfu              string `json:"dfu,omitempty"`
     StatsFreeMem          uint32 `json:"free_memory,omitempty"`
     StatsNTPCount         uint32 `json:"ntp_count,omitempty"`
@@ -123,39 +125,5 @@ type SafecastDataV2 struct {
 	StatsStatus			  string `json:"status,omitempty"`
     Message				  string `json:"message,omitempty"`
 }
-
-// These are strings used as the "unit" for the extended safecast uploads, and
-// they should be maintained so that they are identical to the json: field names above.
-const UnitStats string = "stats"
-const UnitMessage string = "message"
-const UnitCPM string = "cpm"
-const UnitBatVoltage string = "bat_voltage"
-const UnitBatSOC string = "bat_soc"
-const UnitBatCurrent string = "bat_current"
-const UnitEnvTemp string = "env_temp"
-const UnitEnvHumid string = "env_humid"
-const UnitEnvPress string = "env_press"
-const UnitWirelessSNR string = "wireless_snr"
-const UnitPmsPm01_0 string = "pms_pm01_0"
-const UnitPmsPm02_5 string = "pms_pm02_5"
-const UnitPmsPm10_0 string = "pms_pm10_0"
-const UnitPmsC00_30 string = "pms_c00_30"
-const UnitPmsC00_50 string = "pms_c00_50"
-const UnitPmsC01_00 string = "pms_c01_00"
-const UnitPmsC02_50 string = "pms_c02_50"
-const UnitPmsC05_00 string = "pms_c05_00"
-const UnitPmsC10_00 string = "pms_c10_00"
-const UnitPmsCsecs string = "pms_csecs"
-const UnitOpcPm01_0 string = "opc_pm01_0"
-const UnitOpcPm02_5 string = "opc_pm02_5"
-const UnitOpcPm10_0 string = "opc_pm10_0"
-const UnitOpcC00_38 string = "opc_c00_38"
-const UnitOpcC00_54 string = "opc_c00_54"
-const UnitOpcC01_00 string = "opc_c01_00"
-const UnitOpcC02_10 string = "opc_c02_10"
-const UnitOpcC05_00 string = "opc_c05_00"
-const UnitOpcC10_00 string = "opc_c10_00"
-const UnitOpcCsecs string = "opc_csecs"
-const UnitTransport string = "transport"
 
 //
