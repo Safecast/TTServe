@@ -216,6 +216,9 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         if (msg.StatsDfu != nil) {
             scV2a.StatsDfu = msg.GetStatsDfu()
         }
+        if (msg.StatsDeviceInfo != nil) {
+            scV2a.StatsDeviceInfo = msg.GetStatsDeviceInfo()
+        }
 
     } else if msg.Message != nil {
 
@@ -687,6 +690,9 @@ func SafecastCSVLog(UploadedAt string, scV2 SafecastDataV2) {
     }
     if (scV2.StatsDfu != "") {
         stats += fmt.Sprintf("DFU:%s ", scV2.StatsDfu)
+    }
+    if (scV2.StatsDeviceInfo != "") {
+        stats += fmt.Sprintf("Label:%s ", scV2.StatsDeviceInfo)
     }
     if (scV2.Message != "") {
         stats += fmt.Sprintf("Msg:%s ", scV2.Message)

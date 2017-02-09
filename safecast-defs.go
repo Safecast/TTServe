@@ -50,23 +50,6 @@ type SafecastDataV1 struct {
     Transport		string `json:"transport,omitempty"`
 }
 
-// Safecast stats
-type safecastStatsV1 struct {
-    StatsUptimeMinutes    uint32 `json:"uptime_min,omitempty"`
-    StatsAppVersion       string `json:"version,omitempty"`
-    StatsDeviceParams     string `json:"config,omitempty"`
-    StatsTransmittedBytes uint32 `json:"transmitted_bytes,omitempty"`
-    StatsReceivedBytes    uint32 `json:"received_bytes,omitempty"`
-    StatsCommsResets      uint32 `json:"comms_resets,omitempty"`
-    StatsCommsPowerFails  uint32 `json:"comms_power_fails,omitempty"`
-    StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
-    StatsOneshots         uint32 `json:"oneshots,omitempty"`
-    StatsOneshotSeconds   uint32 `json:"oneshot_seconds,omitempty"`
-    StatsIccid            string `json:"iccid,omitempty"`
-    StatsCpsi             string `json:"cpsi,omitempty"`
-    StatsDfu              string `json:"dfu,omitempty"`
-}
-
 type SafecastDataV2 struct {
 	UploadedAt		string `json:"uploaded_at,omitempty"`
     CapturedAt		string `json:"captured_at,omitempty"`
@@ -119,6 +102,7 @@ type SafecastDataV2 struct {
     StatsIccid            string `json:"iccid,omitempty"`
     StatsCpsi             string `json:"cpsi,omitempty"`
     StatsDfu              string `json:"dfu,omitempty"`
+    StatsDeviceInfo       string `json:"label,omitempty"`
     StatsFreeMem          uint32 `json:"free_memory,omitempty"`
     StatsNTPCount         uint32 `json:"ntp_count,omitempty"`
 	StatsLastFailure	  string `json:"last_failure,omitempty"`
