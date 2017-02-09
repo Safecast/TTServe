@@ -1069,6 +1069,10 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 	var ChangedGeiger = false
 	var ChangedTransport = false
 
+	// Use the supplied upload time as our modification time
+	sc.UploadedAt = UploadedAt
+	
+	// Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", sc.DeviceID) + ".json"
 
     // Read the file if it exists, else blank out value
@@ -1217,7 +1221,6 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 	// Shuffle
 	if ChangedLocation {
 		for i:=len(value.LocationHistory)-1; i>0; i-- {
-			fmt.Printf("\nl i=%d\n\n", i)
 			value.LocationHistory[i-1] = value.LocationHistory[i]
 		}
 	    new := SafecastDataV2{}
@@ -1231,7 +1234,6 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 	// Shuffle
 	if ChangedPms {
 		for i:=len(value.PmsHistory)-1; i>0; i-- {
-			fmt.Printf("\np i=%d\n\n", i)
 			value.PmsHistory[i-1] = value.PmsHistory[i]
 		}
 	    new := SafecastDataV2{}
@@ -1252,7 +1254,6 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 	// Shuffle
 	if ChangedOpc {
 		for i:=len(value.OpcHistory)-1; i>0; i-- {
-			fmt.Printf("\no i=%d\n\n", i)
 			value.OpcHistory[i-1] = value.OpcHistory[i]
 		}
 	    new := SafecastDataV2{}
@@ -1272,7 +1273,6 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 	// Shuffle
 	if ChangedGeiger {
 		for i:=len(value.GeigerHistory)-1; i>0; i-- {
-			fmt.Printf("\ng i=%d\n\n", i)
 			value.GeigerHistory[i-1] = value.GeigerHistory[i]
 		}
 	    new := SafecastDataV2{}
@@ -1285,7 +1285,6 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 	// Shuffle
 	if ChangedTransport {
 		for i:=len(value.TransportHistory)-1; i>0; i-- {
-			fmt.Printf("\nt i=%d\n\n", i)
 			value.TransportHistory[i-1] = value.TransportHistory[i]
 		}
 	    new := SafecastDataV2{}
