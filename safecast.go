@@ -1282,6 +1282,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 		new.OpcC02_10 = value.OpcC02_10
 		new.OpcC05_00 = value.OpcC05_00
 		new.OpcC10_00 = value.OpcC10_00
+		new.OpcCsecs = value.OpcCsecs
 		value.OpcHistory[0] = new
 	}
 
