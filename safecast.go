@@ -35,6 +35,7 @@ var httpTransactionErrorFirst bool = true
 // Describes every device that has sent us a message
 type seenDevice struct {
     deviceid            uint32
+	deviceSummary	    string
     seen                time.Time
     everRecentlySeen    bool
     notifiedAsUnseen    bool
@@ -571,7 +572,7 @@ func sendSafecastDeviceSummaryToSlack() {
         s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
 
         if sortedDevices[i].minutesAgo == 0 {
-            s = fmt.Sprintf("%s last seen just now", s)
+            s = fmt.Sprintf("%s just now", s)
         } else {
             var minutesAgo uint32 = uint32(sortedDevices[i].minutesAgo)
             var hoursAgo uint32 = minutesAgo / 60
@@ -579,13 +580,19 @@ func sendSafecastDeviceSummaryToSlack() {
             minutesAgo -= hoursAgo * 60
             hoursAgo -= daysAgo * 24
             if daysAgo != 0 {
-                s = fmt.Sprintf("%s last seen %dd %dh %dm ago", s, daysAgo, hoursAgo, minutesAgo)
+                s = fmt.Sprintf("%s %dd %dh %dm ago", s, daysAgo, hoursAgo, minutesAgo)
             } else if hoursAgo != 0 {
-                s = fmt.Sprintf("%s last seen %dh %dm ago", s, hoursAgo, minutesAgo)
+                s = fmt.Sprintf("%s %dh %dm ago", s, hoursAgo, minutesAgo)
             } else {
-                s = fmt.Sprintf("%s last seen %dm ago", s, minutesAgo)
+                s = fmt.Sprintf("%s %dm ago", s, minutesAgo)
             }
         }
+
+		// Append device summary
+		summary := SafecastGetSummary(id)
+		if summary != "" {
+			s += " " + summary
+		}
 
     }
 
@@ -1309,4 +1316,56 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 	    fd.Close();
 	}
 	
+}
+
+// Get summary of a device
+func SafecastGetSummary(DeviceID uint32) string {
+	
+	// Generate the filename, which we'll use twice
+    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", DeviceID) + ".json"
+
+    // Read the file if it exists, else blank out value
+    value := SafecastValue{}
+    file, err := ioutil.ReadFile(filename)
+    if err != nil {
+		return ""
+	}
+	
+    // Read it as JSON
+    err = json.Unmarshal(file, &value)
+    if err != nil {
+		return ""
+	}
+
+	// Build the summary
+	s := ""
+	
+	if value.StatsDeviceInfo != "" {
+		s += " " + value.StatsDeviceInfo
+	}
+	if value.BatVoltage != 0 {
+		s += fmt.Sprintf(" %.2fv", value.BatVoltage)
+	}
+	if value.Cpm0 != 0 {
+		s += fmt.Sprintf(" %dcpm", value.Cpm0)
+	}
+	if value.Cpm1 != 0 {
+		s += fmt.Sprintf(" %dcpm", value.Cpm1)
+	}
+	if value.OpcCsecs != 0 {
+		s += fmt.Sprintf(" %.0f/%.0f/%.0f", value.OpcPm01_0, value.OpcPm02_5, value.OpcPm10_0)
+	} else if value.PmsCsecs != 0 {
+		s += fmt.Sprintf(" %0.2f/%0.2f/%0.2f", value.PmsPm01_0, value.PmsPm02_5, value.PmsPm10_0)
+	}
+	if value.Latitude != 0.0 {
+        s += fmt.Sprintf(" <http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps> ", value.Latitude, value.Longitude)
+	}
+	
+	if (s == "") {
+		return ""
+	}
+
+	str := "(" + s + " )"
+
+	return str
 }
