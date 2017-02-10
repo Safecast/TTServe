@@ -36,7 +36,6 @@ var httpTransactionErrorFirst bool = true
 // Describes every device that has sent us a message
 type seenDevice struct {
     deviceid            uint32
-    deviceSummary       string
     seen                time.Time
     everRecentlySeen    bool
     notifiedAsUnseen    bool
@@ -612,7 +611,10 @@ func sendSafecastDeviceSummaryToSlack() {
         }
 
         // Append device summary
-        summary := SafecastGetSummary(id)
+        label, summary := SafecastGetSummary(id)
+		if label != "" {
+            s += "\n        " + label
+        }
         if summary != "" {
             s += "\n        " + summary
         }
@@ -1398,7 +1400,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 }
 
 // Get summary of a device
-func SafecastGetSummary(DeviceID uint32) string {
+func SafecastGetSummary(DeviceID uint32) (Label string, Summary string) {
 
     // Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", DeviceID) + ".json"
@@ -1407,21 +1409,21 @@ func SafecastGetSummary(DeviceID uint32) string {
     value := SafecastValue{}
     file, err := ioutil.ReadFile(filename)
     if err != nil {
-        return ""
+        return "", ""
     }
 
     // Read it as JSON
     err = json.Unmarshal(file, &value)
     if err != nil {
-        return ""
+        return "", ""
     }
 
+	// Get the label
+	label := value.StatsDeviceInfo
+	
     // Build the summary
     s := ""
 
-    if value.StatsDeviceInfo != "" {
-        s += " \"" + value.StatsDeviceInfo + "\""
-    }
     if value.BatVoltage != 0 {
         s += fmt.Sprintf(" %.2fv", value.BatVoltage)
     }
@@ -1441,10 +1443,10 @@ func SafecastGetSummary(DeviceID uint32) string {
     }
 
     if (s == "") {
-        return ""
+        return "", ""
     }
 
     str := "(" + s + " )"
 
-    return str
+    return label, str
 }
