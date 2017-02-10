@@ -932,37 +932,37 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
         if sd.Pms.Count00_30 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Pms.Count00_30)
+            s += fmt.Sprintf(",%d", *sd.Pms.Count00_30)
         }
         if sd.Pms.Count00_50 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Pms.Count00_50)
+            s += fmt.Sprintf(",%d", *sd.Pms.Count00_50)
         }
         if sd.Pms.Count01_00 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Pms.Count01_00)
+            s += fmt.Sprintf(",%d", *sd.Pms.Count01_00)
         }
         if sd.Pms.Count02_50 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Pms.Count02_50)
+            s += fmt.Sprintf(",%d", *sd.Pms.Count02_50)
         }
         if sd.Pms.Count05_00 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Pms.Count05_00)
+            s += fmt.Sprintf(",%d", *sd.Pms.Count05_00)
         }
         if sd.Pms.Count10_00 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Pms.Count10_00)
+            s += fmt.Sprintf(",%d", *sd.Pms.Count10_00)
         }
         if sd.Pms.CountSecs == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Pms.CountSecs)
+            s += fmt.Sprintf(",%d", *sd.Pms.CountSecs)
         }
     }
     if sd.Opc == nil {
@@ -986,37 +986,37 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
         if sd.Opc.Count00_38 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Opc.Count00_38)
+            s += fmt.Sprintf(",%d", *sd.Opc.Count00_38)
         }
         if sd.Opc.Count00_54 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Opc.Count00_54)
+            s += fmt.Sprintf(",%d", *sd.Opc.Count00_54)
         }
         if sd.Opc.Count01_00 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Opc.Count01_00)
+            s += fmt.Sprintf(",%d", *sd.Opc.Count01_00)
         }
         if sd.Opc.Count02_10 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Opc.Count02_10)
+            s += fmt.Sprintf(",%d", *sd.Opc.Count02_10)
         }
         if sd.Opc.Count05_00 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Opc.Count05_00)
+            s += fmt.Sprintf(",%d", *sd.Opc.Count05_00)
         }
         if sd.Opc.Count10_00 == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Opc.Count10_00)
+            s += fmt.Sprintf(",%d", *sd.Opc.Count10_00)
         }
         if sd.Opc.CountSecs == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Opc.CountSecs)
+            s += fmt.Sprintf(",%d", *sd.Opc.CountSecs)
         }
     }
     s = s + "\r\n"
