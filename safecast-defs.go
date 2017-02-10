@@ -2,127 +2,121 @@
 
 package main
 
-type SafecastDataV1 struct {
-    CapturedAt		string `json:"captured_at,omitempty"`   // 2016-02-20T14:02:25Z
-    ChannelID		string `json:"channel_id,omitempty"`    // nil
-    DeviceID		string `json:"device_id,omitempty"`     // 140
-    DeviceTypeID	string `json:"devicetype_id,omitempty"` // nil
-    Height			string `json:"height,omitempty"`        // 123
-    ID				string `json:"id,omitempty"`            // 972298
-    LocationName	string `json:"location_name,omitempty"` // nil
-    OriginalID		string `json:"original_id,omitempty"`   // 972298
-    SensorID		string `json:"sensor_id,omitempty"`     // nil
-    StationID		string `json:"station_id,omitempty"`    // nil
-    Unit			string `json:"unit,omitempty"`          // cpm
-    UserID			string `json:"user_id,omitempty"`       // 304
-    Value			string `json:"value,omitempty"`         // 36
-    Latitude		string `json:"latitude,omitempty"`      // 37.0105
-    Longitude		string `json:"longitude,omitempty"`     // 140.9253
-    BatVoltage		string `json:"bat_voltage,omitempty"`   // 0-N volts
-    BatSOC			string `json:"bat_soc,omitempty"`       // 0%-100%
-    BatCurrent		string `json:"bat_current,omitempty"`   // -N to +N amps
-    WirelessSNR		string `json:"wireless_snr,omitempty"`	// gateway signal strength
-    EnvTemp			string `json:"env_temp,omitempty"`      // Degrees centigrade
-    EnvHumid		string `json:"env_humid,omitempty"`     // Percent RH
-    EnvPress		string `json:"env_press,omitempty"`     // Pascals
-    PmsPm01_0		string `json:"pms_pm01_0,omitempty"`
-    PmsPm02_5		string `json:"pms_pm02_5,omitempty"`
-    PmsPm10_0		string `json:"pms_pm10_0,omitempty"`
-    PmsC00_30		string `json:"pms_c00_30,omitempty"`
-    PmsC00_50		string `json:"pms_c00_50,omitempty"`
-    PmsC01_00		string `json:"pms_c01_00,omitempty"`
-    PmsC02_50		string `json:"pms_c02_50,omitempty"`
-    PmsC05_00		string `json:"pms_c05_00,omitempty"`
-    PmsC10_00		string `json:"pms_c10_00,omitempty"`
-    PmsCsecs		string `json:"pms_csecs,omitempty"`
-    OpcPm01_0		string `json:"opc_pm01_0,omitempty"`
-    OpcPm02_5		string `json:"opc_pm02_5,omitempty"`
-    OpcPm10_0		string `json:"opc_pm10_0,omitempty"`
-    OpcC00_38		string `json:"opc_c00_38,omitempty"`
-    OpcC00_54		string `json:"opc_c00_54,omitempty"`
-    OpcC01_00		string `json:"opc_c01_00,omitempty"`
-    OpcC02_10		string `json:"opc_c02_10,omitempty"`
-    OpcC05_00		string `json:"opc_c05_00,omitempty"`
-    OpcC10_00		string `json:"opc_c10_00,omitempty"`
-    OpcCsecs		string `json:"opc_csecs,omitempty"`
-    Cpm0			string `json:"cpm0,omitempty"`
-    Cpm1			string `json:"cpm1,omitempty"`
-    Transport		string `json:"transport,omitempty"`
+// Device Location Data - Lat and Lon required, Alt is optional
+type Loc struct {
+	Lat float32				`json:"loc_lat"`
+	Lon float32				`json:"loc_lon"`
+	Alt *float32			`json:"loc_alt,omitempty"`
 }
 
-type SafecastDataV2 struct {
-	UploadedAt		string `json:"uploaded_at,omitempty"`
-    CapturedAt		string `json:"captured_at,omitempty"`
-    DeviceID		uint32 `json:"device_id,omitempty"`
-    Height			float32 `json:"height,omitempty"`
-    Latitude		float32 `json:"latitude,omitempty"`
-    Longitude		float32 `json:"longitude,omitempty"`
-    BatVoltage		float32 `json:"bat_voltage,omitempty"`
-    BatSOC			float32 `json:"bat_soc,omitempty"`
-    BatCurrent		float32 `json:"bat_current,omitempty"`
-    WirelessSNR		float32 `json:"lora_snr,omitempty"`
-    EnvTemp			float32 `json:"env_temp,omitempty"`
-    EnvHumid		float32 `json:"env_humid,omitempty"`
-    EnvPress		float32 `json:"env_press,omitempty"`
-    PmsPm01_0		float32 `json:"pms_pm01_0,omitempty"`
-    PmsPm02_5		float32 `json:"pms_pm02_5,omitempty"`
-    PmsPm10_0		float32 `json:"pms_pm10_0,omitempty"`
-    PmsC00_30		uint32 `json:"pms_c00_30,omitempty"`
-    PmsC00_50		uint32 `json:"pms_c00_50,omitempty"`
-    PmsC01_00		uint32 `json:"pms_c01_00,omitempty"`
-    PmsC02_50		uint32 `json:"pms_c02_50,omitempty"`
-    PmsC05_00		uint32 `json:"pms_c05_00,omitempty"`
-    PmsC10_00		uint32 `json:"pms_c10_00,omitempty"`
-    PmsCsecs		uint32 `json:"pms_csecs,omitempty"`
-    OpcPm01_0		float32 `json:"opc_pm01_0,omitempty"`
-    OpcPm02_5		float32 `json:"opc_pm02_5,omitempty"`
-    OpcPm10_0		float32 `json:"opc_pm10_0,omitempty"`
-    OpcC00_38		uint32 `json:"opc_c00_38,omitempty"`
-    OpcC00_54		uint32 `json:"opc_c00_54,omitempty"`
-    OpcC01_00		uint32 `json:"opc_c01_00,omitempty"`
-    OpcC02_10		uint32 `json:"opc_c02_10,omitempty"`
-    OpcC05_00		uint32 `json:"opc_c05_00,omitempty"`
-    OpcC10_00		uint32 `json:"opc_c10_00,omitempty"`
-    OpcCsecs		uint32 `json:"opc_csecs,omitempty"`
-    Cpm0			float32 `json:"lndp_cpm,omitempty"`
-    Cpm1			float32 `json:"lndc_cpm,omitempty"`
-    Transport		string `json:"transport,omitempty"`
-    StatsUptimeMinutes    uint32 `json:"uptime_min,omitempty"`
-    StatsAppVersion       string `json:"version,omitempty"`
-    StatsDeviceParams     string `json:"cfgdev,omitempty"`
-    StatsServiceParams    string `json:"cfgsvc,omitempty"`
-    StatsTtnParams		  string `json:"cfgttn,omitempty"`
-    StatsGpsParams        string `json:"cfggps,omitempty"`
-    StatsSensorParams     string `json:"cfgsen,omitempty"`
-    StatsTransmittedBytes uint32 `json:"transmitted_bytes,omitempty"`
-    StatsReceivedBytes    uint32 `json:"received_bytes,omitempty"`
-    StatsCommsResets      uint32 `json:"comms_resets,omitempty"`
-    StatsCommsFails       uint32 `json:"comms_failures,omitempty"`
-    StatsCommsPowerFails  uint32 `json:"comms_power_fails,omitempty"`
-    StatsDeviceRestarts   uint32 `json:"restarts,omitempty"`
-    StatsMotiondrops      uint32 `json:"motiondrops,omitempty"`
-    StatsOneshots         uint32 `json:"oneshots,omitempty"`
-    StatsOneshotSeconds   uint32 `json:"oneshot_seconds,omitempty"`
-    StatsIccid            string `json:"iccid,omitempty"`
-    StatsCpsi             string `json:"cpsi,omitempty"`
-    StatsDfu              string `json:"dfu,omitempty"`
-    StatsDeviceInfo       string `json:"label,omitempty"`
-    StatsFreeMem          uint32 `json:"free_memory,omitempty"`
-    StatsNTPCount         uint32 `json:"ntp_count,omitempty"`
-	StatsLastFailure	  string `json:"last_failure,omitempty"`
-	StatsStatus			  string `json:"status,omitempty"`
-    Message				  string `json:"message,omitempty"`
+// Device Battery Performance Data - all are optional
+type Bat struct {
+	Voltage *float32		`json:"bat_voltage,omitempty"`
+    Current *float32		`json:"bat_current,omitempty"`
+	Charge *float32			`json:"bat_charge,omitempty"`
 }
 
-
-type SafecastValue struct {
-	SafecastDataV2			`json:"current_values,omitempty"`
-	LocationHistory			[5]SafecastDataV2 `json:"location_history,omitempty"`
-	GeigerHistory			[5]SafecastDataV2 `json:"geiger_history,omitempty"`
-	OpcHistory				[5]SafecastDataV2 `json:"opc_history,omitempty"`
-	PmsHistory				[5]SafecastDataV2 `json:"pms_history,omitempty"`
-    TransportHistory		[5]SafecastDataV2 `json:"transport_history,omitempty"`
-	IPInfo					IPInfoData	  	  `json:"transport_ip_info,omitempty"`
+// Device Network Performance Data - all are optional
+type Net struct {
+	SNR *float32			`json:"net_snr,omitempty"`
+    Transport *string		`json:"net_transport,omitempty"`
 }
 
-//
+// Device Basic Environmental Data - all are optional
+type Env struct {
+    Temp *float32			`json:"env_temp,omitempty"`
+    Humid *float32			`json:"env_humid,omitempty"`
+    Press *float32			`json:"env_press,omitempty"`
+}
+
+// LND Geiger Tubes - both are optional
+type Lnd struct {
+	// Unshielded LND 7318
+    u7318 *float32		`json:"lnd_7318u,omitempty"`
+	// Shielded LND 7318
+    c7318 *float32		`json:"lnd_7318c,omitempty"`
+	// Energy-compensated LND 7128
+    ec7128 *float32 `json:"lnd_7128ec,omitempty"`
+}
+
+// Plantower Air Sensor Data - PM all are optional
+type Pms struct {
+    Pm01_0 *float32			`json:"pms_pm01_0,omitempty"`
+    Pm02_5 *float32			`json:"pms_pm02_5,omitempty"`
+    Pm10_0 *float32			`json:"pms_pm10_0,omitempty"`
+    Count00_30 *uint32		`json:"pms_c00_30,omitempty"`
+    Count00_50 *uint32		`json:"pms_c00_50,omitempty"`
+    Count01_00 *uint32		`json:"pms_c01_00,omitempty"`
+    Count02_50 *uint32		`json:"pms_c02_50,omitempty"`
+    Count05_00 *uint32		`json:"pms_c05_00,omitempty"`
+    Count10_00 *uint32		`json:"pms_c10_00,omitempty"`
+    CountSecs *uint32		`json:"pms_csecs,omitempty"`
+}
+
+// Alphasense OPC-N2 Air Sensor Data - all are optional
+type Opc struct {
+    Pm01_0 *float32			`json:"opc_pm01_0,omitempty"`
+    Pm02_5 *float32			`json:"opc_pm02_5,omitempty"`
+    Pm10_0 *float32			`json:"opc_pm10_0,omitempty"`
+    Count00_38 *uint32		`json:"opc_c00_38,omitempty"`
+    Count00_54 *uint32		`json:"opc_c00_54,omitempty"`
+    Count01_00 *uint32		`json:"opc_c01_00,omitempty"`
+    Count02_10 *uint32		`json:"opc_c02_10,omitempty"`
+    Count05_00 *uint32		`json:"opc_c05_00,omitempty"`
+    Count10_00 *uint32		`json:"opc_c10_00,omitempty"`
+    CountSecs *uint32		`json:"opc_csecs,omitempty"`
+}
+
+// General Device Statistics - All Optional
+type Dev struct {
+    UptimeMinutes *uint32	`json:"dev_uptime,omitempty"`
+    AppVersion *string		`json:"dev_firmware,omitempty"`
+    DeviceParams *string	`json:"dev_cfgdev,omitempty"`
+    ServiceParams *string	`json:"dev_cfgsvc,omitempty"`
+    TtnParams *string		`json:"dev_cfgttn,omitempty"`
+    GpsParams *string		`json:"dev_cfggps,omitempty"`
+    SensorParams *string	`json:"dev_cfgsen,omitempty"`
+    TransmittedBytes *uint32 `json:"dev_transmitted_bytes,omitempty"`
+    ReceivedBytes *uint32	`json:"dev_received_bytes,omitempty"`
+    CommsResets *uint32		`json:"dev_comms_resets,omitempty"`
+    CommsFails *uint32		`json:"dev_comms_failures,omitempty"`
+    CommsPowerFails *uint32	`json:"dev_comms_power_fails,omitempty"`
+    DeviceRestarts *uint32	`json:"dev_restarts,omitempty"`
+    Motiondrops *uint32		`json:"dev_motiondrops,omitempty"`
+    Oneshots *uint32		`json:"dev_oneshots,omitempty"`
+    OneshotSeconds *uint32	`json:"dev_oneshot_seconds,omitempty"`
+    Iccid *string			`json:"dev_iccid,omitempty"`
+    Cpsi *string			`json:"dev_cpsi,omitempty"`
+    Dfu *string				`json:"dev_dfu,omitempty"`
+    DeviceInfo *string		`json:"dev_label,omitempty"`
+    FreeMem *uint32			`json:"dev_free_memory,omitempty"`
+    NTPCount *uint32		`json:"dev_ntp_count,omitempty"`
+	LastFailure *string		`json:"dev_last_failure,omitempty"`
+	Status *string			`json:"dev_status,omitempty"`
+}
+
+// Note that this structure has been designed so that we could convert, at a later date,
+// to a structured JSON out put by modifying these definitions by changing this of this form:
+//    *Location `json:",omitempty"`
+// to this form, using the data type as the fiel name and specifying a json field name..
+//	  Location *Location `json:"location,omitempty"`
+
+// Toggle the commment between these two lines to change flat/structured output
+type SafecastData struct {
+
+	// Basics
+    DeviceID uint64			`json:"device_id"`
+	UploadedAt *string		`json:"uploaded_at,omitempty"`
+    CapturedAt *string		`json:"captured_at,omitempty"`
+
+	// Substructures
+	*Loc					`json:",omitempty"`
+	*Env					`json:",omitempty"`
+	*Bat					`json:",omitempty"`
+	*Lnd					`json:",omitempty"`
+	*Pms					`json:",omitempty"`
+	*Opc					`json:",omitempty"`
+	*Net					`json:",omitempty"`
+	*Dev					`json:",omitempty"`
+
+}

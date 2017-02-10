@@ -38,7 +38,7 @@ const ttnDownlinkURL = "https://integrations.thethingsnetwork.org/ttn-eu/api/v2/
 const SafecastV1UploadIP = "107.161.164.163"
 const SafecastV1UploadURL = "http://" + SafecastV1UploadIP + "/scripts/indextest.php"
 const SafecastV1QueryString = "api_key=z3sHhgousVDDrCVXhzMT"
-var SafecastV2UploadURLs = [...]string {
+var SafecastUploadURLs = [...]string {
     "http://ingest.safecast.org/v1/measurements",
 }
 
@@ -807,8 +807,7 @@ func inboundWebRootHandler(rw http.ResponseWriter, req *http.Request) {
 
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
-    var sV1 SafecastDataV1
-    var sV2 SafecastDataV2
+    var sdV1 SafecastDataV1
 
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
@@ -818,7 +817,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
     // postSafecastV1ToSafecast
     // Attempt to unmarshal it as a Safecast V1 data structure
-    err = json.Unmarshal(body, &sV1)
+    err = json.Unmarshal(body, &sdV1)
     if (err != nil) {
         if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
             fmt.Printf("\n%s HTTP request '%s' ignored\n", time.Now().Format(logDateFormat), req.RequestURI);
@@ -828,30 +827,30 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         }
     } else {
 
-        // Convert to V2 format
-        sV2 = SafecastV1toV2(sV1)
-        sV2.Transport = "pnt-http:"+ipv4(req.RemoteAddr)
+        // Convert to current data format
+        sdV1.Transport = "pnt-http:"+ipv4(req.RemoteAddr)
+        deviceID, sd := SafecastV1toCurrent(sdV1)
 
-        fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sV2.DeviceID, sV2.Transport)
+        fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sd.DeviceID, sd.Transport)
         if true {
             fmt.Printf("%s\n", body)
         }
 
-        // For backward compatibility,post it to V1 with an URL that is preserved.  Also post to V2
+        // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
         urlV1 := SafecastV1UploadURL
         if (req.URL.RawQuery != "") {
             urlV1 = fmt.Sprintf("%s?%s", urlV1, req.URL.RawQuery)
         }
         UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
-        SafecastV1Upload(sV1, urlV1)
-        SafecastV2Upload(UploadedAt, sV2)
-        SafecastWriteToLogs(UploadedAt, sV2)
+        SafecastV1Upload(sdV1, urlV1)
+        SafecastUpload(UploadedAt, sd)
+        SafecastWriteToLogs(UploadedAt, sd)
         CountHTTPRedirect++
 
         // It is an error if there is a pending outbound payload for this device, so remove it and report it
-        isAvailable, _ := TelecastOutboundPayload(sV2.DeviceID)
+        isAvailable, _ := TelecastOutboundPayload(deviceID)
         if (isAvailable) {
-            sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", sV2.DeviceID))
+            sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", deviceID))
         }
 
     }
@@ -1116,10 +1115,7 @@ func commonRequestHandler() {
         case teletype.Telecast_BGEIGIE_NANO:
             fallthrough
         case teletype.Telecast_SOLARCAST:
-            ProcessSafecastMessage(msg, checksum, AppReq.Location, AppReq.UploadedAt, AppReq.Transport,
-                AppReq.ServerTime,
-                AppReq.Snr,
-                AppReq.Latitude, AppReq.Longitude, AppReq.Altitude)
+            ProcessSafecastMessage(msg, checksum, AppReq.UploadedAt, AppReq.Transport)
 
             // Handle messages from non-safecast devices
         default:
