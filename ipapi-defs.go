@@ -7,6 +7,8 @@ import (
 )
 
 type IPInfoData struct {
+	Message		 string  `json:"message"`
+	Status		 string  `json:"status"`
     AS           string  `json:"as"`
     City         string  `json:"city"`
     Country      string  `json:"country"`
