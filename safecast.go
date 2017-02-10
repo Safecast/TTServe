@@ -209,8 +209,8 @@ func ProcessSafecastMessage(msg *teletype.Telecast, checksum uint32, UploadedAt 
         dev.Dfu = msg.StatsDfu
         dodev = true
     }
-    if msg.StatsDeviceInfo != nil {
-        dev.DeviceInfo = msg.StatsDeviceInfo
+    if msg.StatsDeviceLabel != nil {
+        dev.DeviceLabel = msg.StatsDeviceLabel
         dodev = true
     }
     if msg.StatsGpsParams != nil {
@@ -805,8 +805,8 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
         if sd.Dev.Dfu != nil {
             stats += fmt.Sprintf("DFU:%s ", *sd.Dev.Dfu)
         }
-        if sd.Dev.DeviceInfo != nil {
-            stats += fmt.Sprintf("Label:%s ", *sd.Dev.DeviceInfo)
+        if sd.Dev.DeviceLabel != nil {
+            stats += fmt.Sprintf("Label:%s ", *sd.Dev.DeviceLabel)
         }
         if sd.Dev.FreeMem != nil {
             stats += fmt.Sprintf("FreeMem:%d ", *sd.Dev.FreeMem)
@@ -1490,8 +1490,8 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         if sc.Dev.Dfu != nil {
             value.Dev.Dfu = sc.Dev.Dfu
         }
-        if sc.Dev.DeviceInfo != nil {
-            value.Dev.DeviceInfo = sc.Dev.DeviceInfo
+        if sc.Dev.DeviceLabel != nil {
+            value.Dev.DeviceLabel = sc.Dev.DeviceLabel
         }
         if sc.Dev.FreeMem != nil {
             value.Dev.FreeMem = sc.Dev.FreeMem
@@ -1631,8 +1631,8 @@ func SafecastGetSummary(DeviceID uint32) (Label string, Gps string, Summary stri
 
     // Get the label
     label := ""
-    if value.Dev != nil && value.Dev.DeviceInfo != nil {
-        label = *value.Dev.DeviceInfo
+    if value.Dev != nil && value.Dev.DeviceLabel != nil {
+        label = *value.Dev.DeviceLabel
     }
 
     gps := ""

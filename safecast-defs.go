@@ -88,7 +88,7 @@ type Dev struct {
     Iccid *string			`json:"dev_iccid,omitempty"`
     Cpsi *string			`json:"dev_cpsi,omitempty"`
     Dfu *string				`json:"dev_dfu,omitempty"`
-    DeviceInfo *string		`json:"dev_label,omitempty"`
+    DeviceLabel *string		`json:"dev_label,omitempty"`
     FreeMem *uint32			`json:"dev_free_memory,omitempty"`
     NTPCount *uint32		`json:"dev_ntp_count,omitempty"`
 	LastFailure *string		`json:"dev_last_failure,omitempty"`
