@@ -588,11 +588,17 @@ func sendSafecastDeviceSummaryToSlack() {
             s = fmt.Sprintf("%s\n", s)
         }
 
+        label, gps, summary := SafecastGetSummary(id)
+
         s += fmt.Sprintf("%010d ", id)
         s += fmt.Sprintf("<http://%s%s%d|now> ", TTServerHTTPAddress, TTServerTopicValue, id)
         s += fmt.Sprintf("<http://%s%s%s%d.json|log> ", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
         s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
 
+		if (gps != "") {
+			s += gps + " "
+		}
+		
         if sortedDevices[i].minutesAgo == 0 {
             s = fmt.Sprintf("%s just now", s)
         } else {
@@ -611,7 +617,6 @@ func sendSafecastDeviceSummaryToSlack() {
         }
 
         // Append device summary
-        label, summary := SafecastGetSummary(id)
 		if label != "" {
             s += "\n        " + label
         }
@@ -1400,7 +1405,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 }
 
 // Get summary of a device
-func SafecastGetSummary(DeviceID uint32) (Label string, Summary string) {
+func SafecastGetSummary(DeviceID uint32) (Label string, Gps string, Summary string) {
 
     // Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", DeviceID) + ".json"
@@ -1409,24 +1414,25 @@ func SafecastGetSummary(DeviceID uint32) (Label string, Summary string) {
     value := SafecastValue{}
     file, err := ioutil.ReadFile(filename)
     if err != nil {
-        return "", ""
+        return "", "", ""
     }
 
     // Read it as JSON
     err = json.Unmarshal(file, &value)
     if err != nil {
-        return "", ""
+        return "", "", ""
     }
 
 	// Get the label
 	label := value.StatsDeviceInfo
+
+	gps := ""
+    if value.Latitude >= 2 {
+        gps = fmt.Sprintf("<http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps>", value.Latitude, value.Longitude)
+    }
 	
     // Build the summary
     s := ""
-
-    if value.Latitude >= 2 {
-        s += fmt.Sprintf("<http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps> ", value.Latitude, value.Longitude)
-    }
 
     if value.BatVoltage != 0 {
         s += fmt.Sprintf("%.2fv ", value.BatVoltage)
@@ -1444,6 +1450,6 @@ func SafecastGetSummary(DeviceID uint32) (Label string, Summary string) {
     }
 
 	// Done
-    return label, s
+    return label, gps, s
 
 }
