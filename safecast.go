@@ -629,9 +629,6 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool) {
 			s += "\n        "
 		} else {
 			s += " ( "
-			if label != "" {
-	            s += "\"" + label + "\" "
-	        }
 		}
 
         if summary != "" {
@@ -639,6 +636,9 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool) {
         }
 
 		if (!fWrap) {
+			if label != "" {
+	            s += "\"" + label + "\" "
+	        }
 			s += ")"
 		}
 
