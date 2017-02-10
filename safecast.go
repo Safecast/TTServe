@@ -1507,13 +1507,20 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         }
     }
 
+	// Calculate a time of the shuffle, allowing for the fact that our preferred time
+	// CapturedAt may not be available.
+	ShuffledAt := value.UploadedAt
+	if value.CapturedAt != nil {
+		ShuffledAt = value.CapturedAt
+	}
+
     // Shuffle
     if ChangedLocation {
         for i:=len(value.LocationHistory)-1; i>0; i-- {
             value.LocationHistory[i] = value.LocationHistory[i-1]
         }
         new := SafecastData{}
-        new.CapturedAt = value.CapturedAt
+        new.CapturedAt = ShuffledAt
         new.Loc = value.Loc
         value.LocationHistory[0] = new
     }
@@ -1524,7 +1531,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.PmsHistory[i] = value.PmsHistory[i-1]
         }
         new := SafecastData{}
-        new.CapturedAt = value.CapturedAt
+        new.CapturedAt = ShuffledAt
         new.Pms = value.Pms
         value.PmsHistory[0] = new
     }
@@ -1535,7 +1542,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.OpcHistory[i] = value.OpcHistory[i-1]
         }
         new := SafecastData{}
-        new.CapturedAt = value.CapturedAt
+        new.CapturedAt = ShuffledAt
         new.Opc = value.Opc
         value.OpcHistory[0] = new
     }
@@ -1546,7 +1553,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.GeigerHistory[i] = value.GeigerHistory[i-1]
         }
         new := SafecastData{}
-        new.CapturedAt = value.CapturedAt
+        new.CapturedAt = ShuffledAt
         new.Lnd = value.Lnd
         value.GeigerHistory[0] = new
     }
@@ -1557,7 +1564,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.TransportHistory[i] = value.TransportHistory[i-1]
         }
         new := SafecastData{}
-        new.CapturedAt = value.CapturedAt
+        new.CapturedAt = ShuffledAt
         new.Net = value.Net
         value.TransportHistory[0] = new
     }
