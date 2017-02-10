@@ -378,16 +378,19 @@ func ProcessSafecastMessage(msg *teletype.Telecast, checksum uint32, UploadedAt 
     if msg.Cpm0 != nil {
         var cpm float32 = float32(msg.GetCpm0())
         lnd.u7318 = &cpm
+		fmt.Printf("Found cpm0 %f\n", *lnd.u7318)
 		dolnd = true
     }
     if (msg.Cpm1 != nil) {
         var cpm float32 = float32(msg.GetCpm1())
         lnd.c7318 = &cpm
+		fmt.Printf("Found cpm1 %f\n", *lnd.c7318)
 		dolnd = true
     }
 
     if dolnd {
         sd.Lnd = &lnd
+		fmt.Printf("Found lnd %v\n", sd.Lnd)
     }
 
     // Log as accurately as we can with regard to what came in

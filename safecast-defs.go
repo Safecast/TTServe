@@ -32,17 +32,11 @@ type Env struct {
 // LND Geiger Tubes - both are optional
 type Lnd struct {
 	// Unshielded LND 7318
-//    u7318 *float32			`json:"lnd_7318u,omitempty"`
+    u7318 *float32			`json:"lnd_7318u,omitempty"`
 	// Shielded LND 7318
-//    c7318 *float32			`json:"lnd_7318c,omitempty"`
+    c7318 *float32			`json:"lnd_7318c,omitempty"`
 	// Energy-compensated LND 7128
-//    ec7128 *float32			`json:"lnd_7128ec,omitempty"`
-	// Unshielded LND 7318
-    u7318 *float32			`json:"lnd_u,omitempty"`
-	// Shielded LND 7318
-    c7318 *float32			`json:"lnd_c,omitempty"`
-	// Energy-compensated LND 7128
-    ec7128 *float32			`json:"lnd_ec,omitempty"`
+    ec7128 *float32			`json:"lnd_7128ec,omitempty"`
 }
 
 // Plantower Air Sensor Data - PM all are optional
