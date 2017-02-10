@@ -596,7 +596,7 @@ func sendSafecastDeviceSummaryToSlack() {
         s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
 
 		if (gps != "") {
-			s += gps + " "
+			s += " " + gps
 		}
 		
         if sortedDevices[i].minutesAgo == 0 {
