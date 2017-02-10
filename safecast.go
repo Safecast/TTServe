@@ -1437,16 +1437,17 @@ func SafecastGetSummary(DeviceID uint32) (Label string, Gps string, Summary stri
     if value.BatVoltage != 0 {
         s += fmt.Sprintf("%.1fv ", value.BatVoltage)
     }
-    if value.Cpm0 != 0 {
+    if value.Cpm0 != 0 && value.Cpm1 != 0 {
+        s += fmt.Sprintf("%.0f/%.0fcpm ", value.Cpm0, value.Cpm1)
+	} else if value.Cpm0 != 0 {
         s += fmt.Sprintf("%.0fcpm ", value.Cpm0)
-    }
-    if value.Cpm1 != 0 {
+    } else if value.Cpm1 != 0 {
         s += fmt.Sprintf("%.0fcpm ", value.Cpm1)
     }
     if (float32(value.OpcCsecs) + value.OpcPm01_0 + value.OpcPm02_5 + value.OpcPm10_0) != 0   {
-        s += fmt.Sprintf("%.1f/%.1f/%.1f ", value.OpcPm01_0, value.OpcPm02_5, value.OpcPm10_0)
+        s += fmt.Sprintf("%.1f/%.1f/%.1fug/m3 ", value.OpcPm01_0, value.OpcPm02_5, value.OpcPm10_0)
     } else if (float32(value.PmsCsecs) + value.PmsPm01_0 + value.PmsPm02_5 + value.PmsPm10_0) != 0 {
-        s += fmt.Sprintf("%.0f/%.0f/%.0f ", value.PmsPm01_0, value.PmsPm02_5, value.PmsPm10_0)
+        s += fmt.Sprintf("%.0f/%.0f/%.0fug/m3 ", value.PmsPm01_0, value.PmsPm02_5, value.PmsPm10_0)
     }
 
 	// Done
