@@ -614,7 +614,7 @@ func sendSafecastDeviceSummaryToSlack() {
         // Append device summary
         summary := SafecastGetSummary(id)
         if summary != "" {
-            s += " " + summary
+            s += "\n        " + summary
         }
 
     }
