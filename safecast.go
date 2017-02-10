@@ -1380,7 +1380,9 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
 				var info IPInfoData
 				err = json.Unmarshal(contents, &info)
 				if err == nil {
-					ipInfo = info
+					if info.Country != "" {
+						ipInfo = info
+					}
 				}
 			}
 		}
