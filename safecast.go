@@ -19,7 +19,7 @@ import (
 const deviceWarningAfterMinutes = 90
 
 // Debug
-const debugFormatConversions = true
+const debugFormatConversions = false
 
 // For dealing with transaction timeouts
 var httpTransactionsInProgress int = 0
@@ -56,7 +56,7 @@ type SafecastValue struct {
     GeigerHistory           [5]SafecastData `json:"geiger_history,omitempty"`
     OpcHistory              [5]SafecastData `json:"opc_history,omitempty"`
     PmsHistory              [5]SafecastData `json:"pms_history,omitempty"`
-    IPInfo                  IPInfoData        `json:"transport_ip_info,omitempty"`
+    IPInfo                  IPInfoData      `json:"transport_ip_info,omitempty"`
 }
 
 // Class used to sort seen devices
@@ -1392,6 +1392,9 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     }
     if sc.Env != nil {
         value.Env = sc.Env
+    }
+    if sc.Net != nil {
+        value.Net = sc.Net
     }
     if sc.Loc != nil {
 		var loc Loc
