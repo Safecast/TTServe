@@ -622,7 +622,7 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool) {
                 s = fmt.Sprintf("%s %dh %dm ago", s, hoursAgo, minutesAgo)
             } else {
 				if (minutesAgo < 10) {
-	                s = fmt.Sprintf(" %s %dm ago", s, minutesAgo)
+	                s = fmt.Sprintf("%s  %dm ago", s, minutesAgo)
 				} else {
 	                s = fmt.Sprintf("%s %dm ago", s, minutesAgo)
 				}
