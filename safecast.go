@@ -1158,7 +1158,10 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
         value.EnvPress = sc.EnvPress
     }
     if (float32(sc.PmsCsecs) + sc.PmsPm01_0 + sc.PmsPm02_5 + sc.PmsPm10_0) != 0 {
-        if sc.PmsCsecs != value.PmsCsecs || sc.PmsPm01_0 != value.PmsPm01_0 || sc.PmsPm02_5 != value.PmsPm02_5 || sc.PmsPm10_0 != value.PmsPm10_0 {
+        if sc.PmsPm01_0 != value.PmsPm01_0 || sc.PmsPm02_5 != value.PmsPm02_5 || sc.PmsPm10_0 != value.PmsPm10_0 {
+            ChangedPms = true
+        }
+        if sc.PmsCsecs != value.PmsCsecs || sc.PmsC00_30 != value.PmsC00_30 || sc.PmsC00_50 != value.PmsC00_50 || sc.PmsC01_00 != value.PmsC01_00 {
             ChangedPms = true
         }
         value.PmsPm01_0 = sc.PmsPm01_0
@@ -1173,7 +1176,10 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
         value.PmsCsecs = sc.PmsCsecs
     }
     if (float32(sc.OpcCsecs) + sc.OpcPm01_0 + sc.OpcPm02_5 + sc.OpcPm10_0) != 0 {
-        if sc.OpcCsecs != value.OpcCsecs || sc.OpcPm01_0 != value.OpcPm01_0 || sc.OpcPm02_5 != value.OpcPm02_5 || sc.OpcPm10_0 != value.OpcPm10_0 {
+        if sc.OpcPm01_0 != value.OpcPm01_0 || sc.OpcPm02_5 != value.OpcPm02_5 || sc.OpcPm10_0 != value.OpcPm10_0 {
+            ChangedOpc = true
+        }
+        if sc.OpcCsecs != value.OpcCsecs || sc.OpcC00_38 != value.OpcC00_38 || sc.OpcC00_54 != value.OpcC00_54 || sc.OpcC01_00 != value.OpcC01_00 {
             ChangedOpc = true
         }
         value.OpcPm01_0 = sc.OpcPm01_0
