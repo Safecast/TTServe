@@ -18,6 +18,9 @@ import (
 // Warning behavior
 const deviceWarningAfterMinutes = 90
 
+// Debug
+const debugFormatConversions = true
+
 // For dealing with transaction timeouts
 var httpTransactionsInProgress int = 0
 var httpTransactions = 0
@@ -1048,7 +1051,7 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
     fd.WriteString("\r\n,\r\n");
 
 	// Debug
-	if true {
+	if debugFormatConversions {
 		fmt.Printf("*** About to log:\n%s\n", string(scJSON))
 	}
 
@@ -1102,8 +1105,7 @@ func SafecastV1toCurrent(v1 SafecastDataV1) (uint32, SafecastData) {
         sd.Loc = &loc
     }
 
-    // Lnd
-
+    // Reverse-engineer Unit/Value to yield the good stuff
     switch (strings.ToLower(v1.Unit)) {
 
     case "pm1":
