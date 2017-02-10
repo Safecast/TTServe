@@ -387,11 +387,6 @@ func ProcessSafecastMessage(msg *teletype.Telecast, checksum uint32, UploadedAt 
         sd.Lnd = &lnd
     }
 
-	// Debug
-	if true {
-		fmt.Printf("*** About to log:\n%v\n", sd)
-	}
-
     // Log as accurately as we can with regard to what came in
     SafecastWriteToLogs(UploadedAt, sd)
 
@@ -1051,6 +1046,11 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
     scJSON, _ := json.Marshal(sd)
     fd.WriteString(string(scJSON));
     fd.WriteString("\r\n,\r\n");
+
+	// Debug
+	if true {
+		fmt.Printf("*** About to log:\n%s\n", string(scJSON))
+	}
 
     // Close and exit
     fd.Close();
