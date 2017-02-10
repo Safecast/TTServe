@@ -1363,6 +1363,30 @@ func SafecastWriteValue(UploadedAt string, sc SafecastDataV2) {
         value.TransportHistory[0] = new
     }
 
+	// If the current transport has an IP address, try to
+	// get the IP info
+
+	ipInfo := IPInfoData{}
+	Str1 := strings.Split(value.Transport, ":")
+	IP := Str1[len(Str1)-1]
+	Str2 := strings.Split(IP, ".")
+	isValidIP := len(Str1) > 1 && len(Str2) == 4
+	if (isValidIP) {	
+		response, err := http.Get("http://ip-api.com/json/" + IP)
+		if err == nil {
+			defer response.Body.Close()
+			contents, err := ioutil.ReadAll(response.Body)
+			if err == nil {
+				var info IPInfoData
+				err = json.Unmarshal(contents, &info)
+				if err == nil {
+					ipInfo = info
+				}
+			}
+		}
+	}
+	value.IPInfo = ipInfo
+	
     // Write it to the file
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
     fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)

@@ -122,6 +122,7 @@ type SafecastValue struct {
 	OpcHistory				[5]SafecastDataV2 `json:"opc_history,omitempty"`
 	PmsHistory				[5]SafecastDataV2 `json:"pms_history,omitempty"`
     TransportHistory		[5]SafecastDataV2 `json:"transport_history,omitempty"`
+	IPInfo					IPInfoData	  	  `json:"transport_ip_info,omitempty"`
 }
 
 //
