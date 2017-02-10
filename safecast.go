@@ -377,20 +377,17 @@ func ProcessSafecastMessage(msg *teletype.Telecast, checksum uint32, UploadedAt 
 
     if msg.Cpm0 != nil {
         var cpm float32 = float32(msg.GetCpm0())
-        lnd.u7318 = &cpm
-		fmt.Printf("Found cpm0 %f\n", *lnd.u7318)
+        lnd.U7318 = &cpm
 		dolnd = true
     }
     if (msg.Cpm1 != nil) {
         var cpm float32 = float32(msg.GetCpm1())
-        lnd.c7318 = &cpm
-		fmt.Printf("Found cpm1 %f\n", *lnd.c7318)
+        lnd.C7318 = &cpm
 		dolnd = true
     }
 
     if dolnd {
         sd.Lnd = &lnd
-		fmt.Printf("Found lnd %v\n", sd.Lnd)
     }
 
     // Log as accurately as we can with regard to what came in
@@ -841,15 +838,15 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
     if sd.Lnd == nil {
         s += ",,"
     } else {
-        if sd.u7318 != nil {
-            s = s + fmt.Sprintf(",%f", *sd.u7318)
+        if sd.U7318 != nil {
+            s = s + fmt.Sprintf(",%f", *sd.U7318)
         } else {
             s += ","
         }
-        if sd.c7318 != nil {
-            s = s + fmt.Sprintf(",%f", *sd.c7318)
-        } else if sd.ec7128 != nil {
-            s = s + fmt.Sprintf(",%f", *sd.ec7128)
+        if sd.C7318 != nil {
+            s = s + fmt.Sprintf(",%f", *sd.C7318)
+        } else if sd.EC7128 != nil {
+            s = s + fmt.Sprintf(",%f", *sd.EC7128)
         } else {
             s += ","
         }
@@ -1151,13 +1148,13 @@ func SafecastV1toCurrent(v1 SafecastDataV1) (uint32, SafecastData) {
         if (subtype == 1) {
             var lnd Lnd
             cpm := float32(f64)
-            lnd.u7318 = &cpm
+            lnd.U7318 = &cpm
             sd.Lnd = &lnd
 
         } else if (subtype == 2) {
             var lnd Lnd
             cpm := float32(f64)
-            lnd.ec7128 = &cpm
+            lnd.EC7128 = &cpm
             sd.Lnd = &lnd
         } else {
             fmt.Sprintf("*** V1toCurrent %d cpm not understood for this subtype\n", sd.DeviceID);
@@ -1416,14 +1413,14 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         if value.Lnd == nil {
             value.Lnd = &lnd
         }
-        if sc.Lnd.u7318 != nil {
-            value.Lnd.u7318 = sc.Lnd.u7318
+        if sc.Lnd.U7318 != nil {
+            value.Lnd.U7318 = sc.Lnd.U7318
         }
-        if sc.Lnd.c7318 != nil {
-            value.Lnd.c7318 = sc.Lnd.c7318
+        if sc.Lnd.C7318 != nil {
+            value.Lnd.C7318 = sc.Lnd.C7318
         }
-        if sc.Lnd.ec7128 != nil {
-            value.Lnd.ec7128 = sc.Lnd.ec7128
+        if sc.Lnd.EC7128 != nil {
+            value.Lnd.EC7128 = sc.Lnd.EC7128
         }
         ChangedGeiger = true
     }
@@ -1640,22 +1637,22 @@ func SafecastGetSummary(DeviceID uint32) (Label string, Gps string, Summary stri
 
     if value.Lnd != nil {
 		didlnd := false
-        if value.Lnd.u7318 != nil {
-			s += fmt.Sprintf("%.0f", *value.Lnd.u7318)
+        if value.Lnd.U7318 != nil {
+			s += fmt.Sprintf("%.0f", *value.Lnd.U7318)
 			didlnd = true;
 		}
-        if value.Lnd.c7318 != nil {
+        if value.Lnd.C7318 != nil {
 			if (didlnd) {
 				s += "|"
 			}
-			s += fmt.Sprintf("%.0f", *value.Lnd.c7318)
+			s += fmt.Sprintf("%.0f", *value.Lnd.C7318)
 			didlnd = true;
 		}
-        if value.Lnd.ec7128 != nil {
+        if value.Lnd.EC7128 != nil {
 			if (didlnd) {
 				s += "|"
 			}
-			s += fmt.Sprintf("%.0f", *value.Lnd.ec7128)
+			s += fmt.Sprintf("%.0f", *value.Lnd.EC7128)
 			didlnd = true;
 		}
 		if (didlnd) {
