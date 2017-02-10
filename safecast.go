@@ -56,7 +56,6 @@ type SafecastValue struct {
     GeigerHistory           [5]SafecastData `json:"geiger_history,omitempty"`
     OpcHistory              [5]SafecastData `json:"opc_history,omitempty"`
     PmsHistory              [5]SafecastData `json:"pms_history,omitempty"`
-    TransportHistory        [5]SafecastData `json:"transport_history,omitempty"`
     IPInfo                  IPInfoData        `json:"transport_ip_info,omitempty"`
 }
 
@@ -1362,7 +1361,6 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     var ChangedPms = false
     var ChangedOpc = false
     var ChangedGeiger = false
-    var ChangedTransport = false
 
     // Use the supplied upload time as our modification time
     sc.UploadedAt = &UploadedAt
@@ -1389,16 +1387,21 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     if sc.CapturedAt != nil {
         value.CapturedAt = sc.CapturedAt
     }
-    if sc.Loc != nil {
-        value.Loc = sc.Loc
-        ChangedLocation = true
-    }
     if sc.Bat != nil {
         value.Bat = sc.Bat
-        ChangedLocation = true
     }
     if sc.Env != nil {
         value.Env = sc.Env
+    }
+    if sc.Loc != nil {
+		var loc Loc
+		if (value.Loc == nil) {
+			value.Loc = &loc
+		}
+		if (value.Loc.Lat != sc.Loc.Lat || value.Loc.Lon != sc.Loc.Lon) {
+	        ChangedLocation = true
+		}
+        value.Loc = sc.Loc
     }
     if sc.Pms != nil {
         value.Pms = sc.Pms
@@ -1414,19 +1417,35 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.Lnd = &lnd
         }
         if sc.Lnd.U7318 != nil {
+			var val float32
+	        if value.Lnd.U7318 == nil {
+	            value.Lnd.U7318 = &val
+	        }
+			if (*value.Lnd.U7318 != *sc.Lnd.U7318) {
+		        ChangedGeiger = true
+			}
             value.Lnd.U7318 = sc.Lnd.U7318
         }
         if sc.Lnd.C7318 != nil {
+			var val float32
+	        if value.Lnd.C7318 == nil {
+	            value.Lnd.C7318 = &val
+	        }
+			if (*value.Lnd.C7318 != *sc.Lnd.C7318) {
+		        ChangedGeiger = true
+			}
             value.Lnd.C7318 = sc.Lnd.C7318
         }
         if sc.Lnd.EC7128 != nil {
+			var val float32
+	        if value.Lnd.EC7128 == nil {
+	            value.Lnd.EC7128 = &val
+	        }
+			if (*value.Lnd.EC7128 != *sc.Lnd.EC7128) {
+		        ChangedGeiger = true
+			}
             value.Lnd.EC7128 = sc.Lnd.EC7128
         }
-        ChangedGeiger = true
-    }
-    if sc.Net != nil {
-        value.Net = sc.Net
-        ChangedTransport = true
     }
     if sc.Dev != nil {
         var dev Dev
@@ -1560,18 +1579,6 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         new.CapturedAt = ShuffledAt
         new.Lnd = value.Lnd
         value.GeigerHistory[0] = new
-    }
-
-    // Shuffle
-    if ChangedTransport {
-        for i:=len(value.TransportHistory)-1; i>0; i-- {
-            value.TransportHistory[i] = value.TransportHistory[i-1]
-        }
-        new := SafecastData{}
-		new.DeviceID = value.DeviceID
-        new.CapturedAt = ShuffledAt
-        new.Net = value.Net
-        value.TransportHistory[0] = new
     }
 
     // If the current transport has an IP address, try to
