@@ -375,10 +375,12 @@ func ProcessSafecastMessage(msg *teletype.Telecast, checksum uint32, UploadedAt 
     if msg.Cpm0 != nil {
         var cpm float32 = float32(msg.GetCpm0())
         lnd.u7318 = &cpm
+		dolnd = true
     }
     if (msg.Cpm1 != nil) {
         var cpm float32 = float32(msg.GetCpm1())
         lnd.c7318 = &cpm
+		dolnd = true
     }
 
     if dolnd {
