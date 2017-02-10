@@ -1424,29 +1424,26 @@ func SafecastGetSummary(DeviceID uint32) (Label string, Summary string) {
     // Build the summary
     s := ""
 
+    if value.Latitude >= 2 {
+        s += fmt.Sprintf("<http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps> ", value.Latitude, value.Longitude)
+    }
+
     if value.BatVoltage != 0 {
-        s += fmt.Sprintf(" %.2fv", value.BatVoltage)
+        s += fmt.Sprintf("%.2fv ", value.BatVoltage)
     }
     if value.Cpm0 != 0 {
-        s += fmt.Sprintf(" %.0fcpm", value.Cpm0)
+        s += fmt.Sprintf("%.0fcpm ", value.Cpm0)
     }
     if value.Cpm1 != 0 {
-        s += fmt.Sprintf(" %.0fcpm", value.Cpm1)
+        s += fmt.Sprintf("%.0fcpm ", value.Cpm1)
     }
     if (float32(value.OpcCsecs) + value.OpcPm01_0 + value.OpcPm02_5 + value.OpcPm10_0) != 0   {
-        s += fmt.Sprintf(" %.2f/%.2f/%.2f", value.OpcPm01_0, value.OpcPm02_5, value.OpcPm10_0)
+        s += fmt.Sprintf("%.2f/%.2f/%.2f ", value.OpcPm01_0, value.OpcPm02_5, value.OpcPm10_0)
     } else if (float32(value.PmsCsecs) + value.PmsPm01_0 + value.PmsPm02_5 + value.PmsPm10_0) != 0 {
-        s += fmt.Sprintf(" %.0f/%.0f/%.0f", value.PmsPm01_0, value.PmsPm02_5, value.PmsPm10_0)
-    }
-    if value.Latitude >= 2 {
-        s += fmt.Sprintf(" <http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps>", value.Latitude, value.Longitude)
+        s += fmt.Sprintf("%.0f/%.0f/%.0f ", value.PmsPm01_0, value.PmsPm02_5, value.PmsPm10_0)
     }
 
-    if (s == "") {
-        return "", ""
-    }
+	// Done
+    return label, s
 
-    str := "(" + s + " )"
-
-    return label, str
 }
