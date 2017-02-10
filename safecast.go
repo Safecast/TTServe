@@ -385,6 +385,11 @@ func ProcessSafecastMessage(msg *teletype.Telecast, checksum uint32, UploadedAt 
         sd.Lnd = &lnd
     }
 
+	// Debug
+	if true {
+		fmt.Printf("*** About to log:\n%v\n", sd)
+	}
+
     // Log as accurately as we can with regard to what came in
     SafecastWriteToLogs(UploadedAt, sd)
 
