@@ -567,7 +567,7 @@ func sendExpiredSafecastDevicesToSlack() {
 }
 
 // Get a summary of devices that are older than this many minutes ago
-func sendSafecastDeviceSummaryToSlack() {
+func sendSafecastDeviceSummaryToSlack(fWrap bool) {
 
     // First, age out the expired devices and recompute when last seen
     sendExpiredSafecastDevicesToSlack()
@@ -591,10 +591,13 @@ func sendSafecastDeviceSummaryToSlack() {
         label, gps, summary := SafecastGetSummary(id)
 
         s += fmt.Sprintf("%010d ", id)
-		if label != "" {
-            s += label
-        }
-        s += "\n        "
+
+		if (fWrap) {
+			if label != "" {
+	            s += label
+			}
+			s += "\n        "
+		}
 
         s += fmt.Sprintf("<http://%s%s%d|now> ", TTServerHTTPAddress, TTServerTopicValue, id)
         s += fmt.Sprintf("<http://%s%s%s%d.json|log> ", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
@@ -602,8 +605,10 @@ func sendSafecastDeviceSummaryToSlack() {
 
 		if (gps != "") {
 			s += " " + gps
-		}
-		
+		} else {
+			s += " gps"
+		}		
+
         if sortedDevices[i].minutesAgo == 0 {
             s = fmt.Sprintf("%s just now", s)
         } else {
@@ -621,10 +626,22 @@ func sendSafecastDeviceSummaryToSlack() {
             }
         }
 
-        // Append device summary
+		if (fWrap) {
+			s += "\n        "
+		} else {
+			s += " ( "
+			if label != "" {
+	            s += "\"" + label + "\" "
+	        }
+		}
+
         if summary != "" {
-            s += "\n        " + summary
+            s += summary
         }
+
+		if (!fWrap) {
+			s += " )"
+		}
 
     }
 
