@@ -1065,7 +1065,9 @@ func SafecastV1toCurrent(v1 SafecastDataV1) (uint32, SafecastData) {
 
     // Net
     if v1.Transport != "" {
-        sd.Transport = &v1.Transport
+		var net Net
+		sd.Net = &net
+        sd.Net.Transport = &v1.Transport
     }
 
     // Loc
