@@ -590,7 +590,7 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool) {
 
         label, gps, summary := SafecastGetSummary(id)
 
-        s += fmt.Sprintf("%010d ", id)
+        s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicValue, id, id)
 
 		if (fWrap) {
 			if label != "" {
@@ -599,7 +599,6 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool) {
 			s += "\n        "
 		}
 
-        s += fmt.Sprintf("<http://%s%s%d|now> ", TTServerHTTPAddress, TTServerTopicValue, id)
         s += fmt.Sprintf("<http://%s%s%s%d.json|log> ", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
         s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
 
@@ -640,7 +639,7 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool) {
         }
 
 		if (!fWrap) {
-			s += " )"
+			s += ")"
 		}
 
     }
