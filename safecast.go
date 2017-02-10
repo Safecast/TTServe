@@ -1683,11 +1683,11 @@ func SafecastGetSummary(DeviceID uint32) (Label string, Gps string, Summary stri
     }
     if value.Opc != nil {
         if value.Opc.Pm01_0 != nil && value.Opc.Pm02_5 != nil && value.Opc.Pm10_0 != nil {
-	        s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3 ", value.Opc.Pm01_0, value.Opc.Pm02_5, value.Opc.Pm10_0)
+	        s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3 ", *value.Opc.Pm01_0, *value.Opc.Pm02_5, *value.Opc.Pm10_0)
 		}
 	} else if value.Pms != nil {
         if value.Pms.Pm01_0 != nil && value.Pms.Pm02_5 != nil && value.Pms.Pm10_0 != nil {
-	        s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3 ", value.Pms.Pm01_0, value.Pms.Pm02_5, value.Pms.Pm10_0)
+	        s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3 ", *value.Pms.Pm01_0, *value.Pms.Pm02_5, *value.Pms.Pm10_0)
 		}
 	}
 
