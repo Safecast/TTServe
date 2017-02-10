@@ -1520,6 +1520,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.LocationHistory[i] = value.LocationHistory[i-1]
         }
         new := SafecastData{}
+		new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Loc = value.Loc
         value.LocationHistory[0] = new
@@ -1531,6 +1532,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.PmsHistory[i] = value.PmsHistory[i-1]
         }
         new := SafecastData{}
+		new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Pms = value.Pms
         value.PmsHistory[0] = new
@@ -1542,6 +1544,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.OpcHistory[i] = value.OpcHistory[i-1]
         }
         new := SafecastData{}
+		new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Opc = value.Opc
         value.OpcHistory[0] = new
@@ -1553,6 +1556,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.GeigerHistory[i] = value.GeigerHistory[i-1]
         }
         new := SafecastData{}
+		new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Lnd = value.Lnd
         value.GeigerHistory[0] = new
@@ -1564,6 +1568,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.TransportHistory[i] = value.TransportHistory[i-1]
         }
         new := SafecastData{}
+		new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Net = value.Net
         value.TransportHistory[0] = new
