@@ -7,19 +7,19 @@ import (
 )
 
 type IPInfoData struct {
-	Message		 string  `json:"message"`
-	Status		 string  `json:"status"`
-    AS           string  `json:"as"`
-    City         string  `json:"city"`
-    Country      string  `json:"country"`
-    CountryCode  string  `json:"countryCode"`
-    ISP          string  `json:"isp"`
-    Latitude     float32 `json:"lat"`
-    Longitude    float32 `json:"lon"`
-    Organization string  `json:"org"`
-    IP           net.IP  `json:"query"`
-    Region       string  `json:"region"`
-    RegionName   string  `json:"regionName"`
-    Timezone     string  `json:"timezone"`
-    Zip          string  `json:"zip"`
+    IP           net.IP  `json:"query,omitempty"`
+	Message		 string  `json:"message,omitempty"`
+	Status		 string  `json:"status,omitempty"`
+    AS           string  `json:"as,omitempty"`
+    City         string  `json:"city,omitempty"`
+    Country      string  `json:"country,omitempty"`
+    CountryCode  string  `json:"countryCode,omitempty"`
+    ISP          string  `json:"isp,omitempty"`
+    Latitude     float32 `json:"lat,omitempty"`
+    Longitude    float32 `json:"lon,omitempty"`
+    Organization string  `json:"org,omitempty"`
+    Region       string  `json:"region,omitempty"`
+    RegionName   string  `json:"regionName,omitempty"`
+    Timezone     string  `json:"timezone,omitempty"`
+    Zip          string  `json:"zip,omitempty"`
 }
