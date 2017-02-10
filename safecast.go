@@ -16,7 +16,8 @@ import (
 )
 
 // Lat/Lon/Alt behavior at the API
-const addFakeLocation = false
+const addFakeLocation = true
+const addFakesAsZeros = true
 
 // Warning behavior
 const deviceWarningAfterMinutes = 90
@@ -145,28 +146,16 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV2.CapturedAt = tstr
     }
 
-    // Include lat/lon/alt on all messages, including metadata
+    // Include lat/lon/alt 
     if msg.Latitude != nil {
         scV2.Latitude =  msg.GetLatitude()
-    } else {
-        if (addFakeLocation) {
-            scV2.Latitude = defaultLat
-        }
     }
     if msg.Longitude != nil {
         scV2.Longitude = msg.GetLongitude()
-    } else {
-        if (addFakeLocation) {
-            scV2.Longitude = defaultLon
-        }
-    }
+	}
     if msg.Altitude != nil {
         scV2.Height = float32(msg.GetAltitude())
-    } else {
-        if (addFakeLocation) {
-            scV2.Height = defaultAlt
-        }
-    }
+	}
 
     // The first/primary upload has all known fields.  It is
     // our goal that someday this is the *only* upload,
@@ -335,8 +324,28 @@ func ProcessSafecastMessage(msg *teletype.Telecast,
         scV2a.Cpm1 = float32(msg.GetCpm1())
     }
 
-    // Log and upload
+    // Log as accurately as we can with regard to what came in
     SafecastWriteToLogs(UploadedAt, scV2a)
+	
+	// After logging, do kludges to conform with API requirements
+    if (addFakeLocation) {
+		if (addFakesAsZeros) {
+			defaultLat = 0.0
+			defaultLon = 0.0
+			defaultAlt = 0.0
+		}
+		if msg.Latitude == nil {
+            scV2.Latitude = defaultLat
+        }
+	    if msg.Longitude == nil {
+            scV2.Longitude = defaultLon
+        }
+		if msg.Altitude == nil {
+            scV2.Height = defaultAlt
+		}
+    }
+
+	// Log, conforming to API requirements
     SafecastV2Upload(UploadedAt, scV2a)
 
 }
