@@ -626,9 +626,9 @@ func sendSafecastDeviceSummaryToSlack() {
 
 // Write to both logs
 func SafecastWriteToLogs(UploadedAt string, scV2 SafecastDataV2) {
-    SafecastJSONLog(UploadedAt, scV2)
-    SafecastCSVLog(UploadedAt, scV2)
-    SafecastWriteValue(UploadedAt, scV2)
+    go SafecastJSONLog(UploadedAt, scV2)
+    go SafecastCSVLog(UploadedAt, scV2)
+    go SafecastWriteValue(UploadedAt, scV2)
 }
 
 // Get path of the safecast directory
