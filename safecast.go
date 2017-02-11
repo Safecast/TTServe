@@ -840,7 +840,7 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
     s = s + fmt.Sprintf(",%s", stats)
     s = s + fmt.Sprintf(",%s", "")          // Value
     if sd.Lnd == nil {
-        s += ",,"
+        s += ",,,"
     } else {
         if sd.U7318 != nil {
             s = s + fmt.Sprintf(",%f", *sd.U7318)
