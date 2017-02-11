@@ -374,14 +374,19 @@ func ProcessSafecastMessage(msg *teletype.Telecast, checksum uint32, UploadedAt 
     var lnd Lnd
     var dolnd = false
 
-    if msg.Cpm0 != nil {
-        var cpm float32 = float32(msg.GetCpm0())
+    if msg.Lnd_7318U != nil {
+        var cpm float32 = float32(msg.GetLnd_7318U())
         lnd.U7318 = &cpm
 		dolnd = true
     }
-    if (msg.Cpm1 != nil) {
-        var cpm float32 = float32(msg.GetCpm1())
+    if msg.Lnd_7318C != nil {
+        var cpm float32 = float32(msg.GetLnd_7318C())
         lnd.C7318 = &cpm
+		dolnd = true
+    }
+    if msg.Lnd_7128Ec != nil {
+        var cpm float32 = float32(msg.GetLnd_7128Ec())
+        lnd.EC7128 = &cpm
 		dolnd = true
     }
 
@@ -740,7 +745,7 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
         }
 
         // Write the header
-        fd.WriteString("Uploaded,Captured,Device ID,Stats,Uptime,CPM0,CPM1,Latitude,Longitude,Altitude,Bat V,Bat SOC,Bat I,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OPC # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
+        fd.WriteString("Uploaded,Captured,Device ID,Stats,Uptime,7318U,7318C,7128EC,Latitude,Longitude,Altitude,Bat V,Bat SOC,Bat I,SNR,Temp C,Humid %,Press Pa,PMS PM 1.0,PMS PM 2.5,PMS PM 10.0,PMS # 0.3,PMS # 0.5,PMS # 1.0,PMS # 2.5,PMS # 5.0,PMS # 10.0,PMS # Secs,OPC PM 1.0,OPC PM 2.5,OPC PM 10.0,OPC # 0.38,OPC # 0.54,OPC # 1.0,OPC # 2.1,OPC # 5.0,OPC # 10.0,OPC # Secs\r\n");
 
     }
 
@@ -844,7 +849,10 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
         }
         if sd.C7318 != nil {
             s = s + fmt.Sprintf(",%f", *sd.C7318)
-        } else if sd.EC7128 != nil {
+        } else {
+            s += ","
+        }
+		if sd.EC7128 != nil {
             s = s + fmt.Sprintf(",%f", *sd.EC7128)
         } else {
             s += ","
