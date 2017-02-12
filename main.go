@@ -281,7 +281,7 @@ func timer15m() {
 
 // Get the current time in UTC as a string
 func nowInUTC() string {
-	return time.Now().UTC().Format("2006-01-02T15:04:05Z")
+    return time.Now().UTC().Format("2006-01-02T15:04:05Z")
 }
 
 // Server health check
@@ -541,7 +541,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
         if (isAvailable) {
 
-			// Responses for now are always hex-encoded for easy device processing
+            // Responses for now are always hex-encoded for easy device processing
             hexPayload := hex.EncodeToString(payload)
             io.WriteString(rw, hexPayload)
             sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID))
@@ -651,7 +651,7 @@ func processBuffer(req IncomingReq, from string, transport string, buf []byte) (
         AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
         // Extract the device ID from the message, which we will need later
-        _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
+        _, ReplyToDeviceID = getReplyDeviceIDFromPayload(AppReq.Payload)
 
         // Enqueue the app request
         AppReq.UploadedAt = nowInUTC()
@@ -682,7 +682,7 @@ func processBuffer(req IncomingReq, from string, transport string, buf []byte) (
             AppReq.Payload = buf[payloadOffset:payloadOffset+length]
 
             // Extract the device ID from the message, which we will need later
-            _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
+            _, ReplyToDeviceID = getReplyDeviceIDFromPayload(AppReq.Payload)
 
             // Add ServerTime in case the payload lacked CapturedAt
             AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
@@ -835,9 +835,9 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         // Convert to current data format
         sdV1.Transport = "reformat-http:"+ipv4(req.RemoteAddr)
         deviceID, deviceType, sd := SafecastReformat(sdV1)
-		if (deviceID == 0) {
-			return
-		}
+        if (deviceID == 0) {
+            return
+        }
 
         fmt.Printf("\n%s Received %s payload for %d from %s\n", time.Now().Format(logDateFormat), deviceType, sd.DeviceID, sdV1.Transport)
         if true {
@@ -1033,7 +1033,7 @@ func ttnMQQTInboundHandler() {
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.
-            isAvailable, deviceID := getDeviceIDFromPayload(AppReq.Payload)
+            isAvailable, deviceID := getReplyDeviceIDFromPayload(AppReq.Payload)
             if isAvailable {
                 isAvailable, payload := TelecastOutboundPayload(deviceID)
                 if (isAvailable) {
@@ -1047,9 +1047,11 @@ func ttnMQQTInboundHandler() {
 
 }
 
-// Get any outbound payload waiting for the node who sent us an AppReq.  If
-// the device ID is not found, guarantee that a 0 is returned for the device ID.
-func getDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, deviceID uint32) {
+// Get any outbound payload waiting for the node who sent us a payload, but ONLY if
+// the payload is of a type where we know that the client is listening for a reply.  If
+// this is not a replyable payload or if the device ID is not found, we guarantee that
+// 0 is returned for the device ID.
+func getReplyDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, deviceID uint32) {
 
     // Extract the telecast message from the AppReq
     msg := &teletype.Telecast{}
@@ -1058,7 +1060,23 @@ func getDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, deviceID u
         return false, 0
     }
 
-    return true, TelecastDeviceID(msg)
+    // Extract the device ID
+    DeviceID := TelecastDeviceID(msg)
+
+    // Look at reply type
+    if msg.ReplyType != nil {
+
+        switch msg.GetReplyType() {
+
+        case teletype.Telecast_REPLY_EXPECTED:
+            fmt.Printf("*** Device %d is awaiting a potential reply from TTSERVE\n", DeviceID)
+            return true, DeviceID
+
+        }
+    }
+
+    // No reply
+    return false, 0
 
 }
 
