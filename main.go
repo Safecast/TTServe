@@ -843,7 +843,7 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
             fmt.Printf("\n%s HTTP request '%s' ignored\n", time.Now().Format(logDateFormat), req.RequestURI);
 			if (true) {
-	            fmt.Printf("\n%s\n\n", string(body));
+	            fmt.Printf("\n%v\n%s\n\n", req, string(body));
 			}
         }
         if (req.RequestURI == "/") {
