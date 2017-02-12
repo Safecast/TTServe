@@ -836,33 +836,17 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-	// Major kludge because of badly formatted json of the form:
-	// ","device_id":"100231","value":"25","unit":"cpm","height":"10","devicetype_id":"Pointcast V1"}
-	ch1 := byte('x')
-	ch2 := byte('y')
-	if len(body) >=1 {
-		ch1 = body[0]
-	}
-	if len(body) >=2 {
-		ch2 = body[1]
-	}
-	fmt.Printf("%d '%c' '%c'\n%s\n%v\n", len(body), ch1, ch2, string(body), body)
-	if ch1 == byte('"') && ch1 == byte(',') {
-		body[0] = '{'
-		body[1] = ' '
-		// kludge
-        fmt.Printf("KLUDGE:\n%v\n%s\n\n", req, string(body));
-	}
-
     // postSafecastV1ToSafecast
     // Attempt to unmarshal it as a Safecast V1 data structure
     err = json.Unmarshal(body, &sdV1)
     if (err != nil) {
         if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
 		fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr));
+			if len(body) != 0 {
+		        fmt.Printf("%s\n", string(body));
+			}
         }
 		if (true) {
-	        fmt.Printf("not-v1:\n%s\n", string(body));
 		}
         if (req.RequestURI == "/") {
             io.WriteString(rw, fmt.Sprintf("Live Free or Die. (%s)\n", TTServerIP))
