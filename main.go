@@ -842,6 +842,9 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
     if (err != nil) {
         if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
             fmt.Printf("\n%s HTTP request '%s' ignored\n", time.Now().Format(logDateFormat), req.RequestURI);
+			if (true) {
+	            fmt.Printf("\n%s\n\n", string(body));
+			}
         }
         if (req.RequestURI == "/") {
             io.WriteString(rw, fmt.Sprintf("Live Free or Die. (%s)\n", TTServerIP))
