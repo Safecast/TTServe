@@ -838,11 +838,20 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// Major kludge because of badly formatted json of the form:
 	// ","device_id":"100231","value":"25","unit":"cpm","height":"10","devicetype_id":"Pointcast V1"}
+	ch1 := byte('x')
+	ch2 := byte('y')
+	if len(body) >=1 {
+		ch1 = body[0]
+	}
+	if len(body) >=2 {
+		ch2 = body[1]
+	}
+	fmt.Printf("%d '%c' '%c'\n%v\n", len(body), ch1, ch2, body)
 	if len(body) > 2 && body[0] == '"' && body[1] == ',' {
 		body[0] = '{'
 		body[1] = ' '
 		// kludge
-        fmt.Printf("\n%v\n%s\n\n", req, string(body));
+        fmt.Printf("KLUDGE:\n%v\n%s\n\n", req, string(body));
 	}
 
     // postSafecastV1ToSafecast
