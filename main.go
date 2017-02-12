@@ -220,6 +220,7 @@ func main() {
     }
 
     // Spawn timer tasks, and do the final one in-line
+    go timer12h()
     go timer15m()
     timer1m()
 
@@ -277,6 +278,21 @@ func timer15m() {
 
     }
 
+}
+
+// General periodic housekeeping
+func timer12h() {
+    for {
+
+		// Send a hello message to devices that have never reported stats
+        if iAmTTServerMonitor {
+			sendHelloToNewDevices()
+		}
+		
+		// Snooze
+        time.Sleep(12 * 60 * 60 * time.Second)
+
+    }
 }
 
 // Get the current time in UTC as a string

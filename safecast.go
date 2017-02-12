@@ -377,17 +377,17 @@ func ProcessSafecastMessage(msg *teletype.Telecast, checksum uint32, UploadedAt 
     if msg.Lnd_7318U != nil {
         var cpm float32 = float32(msg.GetLnd_7318U())
         lnd.U7318 = &cpm
-		dolnd = true
+        dolnd = true
     }
     if msg.Lnd_7318C != nil {
         var cpm float32 = float32(msg.GetLnd_7318C())
         lnd.C7318 = &cpm
-		dolnd = true
+        dolnd = true
     }
     if msg.Lnd_7128Ec != nil {
         var cpm float32 = float32(msg.GetLnd_7128Ec())
         lnd.EC7128 = &cpm
-		dolnd = true
+        dolnd = true
     }
 
     if dolnd {
@@ -570,15 +570,14 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
     }
 }
 
-// Update message ages and notify
-func sendExpiredSafecastDevicesToSlack() {
+// Update the list of seen devices
+func trackAllDevices() {
 
     // Loop over the file system, tracking all devices
-    // Open the directory
     files, err := ioutil.ReadDir(SafecastDirectory() + TTServerValuePath)
     if err == nil {
 
-        // Iterate over each of the pending commands
+        // Iterate over each of the values
         for _, file := range files {
 
             if !file.IsDir() {
@@ -597,6 +596,46 @@ func sendExpiredSafecastDevicesToSlack() {
             }
         }
     }
+}
+
+// Send a hello to devices that have never reported full stats
+func sendHelloToNewDevices() {
+
+    // Make sure the list of devices is up to date
+    trackAllDevices()
+
+    // Sweep through all devices that we've seen
+    for i := 0; i < len(seenDevices); i++ {
+
+        // Get the device ID
+        deviceID := seenDevices[i].deviceid
+
+        // Read the current value, or a blank value structure if it's blank
+        _, value := SafecastReadValue(deviceID)
+
+        // Check to see if it has a required stats field
+        if value.Dev == nil || value.Dev.AppVersion == nil {
+
+            // See if there's a pending command already waiting for this device
+            isValid, _ := getCommand(deviceID)
+            if !isValid {
+
+	            fmt.Printf("*** Requesting core device stats for the first time from %d\n", deviceID)
+                sendCommand("", deviceID, "hello")
+
+            }
+
+        }
+
+    }
+
+}
+
+// Update message ages and notify
+func sendExpiredSafecastDevicesToSlack() {
+
+    // Update the in-memory list of seen devices
+    trackAllDevices()
 
     // Compute an expiration time
     expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes) * time.Minute))
@@ -852,7 +891,7 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
         } else {
             s += ","
         }
-		if sd.EC7128 != nil {
+        if sd.EC7128 != nil {
             s = s + fmt.Sprintf(",%f", *sd.EC7128)
         } else {
             s += ","
@@ -1057,10 +1096,10 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
     fd.WriteString(string(scJSON));
     fd.WriteString("\r\n,\r\n");
 
-	// Debug
-	if debugFormatConversions {
-		fmt.Printf("*** About to log:\n%s\n", string(scJSON))
-	}
+    // Debug
+    if debugFormatConversions {
+        fmt.Printf("*** About to log:\n%s\n", string(scJSON))
+    }
 
     // Close and exit
     fd.Close();
@@ -1070,40 +1109,40 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
 // Reformat a special V1 payload to Current
 func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data SafecastData) {
     var sd SafecastData
-	var devicetype = ""
+    var devicetype = ""
 
     // Basics
     i64, _ := strconv.ParseUint(v1.DeviceID, 10, 32)
     subtype := uint32(i64) % 10
-	sensorid := uint64(i64) - uint64(subtype)
+    sensorid := uint64(i64) - uint64(subtype)
 
-	// Detect what range it is within, and process the conversion differently
-	isPointcast := false
-	if (sensorid > 100000 && sensorid < 199999) {
-		isPointcast = true
-		devicetype = "Pointcast"
-		sd.DeviceID = sensorid / 10
-	}
-	isSafecastAir := false
-	if (sensorid > 500000 && sensorid < 599999) {
-		isSafecastAir = true
-		devicetype = "Safecast-Air"
-		sd.DeviceID = sensorid / 10
-	}
-	if !isPointcast && !isSafecastAir {
+    // Detect what range it is within, and process the conversion differently
+    isPointcast := false
+    if (sensorid > 100000 && sensorid < 199999) {
+        isPointcast = true
+        devicetype = "Pointcast"
+        sd.DeviceID = sensorid / 10
+    }
+    isSafecastAir := false
+    if (sensorid > 500000 && sensorid < 599999) {
+        isSafecastAir = true
+        devicetype = "Safecast-Air"
+        sd.DeviceID = sensorid / 10
+    }
+    if !isPointcast && !isSafecastAir {
         fmt.Sprintf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", sensorid);
-		return 0, "", sd
-	}
-	
-	// Captured
+        return 0, "", sd
+    }
+
+    // Captured
     if (v1.CapturedAt != "") {
         sd.CapturedAt = &v1.CapturedAt
     }
 
     // Net
     if v1.Transport != "" {
-		var net Net
-		sd.Net = &net
+        var net Net
+        sd.Net = &net
         sd.Net.Transport = &v1.Transport
     }
 
@@ -1383,6 +1422,34 @@ func doUploadToSafecast(UploadedAt string, sd SafecastData, url string) bool {
     return errString == ""
 }
 
+// Get the current value
+func SafecastReadValue(deviceID uint32) (isAvail bool, sv SafecastValue) {
+    value := SafecastValue{}
+
+    // Generate the filename, which we'll use twice
+    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", deviceID) + ".json"
+
+    // Read the file if it exists
+    file, err := ioutil.ReadFile(filename)
+    if err != nil {
+        value = SafecastValue{}
+        value.DeviceID = uint64(deviceID);
+        return false, value
+    }
+
+    // Read it as JSON
+    err = json.Unmarshal(file, &value)
+    if err != nil {
+        value = SafecastValue{}
+        value.DeviceID = uint64(deviceID);
+        return false, value
+    }
+
+    // Got it
+    return true, value
+
+}
+
 // Save the last value in a file
 func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     var ChangedLocation = false
@@ -1393,22 +1460,10 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     // Use the supplied upload time as our modification time
     sc.UploadedAt = &UploadedAt
 
-    // Generate the filename, which we'll use twice
-    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", sc.DeviceID) + ".json"
-
-    // Read the file if it exists, else blank out value
-    value := SafecastValue{}
-    file, err := ioutil.ReadFile(filename)
-    if err == nil {
-        // Read it as JSON
-        err = json.Unmarshal(file, &value)
-        if err != nil {
-            value = SafecastValue{}
-        }
-    }
+    // Read the current value, or a blank value structure if it's blank
+    _, value := SafecastReadValue(uint32(sc.DeviceID))
 
     // Update the current values, but only if modified
-    value.DeviceID = sc.DeviceID;
     if sc.UploadedAt != nil {
         value.UploadedAt = sc.UploadedAt
     }
@@ -1425,13 +1480,13 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         value.Net = sc.Net
     }
     if sc.Loc != nil {
-		var loc Loc
-		if (value.Loc == nil) {
-			value.Loc = &loc
-		}
-		if (value.Loc.Lat != sc.Loc.Lat || value.Loc.Lon != sc.Loc.Lon) {
-	        ChangedLocation = true
-		}
+        var loc Loc
+        if (value.Loc == nil) {
+            value.Loc = &loc
+        }
+        if (value.Loc.Lat != sc.Loc.Lat || value.Loc.Lon != sc.Loc.Lon) {
+            ChangedLocation = true
+        }
         value.Loc = sc.Loc
     }
     if sc.Pms != nil {
@@ -1448,33 +1503,33 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.Lnd = &lnd
         }
         if sc.Lnd.U7318 != nil {
-			var val float32
-	        if value.Lnd.U7318 == nil {
-	            value.Lnd.U7318 = &val
-	        }
-			if (*value.Lnd.U7318 != *sc.Lnd.U7318) {
-		        ChangedGeiger = true
-			}
+            var val float32
+            if value.Lnd.U7318 == nil {
+                value.Lnd.U7318 = &val
+            }
+            if (*value.Lnd.U7318 != *sc.Lnd.U7318) {
+                ChangedGeiger = true
+            }
             value.Lnd.U7318 = sc.Lnd.U7318
         }
         if sc.Lnd.C7318 != nil {
-			var val float32
-	        if value.Lnd.C7318 == nil {
-	            value.Lnd.C7318 = &val
-	        }
-			if (*value.Lnd.C7318 != *sc.Lnd.C7318) {
-		        ChangedGeiger = true
-			}
+            var val float32
+            if value.Lnd.C7318 == nil {
+                value.Lnd.C7318 = &val
+            }
+            if (*value.Lnd.C7318 != *sc.Lnd.C7318) {
+                ChangedGeiger = true
+            }
             value.Lnd.C7318 = sc.Lnd.C7318
         }
         if sc.Lnd.EC7128 != nil {
-			var val float32
-	        if value.Lnd.EC7128 == nil {
-	            value.Lnd.EC7128 = &val
-	        }
-			if (*value.Lnd.EC7128 != *sc.Lnd.EC7128) {
-		        ChangedGeiger = true
-			}
+            var val float32
+            if value.Lnd.EC7128 == nil {
+                value.Lnd.EC7128 = &val
+            }
+            if (*value.Lnd.EC7128 != *sc.Lnd.EC7128) {
+                ChangedGeiger = true
+            }
             value.Lnd.EC7128 = sc.Lnd.EC7128
         }
     }
@@ -1557,12 +1612,12 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         }
     }
 
-	// Calculate a time of the shuffle, allowing for the fact that our preferred time
-	// CapturedAt may not be available.
-	ShuffledAt := value.UploadedAt
-	if value.CapturedAt != nil {
-		ShuffledAt = value.CapturedAt
-	}
+    // Calculate a time of the shuffle, allowing for the fact that our preferred time
+    // CapturedAt may not be available.
+    ShuffledAt := value.UploadedAt
+    if value.CapturedAt != nil {
+        ShuffledAt = value.CapturedAt
+    }
 
     // Shuffle
     if ChangedLocation {
@@ -1570,7 +1625,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.LocationHistory[i] = value.LocationHistory[i-1]
         }
         new := SafecastData{}
-		new.DeviceID = value.DeviceID
+        new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Loc = value.Loc
         value.LocationHistory[0] = new
@@ -1582,7 +1637,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.PmsHistory[i] = value.PmsHistory[i-1]
         }
         new := SafecastData{}
-		new.DeviceID = value.DeviceID
+        new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Pms = value.Pms
         value.PmsHistory[0] = new
@@ -1594,7 +1649,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.OpcHistory[i] = value.OpcHistory[i-1]
         }
         new := SafecastData{}
-		new.DeviceID = value.DeviceID
+        new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Opc = value.Opc
         value.OpcHistory[0] = new
@@ -1606,7 +1661,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.GeigerHistory[i] = value.GeigerHistory[i-1]
         }
         new := SafecastData{}
-		new.DeviceID = value.DeviceID
+        new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Lnd = value.Lnd
         value.GeigerHistory[0] = new
@@ -1639,6 +1694,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     }
 
     // Write it to the file
+    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", sc.DeviceID) + ".json"
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
     fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
     if err == nil {
@@ -1686,38 +1742,38 @@ func SafecastGetSummary(DeviceID uint32) (Label string, Gps string, Summary stri
     }
 
     if value.Lnd != nil {
-		didlnd := false
+        didlnd := false
         if value.Lnd.U7318 != nil {
-			s += fmt.Sprintf("%.0f", *value.Lnd.U7318)
-			didlnd = true;
-		}
+            s += fmt.Sprintf("%.0f", *value.Lnd.U7318)
+            didlnd = true;
+        }
         if value.Lnd.C7318 != nil {
-			if (didlnd) {
-				s += "|"
-			}
-			s += fmt.Sprintf("%.0f", *value.Lnd.C7318)
-			didlnd = true;
-		}
+            if (didlnd) {
+                s += "|"
+            }
+            s += fmt.Sprintf("%.0f", *value.Lnd.C7318)
+            didlnd = true;
+        }
         if value.Lnd.EC7128 != nil {
-			if (didlnd) {
-				s += "|"
-			}
-			s += fmt.Sprintf("%.0f", *value.Lnd.EC7128)
-			didlnd = true;
-		}
-		if (didlnd) {
-			s += "cpm "
-		}
+            if (didlnd) {
+                s += "|"
+            }
+            s += fmt.Sprintf("%.0f", *value.Lnd.EC7128)
+            didlnd = true;
+        }
+        if (didlnd) {
+            s += "cpm "
+        }
     }
     if value.Opc != nil {
         if value.Opc.Pm01_0 != nil && value.Opc.Pm02_5 != nil && value.Opc.Pm10_0 != nil {
-	        s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3 ", *value.Opc.Pm01_0, *value.Opc.Pm02_5, *value.Opc.Pm10_0)
-		}
-	} else if value.Pms != nil {
+            s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3 ", *value.Opc.Pm01_0, *value.Opc.Pm02_5, *value.Opc.Pm10_0)
+        }
+    } else if value.Pms != nil {
         if value.Pms.Pm01_0 != nil && value.Pms.Pm02_5 != nil && value.Pms.Pm10_0 != nil {
-	        s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3 ", *value.Pms.Pm01_0, *value.Pms.Pm02_5, *value.Pms.Pm10_0)
-		}
-	}
+            s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3 ", *value.Pms.Pm01_0, *value.Pms.Pm02_5, *value.Pms.Pm10_0)
+        }
+    }
 
     // Done
     return label, gps, s

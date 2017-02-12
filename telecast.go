@@ -156,7 +156,7 @@ func cancelCommand(deviceID uint32) (isCancelled bool) {
 func getCommand(deviceID uint32) (isValid bool, command safecastCommand) {
     cmd := safecastCommand{}
 
-    // Read the file and delete it
+    // Read the file
     file, err := ioutil.ReadFile(SafecastCommandFilename(deviceID))
     if err != nil {
         return false, cmd
