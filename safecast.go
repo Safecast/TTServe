@@ -1067,15 +1067,35 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
 
 }
 
-// Convert v1 to Current
-func SafecastV1toCurrent(v1 SafecastDataV1) (uint32, SafecastData) {
+// Reformat a special V1 payload to Current
+func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data SafecastData) {
     var sd SafecastData
+	var devicetype = ""
 
     // Basics
     i64, _ := strconv.ParseUint(v1.DeviceID, 10, 32)
     subtype := uint32(i64) % 10
-    sd.DeviceID = uint64(i64) - uint64(subtype)
+	sensorid := uint64(i64) - uint64(subtype)
 
+	// Detect what range it is within, and process the conversion differently
+	isPointcast := false
+	if (sensorid > 100000 && sensorid < 199999) {
+		isPointcast = true
+		devicetype = "Pointcast"
+		sd.DeviceID = sensorid / 10
+	}
+	isSafecastAir := false
+	if (sensorid > 500000 && sensorid < 599999) {
+		isSafecastAir = true
+		devicetype = "Safecast-Air"
+		sd.DeviceID = sensorid / 10
+	}
+	if !isPointcast && !isSafecastAir {
+        fmt.Sprintf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", sensorid);
+		return 0, "", sd
+	}
+	
+	// Captured
     if (v1.CapturedAt != "") {
         sd.CapturedAt = &v1.CapturedAt
     }
@@ -1164,7 +1184,7 @@ func SafecastV1toCurrent(v1 SafecastDataV1) (uint32, SafecastData) {
             lnd.EC7128 = &cpm
             sd.Lnd = &lnd
         } else {
-            fmt.Sprintf("*** V1toCurrent %d cpm not understood for this subtype\n", sd.DeviceID);
+            fmt.Sprintf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceID);
         }
 
     case "status":
@@ -1244,11 +1264,11 @@ func SafecastV1toCurrent(v1 SafecastDataV1) (uint32, SafecastData) {
         }
 
     default:
-        fmt.Sprintf("*** Warning ***\n*** Unit %s = Value %s UNRECOGNIZED\n", v1.Unit, v1.Value)
+        fmt.Sprintf("*** Reformat Warning ***\n*** id=%d Unit %s = Value %s UNRECOGNIZED\n", sensorid, v1.Unit, v1.Value)
 
     }
 
-    return uint32(sd.DeviceID), sd
+    return uint32(sd.DeviceID), devicetype, sd
 
 }
 

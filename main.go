@@ -80,8 +80,8 @@ const TTServerTopicValue string = "/device/"
 const TTServerTopicGithub string = "/github"
 const TTServerTopicSlack string = "/slack"
 const TTServerTopicTTN string = "/ttn"
-const TTServerTopicRedirect1 string = "/scripts/"
-const TTServerTopicRedirect2 string = "/"
+const TTServerTopicReformat1 string = "/scripts/"
+const TTServerTopicReformat2 string = "/"
 var   iAmTTServerMonitor = false
 
 // Our server
@@ -99,7 +99,7 @@ var CountUDP = 0
 var CountHTTPDevice = 0
 var CountHTTPGateway = 0
 var CountHTTPRelay = 0
-var CountHTTPRedirect = 0
+var CountHTTPReformat = 0
 var CountTTN = 0
 
 // Constants
@@ -269,8 +269,8 @@ func timer15m() {
         }
 
         // Post stats
-        fmt.Printf("\n%s Stats: UDP:%d HTTPDevice:%d HTTPGateway:%d HTTPRelay:%d HTTPRedirect:%d TTN:%d\n\n", time.Now().Format(logDateFormat),
-            CountUDP, CountHTTPDevice, CountHTTPGateway, CountHTTPRelay, CountHTTPRedirect, CountTTN)
+        fmt.Printf("\n%s Stats: UDP:%d HTTPDevice:%d HTTPGateway:%d HTTPRelay:%d HTTPReformat:%d TTN:%d\n\n", time.Now().Format(logDateFormat),
+            CountUDP, CountHTTPDevice, CountHTTPGateway, CountHTTPRelay, CountHTTPReformat, CountTTN)
 
         // Restart this instance if instructed to do so
         ControlFileCheck()
@@ -392,11 +392,11 @@ func webInboundHandler() {
     http.HandleFunc(TTServerTopicSend, inboundWebSendHandler)
     fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicSend)
 
-    http.HandleFunc(TTServerTopicRedirect1, inboundWebRedirectHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicRedirect1)
+    http.HandleFunc(TTServerTopicReformat1, inboundWebReformatHandler)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicReformat1)
 
-    http.HandleFunc(TTServerTopicRedirect2, inboundWebRedirectHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicRedirect2)
+    http.HandleFunc(TTServerTopicReformat2, inboundWebReformatHandler)
+    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServer, TTServerHTTPPort, TTServerTopicReformat2)
 
     go func() {
         http.ListenAndServe(TTServerHTTPPortAlternate, nil)
@@ -806,7 +806,7 @@ func inboundWebRootHandler(rw http.ResponseWriter, req *http.Request) {
 }
 
 // Handle inbound HTTP requests from the Teletype Gateway
-func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
+func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
     var sdV1 SafecastDataV1
 
     body, err := ioutil.ReadAll(req.Body)
@@ -828,10 +828,13 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     } else {
 
         // Convert to current data format
-        sdV1.Transport = "pnt-http:"+ipv4(req.RemoteAddr)
-        deviceID, sd := SafecastV1toCurrent(sdV1)
+        sdV1.Transport = "reformat-http:"+ipv4(req.RemoteAddr)
+        deviceID, deviceType, sd := SafecastReformat(sdV1)
+		if (deviceID == 0) {
+			return
+		}
 
-        fmt.Printf("\n%s Received redirect payload for %d from %s\n", time.Now().Format(logDateFormat), sd.DeviceID, sdV1.Transport)
+        fmt.Printf("\n%s Received %s payload for %d from %s\n", time.Now().Format(logDateFormat), deviceType, sd.DeviceID, sdV1.Transport)
         if true {
             fmt.Printf("%s\n", body)
         }
@@ -845,7 +848,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         SafecastV1Upload(sdV1, urlV1)
         SafecastUpload(UploadedAt, sd)
         SafecastWriteToLogs(UploadedAt, sd)
-        CountHTTPRedirect++
+        CountHTTPReformat++
 
         // It is an error if there is a pending outbound payload for this device, so remove it and report it
         isAvailable, _ := TelecastOutboundPayload(deviceID)
