@@ -279,6 +279,11 @@ func timer15m() {
 
 }
 
+// Get the current time in UTC as a string
+func nowInUTC() string {
+	return time.Now().UTC().Format("2006-01-02T15:04:05Z")
+}
+
 // Server health check
 func healthCheck() string {
     s := ""
@@ -649,7 +654,7 @@ func processBuffer(req IncomingReq, from string, transport string, buf []byte) (
         _, ReplyToDeviceID = getDeviceIDFromPayload(AppReq.Payload)
 
         // Enqueue the app request
-        AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+        AppReq.UploadedAt = nowInUTC()
         reqQ <- AppReq
         monitorReqQ()
     }
@@ -663,7 +668,7 @@ func processBuffer(req IncomingReq, from string, transport string, buf []byte) (
         }
 
         // Loop over the various things in the buffer
-        UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+        UploadedAt := nowInUTC()
         count := int(buf[1])
         lengthArrayOffset := 2
         payloadOffset := lengthArrayOffset + count
@@ -844,7 +849,7 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         if (req.URL.RawQuery != "") {
             urlV1 = fmt.Sprintf("%s?%s", urlV1, req.URL.RawQuery)
         }
-        UploadedAt := fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+        UploadedAt := nowInUTC()
         SafecastV1Upload(sdV1, urlV1)
         SafecastUpload(UploadedAt, sd)
         SafecastWriteToLogs(UploadedAt, sd)
@@ -1021,7 +1026,7 @@ func ttnMQQTInboundHandler() {
 
             AppReq.Transport = "ttn-mqqt:" + AppReq.TTNDevID
             fmt.Printf("\n%s Received %d-byte payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), AppReq.Transport)
-            AppReq.UploadedAt = fmt.Sprintf("%s", time.Now().Format("2006-01-02 15:04:05"))
+            AppReq.UploadedAt = nowInUTC()
             reqQ <- AppReq
             monitorReqQ()
             CountTTN++

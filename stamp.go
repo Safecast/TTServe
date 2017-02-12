@@ -4,7 +4,6 @@ package main
 import (
     "os"
     "fmt"
-    "time"
     "io/ioutil"
     "encoding/json"
     "github.com/rayozzie/teletype-proto/golang"
@@ -217,7 +216,7 @@ func stampApply(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (is
             message.Altitude = &cachedDevices[CacheEntry].cache.Altitude
 
             // Time is best set to current time rather than nothing at all
-            substituteCapturedAt := time.Now().UTC().Format("2006-01-02T15:04:05Z")
+            substituteCapturedAt := nowInUTC()
             message.CapturedAt = &substituteCapturedAt
             message.CapturedAtDate = nil
             message.CapturedAtTime = nil
