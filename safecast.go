@@ -620,8 +620,8 @@ func sendHelloToNewDevices() {
             isValid, _ := getCommand(deviceID)
             if !isValid {
 
-	            fmt.Printf("*** Requesting core device stats for the first time from %d\n", deviceID)
-                sendCommand("", deviceID, "hello")
+                sendToSafecastOps(fmt.Sprintf("** NOTE ** Sending hello to newly-detected device %d", deviceID))
+                sendCommand("New Device Detected", deviceID, "hello")
 
             }
 
