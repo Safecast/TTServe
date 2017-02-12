@@ -846,7 +846,7 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
 	if len(body) >=2 {
 		ch2 = body[1]
 	}
-	fmt.Printf("%d '%c' '%c'\n%v\n", len(body), ch1, ch2, body)
+	fmt.Printf("%d '%c' '%c'\n%s\n", len(body), ch1, ch2, string(body))
 	if ch1 == byte('"') && ch1 == byte(',') {
 		body[0] = '{'
 		body[1] = ' '
@@ -858,9 +858,12 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
     // Attempt to unmarshal it as a Safecast V1 data structure
     err = json.Unmarshal(body, &sdV1)
     if (err != nil) {
-//        if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
+        if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
 		fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr));
-//        }
+        }
+		if (true) {
+	        fmt.Printf("not-v1:\n%s\n", string(body));
+		}
         if (req.RequestURI == "/") {
             io.WriteString(rw, fmt.Sprintf("Live Free or Die. (%s)\n", TTServerIP))
         }
