@@ -846,7 +846,7 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
 	if len(body) >=2 {
 		ch2 = body[1]
 	}
-	fmt.Printf("%d '%c' '%c'\n%s\n", len(body), ch1, ch2, string(body))
+	fmt.Printf("%d '%c' '%c'\n%s\n%v\n", len(body), ch1, ch2, string(body), body)
 	if ch1 == byte('"') && ch1 == byte(',') {
 		body[0] = '{'
 		body[1] = ' '
