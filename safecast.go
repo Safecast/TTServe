@@ -610,23 +610,26 @@ func sendHelloToNewDevices() {
         // Get the device ID
         deviceID := seenDevices[i].deviceid
 
-        // Read the current value, or a blank value structure if it's blank
-        _, value := SafecastReadValue(deviceID)
+        // Only do this for Safecast devices, as opposed to pointcast or air
+        if deviceID > 1048576 {
 
-        // Check to see if it has a required stats field
-        if value.Dev == nil || value.Dev.AppVersion == nil {
+            // Read the current value, or a blank value structure if it's blank
+            _, value := SafecastReadValue(deviceID)
 
-            // See if there's a pending command already waiting for this device
-            isValid, _ := getCommand(deviceID)
-            if !isValid {
+            // Check to see if it has a required stats field
+            if value.Dev == nil || value.Dev.AppVersion == nil {
 
-                sendToSafecastOps(fmt.Sprintf("** NOTE ** Sending hello to newly-detected device %d", deviceID))
-                sendCommand("New device detected", deviceID, "hello")
+                // See if there's a pending command already waiting for this device
+                isValid, _ := getCommand(deviceID)
+                if !isValid {
+
+                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Sending hello to newly-detected device %d", deviceID))
+                    sendCommand("New device detected", deviceID, "hello")
+
+                }
 
             }
-
         }
-
     }
 
 }
