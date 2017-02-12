@@ -10,7 +10,7 @@ import (
 )
 
 // Debugging
-const debugStamp = true
+const debugStamp = false
 
 // Stamp versions.  Unlike the client, the support
 // for downlevel stamp version must be kept here forever.

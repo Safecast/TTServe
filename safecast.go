@@ -621,7 +621,7 @@ func sendHelloToNewDevices() {
             if !isValid {
 
                 sendToSafecastOps(fmt.Sprintf("** NOTE ** Sending hello to newly-detected device %d", deviceID))
-                sendCommand("New Device Detected", deviceID, "hello")
+                sendCommand("New device detected", deviceID, "hello")
 
             }
 

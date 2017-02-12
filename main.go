@@ -836,15 +836,21 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
+	// Major kludge because of badly formatted json of the form:
+	// ","device_id":"100231","value":"25","unit":"cpm","height":"10","devicetype_id":"Pointcast V1"}
+	if len(body) > 2 && body[0] == '"' && body[1] == ',' {
+		body[0] = '{'
+		body[1] = ' '
+		// kludge
+        fmt.Printf("\n%v\n%s\n\n", req, string(body));
+	}
+
     // postSafecastV1ToSafecast
     // Attempt to unmarshal it as a Safecast V1 data structure
     err = json.Unmarshal(body, &sdV1)
     if (err != nil) {
         if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
             fmt.Printf("\n%s HTTP request '%s' ignored\n", time.Now().Format(logDateFormat), req.RequestURI);
-			if (true) {
-	            fmt.Printf("\n%v\n%s\n\n", req, string(body));
-			}
         }
         if (req.RequestURI == "/") {
             io.WriteString(rw, fmt.Sprintf("Live Free or Die. (%s)\n", TTServerIP))
@@ -1087,8 +1093,8 @@ func getReplyDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, devic
 
         switch msg.GetReplyType() {
 
+		// A reply is expected
         case teletype.Telecast_REPLY_EXPECTED:
-            fmt.Printf("*** Device %d is awaiting a potential reply from TTSERVE\n", DeviceID)
             return true, DeviceID
 
         }
