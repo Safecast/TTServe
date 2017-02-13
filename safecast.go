@@ -1116,31 +1116,75 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
 
 }
 
+func SafecastV1StringsToNumerics(ss SafecastDataV1Strings) SafecastDataV1Numerics {
+    var sn SafecastDataV1Numerics
+	var u64 uint64
+	var f64 float64
+	var err error
+    sn.CapturedAt = ss.CapturedAt
+    sn.ChannelID = ss.ChannelID
+    sn.DeviceTypeID = ss.DeviceTypeID
+    sn.LocationName = ss.LocationName
+    sn.StationID = ss.StationID
+    sn.Unit = ss.Unit
+    sn.UserID = ss.UserID
+    u64, err = strconv.ParseUint(ss.DeviceID, 10, 32)
+    if err == nil {
+        sn.DeviceID = uint32(u64)
+    }
+    u64, err = strconv.ParseUint(ss.ID, 10, 32)
+    if err == nil {
+        sn.ID = uint32(u64)
+    }
+    u64, err = strconv.ParseUint(ss.OriginalID, 10, 32)
+    if err == nil {
+        sn.OriginalID = uint32(u64)
+    }
+    u64, err = strconv.ParseUint(ss.SensorID, 10, 32)
+    if err == nil {
+        sn.SensorID = uint32(u64)
+    }
+    f64, err = strconv.ParseFloat(ss.Value, 32)
+    if err == nil {
+        sn.Value = float32(f64)
+    }
+    f64, err = strconv.ParseFloat(ss.Height, 32)
+    if err == nil {
+        sn.Height = int32(f64)
+    }
+    f64, err = strconv.ParseFloat(ss.Latitude, 32)
+    if err == nil {
+        sn.Latitude = float32(f64)
+    }
+    f64, err = strconv.ParseFloat(ss.Longitude, 32)
+    if err == nil {
+        sn.Longitude = float32(f64)
+    }
+    return sn
+}
+
 // Reformat a special V1 payload to Current
-func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data SafecastData) {
+func SafecastReformat(v1 SafecastDataV1Numerics) (deviceid uint32, devtype string, data SafecastData) {
     var sd SafecastData
     var devicetype = ""
-
-    // Basics
-    i64, _ := strconv.ParseUint(v1.DeviceID, 10, 32)
-    subtype := uint32(i64) % 10
-    sensorid := uint64(i64) - uint64(subtype)
+	var u64 uint64
+	var f64 float64
 
     // Detect what range it is within, and process the conversion differently
     isPointcast := false
-    if (sensorid > 100000 && sensorid < 199999) {
+    if (v1.DeviceID >= 100000 && v1.DeviceID < 199999) {
         isPointcast = true
         devicetype = "Pointcast"
-        sd.DeviceID = sensorid / 10
+        sd.DeviceID = uint64(v1.DeviceID / 10)
     }
     isSafecastAir := false
-    if (sensorid > 500000 && sensorid < 599999) {
+    if (v1.DeviceID >= 50000 && v1.DeviceID < 59999) {
         isSafecastAir = true
-        devicetype = "Safecast-Air"
-        sd.DeviceID = sensorid / 10
+        devicetype = "Safecast Air"
+        sd.DeviceID = uint64(v1.DeviceID)
     }
     if !isPointcast && !isSafecastAir {
-        fmt.Sprintf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", sensorid);
+        fmt.Sprintf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", v1.DeviceID);
         return 0, "", sd
     }
 
@@ -1149,35 +1193,13 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
         sd.CapturedAt = &v1.CapturedAt
     }
 
-    // Net
-    if v1.Transport != "" {
-        var net Net
-        sd.Net = &net
-        sd.Net.Transport = &v1.Transport
-    }
-
     // Loc
     var loc Loc
-    var doloc bool = false;
-
-    f64, err := strconv.ParseFloat(v1.Latitude, 32)
-    if err == nil {
-        loc.Lat = float32(f64)
-        f64, err = strconv.ParseFloat(v1.Longitude, 32)
-        if err == nil {
-            loc.Lon = float32(f64)
-            if loc.Lat != 0 && loc.Lon != 0 {
-                doloc = true
-                f64, err = strconv.ParseFloat(v1.Height, 32)
-                if err == nil {
-                    alt := float32(f64)
-                    loc.Alt = &alt
-                }
-            }
-        }
-    }
-
-    if doloc {
+    loc.Lat = v1.Latitude
+    loc.Lon = v1.Longitude
+    if loc.Lat != 0 && loc.Lon != 0 {
+		alt := float32(v1.Height)
+        loc.Alt = &alt
         sd.Loc = &loc
     }
 
@@ -1185,63 +1207,59 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
     switch (strings.ToLower(v1.Unit)) {
 
     case "pm1":
-        f64, _ = strconv.ParseFloat(v1.Value, 32)
-        pm := float32(f64)
         var opc Opc
+        pm := v1.Value
         opc.Pm01_0 = &pm
         sd.Opc = &opc
 
     case "pm2.5":
-        f64, _ = strconv.ParseFloat(v1.Value, 32)
-        pm := float32(f64)
         var opc Opc
+        pm := v1.Value
         opc.Pm02_5 = &pm
         sd.Opc = &opc
 
     case "pm10":
-        f64, _ = strconv.ParseFloat(v1.Value, 32)
-        pm := float32(f64)
         var opc Opc
+        pm := v1.Value
         opc.Pm10_0 = &pm
         sd.Opc = &opc
 
     case "humd%":
-        f64, _ = strconv.ParseFloat(v1.Value, 32)
-        humid := float32(f64)
         var env Env
+        humid := v1.Value
         env.Humid = &humid
         sd.Env = &env
 
     case "tempc":
-        f64, _ = strconv.ParseFloat(v1.Value, 32)
-        temp := float32(f64)
         var env Env
+        temp := v1.Value
         env.Temp = &temp
         sd.Env = &env
 
     case "cpm":
-        f64, _ = strconv.ParseFloat(v1.Value, 32)
-        if (subtype == 1) {
-            var lnd Lnd
-            cpm := float32(f64)
-            lnd.U7318 = &cpm
-            sd.Lnd = &lnd
-
-        } else if (subtype == 2) {
-            var lnd Lnd
-            cpm := float32(f64)
-            lnd.EC7128 = &cpm
-            sd.Lnd = &lnd
+        if !isPointcast {
+            fmt.Sprintf("*** Reformat: Received CPM for non-Pointcast\n", sd.DeviceID)
         } else {
-            fmt.Sprintf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceID);
-        }
+            if (v1.DeviceID % 10) == 1 {
+                var lnd Lnd
+                cpm := v1.Value
+                lnd.U7318 = &cpm
+                sd.Lnd = &lnd
 
+            } else if (v1.DeviceID % 10) == 2 {
+                var lnd Lnd
+                cpm := v1.Value
+                lnd.EC7128 = &cpm
+                sd.Lnd = &lnd
+            } else {
+                fmt.Sprintf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceID);
+            }
+        }
     case "status":
         // The value is the temp
-        f64, _ = strconv.ParseFloat(v1.Value, 32)
-        temp := float32(f64)
         var env Env
-        env.Temp = &temp
+        TempC := v1.Value
+        env.Temp = &TempC
         sd.Env = &env
 
         // Parse subfields
@@ -1262,23 +1280,23 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
                 bat.Voltage = &f32
                 dobat = true
             case "Fails":
-                i64, _ = strconv.ParseUint(field[1], 10, 32)
-                u32 := uint32(i64)
+                u64, _ = strconv.ParseUint(field[1], 10, 32)
+                u32 := uint32(u64)
                 dev.CommsFails = &u32
                 dodev = true
             case "Restarts":
-                i64, _ = strconv.ParseUint(field[1], 10, 32)
-                u32 := uint32(i64)
+                u64, _ = strconv.ParseUint(field[1], 10, 32)
+                u32 := uint32(u64)
                 dev.DeviceRestarts = &u32
                 dodev = true
             case "FreeRam":
-                i64, _ = strconv.ParseUint(field[1], 10, 32)
-                u32 := uint32(i64)
+                u64, _ = strconv.ParseUint(field[1], 10, 32)
+                u32 := uint32(u64)
                 dev.FreeMem = &u32
                 dodev = true
             case "NTP count":
-                i64, _ = strconv.ParseUint(field[1], 10, 32)
-                u32 := uint32(i64)
+                u64, _ = strconv.ParseUint(field[1], 10, 32)
+                u32 := uint32(u64)
                 dev.NTPCount = &u32
                 dodev = true
             case "Last failure":
@@ -1313,7 +1331,7 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
         }
 
     default:
-        fmt.Sprintf("*** Reformat Warning ***\n*** id=%d Unit %s = Value %s UNRECOGNIZED\n", sensorid, v1.Unit, v1.Value)
+        fmt.Sprintf("*** Reformat Warning ***\n*** %s id=%d Unit %s = Value %f UNRECOGNIZED\n", devicetype, v1.DeviceID, v1.Unit, v1.Value)
 
     }
 
@@ -1321,39 +1339,12 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
 
 }
 
-// Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
-func SafecastV1Upload(scV1 SafecastDataV1, url string) bool {
-
-    // For V1, We've found that in certain cases the server gets overloaded.  When we run into those cases,
-    // turn this OFF and things will slow down.  (Obviously this is not the preferred mode of operation,
-    // because it creates a huge queue of things waiting to be uploaded.)
-    var parallelV1Uploads = false
-
-    if (parallelV1Uploads) {
-        go doUploadToSafecastV1(scV1, url)
-    } else {
-        if (!doUploadToSafecastV1(scV1, url)) {
-            return false
-        }
-        time.Sleep(1 * time.Second)
-    }
-
-    return true
-
-}
-
 // Upload a Safecast data structure to the Safecast service
-func doUploadToSafecastV1(scV1 SafecastDataV1, urlForUpload string) bool {
+func SafecastV1Upload(body []byte, url string, unit string, value string) bool {
 
-    transaction := beginTransaction("V1", scV1.Unit, scV1.Value)
+    transaction := beginTransaction("V1", unit, value)
 
-    scJSON, _ := json.Marshal(scV1)
-
-    if false {
-        fmt.Printf("%s\n", scJSON)
-    }
-
-	req, err := http.NewRequest("POST", urlForUpload, bytes.NewBuffer(scJSON))
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{

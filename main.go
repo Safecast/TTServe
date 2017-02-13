@@ -282,12 +282,12 @@ func timer15m() {
 func timer12h() {
     for {
 
-		// Send a hello message to devices that have never reported stats
+        // Send a hello message to devices that have never reported stats
         if iAmTTServerMonitor {
-			sendHelloToNewDevices()
-		}
-		
-		// Snooze
+            sendHelloToNewDevices()
+        }
+
+        // Snooze
         time.Sleep(12 * 60 * 60 * time.Second)
 
     }
@@ -826,7 +826,8 @@ func inboundWebRootHandler(rw http.ResponseWriter, req *http.Request) {
 
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
-    var sdV1 SafecastDataV1
+    var sds SafecastDataV1Strings
+    var sdn SafecastDataV1Numerics
 
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
@@ -834,54 +835,57 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    // postSafecastV1ToSafecast
-    // Attempt to unmarshal it as a Safecast V1 data structure
-    err = json.Unmarshal(body, &sdV1)
-    if (err != nil) {
-        if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
-			fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr), err);
-			if len(body) != 0 {
-		        fmt.Printf("%s\n", string(body));
-			}
-        }
-		if (true) {
-		}
-        if (req.RequestURI == "/") {
-            io.WriteString(rw, fmt.Sprintf("Live Free or Die. (%s)\n", TTServerIP))
-        }
+    // Attempt to unmarshal it as a Safecast V1 data structure first as strings, then numerics
+    err = json.Unmarshal(body, &sds)
+    if (err == nil) {
+        sdn = SafecastV1StringsToNumerics(sds)
     } else {
-
-        // Convert to current data format
-        sdV1.Transport = "reformat-http:"+ipv4(req.RemoteAddr)
-        deviceID, deviceType, sd := SafecastReformat(sdV1)
-        if (deviceID == 0) {
+        err = json.Unmarshal(body, &sdn)
+        if (err != nil) {
+            if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr), err);
+                if len(body) != 0 {
+                    fmt.Printf("%s\n", string(body));
+                }
+            }
+            if (req.RequestURI == "/") {
+                io.WriteString(rw, fmt.Sprintf("Live Free or Die. (%s)\n", TTServerIP))
+            }
             return
         }
-
-        fmt.Printf("\n%s Received %s payload for %d from %s\n", time.Now().Format(logDateFormat), deviceType, sd.DeviceID, sdV1.Transport)
-        if true {
-            fmt.Printf("%s\n", body)
-        }
-
-        // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
-        UploadedAt := nowInUTC()
-        SafecastV1Upload(sdV1, SafecastV1UploadURL+req.RequestURI)
-        SafecastUpload(UploadedAt, sd)
-        SafecastWriteToLogs(UploadedAt, sd)
-        CountHTTPReformat++
-
-        // It is an error if there is a pending outbound payload for this device, so remove it and report it
-        isAvailable, _ := TelecastOutboundPayload(deviceID)
-        if (isAvailable) {
-            sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", deviceID))
-        }
-
-		// Send a reply to Pointcast saying that the request was processed acceptably.
-		// If we fail to do this, Pointcast goes into an infinite reboot loop with comms errors
-		// due to GetMeasurementReply() returning 0.
-        io.WriteString(rw, "{\"id\":00000001}")
-		
     }
+
+    // Convert to current data format
+    deviceID, deviceType, sd := SafecastReformat(sdn)
+    if (deviceID == 0) {
+        return
+    }
+	
+	transportStr := "reformat-http:"+ipv4(req.RemoteAddr)
+    sd.Transport = &transportStr
+    fmt.Printf("\n%s Received %s payload for %d from %s\n", time.Now().Format(logDateFormat), deviceType, sd.DeviceID, transportStr)
+    if true {
+        fmt.Printf("%s\n", body)
+    }
+
+    // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
+    UploadedAt := nowInUTC()
+    SafecastV1Upload(body, SafecastV1UploadURL+req.RequestURI, sdn.Unit, fmt.Sprintf("%.3f", sdn.Value))
+    SafecastUpload(UploadedAt, sd)
+    SafecastWriteToLogs(UploadedAt, sd)
+    CountHTTPReformat++
+
+    // It is an error if there is a pending outbound payload for this device, so remove it and report it
+    isAvailable, _ := TelecastOutboundPayload(deviceID)
+    if (isAvailable) {
+        sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", deviceID))
+    }
+
+    // Send a reply to Pointcast saying that the request was processed acceptably.
+    // If we fail to do this, Pointcast goes into an infinite reboot loop with comms errors
+    // due to GetMeasurementReply() returning 0.
+    io.WriteString(rw, "{\"id\":00000001}")
+
 
 }
 
@@ -1088,7 +1092,7 @@ func getReplyDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, devic
 
         switch msg.GetReplyType() {
 
-		// A reply is expected
+            // A reply is expected
         case teletype.Telecast_REPLY_EXPECTED:
             return true, DeviceID
 
