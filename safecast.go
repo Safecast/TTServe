@@ -727,21 +727,21 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool, fDetails bool) {
             }
         }
 
-        if (fWrap) {
-            s += "\n        "
-        } else {
-            s += " ( "
-        }
-
         if summary != "" {
-            s += summary
-        }
-
-        if (!fWrap) {
-            if label != "" {
-                s += "\"" + label + "\" "
+            if (fWrap) {
+                s += "\n        "
+            } else {
+                s += " ( "
             }
-            s += ")"
+            if summary != "" {
+                s += summary
+            }
+            if (!fWrap) {
+                if label != "" {
+                    s += "\"" + label + "\" "
+                }
+                s += ")"
+            }
         }
 
     }
