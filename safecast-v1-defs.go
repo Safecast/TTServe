@@ -23,7 +23,7 @@ type SafecastDataV1Strings struct {
 
 type SafecastDataV1Numerics struct {
     CapturedAt		string `json:"captured_at,omitempty"`   // 2016-02-20T14:02:25Z
-    ChannelID		string `json:"channel_id,omitempty"`    // nil
+    ChannelID		uint32 `json:"channel_id,omitempty"`    // nil
     DeviceID		uint32 `json:"device_id,omitempty"`     // 140
     DeviceTypeID	string `json:"devicetype_id,omitempty"` // nil
     Height			int32  `json:"height,omitempty"`        // 123

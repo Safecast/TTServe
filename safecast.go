@@ -1122,7 +1122,6 @@ func SafecastV1StringsToNumerics(ss SafecastDataV1Strings) SafecastDataV1Numeric
 	var f64 float64
 	var err error
     sn.CapturedAt = ss.CapturedAt
-    sn.ChannelID = ss.ChannelID
     sn.DeviceTypeID = ss.DeviceTypeID
     sn.LocationName = ss.LocationName
     sn.StationID = ss.StationID
@@ -1131,6 +1130,10 @@ func SafecastV1StringsToNumerics(ss SafecastDataV1Strings) SafecastDataV1Numeric
     u64, err = strconv.ParseUint(ss.DeviceID, 10, 32)
     if err == nil {
         sn.DeviceID = uint32(u64)
+    }
+    u64, err = strconv.ParseUint(ss.ChannelID, 10, 32)
+    if err == nil {
+        sn.ChannelID = uint32(u64)
     }
     u64, err = strconv.ParseUint(ss.ID, 10, 32)
     if err == nil {

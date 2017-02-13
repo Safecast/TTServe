@@ -861,11 +861,11 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 	
+	var net Net
 	transportStr := "reformat-http:"+ipv4(req.RemoteAddr)
-    sd.Transport = &transportStr
-	fmt.Printf("devicetype: %s\n", deviceType);
-	fmt.Printf("deviceid: %d\n", sd.DeviceID);
-	fmt.Printf("devicetype: %s\n", transportStr);
+	net.Transport = &transportStr
+    sd.Net = &net
+	
     fmt.Printf("\n%s Received %s payload for %d from %s\n", time.Now().Format(logDateFormat), deviceType, sd.DeviceID, transportStr)
     if true {
         fmt.Printf("%s\n", body)
