@@ -882,6 +882,11 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
             sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", deviceID))
         }
 
+		// Send a reply to Pointcast saying that the request was processed acceptably.
+		// If we fail to do this, Pointcast goes into an infinite reboot loop with comms errors
+		// due to GetMeasurementReply() returning 0.
+        io.WriteString(rw, "{\"id\":00000001}")
+		
     }
 
 }
