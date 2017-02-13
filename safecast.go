@@ -1474,13 +1474,46 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         value.CapturedAt = sc.CapturedAt
     }
     if sc.Bat != nil {
-        value.Bat = sc.Bat
+		var bat Bat
+		if value.Bat == nil {
+			value.Bat = &bat
+		}
+		if sc.Voltage != nil {
+			value.Bat.Voltage = sc.Bat.Voltage
+		}
+		if sc.Current != nil {
+			value.Bat.Current = sc.Bat.Current
+		}
+		if sc.Charge != nil {
+			value.Bat.Charge = sc.Bat.Charge
+		}
     }
     if sc.Env != nil {
-        value.Env = sc.Env
+		var env Env
+		if value.Env == nil {
+			value.Env = &env
+		}
+		if sc.Temp != nil {
+			value.Env.Temp = sc.Env.Temp
+		}
+		if sc.Humid != nil {
+			value.Env.Humid = sc.Env.Humid
+		}
+		if sc.Press != nil {
+			value.Env.Press = sc.Env.Press
+		}
     }
     if sc.Net != nil {
-        value.Net = sc.Net
+		var net Net
+		if value.Net == nil {
+			value.Net = &net
+		}
+		if sc.SNR != nil {
+			value.Net.SNR = sc.Net.SNR
+		}
+		if sc.Transport != nil {
+			value.Net.Transport = sc.Net.Transport
+		}
     }
     if sc.Loc != nil {
         var loc Loc
@@ -1493,11 +1526,53 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         value.Loc = sc.Loc
     }
     if sc.Pms != nil {
-        value.Pms = sc.Pms
+        var pms Pms
+        if (value.Pms == nil) {
+            value.Pms = &pms
+        }
+		if sc.Pms.Pm01_0 != nil {
+			value.Pms.Pm01_0 = sc.Pms.Pm01_0
+		}
+		if sc.Pms.Pm02_5 != nil {
+			value.Pms.Pm02_5 = sc.Pms.Pm02_5
+		}
+		if sc.Pms.Pm10_0 != nil {
+			value.Pms.Pm10_0 = sc.Pms.Pm10_0
+		}
+		if sc.Pms.CountSecs != nil {
+			value.Pms.Count00_30 = sc.Pms.Count00_30
+			value.Pms.Count00_50 = sc.Pms.Count00_50
+			value.Pms.Count01_00 = sc.Pms.Count01_00
+			value.Pms.Count02_50 = sc.Pms.Count02_50
+			value.Pms.Count05_00 = sc.Pms.Count05_00
+			value.Pms.Count10_00 = sc.Pms.Count10_00
+			value.Pms.CountSecs = sc.Pms.CountSecs
+		}
         ChangedPms = true
     }
     if sc.Opc != nil {
-        value.Opc = sc.Opc
+        var opc Opc
+        if (value.Opc == nil) {
+            value.Opc = &opc
+        }
+		if sc.Opc.Pm01_0 != nil {
+			value.Opc.Pm01_0 = sc.Opc.Pm01_0
+		}
+		if sc.Opc.Pm02_5 != nil {
+			value.Opc.Pm02_5 = sc.Opc.Pm02_5
+		}
+		if sc.Opc.Pm10_0 != nil {
+			value.Opc.Pm10_0 = sc.Opc.Pm10_0
+		}
+		if sc.Opc.CountSecs != nil {
+			value.Opc.Count00_38 = sc.Opc.Count00_38
+			value.Opc.Count00_54 = sc.Opc.Count00_54
+			value.Opc.Count01_00 = sc.Opc.Count01_00
+			value.Opc.Count02_10 = sc.Opc.Count02_10
+			value.Opc.Count05_00 = sc.Opc.Count05_00
+			value.Opc.Count10_00 = sc.Opc.Count10_00
+			value.Opc.CountSecs = sc.Opc.CountSecs
+		}
         ChangedOpc = true
     }
     if sc.Lnd != nil {
