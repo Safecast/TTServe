@@ -862,7 +862,7 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
     }
 	
 	var net Net
-	transportStr := deviceType+ipv4(req.RemoteAddr)
+	transportStr := deviceType+":"+ipv4(req.RemoteAddr)
 	net.Transport = &transportStr
     sd.Net = &net
 	
