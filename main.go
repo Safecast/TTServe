@@ -862,14 +862,12 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
     }
 	
 	var net Net
-	transportStr := "reformat-http:"+ipv4(req.RemoteAddr)
+	transportStr := deviceType+ipv4(req.RemoteAddr)
 	net.Transport = &transportStr
     sd.Net = &net
 	
-    fmt.Printf("\n%s Received %s payload for %d from %s\n", time.Now().Format(logDateFormat), deviceType, sd.DeviceID, transportStr)
-    if true {
-        fmt.Printf("%s\n", body)
-    }
+    fmt.Printf("\n%s Received payload for %d from %s\n", time.Now().Format(logDateFormat), sd.DeviceID, transportStr)
+    fmt.Printf("%s\n", body)
 
     // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
     UploadedAt := nowInUTC()

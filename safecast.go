@@ -1180,13 +1180,13 @@ func SafecastReformat(v1 SafecastDataV1Numerics) (deviceid uint32, devtype strin
     isPointcast := false
     if (v1.DeviceID >= 100000 && v1.DeviceID < 199999) {
         isPointcast = true
-        devicetype = "Pointcast"
+        devicetype = "pointcast"
         sd.DeviceID = uint64(v1.DeviceID / 10)
     }
     isSafecastAir := false
     if (v1.DeviceID >= 50000 && v1.DeviceID < 59999) {
         isSafecastAir = true
-        devicetype = "Safecast Air"
+        devicetype = "safecast-air"
         sd.DeviceID = uint64(v1.DeviceID)
     }
     if !isPointcast && !isSafecastAir {
