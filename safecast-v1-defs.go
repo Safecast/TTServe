@@ -33,7 +33,7 @@ type SafecastDataV1Numerics struct {
     SensorID		uint32 `json:"sensor_id,omitempty"`     // nil
     StationID		string `json:"station_id,omitempty"`    // nil
     Unit			string `json:"unit,omitempty"`          // cpm
-    UserID			string `json:"user_id,omitempty"`       // 304
+    UserID			uint32 `json:"user_id,omitempty"`       // 304
     Value			float32 `json:"value,omitempty"`        // 36
     Latitude		float32 `json:"latitude,omitempty"`     // 37.0105
     Longitude		float32 `json:"longitude,omitempty"`    // 140.9253

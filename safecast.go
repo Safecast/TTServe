@@ -1126,10 +1126,13 @@ func SafecastV1StringsToNumerics(ss SafecastDataV1Strings) SafecastDataV1Numeric
     sn.LocationName = ss.LocationName
     sn.StationID = ss.StationID
     sn.Unit = ss.Unit
-    sn.UserID = ss.UserID
     u64, err = strconv.ParseUint(ss.DeviceID, 10, 32)
     if err == nil {
         sn.DeviceID = uint32(u64)
+    }
+    u64, err = strconv.ParseUint(ss.UserID, 10, 32)
+    if err == nil {
+        sn.UserID = uint32(u64)
     }
     u64, err = strconv.ParseUint(ss.ChannelID, 10, 32)
     if err == nil {
