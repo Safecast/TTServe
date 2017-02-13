@@ -403,7 +403,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast, checksum uint32, UploadedAt 
 }
 
 // Begin transaction and return the transaction ID
-func beginTransaction(version string, url string, message1 string, message2 string) int {
+func beginTransaction(version string,  message1 string, message2 string) int {
     httpTransactionsInProgress += 1
     httpTransactions += 1
     transaction := httpTransactions % httpTransactionsRecorded
@@ -1343,9 +1343,9 @@ func SafecastV1Upload(scV1 SafecastDataV1, url string) bool {
 }
 
 // Upload a Safecast data structure to the Safecast service
-func doUploadToSafecastV1(scV1 SafecastDataV1, url string) bool {
+func doUploadToSafecastV1(scV1 SafecastDataV1, urlForUpload string) bool {
 
-    transaction := beginTransaction("V1", SafecastV1UploadURL, scV1.Unit, scV1.Value)
+    transaction := beginTransaction("V1", scV1.Unit, scV1.Value)
 
     scJSON, _ := json.Marshal(scV1)
 
@@ -1353,11 +1353,9 @@ func doUploadToSafecastV1(scV1 SafecastDataV1, url string) bool {
         fmt.Printf("%s\n", scJSON)
     }
 
-    urlForUpload := fmt.Sprintf("%s?%s", SafecastV1UploadURL, SafecastV1QueryString)
-    if (url != "") {
-        urlForUpload = url
-    }
-    req, err := http.NewRequest("POST", urlForUpload, bytes.NewBuffer(scJSON))
+	url := SafecastV1UploadURL + urlForUpload
+	fmt.Printf("POST to: %s\n", url)
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{
@@ -1399,7 +1397,7 @@ func doUploadToSafecast(UploadedAt string, sd SafecastData, url string) bool {
     if sd.CapturedAt != nil {
         CapturedAt = *sd.CapturedAt
     }
-    transaction := beginTransaction("V2", url, "captured", CapturedAt)
+    transaction := beginTransaction("V2", "captured", CapturedAt)
 
     sd.UploadedAt = &UploadedAt
     scJSON, _ := json.Marshal(sd)

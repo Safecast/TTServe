@@ -35,9 +35,7 @@ const ttnTopic string = "+/devices/+/up"
 const ttnDownlinkURL = "https://integrations.thethingsnetwork.org/ttn-eu/api/v2/down/%s/%s?key=%s"
 
 // Safecast-related
-const SafecastV1UploadIP = "gw01.safecast.org"
-const SafecastV1UploadURL = "http://" + SafecastV1UploadIP + "/scripts/index.php"
-const SafecastV1QueryString = "api_key=z3sHhgousVDDrCVXhzMT"
+const SafecastV1UploadURL = "http://gw01.safecast.org"
 var SafecastUploadURLs = [...]string {
     "http://ingest.safecast.org/v1/measurements",
 }
@@ -866,12 +864,8 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
-        urlV1 := SafecastV1UploadURL
-        if (req.URL.RawQuery != "") {
-            urlV1 = fmt.Sprintf("%s?%s", urlV1, req.URL.RawQuery)
-        }
         UploadedAt := nowInUTC()
-        SafecastV1Upload(sdV1, urlV1)
+        SafecastV1Upload(sdV1, req.RequestURI)
         SafecastUpload(UploadedAt, sd)
         SafecastWriteToLogs(UploadedAt, sd)
         CountHTTPReformat++
