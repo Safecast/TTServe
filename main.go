@@ -839,7 +839,7 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
     err = json.Unmarshal(body, &sdV1)
     if (err != nil) {
         if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
-		fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr));
+			fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr), err);
 			if len(body) != 0 {
 		        fmt.Printf("%s\n", string(body));
 			}
