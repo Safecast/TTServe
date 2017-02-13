@@ -67,12 +67,17 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
     case "status":
         if messageAfterFirstWord == "" {
-            sendSafecastDeviceSummaryToSlack(false)
+            sendSafecastDeviceSummaryToSlack(false, false)
         }
 
-    case "stat":
+    case "details":
         if messageAfterFirstWord == "" {
-            sendSafecastDeviceSummaryToSlack(true)
+            sendSafecastDeviceSummaryToSlack(false, true)
+        }
+
+    case "mobile":
+        if messageAfterFirstWord == "" {
+            sendSafecastDeviceSummaryToSlack(true, true)
         }
 
     case "pending":
