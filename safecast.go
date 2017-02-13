@@ -1397,7 +1397,7 @@ func doUploadToSafecast(UploadedAt string, sd SafecastData, url string) bool {
     sd.UploadedAt = &UploadedAt
     scJSON, _ := json.Marshal(sd)
 
-    if false {
+    if true {
         fmt.Printf("%s\n", scJSON)
     }
 
