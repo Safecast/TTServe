@@ -36,7 +36,7 @@ const ttnDownlinkURL = "https://integrations.thethingsnetwork.org/ttn-eu/api/v2/
 
 // Safecast-related
 const SafecastV1UploadIP = "gw01.safecast.org"
-const SafecastV1UploadURL = "http://" + SafecastV1UploadIP + "/scripts/indextest.php"
+const SafecastV1UploadURL = "http://" + SafecastV1UploadIP + "/scripts/index.php"
 const SafecastV1QueryString = "api_key=z3sHhgousVDDrCVXhzMT"
 var SafecastUploadURLs = [...]string {
     "http://ingest.safecast.org/v1/measurements",
