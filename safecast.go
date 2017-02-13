@@ -683,16 +683,16 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool, fDetails bool) {
             s = fmt.Sprintf("%s\n", s)
         }
 
-		label := ""
-		gps := ""
-		summary := ""
-		if (fDetails) {
-	        label, gps, summary = SafecastGetSummary(id)
-		}
-		
+        label := ""
+        gps := ""
+        summary := ""
+        if fDetails {
+            label, gps, summary = SafecastGetSummary(id)
+        }
+
         s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicValue, id, id)
 
-        if (fWrap) {
+        if fWrap {
             if label != "" {
                 s += label
             }
@@ -702,10 +702,12 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool, fDetails bool) {
         s += fmt.Sprintf("<http://%s%s%s%d.json|log> ", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
         s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
 
-        if (gps != "") {
-            s += " " + gps
-        } else {
-            s += " gps"
+        if fDetails {
+            if gps != "" {
+                s += " " + gps
+            } else {
+                s += " gps"
+            }
         }
 
         if sortedDevices[i].minutesAgo == 0 {
