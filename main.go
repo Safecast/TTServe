@@ -865,7 +865,7 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
 
         // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
         UploadedAt := nowInUTC()
-        SafecastV1Upload(sdV1, req.RequestURI)
+        SafecastV1Upload(sdV1, SafecastV1UploadURL+req.RequestURI)
         SafecastUpload(UploadedAt, sd)
         SafecastWriteToLogs(UploadedAt, sd)
         CountHTTPReformat++

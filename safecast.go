@@ -1353,9 +1353,7 @@ func doUploadToSafecastV1(scV1 SafecastDataV1, urlForUpload string) bool {
         fmt.Printf("%s\n", scJSON)
     }
 
-	url := SafecastV1UploadURL + urlForUpload
-	fmt.Printf("POST to: %s\n", url)
-    req, err := http.NewRequest("POST", url, bytes.NewBuffer(scJSON))
+	req, err := http.NewRequest("POST", urlForUpload, bytes.NewBuffer(scJSON))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{
