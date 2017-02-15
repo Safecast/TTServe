@@ -1146,6 +1146,7 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
 
     // Required field
     if v1.DeviceID == nil {
+        fmt.Sprintf("*** Reformat: Missing Device ID\n");
         return 0, "", sd
     }
 
