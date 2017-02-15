@@ -37,9 +37,9 @@ type SafecastDataV1 struct {
     Longitude		*float32
 }
 
-func Decode(r io.Reader) (x *SafecastDataV1, err error) {
+func SafecastV1Decode(r io.Reader) (x SafecastDataV1, err error) {
 
-	x = new(SafecastDataV1)
+	x = SafecastDataV1{}
 	err = json.NewDecoder(r).Decode(x)
 	if err != nil {
 		return

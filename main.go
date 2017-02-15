@@ -841,14 +841,8 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    if (false) {
-
-        // Attempt to unmarshal it as a Safecast V1 data structure first as strings, then numerics
-        err = json.Unmarshal(body, &sdV1)
-    }
-
 	// Decode the request with custom marshaling
-    err = json.NewDecoder(bytes.NewReader(body)).Decode(&sdV1)
+	sdV1, err = SafecastV1Decode(bytes.NewReader(body))
     if err != nil {
         if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
             fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr), err);
