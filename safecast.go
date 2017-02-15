@@ -84,11 +84,11 @@ func (a ByKey) Less(i, j int) bool {
 // Process an inbound Safecast message, as an asynchronous goroutine
 func ProcessSafecastMessage(SeqNo int, msg teletype.Telecast, checksum uint32, UploadedAt string, Transport string) {
 
-	// To ensure a best-efforts sequencing in log, impose a delay in proportion to sequencing
-	if SeqNo != 0 {
+    // To ensure a best-efforts sequencing in log, impose a delay in proportion to sequencing
+    if SeqNo != 0 {
         time.Sleep(time.Duration(SeqNo) * time.Minute)
-	}
-	
+    }
+
     // Discard it if it's a duplicate
     if isDuplicate(checksum) {
         fmt.Printf("%s DISCARDING duplicate message\n", time.Now().Format(logDateFormat));
@@ -883,27 +883,27 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
     // Write the stuff
     s := ""
 
-	// Convert the times to something that can be parsed by Excel
-	zTime := ""
+    // Convert the times to something that can be parsed by Excel
+    zTime := ""
     if sd.UploadedAt != nil {
-		zTime = fmt.Sprintf("%s", *sd.UploadedAt)
+        zTime = fmt.Sprintf("%s", *sd.UploadedAt)
     } else if UploadedAt != "" {
-		zTime = UploadedAt
-	}
-	t, err := time.Parse("2006-01-02T15:04:05Z", zTime)
-	if err == nil {
-		zTime = t.UTC().Format("2006-01-02 15:04:05")
-	}
-	s += zTime
-	
-	s += ","
+        zTime = UploadedAt
+    }
+    t, err := time.Parse("2006-01-02T15:04:05Z", zTime)
+    if err == nil {
+        zTime = t.UTC().Format("2006-01-02 15:04:05")
+    }
+    s += zTime
+
+    s += ","
     if sd.CapturedAt != nil {
-		t, err = time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
-		if err == nil {
-			s += t.UTC().Format("2006-01-02 15:04:05")
-		} else {
-			s += *sd.CapturedAt
-		}
+        t, err = time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
+        if err == nil {
+            s += t.UTC().Format("2006-01-02 15:04:05")
+        } else {
+            s += *sd.CapturedAt
+        }
     }
 
     s = s + fmt.Sprintf(",%d", sd.DeviceID)
@@ -1137,229 +1137,189 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
 
 }
 
-func SafecastV1StringsToNumerics(ss SafecastDataV1Strings) SafecastDataV1Numerics {
-    var sn SafecastDataV1Numerics
-	var u64 uint64
-	var f64 float64
-	var err error
-    sn.CapturedAt = ss.CapturedAt
-    sn.DeviceTypeID = ss.DeviceTypeID
-    sn.LocationName = ss.LocationName
-    sn.StationID = ss.StationID
-    sn.Unit = ss.Unit
-    u64, err = strconv.ParseUint(ss.DeviceID, 10, 32)
-    if err == nil {
-        sn.DeviceID = uint32(u64)
-    }
-    u64, err = strconv.ParseUint(ss.UserID, 10, 32)
-    if err == nil {
-        sn.UserID = uint32(u64)
-    }
-    u64, err = strconv.ParseUint(ss.ChannelID, 10, 32)
-    if err == nil {
-        sn.ChannelID = uint32(u64)
-    }
-    u64, err = strconv.ParseUint(ss.ID, 10, 32)
-    if err == nil {
-        sn.ID = uint32(u64)
-    }
-    u64, err = strconv.ParseUint(ss.OriginalID, 10, 32)
-    if err == nil {
-        sn.OriginalID = uint32(u64)
-    }
-    u64, err = strconv.ParseUint(ss.SensorID, 10, 32)
-    if err == nil {
-        sn.SensorID = uint32(u64)
-    }
-    f64, err = strconv.ParseFloat(ss.Value, 32)
-    if err == nil {
-        sn.Value = float32(f64)
-    }
-    f64, err = strconv.ParseFloat(ss.Height, 32)
-    if err == nil {
-        sn.Height = int32(f64)
-    }
-    f64, err = strconv.ParseFloat(ss.Latitude, 32)
-    if err == nil {
-        sn.Latitude = float32(f64)
-    }
-    f64, err = strconv.ParseFloat(ss.Longitude, 32)
-    if err == nil {
-        sn.Longitude = float32(f64)
-    }
-    return sn
-}
-
 // Reformat a special V1 payload to Current
-func SafecastReformat(v1 SafecastDataV1Numerics) (deviceid uint32, devtype string, data SafecastData) {
+func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data SafecastData) {
     var sd SafecastData
     var devicetype = ""
-	var u64 uint64
-	var f64 float64
+    var u64 uint64
+    var f64 float64
+
+    // Required field
+    if v1.DeviceID == nil {
+        return 0, "", sd
+    }
 
     // Detect what range it is within, and process the conversion differently
     isPointcast := false
-    if (v1.DeviceID >= 100000 && v1.DeviceID < 199999) {
+    if (*v1.DeviceID >= 100000 && *v1.DeviceID < 199999) {
         isPointcast = true
         devicetype = "pointcast"
-        sd.DeviceID = uint64(v1.DeviceID / 10)
+        sd.DeviceID = uint64(*v1.DeviceID / 10)
     }
     isSafecastAir := false
-    if (v1.DeviceID >= 50000 && v1.DeviceID < 59999) {
+    if (*v1.DeviceID >= 50000 && *v1.DeviceID < 59999) {
         isSafecastAir = true
         devicetype = "safecast-air"
-        sd.DeviceID = uint64(v1.DeviceID)
+        sd.DeviceID = uint64(*v1.DeviceID)
     }
     if !isPointcast && !isSafecastAir {
-        fmt.Sprintf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", v1.DeviceID);
+        fmt.Sprintf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceID);
         return 0, "", sd
     }
 
     // Captured
-    if (v1.CapturedAt != "") {
-        sd.CapturedAt = &v1.CapturedAt
+    if v1.CapturedAt != nil {
+        sd.CapturedAt = v1.CapturedAt
     }
 
     // Loc
-    var loc Loc
-    loc.Lat = v1.Latitude
-    loc.Lon = v1.Longitude
-    if loc.Lat != 0 && loc.Lon != 0 {
-		alt := float32(v1.Height)
-        loc.Alt = &alt
+    if v1.Latitude != nil && v1.Longitude != nil {
+        var loc Loc
+        loc.Lat = *v1.Latitude
+        loc.Lon = *v1.Longitude
+        if v1.Height != nil {
+            alt := float32(*v1.Height)
+            loc.Alt = &alt
+        }
         sd.Loc = &loc
     }
 
     // Reverse-engineer Unit/Value to yield the good stuff
-    switch (strings.ToLower(v1.Unit)) {
+    if v1.Unit != nil && v1.Value != nil {
 
-    case "pm1":
-        var opc Opc
-        pm := v1.Value
-        opc.Pm01_0 = &pm
-        sd.Opc = &opc
+        switch (strings.ToLower(*v1.Unit)) {
 
-    case "pm2.5":
-        var opc Opc
-        pm := v1.Value
-        opc.Pm02_5 = &pm
-        sd.Opc = &opc
+        case "pm1":
+            var opc Opc
+            pm := *v1.Value
+            opc.Pm01_0 = &pm
+            sd.Opc = &opc
 
-    case "pm10":
-        var opc Opc
-        pm := v1.Value
-        opc.Pm10_0 = &pm
-        sd.Opc = &opc
+        case "pm2.5":
+            var opc Opc
+            pm := *v1.Value
+            opc.Pm02_5 = &pm
+            sd.Opc = &opc
 
-    case "humd%":
-        var env Env
-        humid := v1.Value
-        env.Humid = &humid
-        sd.Env = &env
+        case "pm10":
+            var opc Opc
+            pm := *v1.Value
+            opc.Pm10_0 = &pm
+            sd.Opc = &opc
 
-    case "tempc":
-        var env Env
-        temp := v1.Value
-        env.Temp = &temp
-        sd.Env = &env
+        case "humd%":
+            var env Env
+            humid := *v1.Value
+            env.Humid = &humid
+            sd.Env = &env
 
-    case "cpm":
-        if !isPointcast {
-            fmt.Sprintf("*** Reformat: Received CPM for non-Pointcast\n", sd.DeviceID)
-        } else {
-            if (v1.DeviceID % 10) == 1 {
-                var lnd Lnd
-                cpm := v1.Value
-                lnd.U7318 = &cpm
-                sd.Lnd = &lnd
+        case "tempc":
+            var env Env
+            temp := *v1.Value
+            env.Temp = &temp
+            sd.Env = &env
 
-            } else if (v1.DeviceID % 10) == 2 {
-                var lnd Lnd
-                cpm := v1.Value
-                lnd.EC7128 = &cpm
-                sd.Lnd = &lnd
+        case "cpm":
+            if !isPointcast {
+                fmt.Sprintf("*** Reformat: Received CPM for non-Pointcast\n", sd.DeviceID)
             } else {
-                fmt.Sprintf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceID);
-            }
-        }
-    case "status":
-        // The value is the temp
-        var env Env
-        TempC := v1.Value
-        env.Temp = &TempC
-        sd.Env = &env
+                if (*v1.DeviceID % 10) == 1 {
+                    var lnd Lnd
+                    cpm := *v1.Value
+                    lnd.U7318 = &cpm
+                    sd.Lnd = &lnd
 
-        // Parse subfields
-        var bat Bat
-        var dobat = false
-        var dev Dev
-        var dodev = false
-
-        unrecognized := ""
-        status := v1.DeviceTypeID
-        fields := strings.Split(status, ",")
-        for v := range fields {
-            field := strings.Split(fields[v], ":")
-            switch (field[0]) {
-            case "Battery Voltage":
-                f64, _ = strconv.ParseFloat(field[1], 32)
-                f32 := float32(f64)
-                bat.Voltage = &f32
-                dobat = true
-            case "Fails":
-                u64, _ = strconv.ParseUint(field[1], 10, 32)
-                u32 := uint32(u64)
-                dev.CommsFails = &u32
-                dodev = true
-            case "Restarts":
-                u64, _ = strconv.ParseUint(field[1], 10, 32)
-                u32 := uint32(u64)
-                dev.DeviceRestarts = &u32
-                dodev = true
-            case "FreeRam":
-                u64, _ = strconv.ParseUint(field[1], 10, 32)
-                u32 := uint32(u64)
-                dev.FreeMem = &u32
-                dodev = true
-            case "NTP count":
-                u64, _ = strconv.ParseUint(field[1], 10, 32)
-                u32 := uint32(u64)
-                dev.NTPCount = &u32
-                dodev = true
-            case "Last failure":
-                var LastFailure string = field[1]
-                dev.LastFailure = &LastFailure
-                dodev = true
-            default:
-                if (unrecognized == "") {
-                    unrecognized = "{"
+                } else if (*v1.DeviceID % 10) == 2 {
+                    var lnd Lnd
+                    cpm := *v1.Value
+                    lnd.EC7128 = &cpm
+                    sd.Lnd = &lnd
                 } else {
-                    unrecognized = unrecognized + ","
+                    fmt.Sprintf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceID);
                 }
-                unrecognized = unrecognized + "\"" + field[0] + "\":\"" + field[1] + "\""
-            case "DeviceID":
-            case "Temperature":
             }
-        }
+        case "status":
+            // The value is the temp
+            var env Env
+            TempC := *v1.Value
+            env.Temp = &TempC
+            sd.Env = &env
 
-        // If we found unrecognized fields, emit them
-        if (unrecognized != "") {
-            unrecognized = unrecognized + "}"
-            dev.Status = &unrecognized
-            dodev = true
-        }
+            // Parse subfields
+            var bat Bat
+            var dobat = false
+            var dev Dev
+            var dodev = false
 
-        // Include in  the uploads
-        if dobat {
-            sd.Bat = &bat
-        }
-        if dodev {
-            sd.Dev = &dev
-        }
+            unrecognized := ""
+			status := ""
+			if v1.DeviceTypeID != nil {
+	            status = *v1.DeviceTypeID
+			}
+            fields := strings.Split(status, ",")
+            for v := range fields {
+                field := strings.Split(fields[v], ":")
+                switch (field[0]) {
+                case "Battery Voltage":
+                    f64, _ = strconv.ParseFloat(field[1], 32)
+                    f32 := float32(f64)
+                    bat.Voltage = &f32
+                    dobat = true
+                case "Fails":
+                    u64, _ = strconv.ParseUint(field[1], 10, 32)
+                    u32 := uint32(u64)
+                    dev.CommsFails = &u32
+                    dodev = true
+                case "Restarts":
+                    u64, _ = strconv.ParseUint(field[1], 10, 32)
+                    u32 := uint32(u64)
+                    dev.DeviceRestarts = &u32
+                    dodev = true
+                case "FreeRam":
+                    u64, _ = strconv.ParseUint(field[1], 10, 32)
+                    u32 := uint32(u64)
+                    dev.FreeMem = &u32
+                    dodev = true
+                case "NTP count":
+                    u64, _ = strconv.ParseUint(field[1], 10, 32)
+                    u32 := uint32(u64)
+                    dev.NTPCount = &u32
+                    dodev = true
+                case "Last failure":
+                    var LastFailure string = field[1]
+                    dev.LastFailure = &LastFailure
+                    dodev = true
+                default:
+                    if (unrecognized == "") {
+                        unrecognized = "{"
+                    } else {
+                        unrecognized = unrecognized + ","
+                    }
+                    unrecognized = unrecognized + "\"" + field[0] + "\":\"" + field[1] + "\""
+                case "DeviceID":
+                case "Temperature":
+                }
+            }
 
-    default:
-        fmt.Sprintf("*** Reformat Warning ***\n*** %s id=%d Unit %s = Value %f UNRECOGNIZED\n", devicetype, v1.DeviceID, v1.Unit, v1.Value)
+            // If we found unrecognized fields, emit them
+            if (unrecognized != "") {
+                unrecognized = unrecognized + "}"
+                dev.Status = &unrecognized
+                dodev = true
+            }
 
+            // Include in  the uploads
+            if dobat {
+                sd.Bat = &bat
+            }
+            if dodev {
+                sd.Dev = &dev
+            }
+
+        default:
+            fmt.Sprintf("*** Reformat Warning ***\n*** %s id=%d Unit %s = Value %f UNRECOGNIZED\n", devicetype, *v1.DeviceID, *v1.Unit, *v1.Value)
+
+        }
     }
 
     return uint32(sd.DeviceID), devicetype, sd
@@ -1495,46 +1455,46 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         value.CapturedAt = sc.CapturedAt
     }
     if sc.Bat != nil {
-		var bat Bat
-		if value.Bat == nil {
-			value.Bat = &bat
-		}
-		if sc.Voltage != nil {
-			value.Bat.Voltage = sc.Bat.Voltage
-		}
-		if sc.Current != nil {
-			value.Bat.Current = sc.Bat.Current
-		}
-		if sc.Charge != nil {
-			value.Bat.Charge = sc.Bat.Charge
-		}
+        var bat Bat
+        if value.Bat == nil {
+            value.Bat = &bat
+        }
+        if sc.Voltage != nil {
+            value.Bat.Voltage = sc.Bat.Voltage
+        }
+        if sc.Current != nil {
+            value.Bat.Current = sc.Bat.Current
+        }
+        if sc.Charge != nil {
+            value.Bat.Charge = sc.Bat.Charge
+        }
     }
     if sc.Env != nil {
-		var env Env
-		if value.Env == nil {
-			value.Env = &env
-		}
-		if sc.Temp != nil {
-			value.Env.Temp = sc.Env.Temp
-		}
-		if sc.Humid != nil {
-			value.Env.Humid = sc.Env.Humid
-		}
-		if sc.Press != nil {
-			value.Env.Press = sc.Env.Press
-		}
+        var env Env
+        if value.Env == nil {
+            value.Env = &env
+        }
+        if sc.Temp != nil {
+            value.Env.Temp = sc.Env.Temp
+        }
+        if sc.Humid != nil {
+            value.Env.Humid = sc.Env.Humid
+        }
+        if sc.Press != nil {
+            value.Env.Press = sc.Env.Press
+        }
     }
     if sc.Net != nil {
-		var net Net
-		if value.Net == nil {
-			value.Net = &net
-		}
-		if sc.SNR != nil {
-			value.Net.SNR = sc.Net.SNR
-		}
-		if sc.Transport != nil {
-			value.Net.Transport = sc.Net.Transport
-		}
+        var net Net
+        if value.Net == nil {
+            value.Net = &net
+        }
+        if sc.SNR != nil {
+            value.Net.SNR = sc.Net.SNR
+        }
+        if sc.Transport != nil {
+            value.Net.Transport = sc.Net.Transport
+        }
     }
     if sc.Loc != nil {
         var loc Loc
@@ -1551,24 +1511,24 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         if (value.Pms == nil) {
             value.Pms = &pms
         }
-		if sc.Pms.Pm01_0 != nil {
-			value.Pms.Pm01_0 = sc.Pms.Pm01_0
-		}
-		if sc.Pms.Pm02_5 != nil {
-			value.Pms.Pm02_5 = sc.Pms.Pm02_5
-		}
-		if sc.Pms.Pm10_0 != nil {
-			value.Pms.Pm10_0 = sc.Pms.Pm10_0
-		}
-		if sc.Pms.CountSecs != nil {
-			value.Pms.Count00_30 = sc.Pms.Count00_30
-			value.Pms.Count00_50 = sc.Pms.Count00_50
-			value.Pms.Count01_00 = sc.Pms.Count01_00
-			value.Pms.Count02_50 = sc.Pms.Count02_50
-			value.Pms.Count05_00 = sc.Pms.Count05_00
-			value.Pms.Count10_00 = sc.Pms.Count10_00
-			value.Pms.CountSecs = sc.Pms.CountSecs
-		}
+        if sc.Pms.Pm01_0 != nil {
+            value.Pms.Pm01_0 = sc.Pms.Pm01_0
+        }
+        if sc.Pms.Pm02_5 != nil {
+            value.Pms.Pm02_5 = sc.Pms.Pm02_5
+        }
+        if sc.Pms.Pm10_0 != nil {
+            value.Pms.Pm10_0 = sc.Pms.Pm10_0
+        }
+        if sc.Pms.CountSecs != nil {
+            value.Pms.Count00_30 = sc.Pms.Count00_30
+            value.Pms.Count00_50 = sc.Pms.Count00_50
+            value.Pms.Count01_00 = sc.Pms.Count01_00
+            value.Pms.Count02_50 = sc.Pms.Count02_50
+            value.Pms.Count05_00 = sc.Pms.Count05_00
+            value.Pms.Count10_00 = sc.Pms.Count10_00
+            value.Pms.CountSecs = sc.Pms.CountSecs
+        }
         ChangedPms = true
     }
     if sc.Opc != nil {
@@ -1576,24 +1536,24 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         if (value.Opc == nil) {
             value.Opc = &opc
         }
-		if sc.Opc.Pm01_0 != nil {
-			value.Opc.Pm01_0 = sc.Opc.Pm01_0
-		}
-		if sc.Opc.Pm02_5 != nil {
-			value.Opc.Pm02_5 = sc.Opc.Pm02_5
-		}
-		if sc.Opc.Pm10_0 != nil {
-			value.Opc.Pm10_0 = sc.Opc.Pm10_0
-		}
-		if sc.Opc.CountSecs != nil {
-			value.Opc.Count00_38 = sc.Opc.Count00_38
-			value.Opc.Count00_54 = sc.Opc.Count00_54
-			value.Opc.Count01_00 = sc.Opc.Count01_00
-			value.Opc.Count02_10 = sc.Opc.Count02_10
-			value.Opc.Count05_00 = sc.Opc.Count05_00
-			value.Opc.Count10_00 = sc.Opc.Count10_00
-			value.Opc.CountSecs = sc.Opc.CountSecs
-		}
+        if sc.Opc.Pm01_0 != nil {
+            value.Opc.Pm01_0 = sc.Opc.Pm01_0
+        }
+        if sc.Opc.Pm02_5 != nil {
+            value.Opc.Pm02_5 = sc.Opc.Pm02_5
+        }
+        if sc.Opc.Pm10_0 != nil {
+            value.Opc.Pm10_0 = sc.Opc.Pm10_0
+        }
+        if sc.Opc.CountSecs != nil {
+            value.Opc.Count00_38 = sc.Opc.Count00_38
+            value.Opc.Count00_54 = sc.Opc.Count00_54
+            value.Opc.Count01_00 = sc.Opc.Count01_00
+            value.Opc.Count02_10 = sc.Opc.Count02_10
+            value.Opc.Count05_00 = sc.Opc.Count05_00
+            value.Opc.Count10_00 = sc.Opc.Count10_00
+            value.Opc.CountSecs = sc.Opc.CountSecs
+        }
         ChangedOpc = true
     }
     if sc.Lnd != nil {
