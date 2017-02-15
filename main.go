@@ -122,16 +122,16 @@ var MAX_PENDING_REQUESTS int = 100
 // Common app request
 type IncomingReq struct {
     Payload []byte
-    Longitude	float32
-    Latitude	float32
-    Altitude	float32
-    Snr			float32
-    Location	string
-    ServerTime	string
-    Transport	string
-    UploadedAt	string
-    TTNDevID	string
-	SeqNo		int
+    Longitude   float32
+    Latitude    float32
+    Altitude    float32
+    Snr         float32
+    Location    string
+    ServerTime  string
+    Transport   string
+    UploadedAt  string
+    TTNDevID    string
+    SeqNo       int
 }
 var reqQ chan IncomingReq
 var reqQMaxLength = 0
@@ -690,11 +690,11 @@ func processBuffer(req IncomingReq, from string, transport string, buf []byte) (
 
         for i:=0; i<count; i++ {
 
-			// Insert a sequence number to attempt to impose a sequencing delay in ProcessSafecastMessage,
-			// so that things are sequenced properly in the log.  This is not guaranteed of course, but it is helpful
-			// for log readability.
-			AppReq.SeqNo = i
-			
+            // Insert a sequence number to attempt to impose a sequencing delay in ProcessSafecastMessage,
+            // so that things are sequenced properly in the log.  This is not guaranteed of course, but it is helpful
+            // for log readability.
+            AppReq.SeqNo = i
+
             // Extract the length
             length := int(buf[lengthArrayOffset+i])
 
@@ -841,14 +841,16 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-	// TEST
-	test := SafecastDataV1{}
-    err = json.Unmarshal(body, &test)
-    if (err == nil) {
-		fmt.Printf("SUCCESS:\n%s\n%v\n", string(body), test);
-	} else {
-		fmt.Printf("FAIL:\n%s\n", string(body));
-	}
+    // TEST
+    if len(body) != 0 {
+        test := SafecastDataV1{}
+        err = json.Unmarshal(body, &test)
+        if (err == nil) {
+            fmt.Printf("SUCCESS:\n%s\n%v\n", string(body), test);
+        } else {
+            fmt.Printf("FAIL:\n%s\n", string(body));
+        }
+    }
 
     // Attempt to unmarshal it as a Safecast V1 data structure first as strings, then numerics
     err = json.Unmarshal(body, &sds)
@@ -875,12 +877,12 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
     if (deviceID == 0) {
         return
     }
-	
-	var net Net
-	transportStr := deviceType+":"+ipv4(req.RemoteAddr)
-	net.Transport = &transportStr
+
+    var net Net
+    transportStr := deviceType+":"+ipv4(req.RemoteAddr)
+    net.Transport = &transportStr
     sd.Net = &net
-	
+
     fmt.Printf("\n%s Received payload for %d from %s\n", time.Now().Format(logDateFormat), sd.DeviceID, transportStr)
     fmt.Printf("%s\n", body)
 
@@ -1273,7 +1275,7 @@ func ControlFileTime(controlfilename string, message string) (restartTime time.T
     // Get the file date/time, returning a stable time if we fail
     file, err := os.Stat(filename)
     if err != nil {
-		fmt.Printf("*** Error fetching file time for %s: %v\n", filename, err)
+        fmt.Printf("*** Error fetching file time for %s: %v\n", filename, err)
         return TTServerBootTime
     }
 
