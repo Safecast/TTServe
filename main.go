@@ -1176,7 +1176,7 @@ func commonRequestHandler() {
 
             // Handle messages from non-safecast devices
         default:
-            ProcessTelecastMessage(*msg, AppReq.TTNDevID)
+            go ProcessTelecastMessage(*msg, AppReq.TTNDevID)
         }
     }
 }
