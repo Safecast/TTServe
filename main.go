@@ -841,6 +841,15 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
+	// TEST
+	test := SafecastDataV1{}
+    err = json.Unmarshal(body, &test)
+    if (err == nil) {
+		fmt.Printf("SUCCESS:\n%s\n%v\n", string(body), test);
+	} else {
+		fmt.Printf("FAIL:\n%s\n", string(body));
+	}
+
     // Attempt to unmarshal it as a Safecast V1 data structure first as strings, then numerics
     err = json.Unmarshal(body, &sds)
     if (err == nil) {
