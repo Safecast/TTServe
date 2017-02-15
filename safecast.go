@@ -877,16 +877,30 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
 
     // Write the stuff
     s := ""
+
+	// Convert the times to something that can be parsed by Excel
+	zTime := ""
     if sd.UploadedAt != nil {
-		s += fmt.Sprintf("%s", *sd.UploadedAt)
+		zTime = fmt.Sprintf("%s", *sd.UploadedAt)
     } else if UploadedAt != "" {
-		s += UploadedAt
+		zTime = UploadedAt
 	}
+	t, err := time.Parse("2006-01-02T15:04:05Z", zTime)
+	if err == nil {
+		zTime = t.UTC().Format("2006-01-02 15:04:05")
+	}
+	s += zTime
+	
+	s += ","
     if sd.CapturedAt != nil {
-        s += fmt.Sprintf(",%s", *sd.CapturedAt)
-    } else {
-        s += ","
+		t, err = time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
+		if err == nil {
+			s += t.UTC().Format("2006-01-02 15:04:05")
+		} else {
+			s += *sd.CapturedAt
+		}
     }
+
     s = s + fmt.Sprintf(",%d", sd.DeviceID)
     s = s + fmt.Sprintf(",%s", stats)
     s = s + fmt.Sprintf(",%s", "")          // Value
