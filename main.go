@@ -841,11 +841,15 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-	// Decode the request with custom marshaling
-	sdV1, err = SafecastV1Decode(bytes.NewReader(body))
+    // Decode the request with custom marshaling
+    sdV1, err = SafecastV1Decode(bytes.NewReader(body))
     if err != nil {
         if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
-            fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr), err);
+            if err == io.EOF {
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr));
+            } else {
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr), err);
+            }
             if len(body) != 0 {
                 fmt.Printf("%s\n", string(body));
             }

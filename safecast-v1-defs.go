@@ -39,12 +39,16 @@ type SafecastDataV1 struct {
 
 func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
+	// Create a new instance, and decode the I/O stream into the fields as well
+	// as the interfaces{}, which, when queried, can supply us not only with values
+	// but also with type information.
 	x = new(SafecastDataV1)
 	err = json.NewDecoder(r).Decode(x)
 	if err != nil {
 		return
 	}
 
+	// Now go through each Raw interface and unpack the value into the corresponding non-Raw field
 	switch t := x.ChannelIDRaw.(type) {
 	case string:
 	    u64, err := strconv.ParseUint(t, 10, 32)
@@ -177,5 +181,6 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 		x.Longitude = &f32
 	}
 
+	// Done
 	return
 }
