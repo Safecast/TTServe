@@ -834,15 +834,22 @@ func inboundWebRootHandler(rw http.ResponseWriter, req *http.Request) {
 func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
     var sdV1 SafecastDataV1
 
+    // Read the body as a byte array
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
         fmt.Printf("Error reading HTTP request body: \n%v\n", req)
         return
     }
 
-    // Attempt to unmarshal it as a Safecast V1 data structure first as strings, then numerics
-    err = json.Unmarshal(body, &sdV1)
-    if (err != nil) {
+    if (false) {
+
+        // Attempt to unmarshal it as a Safecast V1 data structure first as strings, then numerics
+        err = json.Unmarshal(body, &sdV1)
+    }
+
+	// Decode the request with custom marshaling
+    err = json.NewDecoder(req.Body).Decode(&sdV1)
+    if err != nil {
         if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
             fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr), err);
             if len(body) != 0 {
@@ -870,15 +877,15 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
     fmt.Printf("\n%s Received payload for %d from %s\n", time.Now().Format(logDateFormat), sd.DeviceID, transportStr)
     fmt.Printf("%s\n", body)
 
-	// Fill in the minimums so as to prevent faults
-	if sdV1.Unit == nil {
-		s := ""
-		sdV1.Unit = &s
-	}
-	if sdV1.Unit == nil {
-		v := float32(0)
-		sdV1.Value = &v
-	}
+    // Fill in the minimums so as to prevent faults
+    if sdV1.Unit == nil {
+        s := ""
+        sdV1.Unit = &s
+    }
+    if sdV1.Unit == nil {
+        v := float32(0)
+        sdV1.Value = &v
+    }
     // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
     UploadedAt := nowInUTC()
     SafecastV1Upload(body, SafecastV1UploadURL+req.RequestURI, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))

@@ -1141,8 +1141,6 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
 func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data SafecastData) {
     var sd SafecastData
     var devicetype = ""
-    var u64 uint64
-    var f64 float64
 
     // Required field
     if v1.DeviceID == nil {
@@ -1262,27 +1260,27 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
                 field := strings.Split(fields[v], ":")
                 switch (field[0]) {
                 case "Battery Voltage":
-                    f64, _ = strconv.ParseFloat(field[1], 32)
+                    f64, _ := strconv.ParseFloat(field[1], 32)
                     f32 := float32(f64)
                     bat.Voltage = &f32
                     dobat = true
                 case "Fails":
-                    u64, _ = strconv.ParseUint(field[1], 10, 32)
+                    u64, _ := strconv.ParseUint(field[1], 10, 32)
                     u32 := uint32(u64)
                     dev.CommsFails = &u32
                     dodev = true
                 case "Restarts":
-                    u64, _ = strconv.ParseUint(field[1], 10, 32)
+                    u64, _ := strconv.ParseUint(field[1], 10, 32)
                     u32 := uint32(u64)
                     dev.DeviceRestarts = &u32
                     dodev = true
                 case "FreeRam":
-                    u64, _ = strconv.ParseUint(field[1], 10, 32)
+                    u64, _ := strconv.ParseUint(field[1], 10, 32)
                     u32 := uint32(u64)
                     dev.FreeMem = &u32
                     dodev = true
                 case "NTP count":
-                    u64, _ = strconv.ParseUint(field[1], 10, 32)
+                    u64, _ := strconv.ParseUint(field[1], 10, 32)
                     u32 := uint32(u64)
                     dev.NTPCount = &u32
                     dodev = true
