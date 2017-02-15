@@ -1144,7 +1144,7 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
 
     // Required field
     if v1.DeviceID == nil {
-        fmt.Sprintf("*** Reformat: Missing Device ID\n");
+        fmt.Printf("*** Reformat: Missing Device ID\n");
         return 0, "", sd
     }
 
@@ -1162,7 +1162,7 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
         sd.DeviceID = uint64(*v1.DeviceID)
     }
     if !isPointcast && !isSafecastAir {
-        fmt.Sprintf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceID);
+        fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceID);
         return 0, "", sd
     }
 
@@ -1220,7 +1220,7 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
 
         case "cpm":
             if !isPointcast {
-                fmt.Sprintf("*** Reformat: Received CPM for non-Pointcast\n", sd.DeviceID)
+                fmt.Printf("*** Reformat: Received CPM for non-Pointcast\n", sd.DeviceID)
             } else {
                 if (*v1.DeviceID % 10) == 1 {
                     var lnd Lnd
@@ -1234,7 +1234,7 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
                     lnd.EC7128 = &cpm
                     sd.Lnd = &lnd
                 } else {
-                    fmt.Sprintf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceID);
+                    fmt.Printf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceID);
                 }
             }
         case "status":
@@ -1316,7 +1316,7 @@ func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data 
             }
 
         default:
-            fmt.Sprintf("*** Reformat Warning ***\n*** %s id=%d Unit %s = Value %f UNRECOGNIZED\n", devicetype, *v1.DeviceID, *v1.Unit, *v1.Value)
+            fmt.Printf("*** Reformat Warning ***\n*** %s id=%d Unit %s = Value %f UNRECOGNIZED\n", devicetype, *v1.DeviceID, *v1.Unit, *v1.Value)
 
         }
     }
