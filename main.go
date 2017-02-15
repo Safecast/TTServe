@@ -832,7 +832,7 @@ func inboundWebRootHandler(rw http.ResponseWriter, req *http.Request) {
 
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
-    var sdV1 SafecastDataV1
+    var sdV1 *SafecastDataV1
 
     // Read the body as a byte array
     body, err := ioutil.ReadAll(req.Body)

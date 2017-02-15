@@ -1138,7 +1138,7 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
 }
 
 // Reformat a special V1 payload to Current
-func SafecastReformat(v1 SafecastDataV1) (deviceid uint32, devtype string, data SafecastData) {
+func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data SafecastData) {
     var sd SafecastData
     var devicetype = ""
 
