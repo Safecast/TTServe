@@ -878,8 +878,10 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
     // Write the stuff
     s := ""
     if sd.UploadedAt != nil {
-        s += UploadedAt
-    }
+		s += fmt.Sprintf("%s", *sd.UploadedAt)
+    } else if UploadedAt != "" {
+		s += UploadedAt
+	}
     if sd.CapturedAt != nil {
         s += fmt.Sprintf(",%s", *sd.CapturedAt)
     } else {
