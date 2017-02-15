@@ -858,7 +858,7 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
     // Convert to current data format
     deviceID, deviceType, sd := SafecastReformat(sdV1)
     if (deviceID == 0) {
-        fmt.Printf("%s\n", string(body));
+        fmt.Printf("%s\n%v\n", string(body), sdV1);
         return
     }
 
