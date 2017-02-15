@@ -1264,8 +1264,12 @@ func ControlFileTime(controlfilename string, message string) (restartTime time.T
     // Get the file date/time, returning a stable time if we fail
     file, err := os.Stat(filename)
     if err != nil {
+		fmt.Printf("*** Error fetching file time for %s: %v\n", filename, err)
         return TTServerBootTime
     }
 
+	if (true) {
+		fmt.Printf("*** File time for %s: %v\n", filename, file.ModTime())
+	}
     return file.ModTime()
 }
