@@ -84,9 +84,9 @@ func (a ByKey) Less(i, j int) bool {
 // Process an inbound Safecast message, as an asynchronous goroutine
 func ProcessSafecastMessage(SeqNo int, msg teletype.Telecast, checksum uint32, UploadedAt string, Transport string) {
 
-	// To ensure a best-efforts sequencing in log, add a delay in proportion to sequencing
+	// To ensure a best-efforts sequencing in log, impose a delay in proportion to sequencing
 	if SeqNo != 0 {
-        time.Sleep(time.Duration(SeqNo*10) * time.Second)
+        time.Sleep(time.Duration(SeqNo) * time.Minute)
 	}
 	
     // Discard it if it's a duplicate
