@@ -112,8 +112,15 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 		ControlFileTime(TTServerHealthControlFile, user)
 
     case "send":
-        if len(args) < 3 {
+        if len(args) == 1 {
             sendToSafecastOps("Command format: send <deviceID> <message>")
+		} else if len(args) == 2 {
+			switch argsLC[1] {
+			case "hello":
+	            sendHelloToNewDevices()
+			default:
+	            sendToSafecastOps("Unrecognized subcommand of 'send'")
+			}
         } else {
             i64, err := strconv.ParseUint(args[1], 10, 32)
             deviceID := uint32(i64)
