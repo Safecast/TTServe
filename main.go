@@ -783,7 +783,7 @@ func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Log it
     filename := req.RequestURI[len(TTServerTopicLog):]
-    fmt.Printf("%s WEB REQUEST for %s\n", time.Now().Format(logDateFormat), filename)
+    fmt.Printf("%s LOG request for %s\n", time.Now().Format(logDateFormat), filename)
 
     // Open the file
     file := SafecastDirectory() + TTServerLogPath + "/" + filename
@@ -807,7 +807,7 @@ func inboundWebValueHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Log it
     filename := req.RequestURI[len(TTServerTopicValue):]
-    fmt.Printf("%s WEB REQUEST for %s\n", time.Now().Format(logDateFormat), filename)
+    fmt.Printf("%s Device information request for %s\n", time.Now().Format(logDateFormat), filename)
 
     // Open the file
     file := SafecastDirectory() + TTServerValuePath + "/" + filename + ".json"
