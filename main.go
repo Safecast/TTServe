@@ -1268,8 +1268,5 @@ func ControlFileTime(controlfilename string, message string) (restartTime time.T
         return TTServerBootTime
     }
 
-	if (true) {
-		fmt.Printf("*** File time for %s: %v\n", filename, file.ModTime())
-	}
     return file.ModTime()
 }
