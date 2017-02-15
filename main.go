@@ -122,15 +122,16 @@ var MAX_PENDING_REQUESTS int = 100
 // Common app request
 type IncomingReq struct {
     Payload []byte
-    Longitude  float32
-    Latitude   float32
-    Altitude   float32
-    Snr        float32
-    Location   string
-    ServerTime string
-    Transport  string
-    UploadedAt string
-    TTNDevID  string
+    Longitude	float32
+    Latitude	float32
+    Altitude	float32
+    Snr			float32
+    Location	string
+    ServerTime	string
+    Transport	string
+    UploadedAt	string
+    TTNDevID	string
+	SeqNo		int
 }
 var reqQ chan IncomingReq
 var reqQMaxLength = 0
@@ -689,6 +690,11 @@ func processBuffer(req IncomingReq, from string, transport string, buf []byte) (
 
         for i:=0; i<count; i++ {
 
+			// Insert a sequence number to attempt to impose a sequencing delay in ProcessSafecastMessage,
+			// so that things are sequenced properly in the log.  This is not guaranteed of course, but it is helpful
+			// for log readability.
+			AppReq.SeqNo = i
+			
             // Extract the length
             length := int(buf[lengthArrayOffset+i])
 
@@ -1166,7 +1172,7 @@ func commonRequestHandler() {
         case teletype.Telecast_BGEIGIE_NANO:
             fallthrough
         case teletype.Telecast_SOLARCAST:
-            ProcessSafecastMessage(*msg, checksum, AppReq.UploadedAt, AppReq.Transport)
+            go ProcessSafecastMessage(AppReq.SeqNo, *msg, checksum, AppReq.UploadedAt, AppReq.Transport)
 
             // Handle messages from non-safecast devices
         default:

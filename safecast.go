@@ -81,9 +81,14 @@ func (a ByKey) Less(i, j int) bool {
     return false
 }
 
-// Process an inbound Safecast message
-func ProcessSafecastMessage(msg teletype.Telecast, checksum uint32, UploadedAt string, Transport string) {
+// Process an inbound Safecast message, as an asynchronous goroutine
+func ProcessSafecastMessage(SeqNo int, msg teletype.Telecast, checksum uint32, UploadedAt string, Transport string) {
 
+	// To ensure a best-efforts sequencing in log, add a delay in proportion to sequencing
+	if SeqNo != 0 {
+        time.Sleep(time.Duration(SeqNo*10) * time.Second)
+	}
+	
     // Discard it if it's a duplicate
     if isDuplicate(checksum) {
         fmt.Printf("%s DISCARDING duplicate message\n", time.Now().Format(logDateFormat));
