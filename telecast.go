@@ -75,10 +75,10 @@ func sendTelecastOutboundSummaryToSlack() {
 }
 
 // Process inbound telecast message
-func ProcessTelecastMessage(msg *teletype.Telecast, devEui string) {
+func ProcessTelecastMessage(msg teletype.Telecast, devEui string) {
 
     // Keep track of devices from whom we've received message
-    deviceID := TelecastDeviceID(msg)
+    deviceID := TelecastDeviceID(&msg)
 
     // Unpack the message arguments
     message := msg.GetMessage()

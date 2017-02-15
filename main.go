@@ -1166,11 +1166,11 @@ func commonRequestHandler() {
         case teletype.Telecast_BGEIGIE_NANO:
             fallthrough
         case teletype.Telecast_SOLARCAST:
-            ProcessSafecastMessage(msg, checksum, AppReq.UploadedAt, AppReq.Transport)
+            ProcessSafecastMessage(*msg, checksum, AppReq.UploadedAt, AppReq.Transport)
 
             // Handle messages from non-safecast devices
         default:
-            ProcessTelecastMessage(msg, AppReq.TTNDevID)
+            ProcessTelecastMessage(*msg, AppReq.TTNDevID)
         }
     }
 }

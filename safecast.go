@@ -82,7 +82,7 @@ func (a ByKey) Less(i, j int) bool {
 }
 
 // Process an inbound Safecast message
-func ProcessSafecastMessage(msg *teletype.Telecast, checksum uint32, UploadedAt string, Transport string) {
+func ProcessSafecastMessage(msg teletype.Telecast, checksum uint32, UploadedAt string, Transport string) {
 
     // Discard it if it's a duplicate
     if isDuplicate(checksum) {
@@ -91,7 +91,7 @@ func ProcessSafecastMessage(msg *teletype.Telecast, checksum uint32, UploadedAt 
     }
 
     // Process stamps by adding or removing fields from the message
-    if (!stampSetOrApply(msg)) {
+    if (!stampSetOrApply(&msg)) {
         fmt.Printf("%s DISCARDING un-stampable message\n", time.Now().Format(logDateFormat));
         return
     }
