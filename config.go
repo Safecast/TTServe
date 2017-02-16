@@ -25,6 +25,34 @@ var SafecastUploadURLs = [...]string {
     "http://ingest.safecast.org/v1/measurements",
 }
 
+// Slack service info
+const SLACK_OPS_NONE =	   -1
+const SLACK_OPS_SAFECAST =	0
+const SLACK_OPS_ROZZIE =	1
+const SLACK_OPS_MUSTI =		2
+var SlackCommandSource = SLACK_OPS_NONE
+
+const SLACK_MSG_UNSOLICITED =	true
+const SLACK_MSG_REPLY =			false
+
+var SlackInboundTokens = [...]string {
+	// Safecast
+	"JzemotPucrCixAx2JPRZpgn9",
+	// Rozzie
+	"sfC2GfAnleQ3BFgsq2dGO7Yw",
+	// Musti
+	"XnOxJn2lD7SvECqOs56aSUUb",
+}
+
+var SlackOutboundURLs = [...]string {
+	// Safecast #ops channel
+	"https://hooks.slack.com/services/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",
+	// Ray Ozzie's private team/channel, for testing
+	"https://hooks.slack.com/services/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",
+	// Musti's team
+	"https://XXXhooks.slack.com/services/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",
+}
+
 // Paths for the file system shared among all TTSERVE instances
 const TTServerLogPath = "/log"
 const TTServerStampPath = "/stamp"

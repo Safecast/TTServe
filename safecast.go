@@ -406,7 +406,7 @@ func endTransaction(transaction int, errstr string) {
 
     // Output to console every time we are in a "slow mode"
     if (theMin > 5) {
-        fmt.Printf("%s Safecast HTTP Upload Statistics\n", time.Now().Format(logDateFormat))
+        fmt.Printf("%s Safecast Upload Statistics\n", time.Now().Format(logDateFormat))
         fmt.Printf("%s *** %d total uploads since restart\n", time.Now().Format(logDateFormat), httpTransactions)
         if (httpTransactionsInProgress > 0) {
             fmt.Printf("%s *** %d uploads still in progress\n", time.Now().Format(logDateFormat), httpTransactionsInProgress)
@@ -420,11 +420,11 @@ func endTransaction(transaction int, errstr string) {
         // If all of them have the same timeout value, the server must be down.
         s := ""
         if (theMin == theMax && theMin == theMean) {
-            s = fmt.Sprintf("Safecast API: all of the most recent %d uploads failed. Please check the service.", theCount)
+            s = fmt.Sprintf("HTTP Upload: all of the most recent %d uploads failed. Please check the service.", theCount)
         } else {
-            s = fmt.Sprintf("Safecast API: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", theCount, theMin, theMax, theMean)
+            s = fmt.Sprintf("HTTP Upload: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", theCount, theMin, theMax, theMean)
         }
-        sendToSafecastApi(s);
+        sendToSafecastOps(s, SLACK_MSG_UNSOLICITED);
     }
 
 }
@@ -461,13 +461,11 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
             // i.e. every day or few days.  When we ultimately move the dev server to AWS, we should re-enable this.
             if (false) {
                 sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to Safecast:%s)",
-                    httpTransactionErrorTime, httpTransactionErrorString));
+                    httpTransactionErrorTime, httpTransactionErrorString), SLACK_MSG_UNSOLICITED);
             }
         } else {
             sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading to Safecast in %d minutes:%s)",
-                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorString));
-            sendToSafecastApi(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading to Safecast in %d minutes:%s)",
-                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorString));
+                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorString), SLACK_MSG_UNSOLICITED);
         }
         httpTransactionErrors = 0
         httpTransactionErrorFirst = true;

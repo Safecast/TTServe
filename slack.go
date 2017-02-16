@@ -30,6 +30,13 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Extract useful information
+    t, present := urlParams["token"]
+    if !present {
+        fmt.Printf("Slack token not present\n");
+        return
+    }
+    token := t[0]
+
     u, present := urlParams["user_name"]
     if !present {
         fmt.Printf("Slack user_name not present\n");
@@ -61,7 +68,18 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-
+	// Figure out who is sending this to us
+	SlackCommandSource = SLACK_OPS_NONE
+    for source, tok := range SlackInboundTokens {
+		if tok == token {
+			SlackCommandSource = source
+		}
+	}
+	if SlackCommandSource == SLACK_OPS_NONE {
+		fmt.Printf("*** Slack command from uknown token: %s\n", token)
+		return
+	}
+	
     // Process queries
     switch argsLC[0] {
 
@@ -87,53 +105,53 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
     case "cancel":
         if len(args) != 2 {
-            sendToSafecastOps("Command format: cancel <deviceID>")
+            sendToSafecastOps("Command format: cancel <deviceID>", SLACK_MSG_REPLY)
         } else {
             i64, _ := strconv.ParseUint(args[1], 10, 32)
             deviceID := uint32(i64)
             if (cancelCommand(deviceID)) {
-                sendToSafecastOps("Cancelled.")
+                sendToSafecastOps("Cancelled.", SLACK_MSG_REPLY)
             } else {
-                sendToSafecastOps("Not found.")
+                sendToSafecastOps("Not found.", SLACK_MSG_REPLY)
             }
         }
 
     case "restart":
 		ControlFileTime(TTServerRestartAllControlFile, user)
-        sendToSafecastOps(fmt.Sprintf("** %s restarting **", ThisServerAddressIPv4))
+        sendToSafecastOps(fmt.Sprintf("** %s restarting **", ThisServerAddressIPv4), SLACK_MSG_REPLY)
         fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart' command\n***\n***\n\n")
         os.Exit(0)
 
     case "health":
-        sendToSafecastOps(fmt.Sprintf("Checking health of all instances..."))
+        sendToSafecastOps(fmt.Sprintf("Checking health of all instances..."), SLACK_MSG_REPLY)
 		ControlFileTime(TTServerHealthControlFile, user)
 
     case "send":
         if len(args) == 1 {
-            sendToSafecastOps("Command format: send <deviceID> <message>")
+            sendToSafecastOps("Command format: send <deviceID> <message>", SLACK_MSG_REPLY)
 		} else if len(args) == 2 {
 			switch argsLC[1] {
 			case "hello":
 	            sendHelloToNewDevices()
 			default:
-	            sendToSafecastOps("Unrecognized subcommand of 'send'")
+	            sendToSafecastOps("Unrecognized subcommand of 'send'", SLACK_MSG_REPLY)
 			}
         } else {
             i64, err := strconv.ParseUint(args[1], 10, 32)
             deviceID := uint32(i64)
             if err != nil {
-                sendToSafecastOps("Command format: send <deviceID> <message>")
+                sendToSafecastOps("Command format: send <deviceID> <message>", SLACK_MSG_REPLY)
             } else {
-                sendToSafecastOps(fmt.Sprintf("Sending to %d: %s", deviceID, messageAfterSecondWord))
+                sendToSafecastOps(fmt.Sprintf("Sending to %d: %s", deviceID, messageAfterSecondWord), SLACK_MSG_REPLY)
                 sendCommand(user, deviceID, messageAfterSecondWord)
             }
         }
 
     case "hello":
         if len(args) == 1 {
-            sendToSafecastOps(fmt.Sprintf("Hello back, %s.", user))
+            sendToSafecastOps(fmt.Sprintf("Hello back, %s.", user), SLACK_MSG_REPLY)
         } else {
-            sendToSafecastOps(fmt.Sprintf("Back at you: %s", messageAfterFirstWord))
+            sendToSafecastOps(fmt.Sprintf("Back at you: %s", messageAfterFirstWord), SLACK_MSG_REPLY)
         }
 
     default:
@@ -143,13 +161,14 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 }
 
 // Send a text string to the Safecast #ops channel
-func sendToSafecastOps(msg string) {
-    sendToOpsViaSlack(msg, "https://hooks.slack.com/services/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")
-}
-
-// Send a text string to the Safecast #api channel
-func sendToSafecastApi(msg string) {
-    sendToOpsViaSlack(msg, "https://hooks.slack.com/services/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")
+func sendToSafecastOps(msg string, isUnsolicited bool) {
+	if (isUnsolicited) {
+	    for _, url := range SlackOutboundURLs {
+		    sendToOpsViaSlack(msg, url)
+		}
+	} else {
+		sendToOpsViaSlack(msg, SlackOutboundURLs[SlackCommandSource])
+	}
 }
 
 // Send a text string to the TTN  #ops channel

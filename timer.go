@@ -94,8 +94,8 @@ func ControlFileCheck() {
 
     // Slack restart
     if (ControlFileTime(TTServerRestartAllControlFile, "") != AllServersSlackRestartRequestTime) {
-        sendToSafecastOps(fmt.Sprintf("** %s restarting **", ThisServerAddressIPv4))
-        fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart-all' command\n***\n***\n\n")
+        sendToSafecastOps(fmt.Sprintf("** %s restarting **", ThisServerAddressIPv4), SLACK_MSG_REPLY)
+        fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart' command\n***\n***\n\n")
         os.Exit(0)
     }
 
@@ -107,7 +107,7 @@ func ControlFileCheck() {
 
     // Heath
     if (ControlFileTime(TTServerHealthControlFile, "") != AllServersSlackHealthRequestTime) {
-        sendToSafecastOps(ServerHealthCheck())
+        sendToSafecastOps(ServerHealthCheck(), SLACK_MSG_REPLY)
         AllServersSlackHealthRequestTime = ControlFileTime(TTServerHealthControlFile, "")
     }
 

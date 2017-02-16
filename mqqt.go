@@ -62,7 +62,7 @@ func MqqtInboundHandler() {
                 isAvailable, payload := TelecastOutboundPayload(deviceID)
                 if (isAvailable) {
                     ttnOutboundPublish(AppReq.TTNDevID, payload)
-                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", deviceID))
+                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", deviceID), SLACK_MSG_UNSOLICITED)
                 }
             }
         }
@@ -93,11 +93,11 @@ func MqqtSubscriptionNotifier() {
         if (!ttnFullyConnected) {
             minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
             if (minutesOffline > 15) {
-                sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
+                sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected), SLACK_MSG_UNSOLICITED)
             }
         } else {
             if (ttnOutages > 1) {
-                sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m", ttnOutages))
+                sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m", ttnOutages), SLACK_MSG_UNSOLICITED)
                 ttnOutages = 0;
             }
         }
@@ -153,7 +153,7 @@ func MqqtSubscriptionMonitor() {
                     minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
                     // Don't bother reporting quick outages, generally caused by server restarts
                     if (minutesOffline >= 5) {
-                        sendToSafecastOps(fmt.Sprintf("TTN returned (%d-minute outage began at %s UTC)", minutesOffline, ttnLastDisconnected))
+                        sendToSafecastOps(fmt.Sprintf("TTN returned (%d-minute outage began at %s UTC)", minutesOffline, ttnLastDisconnected), SLACK_MSG_UNSOLICITED)
                     }
                     sendToTTNOps(fmt.Sprintf("Connection restored from this server to %s\n", ttnServer))
                     fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))

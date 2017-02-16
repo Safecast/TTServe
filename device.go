@@ -70,7 +70,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time) {
                     case minutesAgo >= 120:
                         message = fmt.Sprintf("~%d hours", hoursAgo)
                     }
-                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after %s away", seenDevices[i].deviceid, message))
+                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after %s away", seenDevices[i].deviceid, message), SLACK_MSG_UNSOLICITED)
                 }
                 // Mark as having been seen on the latest date of any file having that time
                 seenDevices[i].notifiedAsUnseen = false;
@@ -148,7 +148,7 @@ func sendHelloToNewDevices() {
                 isValid, _ := getCommand(deviceID)
                 if !isValid {
 
-                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Sending hello to newly-detected device %d", deviceID))
+                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Sending hello to newly-detected device %d", deviceID), SLACK_MSG_UNSOLICITED)
                     sendCommand("New device detected", deviceID, "hello")
 
                 }
@@ -180,7 +180,7 @@ func sendExpiredSafecastDevicesToSlack() {
                 seenDevices[i].notifiedAsUnseen = true
                 sendToSafecastOps(fmt.Sprintf("** Warning **  Device %d hasn't been seen for %d minutes",
                     seenDevices[i].deviceid,
-                    seenDevices[i].minutesAgo))
+                    seenDevices[i].minutesAgo), SLACK_MSG_UNSOLICITED)
             }
         }
     }
@@ -272,6 +272,6 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool, fDetails bool) {
     }
 
     // Send it to Slack
-    sendToSafecastOps(s)
+    sendToSafecastOps(s, SLACK_MSG_REPLY)
 
 }

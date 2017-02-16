@@ -70,7 +70,7 @@ func sendTelecastOutboundSummaryToSlack() {
     }
 
     // Send it to Slack
-    sendToSafecastOps(s)
+    sendToSafecastOps(s, SLACK_MSG_REPLY)
 
 }
 

@@ -74,7 +74,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // It is an error if there is a pending outbound payload for this device, so remove it and report it
     isAvailable, _ := TelecastOutboundPayload(deviceID)
     if (isAvailable) {
-        sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", deviceID))
+        sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", deviceID), SLACK_MSG_UNSOLICITED)
     }
 
     // Send a reply to Pointcast saying that the request was processed acceptably.
