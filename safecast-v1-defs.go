@@ -156,11 +156,18 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
 	switch t := x.ValueRaw.(type) {
 	case string:
+		// This is to correct for a safecast-air bug
+		// observed on 2017-02-15 wherein if the first char
+		// is a space AND the resulting value is 0, it is
+		// a bogus value that should be ignored
+		var beginsWithSpace = t[0] == ' '
 		t = strings.TrimSpace(t)
 	    f64, err := strconv.ParseFloat(t, 32)
 	    if err == nil {
 			f32 := float32(f64)
-	        x.Value = &f32
+			if (f32 != 0 || !beginsWithSpace) {
+		        x.Value = &f32
+			}
 	    }
 	case float64:
 		f32 := float32(t)
