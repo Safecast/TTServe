@@ -6,6 +6,7 @@ import (
 	"io"
 	"encoding/json"
 	"strconv"
+	"strings"
 )
 
 type SafecastDataV1 struct {
@@ -51,6 +52,7 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 	// Now go through each Raw interface and unpack the value into the corresponding non-Raw field
 	switch t := x.ChannelIDRaw.(type) {
 	case string:
+		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
@@ -63,6 +65,7 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
 	switch t := x.DeviceIDRaw.(type) {
 	case string:
+		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
@@ -75,6 +78,7 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
 	switch t := x.OriginalIDRaw.(type) {
 	case string:
+		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
@@ -87,6 +91,7 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
 	switch t := x.SensorIDRaw.(type) {
 	case string:
+		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
@@ -99,6 +104,7 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
 	switch t := x.StationIDRaw.(type) {
 	case string:
+		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
@@ -111,6 +117,7 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
 	switch t := x.UserIDRaw.(type) {
 	case string:
+		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
@@ -123,6 +130,7 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
 	switch t := x.IDRaw.(type) {
 	case string:
+		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
@@ -135,6 +143,7 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
 	switch t := x.HeightRaw.(type) {
 	case string:
+		t = strings.TrimSpace(t)
 	    f64, err := strconv.ParseFloat(t, 32)
 	    if err == nil {
 			i32 := int32(f64)
@@ -147,6 +156,7 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
 	switch t := x.ValueRaw.(type) {
 	case string:
+		t = strings.TrimSpace(t)
 	    f64, err := strconv.ParseFloat(t, 32)
 	    if err == nil {
 			f32 := float32(f64)
@@ -159,6 +169,7 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
 	switch t := x.LatitudeRaw.(type) {
 	case string:
+		t = strings.TrimSpace(t)
 	    f64, err := strconv.ParseFloat(t, 32)
 	    if err == nil {
 			f32 := float32(f64)
@@ -171,6 +182,7 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 
 	switch t := x.LongitudeRaw.(type) {
 	case string:
+		t = strings.TrimSpace(t)
 	    f64, err := strconv.ParseFloat(t, 32)
 	    if err == nil {
 			f32 := float32(f64)

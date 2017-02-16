@@ -880,7 +880,7 @@ func inboundWebReformatHandler(rw http.ResponseWriter, req *http.Request) {
         s := ""
         sdV1.Unit = &s
     }
-    if sdV1.Unit == nil {
+    if sdV1.Value == nil {
         v := float32(0)
         sdV1.Value = &v
     }
