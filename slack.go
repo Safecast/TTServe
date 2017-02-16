@@ -2,7 +2,6 @@
 package main
 
 import (
-    "os"
     "fmt"
     "time"
     "bytes"
@@ -117,13 +116,11 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
     case "restart":
+        sendToSafecastOps(fmt.Sprintf("Restarting all instances..."), SLACK_MSG_UNSOLICITED)
 		ControlFileTime(TTServerRestartAllControlFile, user)
-        sendToSafecastOps(fmt.Sprintf("** %s restarting **", ThisServerAddressIPv4), SLACK_MSG_REPLY)
-        fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart' command\n***\n***\n\n")
-        os.Exit(0)
 
     case "health":
-        sendToSafecastOps(fmt.Sprintf("Checking health of all instances..."), SLACK_MSG_REPLY)
+        sendToSafecastOps(fmt.Sprintf("Checking health of all instances..."), SLACK_MSG_UNSOLICITED)
 		ControlFileTime(TTServerHealthControlFile, user)
 
     case "send":
@@ -167,7 +164,9 @@ func sendToSafecastOps(msg string, isUnsolicited bool) {
 		    sendToOpsViaSlack(msg, url)
 		}
 	} else {
-		sendToOpsViaSlack(msg, SlackOutboundURLs[SlackCommandSource])
+		if SlackCommandSource != SLACK_OPS_NONE {
+			sendToOpsViaSlack(msg, SlackOutboundURLs[SlackCommandSource])
+	}
 	}
 }
 
