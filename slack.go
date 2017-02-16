@@ -100,7 +100,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
     case "restart":
 		ControlFileTime(TTServerRestartAllControlFile, user)
-        sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServerIP))
+        sendToSafecastOps(fmt.Sprintf("** %s restarting **", ThisServerAddressIPv4))
         fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart' command\n***\n***\n\n")
         os.Exit(0)
 

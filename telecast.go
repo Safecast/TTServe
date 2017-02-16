@@ -75,7 +75,7 @@ func sendTelecastOutboundSummaryToSlack() {
 }
 
 // Process inbound telecast message
-func ProcessTelecastMessage(msg teletype.Telecast, devEui string) {
+func SendTelecastMessage(msg teletype.Telecast, devEui string) {
 
     // Keep track of devices from whom we've received message
     deviceID := TelecastDeviceID(&msg)
@@ -201,5 +201,38 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
 
     // Done
     return true, tdata
+
+}
+
+// Get any outbound payload waiting for the node who sent us a payload, but ONLY if
+// the payload is of a type where we know that the client is listening for a reply.  If
+// this is not a replyable payload or if the device ID is not found, we guarantee that
+// 0 is returned for the device ID.
+func getReplyDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, deviceID uint32) {
+
+    // Extract the telecast message from the AppReq
+    msg := &teletype.Telecast{}
+    err := proto.Unmarshal(inboundPayload, msg)
+    if err != nil {
+        return false, 0
+    }
+
+    // Extract the device ID
+    DeviceID := TelecastDeviceID(msg)
+
+    // Look at reply type
+    if msg.ReplyType != nil {
+
+        switch msg.GetReplyType() {
+
+            // A reply is expected
+        case teletype.Telecast_REPLY_EXPECTED:
+            return true, DeviceID
+
+        }
+    }
+
+    // No reply
+    return false, 0
 
 }

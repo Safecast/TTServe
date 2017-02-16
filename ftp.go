@@ -2,8 +2,6 @@
 package main
 
 import (
-	"bytes"
-	"net/http"
     "crypto/tls"
     "errors"
     "io/ioutil"
@@ -12,45 +10,50 @@ import (
 	ftp "github.com/fclairamb/ftpserver/server"
 )
 
-// externalIP is a function to retrieve this machine's external IP address as a string
-var thisIP string = ""
+// Primary internal data structure
+var (
+    ftpServer *ftp.FtpServer
+)
 
-func externalIP() (string, error) {
+// Kick off inbound messages coming from all sources, then serve HTTP
+func FtpInboundHandler() {
 
-	// Cache the IP after the first time we've fetched it
-	if (thisIP != "") {
-		return thisIP, nil
-	}
+    fmt.Printf("Now handling inbound FTP on %s:%d\n", TTServerFTPAddress, TTServerFTPPort)
 
-	// If you need to take a bet, amazon is about as reliable & sustainable a service as you can get
-	rsp, err := http.Get("http://checkip.amazonaws.com")
-	if err != nil {
-		return "", err
-	}
-	defer rsp.Body.Close()
-
-	buf, err := ioutil.ReadAll(rsp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	thisIP = string(bytes.TrimSpace(buf))
-	return thisIP, nil
+    ftpServer = ftp.NewFtpServer(NewFtpDriver())
+    err := ftpServer.ListenAndServe()
+    if err != nil {
+        fmt.Printf("Error listening on FTP: %s\n", err)
+    }
 
 }
 
-// TeletypeDriver defines a very basic serverftp driver
-type TeletypeDriver struct {
+// Stop the FTP server
+func FtpStop() {
+    ftpServer.Stop()
+}
+
+// FtpDriver defines a very basic serverftp driver
+type FtpDriver struct {
     baseDir   string
     tlsConfig *tls.Config
 }
 
-func (driver *TeletypeDriver) WelcomeUser(cc ftp.ClientContext) (string, error) {
+// Create a new instance of an FTP driver
+func NewFtpDriver() *FtpDriver {
+    directory := SafecastDirectory()
+    directory = directory + TTServerBuildPath
+    driver := &FtpDriver{}
+    driver.baseDir = directory
+    return driver
+}
+
+func (driver *FtpDriver) WelcomeUser(cc ftp.ClientContext) (string, error) {
     cc.SetDebug(true)
     return "Welcome to TTSERVE", nil
 }
 
-func (driver *TeletypeDriver) AuthUser(cc ftp.ClientContext, user, pass string) (ftp.ClientHandlingDriver, error) {
+func (driver *FtpDriver) AuthUser(cc ftp.ClientContext, user, pass string) (ftp.ClientHandlingDriver, error) {
     if user == "bad" || pass == "bad" {
         return nil, errors.New("BAD username or password !")
     } else {
@@ -58,7 +61,7 @@ func (driver *TeletypeDriver) AuthUser(cc ftp.ClientContext, user, pass string) 
     }
 }
 
-func (driver *TeletypeDriver) GetTLSConfig() (*tls.Config, error) {
+func (driver *FtpDriver) GetTLSConfig() (*tls.Config, error) {
     if driver.tlsConfig == nil {
         fmt.Printf("FTP: Loading certificate\n")
         directory := SafecastDirectory()
@@ -75,20 +78,20 @@ func (driver *TeletypeDriver) GetTLSConfig() (*tls.Config, error) {
     return driver.tlsConfig, nil
 }
 
-func (driver *TeletypeDriver) ChangeDirectory(cc ftp.ClientContext, directory string) error {
+func (driver *FtpDriver) ChangeDirectory(cc ftp.ClientContext, directory string) error {
     _, err := os.Stat(driver.baseDir + directory)
     return err
 }
 
-func (driver *TeletypeDriver) MakeDirectory(cc ftp.ClientContext, directory string) error {
+func (driver *FtpDriver) MakeDirectory(cc ftp.ClientContext, directory string) error {
 
-    // Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
+    // Ftp NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
     return errors.New("MKDIR not implemented")
 
     return os.Mkdir(driver.baseDir+directory, 0777)
 }
 
-func (driver *TeletypeDriver) ListFiles(cc ftp.ClientContext) ([]os.FileInfo, error) {
+func (driver *FtpDriver) ListFiles(cc ftp.ClientContext) ([]os.FileInfo, error) {
 
     path := driver.baseDir + cc.Path()
 
@@ -97,15 +100,15 @@ func (driver *TeletypeDriver) ListFiles(cc ftp.ClientContext) ([]os.FileInfo, er
     return files, err
 }
 
-func (driver *TeletypeDriver) UserLeft(cc ftp.ClientContext) {
+func (driver *FtpDriver) UserLeft(cc ftp.ClientContext) {
 
 }
 
-func (driver *TeletypeDriver) OpenFile(cc ftp.ClientContext, path string, flag int) (ftp.FileStream, error) {
+func (driver *FtpDriver) OpenFile(cc ftp.ClientContext, path string, flag int) (ftp.FileStream, error) {
 
     path = driver.baseDir + path
 
-    // Teletype NOT IMPLEMENTED - our FTP server is read-only root-only open-to-all
+    // Ftp NOT IMPLEMENTED - our FTP server is read-only root-only open-to-all
     flag = os.O_RDONLY
 
     // If we are writing and we are not in append mode, we should remove the file
@@ -119,37 +122,37 @@ func (driver *TeletypeDriver) OpenFile(cc ftp.ClientContext, path string, flag i
     return os.OpenFile(path, flag, 0666)
 }
 
-func (driver *TeletypeDriver) GetFileInfo(cc ftp.ClientContext, path string) (os.FileInfo, error) {
+func (driver *FtpDriver) GetFileInfo(cc ftp.ClientContext, path string) (os.FileInfo, error) {
     path = driver.baseDir + path
 
     return os.Stat(path)
 }
 
-func (driver *TeletypeDriver) CanAllocate(cc ftp.ClientContext, size int) (bool, error) {
+func (driver *FtpDriver) CanAllocate(cc ftp.ClientContext, size int) (bool, error) {
     return true, nil
 }
 
-func (driver *TeletypeDriver) ChmodFile(cc ftp.ClientContext, path string, mode os.FileMode) error {
+func (driver *FtpDriver) ChmodFile(cc ftp.ClientContext, path string, mode os.FileMode) error {
 
-    // Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
+    // Ftp NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
     return errors.New("CHMOD not implemented")
 
     path = driver.baseDir + path
     return os.Chmod(path, mode)
 }
 
-func (driver *TeletypeDriver) DeleteFile(cc ftp.ClientContext, path string) error {
+func (driver *FtpDriver) DeleteFile(cc ftp.ClientContext, path string) error {
 
-    // Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
+    // Ftp NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
     return errors.New("RM not implemented")
 
     path = driver.baseDir + path
     return os.Remove(path)
 }
 
-func (driver *TeletypeDriver) RenameFile(cc ftp.ClientContext, from, to string) error {
+func (driver *FtpDriver) RenameFile(cc ftp.ClientContext, from, to string) error {
 
-    // Teletype NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
+    // Ftp NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
     return errors.New("MV not implemented")
 
     from = driver.baseDir + from
@@ -157,20 +160,11 @@ func (driver *TeletypeDriver) RenameFile(cc ftp.ClientContext, from, to string) 
     return os.Rename(from, to)
 }
 
-func (driver *TeletypeDriver) GetSettings() *ftp.Settings {
+func (driver *FtpDriver) GetSettings() *ftp.Settings {
     config := &ftp.Settings{}
-	config.PublicHost, _ = externalIP()
+	config.PublicHost = ThisServerAddressIPv4
     config.ListenHost = ""
     config.ListenPort = TTServerFTPPort
     config.MaxConnections = 10000
     return config
-}
-
-// Create a new instance of an FTP driver
-func NewTeletypeDriver() *TeletypeDriver {
-    directory := SafecastDirectory()
-    directory = directory + TTServerBuildPath
-    driver := &TeletypeDriver{}
-    driver.baseDir = directory
-    return driver
 }
