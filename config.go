@@ -50,7 +50,7 @@ var SlackOutboundURLs = [...]string {
 	// Ray Ozzie's private team/channel, for testing
 	"https://hooks.slack.com/services/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",
 	// Musti's team
-	"https://XXXhooks.slack.com/services/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",
+	"https://hooks.slack.com/services/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",
 }
 
 // Paths for the file system shared among all TTSERVE instances
