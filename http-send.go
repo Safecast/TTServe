@@ -4,7 +4,7 @@ package main
 import (
     "net/http"
     "fmt"
-	"time"
+    "time"
     "io"
     "io/ioutil"
     "encoding/hex"
@@ -90,19 +90,23 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
     // Outbound message processing
     if (ReplyToDeviceID != 0) {
 
-        // Delay just in case there's a chance that request processing may generate a reply
-        // to this request.  It's no big deal if we miss it, though, because it will just be
-        // picked up on the next call.
-        time.Sleep(1 * time.Second)
+        // Wait for up to five seconds for a reply to appear.  It's no big deal if we miss it,
+        // though, because it'll just be picked up on the next call
 
-        // See if there's an outbound message waiting for this device.
-        isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
-        if (isAvailable) {
+        for i:=0; i<5; i++ {
 
-            // Responses for now are always hex-encoded for easy device processing
-            hexPayload := hex.EncodeToString(payload)
-            io.WriteString(rw, hexPayload)
-            sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID), SLACK_MSG_UNSOLICITED)
+            // See if there's an outbound message waiting for this device.
+            isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
+            if (isAvailable) {
+
+                // Responses for now are always hex-encoded for easy device processing
+                hexPayload := hex.EncodeToString(payload)
+                io.WriteString(rw, hexPayload)
+                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID), SLACK_MSG_UNSOLICITED)
+                break
+            }
+
+            time.Sleep(1 * time.Second)
         }
 
     }

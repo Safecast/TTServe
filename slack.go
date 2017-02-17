@@ -157,15 +157,18 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-// Send a text string to the Safecast #ops channel
+// Send a text string to the Safecast #ops channel.  Note that this MUST BE FAST
+// because there are assumptions that this will return quickly because it's called
+// within an HTTP request handler that must return so as to flush the response buffer
+// back to the callers.
 func sendToSafecastOps(msg string, isUnsolicited bool) {
 	if (isUnsolicited) {
 	    for _, url := range SlackOutboundURLs {
-		    sendToOpsViaSlack(msg, url)
+		    go sendToOpsViaSlack(msg, url)
 		}
 	} else {
 		if SlackCommandSource != SLACK_OPS_NONE {
-			sendToOpsViaSlack(msg, SlackOutboundURLs[SlackCommandSource])
+			go sendToOpsViaSlack(msg, SlackOutboundURLs[SlackCommandSource])
 	}
 	}
 }

@@ -105,11 +105,6 @@ func processBuffer(req IncomingAppReq, from string, transport string, buf []byte
 
         for i:=0; i<count; i++ {
 
-            // Insert a sequence number to attempt to impose a sequencing delay in SendSafecastMessage,
-            // so that things are sequenced properly in the log.  This is not guaranteed of course, but it is helpful
-            // for log readability.
-            AppReq.SeqNo = i
-
             // Extract the length
             length := int(buf[lengthArrayOffset+i])
 
@@ -118,6 +113,16 @@ func processBuffer(req IncomingAppReq, from string, transport string, buf []byte
 
             // Extract the device ID from the message, which we will need later
             _, ReplyToDeviceID = getReplyDeviceIDFromPayload(AppReq.Payload)
+
+			// If a reply is expected, pass a sequence number of 0 so we process it as quickly as possible.
+			// Otherwise, insert a sequence number to attempt to impose a sequencing delay in SendSafecastMessage,
+            // so that things are sequenced properly in the log.  This is not guaranteed of course, but it is helpful
+            // for log readability.
+			if (ReplyToDeviceID == 0) {
+	            AppReq.SeqNo = i
+			} else {
+				AppReq.SeqNo = 0
+			}
 
             // Add ServerTime in case the payload lacked CapturedAt
             AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
