@@ -367,7 +367,7 @@ func beginTransaction(version string,  message1 string, message2 string) int {
 }
 
 // End transaction and issue warnings
-func endTransaction(transaction int, errstr string) {
+func endTransaction(transaction int, url string, errstr string) {
     httpTransactionsInProgress -= 1
     duration := int(time.Now().Sub(httpTransactionTimes[transaction]) / time.Second)
     httpTransactionDurations[transaction] = duration
@@ -379,7 +379,7 @@ func endTransaction(transaction int, errstr string) {
             httpTransactionErrorString = errstr
             httpTransactionErrorFirst = false
         }
-        fmt.Printf("%s <<<    [%d] *** after %d seconds, ERROR uploading to Safecast %s\n\n", time.Now().Format(logDateFormat), transaction, duration, errstr)
+        fmt.Printf("%s <<<    [%d] *** after %d seconds, ERROR uploading to %s %s\n\n", time.Now().Format(logDateFormat), transaction, duration, url, errstr)
     } else {
         if (duration < 5) {
             fmt.Printf("%s <<<    [%d]\n", time.Now().Format(logDateFormat), transaction);
@@ -496,8 +496,14 @@ func SafecastV1Upload(body []byte, url string, unit string, value string) bool {
         errString = s[len(s)-1]
     }
 
-    endTransaction(transaction, errString)
-
+	// On 2017-02-17 I disabled errors uploading to V1 servers, because it's no longer
+	// interesting relative to uploads to the new "Ingest" servers.
+	if false {
+	    endTransaction(transaction, url, errString)
+	} else {
+	    endTransaction(transaction, url, "")
+	}
+	
     return errString == ""
 }
 
@@ -547,7 +553,7 @@ func doUploadToSafecast(UploadedAt string, sd SafecastData, url string) bool {
         errString = s[len(s)-1]
     }
 
-    endTransaction(transaction, errString)
+    endTransaction(transaction, url, errString)
 
     return errString == ""
 }
