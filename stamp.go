@@ -54,7 +54,7 @@ func stampFilename(DeviceID uint32) string {
 }
 
 // Set or apply the stamp
-func stampSetOrApply(message *teletype.Telecast) (isValidMessage bool) {
+func stampSetOrApply(message *ttproto.Telecast) (isValidMessage bool) {
     var CacheEntry int = 0
 
     // Device ID is required here, but that doesn't mean it's not a valid message
@@ -99,7 +99,7 @@ func stampSetOrApply(message *teletype.Telecast) (isValidMessage bool) {
 }
 
 // Set or apply the stamp
-func stampSet(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (isValidMessage bool) {
+func stampSet(message *ttproto.Telecast, DeviceID uint32, CacheEntry int) (isValidMessage bool) {
 
     // Regardless of whatever else happens, we need to invalidate the cache
     cachedDevices[CacheEntry].valid = false
@@ -167,7 +167,7 @@ func stampSet(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (isVa
 }
 
 // Set or apply the stamp
-func stampApply(message *teletype.Telecast, DeviceID uint32, CacheEntry int) (isValidMessage bool) {
+func stampApply(message *ttproto.Telecast, DeviceID uint32, CacheEntry int) (isValidMessage bool) {
 
     // If there's no valid cache entry, or if the cache entry is wrong, refresh the cache
     if !cachedDevices[CacheEntry].valid || (cachedDevices[CacheEntry].valid && cachedDevices[CacheEntry].cache.Stamp != message.GetStamp()) {

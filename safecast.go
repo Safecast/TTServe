@@ -36,7 +36,7 @@ type receivedMessage struct {
 var recentlyReceived [25]receivedMessage
 
 // Process an inbound Safecast message, as an asynchronous goroutine
-func SendSafecastMessage(SeqNo int, msg teletype.Telecast, checksum uint32, UploadedAt string, Transport string) {
+func SendSafecastMessage(SeqNo int, msg ttproto.Telecast, checksum uint32, UploadedAt string, Transport string) {
 
     // To ensure a best-efforts sequencing in log, impose a delay in proportion to sequencing
     if SeqNo != 0 {

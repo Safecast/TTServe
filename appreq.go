@@ -48,7 +48,7 @@ func AppReqHandler() {
     for AppReq := range AppReqQ {
 
         // Unmarshal the message
-        msg := &teletype.Telecast{}
+        msg := &ttproto.Telecast{}
         err := proto.Unmarshal(AppReq.Payload, msg)
         if err != nil {
             fmt.Printf("*** PB unmarshaling error: ", err)
@@ -99,9 +99,9 @@ func AppReqHandler() {
         switch msg.GetDeviceType() {
 
             // Is it something we recognize as being from safecast?
-        case teletype.Telecast_BGEIGIE_NANO:
+        case ttproto.Telecast_BGEIGIE_NANO:
             fallthrough
-        case teletype.Telecast_SOLARCAST:
+        case ttproto.Telecast_SOLARCAST:
             go SendSafecastMessage(AppReq.SeqNo, *msg, checksum, AppReq.UploadedAt, AppReq.Transport)
 
             // Handle messages from non-safecast devices

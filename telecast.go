@@ -26,7 +26,7 @@ type safecastCommand struct {
 }
 
 // Get a Telecast Device ID number for this message
-func TelecastDeviceID (msg *teletype.Telecast) uint32 {
+func TelecastDeviceID (msg *ttproto.Telecast) uint32 {
     if msg.DeviceID != nil {
         return msg.GetDeviceID()
     }
@@ -80,7 +80,7 @@ func sendTelecastOutboundSummaryToSlack() {
 }
 
 // Process inbound telecast message
-func SendTelecastMessage(msg teletype.Telecast, devEui string) {
+func SendTelecastMessage(msg ttproto.Telecast, devEui string) {
 
     // Keep track of devices from whom we've received message
     deviceID := TelecastDeviceID(&msg)
@@ -190,8 +190,8 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
     }
 
     // Marshal the command into a telecast message
-    deviceType := teletype.Telecast_TTSERVE
-    tmsg := &teletype.Telecast{}
+    deviceType := ttproto.Telecast_TTSERVE
+    tmsg := &ttproto.Telecast{}
     tmsg.DeviceID = &deviceID;
     tmsg.DeviceType = &deviceType
     tmsg.Message = proto.String(cmd.Command)
@@ -216,7 +216,7 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
 func getReplyDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, deviceID uint32) {
 
     // Extract the telecast message from the AppReq
-    msg := &teletype.Telecast{}
+    msg := &ttproto.Telecast{}
     err := proto.Unmarshal(inboundPayload, msg)
     if err != nil {
         return false, 0
@@ -231,7 +231,7 @@ func getReplyDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, devic
         switch msg.GetReplyType() {
 
             // A reply is expected
-        case teletype.Telecast_REPLY_EXPECTED:
+        case ttproto.Telecast_REPLY_EXPECTED:
             return true, DeviceID
 
         }
