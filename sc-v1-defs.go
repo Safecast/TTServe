@@ -1,5 +1,10 @@
-// Safecast API data structures
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
+// Use of this source code is governed by licenses granted by the
+// copyright holder including that found in the LICENSE file.
 
+// Safecast V1 API data structures, implemented in such a way
+// that JSON strictness is quite forgiving.  This is necessary for
+// messages received from Pointcast and Safecast Air devices.
 package main
 
 import (

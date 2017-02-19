@@ -2,6 +2,7 @@
 // Use of this source code is governed by the MIT license found with the
 // source code from where this was derived:
 // https://github.com/go-playground/webhooks/blob/v1/github/payload.go
+
 package main
 
 // WatchPayload contains the information for GitHub's watch hook event

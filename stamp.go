@@ -1,4 +1,12 @@
-// Message stamping support
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
+// Use of this source code is governed by licenses granted by the
+// copyright holder including that found in the LICENSE file.
+
+// Support for "stamping" of messages - a method wherein the
+// GPS satellite-detected date/time and location are uploaded
+// very infrequently and associated with a "stamp ID".  By
+// including this stamp on each uploaded message (along with
+// an offset), we save significant network bandwidth.
 package main
 
 import (

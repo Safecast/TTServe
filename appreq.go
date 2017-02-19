@@ -1,8 +1,11 @@
-// Incoming request processing
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
+// Use of this source code is governed by licenses granted by the
+// copyright holder including that found in the LICENSE file.
+
+// Processing of requests enqueued by many protocol front-ends
 package main
 
 import (
-	"os"
 	"fmt"
 	"time"
     "hash/crc32"
@@ -24,13 +27,18 @@ type IncomingAppReq struct {
     TTNDevID    string
     SeqNo       int
 }
+
 var MAX_REQQ_PENDING int = 100
 var AppReqQ chan IncomingAppReq
-var AppReqQMaxLength = 0
 
 // Make the queue
 func AppReqInit() {
     AppReqQ = make(chan IncomingAppReq, MAX_REQQ_PENDING)
+}
+
+// Push a new entry on the request queue
+func AppReqPush(req IncomingAppReq) {
+    AppReqQ <- req
 }
 
 // Common handler for messages incoming either from TTN or HTTP
@@ -101,28 +109,4 @@ func AppReqHandler() {
             go SendTelecastMessage(*msg, AppReq.TTNDevID)
         }
     }
-}
-
-// Monitor the queue length
-func AppReqPush(req IncomingAppReq) {
-
-	// Enqueue the item
-    AppReqQ <- req
-
-	// Check the length of the queue
-    elements := len(AppReqQ)
-    if (elements > AppReqQMaxLength) {
-        AppReqQMaxLength = elements
-        if (AppReqQMaxLength > 1) {
-            fmt.Printf("\n%s Requests pending reached new maximum of %d\n", time.Now().Format(logDateFormat), AppReqQMaxLength)
-        }
-    }
-
-    // We have observed once that the HTTP stack got messed up to the point where the queue just grew forever
-    // because nothing was getting serviced.  In this case, abort and restart the process.
-    if (AppReqQMaxLength >= MAX_REQQ_PENDING) {
-        fmt.Printf("\n***\n***\n*** RESTARTING defensively because of request queue overflow\n***\n***\n\n")
-        os.Exit(0)
-    }
-
 }

@@ -1,4 +1,9 @@
-// Handle inbound and outbound Telecast messages
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
+// Use of this source code is governed by licenses granted by the
+// copyright holder including that found in the LICENSE file.
+
+// Telecast refers to the protobuf-based protocol used to transmit and
+// receive data between the TT-prefixed servers, gateways, and devices.
 package main
 
 import (

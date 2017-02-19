@@ -1,4 +1,7 @@
-// Configuration Parameters
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
+// Use of this source code is governed by licenses granted by the
+// copyright holder including that found in the LICENSE file.
+
 package main
 
 import (
@@ -30,15 +33,6 @@ func timer15m() {
 
         // Sleep
         time.Sleep(15 * 60 * time.Second)
-
-        // Report maximum inbound pending transactions
-        if (AppReqQMaxLength > 1) {
-            fmt.Printf("\n%s Request queue high water mark: %d concurrent requests\n", time.Now().Format(logDateFormat), AppReqQMaxLength)
-            if (AppReqQMaxLength >= MAX_REQQ_PENDING) {
-                fmt.Printf("\n***\n***\n*** RESTARTING defensively because of request queue overflow\n***\n***\n\n")
-                os.Exit(0)
-            }
-        }
 
         // Post Safecast errors
         sendSafecastCommsErrorsToSlack(15)

@@ -1,4 +1,8 @@
-// FTP server for downloading code to the devices
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
+// Use of this source code is governed by licenses granted by the
+// copyright holder including that found in the LICENSE file.
+
+// FTP server that enables downloading of firmware to devices for DFU
 package main
 
 import (

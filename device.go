@@ -1,4 +1,8 @@
-// Safecast inbound message handling and publishing
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
+// Use of this source code is governed by licenses granted by the
+// copyright holder including that found in the LICENSE file.
+
+// Tracking and handling of device entities
 package main
 
 import (

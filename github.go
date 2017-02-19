@@ -1,4 +1,8 @@
-// Github webhook, used so that we can sense new commits
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
+// Use of this source code is governed by licenses granted by the
+// copyright holder including that found in the LICENSE file.
+
+// Github webhook that enables server auto-restart on commit
 package main
 
 import (
