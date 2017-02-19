@@ -18,7 +18,7 @@ import (
 func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
     var AppReq IncomingAppReq
     var ttn UplinkMessage
-    var ReplyToDeviceID uint32 = 0
+    var ReplyToDeviceId uint32 = 0
 
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
@@ -43,11 +43,11 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq.Location = ttn.Metadata.Gateways[0].GtwID
     }
 
-    ReplyToDeviceID = processBuffer(AppReq, "TTN", "ttn-http:"+ttn.DevID, ttn.PayloadRaw)
+    ReplyToDeviceId = processBuffer(AppReq, "TTN", "ttn-http:"+ttn.DevID, ttn.PayloadRaw)
     CountTTN++
 
     // Outbound message processing
-    if (ReplyToDeviceID != 0) {
+    if (ReplyToDeviceId != 0) {
 
         // Delay just in case there's a chance that request processing may generate a reply
         // to this request.  It's no big deal if we miss it, though, because it will just be
@@ -55,7 +55,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
         time.Sleep(1 * time.Second)
 
         // See if there's an outbound message waiting for this device.
-        isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
+        isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)
         if (isAvailable) {
             jmsg := &DownlinkMessage{}
             jmsg.DevID = ttn.DevID
@@ -80,10 +80,10 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
                 resp, err := httpclient.Do(req)
                 if err != nil {
                     fmt.Printf("\n*** HTTPS POST error: %v\n\n", err);
-                    sendToSafecastOps(fmt.Sprintf("Error transmitting command to device %d: %v\n", ReplyToDeviceID, err), SLACK_MSG_UNSOLICITED)
+                    sendToSafecastOps(fmt.Sprintf("Error transmitting command to device %d: %v\n", ReplyToDeviceId, err), SLACK_MSG_UNSOLICITED)
                 } else {
                     resp.Body.Close()
-                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID), SLACK_MSG_UNSOLICITED)
+                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED)
                 }
 
             }

@@ -56,15 +56,15 @@ func SendSafecastMessage(SeqNo int, msg ttproto.Telecast, checksum uint32, Uploa
     }
 
     // This is the ONLY required field
-    if msg.DeviceID == nil {
-        fmt.Printf("%s DISCARDING message with no DeviceID\n", time.Now().Format(logDateFormat));
+    if msg.DeviceId == nil {
+        fmt.Printf("%s DISCARDING message with no DeviceId\n", time.Now().Format(logDateFormat));
         return
     }
 
     // Generate the fields common to all uploads to safecast
     sd := SafecastData{}
 
-    sd.DeviceID = uint64(msg.GetDeviceID())
+    sd.DeviceId = uint64(msg.GetDeviceId())
 
     // CapturedAt
     if msg.CapturedAt != nil {
@@ -195,16 +195,16 @@ func SendSafecastMessage(SeqNo int, msg ttproto.Telecast, checksum uint32, Uploa
     var bat Bat
     var dobat = false
 
-    if msg.BatteryVoltage != nil {
-        bat.Voltage = msg.BatteryVoltage
+    if msg.BatVoltage != nil {
+        bat.Voltage = msg.BatVoltage
         dobat = true
     }
-    if msg.BatterySOC != nil {
-        bat.Charge = msg.BatterySOC
+    if msg.BatSoc != nil {
+        bat.Charge = msg.BatSoc
         dobat = true;
     }
-    if msg.BatteryCurrent != nil {
-        bat.Current = msg.BatteryCurrent
+    if msg.BatCurrent != nil {
+        bat.Current = msg.BatCurrent
         dobat = true;
     }
 
@@ -216,12 +216,12 @@ func SendSafecastMessage(SeqNo int, msg ttproto.Telecast, checksum uint32, Uploa
     var env Env
     var doenv = false
 
-    if msg.EnvTemperature != nil {
-        env.Temp = msg.EnvTemperature
+    if msg.EnvTemp != nil {
+        env.Temp = msg.EnvTemp
         doenv = true
     }
-    if msg.EnvHumidity != nil {
-        env.Humid = msg.EnvHumidity
+    if msg.EnvHumid != nil {
+        env.Humid = msg.EnvHumid
     }
     if msg.EnvPressure != nil {
         env.Press = msg.EnvPressure
@@ -239,8 +239,8 @@ func SendSafecastMessage(SeqNo int, msg ttproto.Telecast, checksum uint32, Uploa
         net.Transport = &Transport
         donet = true
     }
-    if msg.WirelessSNR != nil {
-        net.SNR = msg.WirelessSNR
+    if msg.WirelessSnr != nil {
+        net.SNR = msg.WirelessSnr
         donet = true
     }
 

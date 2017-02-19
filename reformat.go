@@ -17,26 +17,26 @@ func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data
     var devicetype = ""
 
     // Required field
-    if v1.DeviceID == nil {
+    if v1.DeviceId == nil {
         fmt.Printf("*** Reformat: Missing Device ID\n");
         return 0, "", sd
     }
 
     // Detect what range it is within, and process the conversion differently
     isPointcast := false
-    if (*v1.DeviceID >= 100000 && *v1.DeviceID < 199999) {
+    if (*v1.DeviceId >= 100000 && *v1.DeviceId < 199999) {
         isPointcast = true
         devicetype = "pointcast"
-        sd.DeviceID = uint64(*v1.DeviceID / 10)
+        sd.DeviceId = uint64(*v1.DeviceId / 10)
     }
     isSafecastAir := false
-    if (*v1.DeviceID >= 50000 && *v1.DeviceID < 59999) {
+    if (*v1.DeviceId >= 50000 && *v1.DeviceId < 59999) {
         isSafecastAir = true
         devicetype = "safecast-air"
-        sd.DeviceID = uint64(*v1.DeviceID)
+        sd.DeviceId = uint64(*v1.DeviceId)
     }
     if !isPointcast && !isSafecastAir {
-        fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceID);
+        fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceId);
         return 0, "", sd
     }
 
@@ -94,21 +94,21 @@ func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data
 
         case "cpm":
             if !isPointcast {
-                fmt.Printf("*** Reformat: Received CPM for non-Pointcast\n", sd.DeviceID)
+                fmt.Printf("*** Reformat: Received CPM for non-Pointcast\n", sd.DeviceId)
             } else {
-                if (*v1.DeviceID % 10) == 1 {
+                if (*v1.DeviceId % 10) == 1 {
                     var lnd Lnd
                     cpm := *v1.Value
                     lnd.U7318 = &cpm
                     sd.Lnd = &lnd
 
-                } else if (*v1.DeviceID % 10) == 2 {
+                } else if (*v1.DeviceId % 10) == 2 {
                     var lnd Lnd
                     cpm := *v1.Value
                     lnd.EC7128 = &cpm
                     sd.Lnd = &lnd
                 } else {
-                    fmt.Printf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceID);
+                    fmt.Printf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceId);
                 }
             }
         case "status":
@@ -126,8 +126,8 @@ func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data
 
             unrecognized := ""
 			status := ""
-			if v1.DeviceTypeID != nil {
-	            status = *v1.DeviceTypeID
+			if v1.DeviceTypeId != nil {
+	            status = *v1.DeviceTypeId
 			}
             fields := strings.Split(status, ",")
             for v := range fields {
@@ -169,7 +169,7 @@ func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data
                         unrecognized = unrecognized + ","
                     }
                     unrecognized = unrecognized + "\"" + field[0] + "\":\"" + field[1] + "\""
-                case "DeviceID":
+                case "DeviceId":
                 case "Temperature":
                 }
             }
@@ -190,11 +190,11 @@ func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data
             }
 
         default:
-            fmt.Printf("*** Reformat Warning ***\n*** %s id=%d Unit %s = Value %f UNRECOGNIZED\n", devicetype, *v1.DeviceID, *v1.Unit, *v1.Value)
+            fmt.Printf("*** Reformat Warning ***\n*** %s id=%d Unit %s = Value %f UNRECOGNIZED\n", devicetype, *v1.DeviceId, *v1.Unit, *v1.Value)
 
         }
     }
 
-    return uint32(sd.DeviceID), devicetype, sd
+    return uint32(sd.DeviceId), devicetype, sd
 
 }

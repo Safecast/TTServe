@@ -18,7 +18,7 @@ import (
 // Handle inbound HTTP requests from the gateway or directly from the device
 func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
     var AppReq IncomingAppReq
-    var ReplyToDeviceID uint32 = 0
+    var ReplyToDeviceId uint32 = 0
 
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
@@ -61,7 +61,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq.Location = ttg.Location
 
         // Process it
-        ReplyToDeviceID = processBuffer(AppReq, "Lora gateway", "lora-http:"+ipv4(req.RemoteAddr), ttg.Payload)
+        ReplyToDeviceId = processBuffer(AppReq, "Lora gateway", "lora-http:"+ipv4(req.RemoteAddr), ttg.Payload)
         CountHTTPGateway++;
 
     }
@@ -77,7 +77,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         // Process it
-        ReplyToDeviceID = processBuffer(AppReq, "device on cellular", "device-http:"+ipv4(req.RemoteAddr), buf)
+        ReplyToDeviceId = processBuffer(AppReq, "device on cellular", "device-http:"+ipv4(req.RemoteAddr), buf)
         CountHTTPDevice++;
 
     }
@@ -92,7 +92,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Outbound message processing
-    if (ReplyToDeviceID != 0) {
+    if (ReplyToDeviceId != 0) {
 
         // Wait for up to five seconds for a reply to appear.  It's no big deal if we miss it,
         // though, because it'll just be picked up on the next call
@@ -100,13 +100,13 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         for i:=0; i<5; i++ {
 
             // See if there's an outbound message waiting for this device.
-            isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
+            isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)
             if (isAvailable) {
 
                 // Responses for now are always hex-encoded for easy device processing
                 hexPayload := hex.EncodeToString(payload)
                 io.WriteString(rw, hexPayload)
-                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID), SLACK_MSG_UNSOLICITED)
+                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED)
                 break
             }
 

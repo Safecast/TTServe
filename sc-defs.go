@@ -108,7 +108,7 @@ type Dev struct {
 type SafecastData struct {
 
 	// Basics
-    DeviceID uint64			`json:"device"`
+    DeviceId uint64			`json:"device"`
 	UploadedAt *string		`json:"when_uploaded,omitempty"`
     CapturedAt *string		`json:"when_captured,omitempty"`
 

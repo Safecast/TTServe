@@ -62,7 +62,7 @@ func MqqtInboundHandler() {
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.
-            isAvailable, deviceID := getReplyDeviceIDFromPayload(AppReq.Payload)
+            isAvailable, deviceID := getReplyDeviceIdFromPayload(AppReq.Payload)
             if isAvailable {
                 isAvailable, payload := TelecastOutboundPayload(deviceID)
                 if (isAvailable) {

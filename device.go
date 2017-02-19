@@ -50,9 +50,9 @@ func (a ByKey) Less(i, j int) bool {
 }
 
 // Keep track of all devices that have logged data via ttserve
-func trackDevice(DeviceID uint32, whenSeen time.Time) {
+func trackDevice(DeviceId uint32, whenSeen time.Time) {
     var dev seenDevice
-    dev.deviceid = DeviceID
+    dev.deviceid = DeviceId
 
     // Attempt to update the existing entry if we can find it
     found := false

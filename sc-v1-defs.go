@@ -16,23 +16,23 @@ import (
 
 type SafecastDataV1 struct {
     CapturedAt		*string `json:"captured_at,omitempty"`
-    DeviceTypeID	*string `json:"devicetype_id,omitempty"`
+    DeviceTypeId	*string `json:"devicetype_id,omitempty"`
     LocationName	*string `json:"location_name,omitempty"`
     Unit			*string `json:"unit,omitempty"`
-    ChannelIDRaw	interface{} `json:"channel_id,omitempty"`
-    ChannelID		*uint32
-    DeviceIDRaw		interface{} `json:"device_id,omitempty"`
-    DeviceID		*uint32
-    OriginalIDRaw	interface{} `json:"original_id,omitempty"`
-    OriginalID		*uint32
-    SensorIDRaw		interface{} `json:"sensor_id,omitempty"`
-    SensorID		*uint32
-    StationIDRaw	interface{} `json:"station_id,omitempty"`
-    StationID		*uint32
-    UserIDRaw		interface{} `json:"user_id,omitempty"`
-    UserID			*uint32
-    IDRaw			interface{} `json:"id,omitempty"`
-    ID				*uint32
+    ChannelIdRaw	interface{} `json:"channel_id,omitempty"`
+    ChannelId		*uint32
+    DeviceIdRaw		interface{} `json:"device_id,omitempty"`
+    DeviceId		*uint32
+    OriginalIdRaw	interface{} `json:"original_id,omitempty"`
+    OriginalId		*uint32
+    SensorIdRaw		interface{} `json:"sensor_id,omitempty"`
+    SensorId		*uint32
+    StationIdRaw	interface{} `json:"station_id,omitempty"`
+    StationId		*uint32
+    UserIdRaw		interface{} `json:"user_id,omitempty"`
+    UserId			*uint32
+    IdRaw			interface{} `json:"id,omitempty"`
+    Id				*uint32
     HeightRaw		interface{} `json:"height,omitempty"`
     Height			*int32
     ValueRaw		interface{} `json:"value,omitempty"`
@@ -55,95 +55,95 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 	}
 
 	// Now go through each Raw interface and unpack the value into the corresponding non-Raw field
-	switch t := x.ChannelIDRaw.(type) {
+	switch t := x.ChannelIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.ChannelID = &u32
+	        x.ChannelId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.ChannelID = &u32
+		x.ChannelId = &u32
 	}
 
-	switch t := x.DeviceIDRaw.(type) {
+	switch t := x.DeviceIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.DeviceID = &u32
+	        x.DeviceId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.DeviceID = &u32
+		x.DeviceId = &u32
 	}
 
-	switch t := x.OriginalIDRaw.(type) {
+	switch t := x.OriginalIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.OriginalID = &u32
+	        x.OriginalId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.OriginalID = &u32
+		x.OriginalId = &u32
 	}
 
-	switch t := x.SensorIDRaw.(type) {
+	switch t := x.SensorIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.SensorID = &u32
+	        x.SensorId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.SensorID = &u32
+		x.SensorId = &u32
 	}
 
-	switch t := x.StationIDRaw.(type) {
+	switch t := x.StationIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.StationID = &u32
+	        x.StationId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.StationID = &u32
+		x.StationId = &u32
 	}
 
-	switch t := x.UserIDRaw.(type) {
+	switch t := x.UserIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.UserID = &u32
+	        x.UserId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.UserID = &u32
+		x.UserId = &u32
 	}
 
-	switch t := x.IDRaw.(type) {
+	switch t := x.IdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.ID = &u32
+	        x.Id = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.ID = &u32
+		x.Id = &u32
 	}
 
 	switch t := x.HeightRaw.(type) {

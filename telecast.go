@@ -26,9 +26,9 @@ type safecastCommand struct {
 }
 
 // Get a Telecast Device ID number for this message
-func TelecastDeviceID (msg *ttproto.Telecast) uint32 {
-    if msg.DeviceID != nil {
-        return msg.GetDeviceID()
+func TelecastDeviceId (msg *ttproto.Telecast) uint32 {
+    if msg.DeviceId != nil {
+        return msg.GetDeviceId()
     }
     return 0
 }
@@ -83,7 +83,7 @@ func sendTelecastOutboundSummaryToSlack() {
 func SendTelecastMessage(msg ttproto.Telecast, devEui string) {
 
     // Keep track of devices from whom we've received message
-    deviceID := TelecastDeviceID(&msg)
+    deviceID := TelecastDeviceId(&msg)
 
     // Unpack the message arguments
     message := msg.GetMessage()
@@ -118,9 +118,9 @@ func SendTelecastMessage(msg ttproto.Telecast, devEui string) {
 }
 
 // Construct the path of a command file
-func SafecastCommandFilename(DeviceID uint32) string {
+func SafecastCommandFilename(DeviceId uint32) string {
     directory := SafecastDirectory()
-    file := directory + TTServerCommandPath + "/" + fmt.Sprintf("%d", DeviceID) + ".json"
+    file := directory + TTServerCommandPath + "/" + fmt.Sprintf("%d", DeviceId) + ".json"
     return file
 }
 
@@ -192,7 +192,7 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
     // Marshal the command into a telecast message
     deviceType := ttproto.Telecast_TTSERVE
     tmsg := &ttproto.Telecast{}
-    tmsg.DeviceID = &deviceID;
+    tmsg.DeviceId = &deviceID;
     tmsg.DeviceType = &deviceType
     tmsg.Message = proto.String(cmd.Command)
     tdata, terr := proto.Marshal(tmsg)
@@ -213,7 +213,7 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
 // the payload is of a type where we know that the client is listening for a reply.  If
 // this is not a replyable payload or if the device ID is not found, we guarantee that
 // 0 is returned for the device ID.
-func getReplyDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, deviceID uint32) {
+func getReplyDeviceIdFromPayload(inboundPayload []byte) (isAvailable bool, deviceID uint32) {
 
     // Extract the telecast message from the AppReq
     msg := &ttproto.Telecast{}
@@ -223,7 +223,7 @@ func getReplyDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, devic
     }
 
     // Extract the device ID
-    DeviceID := TelecastDeviceID(msg)
+    DeviceId := TelecastDeviceId(msg)
 
     // Look at reply type
     if msg.ReplyType != nil {
@@ -232,7 +232,7 @@ func getReplyDeviceIDFromPayload(inboundPayload []byte) (isAvailable bool, devic
 
             // A reply is expected
         case ttproto.Telecast_REPLY_EXPECTED:
-            return true, DeviceID
+            return true, DeviceId
 
         }
     }

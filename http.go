@@ -66,8 +66,8 @@ func inboundWebRootHandler(rw http.ResponseWriter, req *http.Request) {
 }
 
 // Process a payload buffer
-func processBuffer(req IncomingAppReq, from string, transport string, buf []byte) (DeviceID uint32) {
-    var ReplyToDeviceID uint32 = 0
+func processBuffer(req IncomingAppReq, from string, transport string, buf []byte) (DeviceId uint32) {
+    var ReplyToDeviceId uint32 = 0
     var AppReq IncomingAppReq = req
 
     AppReq.Transport = transport
@@ -86,7 +86,7 @@ func processBuffer(req IncomingAppReq, from string, transport string, buf []byte
         AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
         // Extract the device ID from the message, which we will need later
-        _, ReplyToDeviceID = getReplyDeviceIDFromPayload(AppReq.Payload)
+        _, ReplyToDeviceId = getReplyDeviceIdFromPayload(AppReq.Payload)
 
         // Enqueue the app request
         AppReq.UploadedAt = nowInUTC()
@@ -116,13 +116,13 @@ func processBuffer(req IncomingAppReq, from string, transport string, buf []byte
             AppReq.Payload = buf[payloadOffset:payloadOffset+length]
 
             // Extract the device ID from the message, which we will need later
-            _, ReplyToDeviceID = getReplyDeviceIDFromPayload(AppReq.Payload)
+            _, ReplyToDeviceId = getReplyDeviceIdFromPayload(AppReq.Payload)
 
 			// If a reply is expected, pass a sequence number of 0 so we process it as quickly as possible.
 			// Otherwise, insert a sequence number to attempt to impose a sequencing delay in SendSafecastMessage,
             // so that things are sequenced properly in the log.  This is not guaranteed of course, but it is helpful
             // for log readability.
-			if (ReplyToDeviceID == 0) {
+			if (ReplyToDeviceId == 0) {
 	            AppReq.SeqNo = i
 			} else {
 				AppReq.SeqNo = 0
@@ -149,7 +149,7 @@ func processBuffer(req IncomingAppReq, from string, transport string, buf []byte
     }
     }
 
-    return ReplyToDeviceID
+    return ReplyToDeviceId
 
 }
 

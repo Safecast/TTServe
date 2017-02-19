@@ -56,7 +56,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     net.Transport = &transportStr
     sd.Net = &net
 
-    fmt.Printf("\n%s Received payload for %d from %s\n", time.Now().Format(logDateFormat), sd.DeviceID, transportStr)
+    fmt.Printf("\n%s Received payload for %d from %s\n", time.Now().Format(logDateFormat), sd.DeviceId, transportStr)
     fmt.Printf("%s\n", body)
 
     // Fill in the minimums so as to prevent faults

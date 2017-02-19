@@ -26,17 +26,17 @@ type SafecastValue struct {
 }
 
 // Get the current value
-func SafecastReadValue(deviceID uint32) (isAvail bool, sv SafecastValue) {
+func SafecastReadValue(deviceId uint32) (isAvail bool, sv SafecastValue) {
     value := SafecastValue{}
 
     // Generate the filename, which we'll use twice
-    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", deviceID) + ".json"
+    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", deviceId) + ".json"
 
     // Read the file if it exists
     file, err := ioutil.ReadFile(filename)
     if err != nil {
         value = SafecastValue{}
-        value.DeviceID = uint64(deviceID);
+        value.DeviceId = uint64(deviceId);
         return false, value
     }
 
@@ -44,7 +44,7 @@ func SafecastReadValue(deviceID uint32) (isAvail bool, sv SafecastValue) {
     err = json.Unmarshal(file, &value)
     if err != nil {
         value = SafecastValue{}
-        value.DeviceID = uint64(deviceID);
+        value.DeviceId = uint64(deviceId);
         return false, value
     }
 
@@ -64,7 +64,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     sc.UploadedAt = &UploadedAt
 
     // Read the current value, or a blank value structure if it's blank
-    _, value := SafecastReadValue(uint32(sc.DeviceID))
+    _, value := SafecastReadValue(uint32(sc.DeviceId))
 
     // Update the current values, but only if modified
     if sc.UploadedAt != nil {
@@ -303,7 +303,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.LocationHistory[i] = value.LocationHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceID = value.DeviceID
+        new.DeviceId = value.DeviceId
         new.CapturedAt = ShuffledAt
         new.Loc = value.Loc
         value.LocationHistory[0] = new
@@ -315,7 +315,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.PmsHistory[i] = value.PmsHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceID = value.DeviceID
+        new.DeviceId = value.DeviceId
         new.CapturedAt = ShuffledAt
         new.Pms = value.Pms
         value.PmsHistory[0] = new
@@ -327,7 +327,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.OpcHistory[i] = value.OpcHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceID = value.DeviceID
+        new.DeviceId = value.DeviceId
         new.CapturedAt = ShuffledAt
         new.Opc = value.Opc
         value.OpcHistory[0] = new
@@ -339,7 +339,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
             value.GeigerHistory[i] = value.GeigerHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceID = value.DeviceID
+        new.DeviceId = value.DeviceId
         new.CapturedAt = ShuffledAt
         new.Lnd = value.Lnd
         value.GeigerHistory[0] = new
@@ -372,7 +372,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     }
 
     // Write it to the file
-    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", sc.DeviceID) + ".json"
+    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", sc.DeviceId) + ".json"
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
     fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
     if err == nil {
@@ -383,10 +383,10 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
 }
 
 // Get summary of a device
-func SafecastGetSummary(DeviceID uint32) (Label string, Gps string, Summary string) {
+func SafecastGetSummary(DeviceId uint32) (Label string, Gps string, Summary string) {
 
     // Generate the filename, which we'll use twice
-    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", DeviceID) + ".json"
+    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", DeviceId) + ".json"
 
     // Read the file if it exists, else blank out value
     value := SafecastValue{}

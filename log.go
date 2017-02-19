@@ -23,10 +23,10 @@ func SafecastDirectory() string {
 }
 
 // Construct path of a log file
-func SafecastLogFilename(DeviceID string, Extension string) string {
+func SafecastLogFilename(DeviceId string, Extension string) string {
     directory := SafecastDirectory()
     prefix := time.Now().UTC().Format("2006-01-")
-    file := directory + TTServerLogPath + "/" + prefix + DeviceID + Extension
+    file := directory + TTServerLogPath + "/" + prefix + DeviceId + Extension
     return file
 }
 
@@ -40,7 +40,7 @@ func SafecastWriteToLogs(UploadedAt string, sd SafecastData) {
 // Write the value to the log
 func SafecastJSONLog(UploadedAt string, sd SafecastData) {
 
-    file := SafecastLogFilename(fmt.Sprintf("%d", sd.DeviceID), ".json")
+    file := SafecastLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".json")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
@@ -70,7 +70,7 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
 func SafecastCSVLog(UploadedAt string, sd SafecastData) {
 
     // Extract the device number and form a filename
-    file := SafecastLogFilename(fmt.Sprintf("%d", sd.DeviceID), ".csv")
+    file := SafecastLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".csv")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
@@ -191,7 +191,7 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
         }
     }
 
-    s = s + fmt.Sprintf(",%d", sd.DeviceID)
+    s = s + fmt.Sprintf(",%d", sd.DeviceId)
     s = s + fmt.Sprintf(",%s", stats)
     s = s + fmt.Sprintf(",%s", "")          // Value
     if sd.Lnd == nil {
