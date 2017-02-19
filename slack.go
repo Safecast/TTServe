@@ -161,15 +161,17 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 // because there are assumptions that this will return quickly because it's called
 // within an HTTP request handler that must return so as to flush the response buffer
 // back to the callers.
-func sendToSafecastOps(msg string, isUnsolicited bool) {
-	if (isUnsolicited) {
+func sendToSafecastOps(msg string, destination int) {
+	if destination == SLACK_MSG_UNSOLICITED {
 	    for _, url := range SlackOutboundURLs {
 		    go sendToOpsViaSlack(msg, url)
 		}
+	} else if destination == SLACK_MSG_UNSOLICITED_OPS {
+		go sendToOpsViaSlack(msg, SlackOutboundURLs[SLACK_OPS_SAFECAST])
 	} else {
 		if SlackCommandSource != SLACK_OPS_NONE {
 			go sendToOpsViaSlack(msg, SlackOutboundURLs[SlackCommandSource])
-	}
+		}
 	}
 }
 

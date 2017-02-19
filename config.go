@@ -32,8 +32,9 @@ const SLACK_OPS_ROZZIE =	1
 const SLACK_OPS_MUSTI =		2
 var SlackCommandSource = SLACK_OPS_NONE
 
-const SLACK_MSG_UNSOLICITED =	true
-const SLACK_MSG_REPLY =			false
+const SLACK_MSG_UNSOLICITED =		0
+const SLACK_MSG_UNSOLICITED_OPS =	1
+const SLACK_MSG_REPLY =				2
 
 var SlackInboundTokens = [...]string {
 	// Safecast

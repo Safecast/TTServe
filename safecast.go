@@ -463,11 +463,11 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
             // i.e. every day or few days.  When we ultimately move the dev server to AWS, we should re-enable this.
             if (false) {
                 sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to %s:%s)",
-                    httpTransactionErrorTime, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED);
+                    httpTransactionErrorTime, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS);
             }
         } else {
             sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading in %d minutes to %s:%s)",
-                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED);
+                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS);
         }
         httpTransactionErrors = 0
         httpTransactionErrorFirst = true;
