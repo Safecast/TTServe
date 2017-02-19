@@ -19,6 +19,7 @@ const httpTransactionsRecorded = 500
 var httpTransactionDurations[httpTransactionsRecorded] int
 var httpTransactionTimes[httpTransactionsRecorded] time.Time
 var httpTransactionErrorTime string
+var httpTransactionErrorUrl string
 var httpTransactionErrorString string
 var httpTransactionErrors = 0
 var httpTransactionErrorFirst bool = true
@@ -376,6 +377,7 @@ func endTransaction(transaction int, url string, errstr string) {
         httpTransactionErrors = httpTransactionErrors + 1
         if (httpTransactionErrorFirst) {
             httpTransactionErrorTime = time.Now().Format(logDateFormat)
+            httpTransactionErrorUrl = url
             httpTransactionErrorString = errstr
             httpTransactionErrorFirst = false
         }
@@ -460,12 +462,12 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
             // As of 10/2016, I've chosen to suppress single-instance errors simply because they occur too frequently,
             // i.e. every day or few days.  When we ultimately move the dev server to AWS, we should re-enable this.
             if (false) {
-                sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to Safecast:%s)",
-                    httpTransactionErrorTime, httpTransactionErrorString), SLACK_MSG_UNSOLICITED);
+                sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to %s:%s)",
+                    httpTransactionErrorTime, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED);
             }
         } else {
-            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading to Safecast in %d minutes:%s)",
-                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorString), SLACK_MSG_UNSOLICITED);
+            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading in %d minutes to %s:%s)",
+                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED);
         }
         httpTransactionErrors = 0
         httpTransactionErrorFirst = true;
