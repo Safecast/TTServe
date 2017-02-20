@@ -10,7 +10,7 @@ import (
 	"time"
     "hash/crc32"
     "github.com/golang/protobuf/proto"
-    "github.com/rayozzie/teletype-proto/golang"
+    "github.com/safecast/ttproto/golang"
 )
 
 // Common app request

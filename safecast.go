@@ -13,7 +13,7 @@ import (
     "strings"
     "strconv"
     "encoding/json"
-    "github.com/rayozzie/teletype-proto/golang"
+    "github.com/safecast/ttproto/golang"
 )
 
 // For dealing with transaction timeouts

@@ -6,7 +6,7 @@
 
 # Make sure we're in the right directory, which is necessary via cron
 export GOPATH=$HOME/go
-cd $GOPATH/src/github.com/rayozzie/teletype-ttserve
+cd $GOPATH/src/github.com/safecast/ttserve
 
 # Loop forever
 while [ : ]; do

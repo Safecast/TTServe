@@ -14,7 +14,7 @@ import (
     "fmt"
     "io/ioutil"
     "encoding/json"
-    "github.com/rayozzie/teletype-proto/golang"
+    "github.com/safecast/ttproto/golang"
 )
 
 // Debugging

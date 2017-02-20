@@ -15,7 +15,7 @@ import (
     "io/ioutil"
     "encoding/json"
     "github.com/golang/protobuf/proto"
-    "github.com/rayozzie/teletype-proto/golang"
+    "github.com/safecast/ttproto/golang"
 )
 
 // Safecast Command as saved in text file

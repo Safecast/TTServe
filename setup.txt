@@ -35,11 +35,12 @@ export PATH=$PATH:$GOPATH/bin
 export TT=$GOPATH/src/github.com/rayozzie/teletype-ttserve
 
 ## Fetch our app package
-mkdir $HOME/go && mkdir $HOME/go/src && mkdir $HOME/go/src/github.com && mkdir $HOME/go/src/github.com/rayozzie && cd $HOME/go/src/github.com/rayozzie
-git clone https://ttserve:teletype123@github.com/rayozzie/teletype-ttserve
+mkdir $HOME/go && mkdir $HOME/go/src && mkdir $HOME/go/src/github.com && mkdir $HOME/go/src/github.com/safecast && cd $HOME/go/src/github.com/safecast
+git init
+git clone https://github.com/safecast/ttserve
 
 ## Use "crontab -e" and add this line
-@reboot screen -dmS ttserve $HOME/go/src/github.com/rayozzie/teletype-ttserve/run.sh
+@reboot screen -dmS ttserve $HOME/go/src/github.com/safecast/ttserve/run.sh
 
 ## REBOOT THE AWS INSTANCE
 ## You can then come back via SSH and use 'screen' to look around 
