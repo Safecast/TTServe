@@ -11,8 +11,8 @@ import (
     "syscall"
     "io/ioutil"
     "net/http"
-    "net"
     "fmt"
+    "net"
     "time"
 )
 
