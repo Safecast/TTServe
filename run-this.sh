@@ -14,7 +14,7 @@ while [ ! -d "$HOME/efs/safecast" ]; do
 done
 
 set -v
-git pull https://ttserve:teletype123@github.com/safecast/ttserve
+git pull https://github.com/safecast/ttserve
 go get -u
 go build
-sudo ./teletype-ttserve $HOME/efs/safecast
+sudo ./ttserve $HOME/efs/safecast
