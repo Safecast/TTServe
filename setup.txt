@@ -32,7 +32,7 @@ go version
 ## Add these to the end of ~/.profile with NANO editor
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
-export TT=$GOPATH/src/github.com/rayozzie/teletype-ttserve
+export TT=$GOPATH/src/github.com/safecast/ttserve
 
 ## Fetch our app package
 mkdir $HOME/go && mkdir $HOME/go/src && mkdir $HOME/go/src/github.com && mkdir $HOME/go/src/github.com/safecast && cd $HOME/go/src/github.com/safecast
