@@ -5,14 +5,14 @@
 package main
 
 import (
-    "bytes"
     "os"
+    "net"
+    "fmt"
+    "bytes"
     "os/signal"
     "syscall"
     "io/ioutil"
     "net/http"
-    "fmt"
-    "net"
     "time"
 )
 
