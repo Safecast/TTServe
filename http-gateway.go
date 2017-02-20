@@ -6,10 +6,10 @@
 package main
 
 import (
-	"os"
+    "os"
     "net/http"
     "fmt"
-	"time"
+    "time"
     "io"
 )
 
@@ -20,19 +20,25 @@ func inboundWebGatewayHandler(rw http.ResponseWriter, req *http.Request) {
     rw.Header().Set("Content-Type", "application/json")
 
     // Log it
+	fmt.Printf("%s %v\n", req.RequestURI)
     filename := req.RequestURI[len(TTServerTopicGateway2):]
-    fmt.Printf("%s Gateway information request for %s\n", time.Now().Format(logDateFormat), filename)
+    if filename != "" {
+        fmt.Printf("%s Gateway information request for %s\n", time.Now().Format(logDateFormat), filename)
 
-    // Open the file
-    file := SafecastDirectory() + TTServerGatewayPath + "/" + filename + ".json"
-    fd, err := os.Open(file)
-    if err != nil {
-        io.WriteString(rw, errorString(err))
-        return
+        // Open the file
+        file := SafecastDirectory() + TTServerGatewayPath + "/" + filename + ".json"
+        fd, err := os.Open(file)
+        if err != nil {
+            io.WriteString(rw, errorString(err))
+            return
+        }
+        defer fd.Close()
+
+        // Copy the file to output
+        io.Copy(rw, fd)
+		return
     }
-    defer fd.Close()
 
-    // Copy the file to output
-    io.Copy(rw, fd)
+    fmt.Printf("%s Gateway update\n", time.Now().Format(logDateFormat))
 
 }
