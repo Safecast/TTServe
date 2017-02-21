@@ -8,6 +8,7 @@ package main
 
 import (
     "os"
+	"time"
     "net/http"
     "fmt"
     "io/ioutil"
@@ -27,29 +28,46 @@ type SafecastValue struct {
 
 // Get the current value
 func SafecastReadValue(deviceId uint32) (isAvail bool, sv SafecastValue) {
-    value := SafecastValue{}
+    valueEmpty := SafecastValue{}
+    valueEmpty.DeviceId = uint64(deviceId);
 
     // Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", deviceId) + ".json"
 
-    // Read the file if it exists
-    file, err := ioutil.ReadFile(filename)
+    // If the file doesn't exist, don't even try
+    _, err := os.Stat(filename)
     if err != nil {
-        value = SafecastValue{}
-        value.DeviceId = uint64(deviceId);
-        return false, value
+        if os.IsNotExist(err) {
+            return true, valueEmpty
+        }
+        return false, valueEmpty
     }
 
-    // Read it as JSON
-    err = json.Unmarshal(file, &value)
-    if err != nil {
-        value = SafecastValue{}
-        value.DeviceId = uint64(deviceId);
-        return false, value
+    // Try reading the file several times, now that we know it exists,
+    // just to deal with issues of contention
+    for i:=0; i<5; i++ {
+
+        // Read the file and unmarshall if no error
+        contents, errRead := ioutil.ReadFile(filename)
+        if err == nil {
+		    valueToRead := SafecastValue{}
+            err = json.Unmarshal(contents, &valueToRead)
+            if err == nil {
+                return true, valueToRead
+            }
+        }
+		err = errRead
+		
+        // Delay before trying again
+        time.Sleep(10 * time.Second)
+
     }
 
-    // Got it
-    return true, value
+    // Error
+    if os.IsNotExist(err) {
+        return true, valueEmpty
+    }
+    return false, valueEmpty
 
 }
 
@@ -64,7 +82,12 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     sc.UploadedAt = &UploadedAt
 
     // Read the current value, or a blank value structure if it's blank
-    _, value := SafecastReadValue(uint32(sc.DeviceId))
+    isAvail, value := SafecastReadValue(uint32(sc.DeviceId))
+
+    // Exit if error, so that we don't overwrite in cases of contention
+    if !isAvail {
+        return
+    }
 
     // Update the current values, but only if modified
     if sc.UploadedAt != nil {
@@ -385,19 +408,9 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
 // Get summary of a device
 func SafecastGetSummary(DeviceId uint32) (Label string, Gps string, Summary string) {
 
-    // Generate the filename, which we'll use twice
-    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", DeviceId) + ".json"
-
-    // Read the file if it exists, else blank out value
-    value := SafecastValue{}
-    file, err := ioutil.ReadFile(filename)
-    if err != nil {
-        return "", "", ""
-    }
-
-    // Read it as JSON
-    err = json.Unmarshal(file, &value)
-    if err != nil {
+	// Read the file
+	isAvail, value := SafecastReadValue(DeviceId)
+    if !isAvail {
         return "", "", ""
     }
 
