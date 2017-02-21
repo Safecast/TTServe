@@ -43,13 +43,26 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
     file := SafecastLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".json")
 
     // Open it
-    fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
+    fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_EXCL, 0666)
     if (err != nil) {
 
-        // Attempt to create the file if it doesn't already exist
-        fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+		// Don't attempt to create it if it already exists
+	    _, err2 := os.Stat(file)
+		if err2 == nil {
+            fmt.Printf("Logging: Can't log to %s: %s\n", file, err);
+			return
+	    }
+        if err2 == nil {
+			if !os.IsNotExist(err2) {
+	            fmt.Printf("Logging: Ignoring attempt to create %s: %s\n", file, err2);
+				return
+			}
+	    }
+
+        // Attempt to create the file because it doesn't already exist
+        fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_EXCL, 0666)
         if (err != nil) {
-            fmt.Printf("Logging: error creating file %s: %s\n", file, err);
+            fmt.Printf("Logging: error creating %s: %s\n", file, err);
             return;
         }
 
@@ -73,11 +86,24 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
     file := SafecastLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".csv")
 
     // Open it
-    fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND, 0666)
+    fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_EXCL, 0666)
     if (err != nil) {
 
-        // Attempt to create the file if it doesn't already exist
-        fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+		// Don't attempt to create it if it already exists
+	    _, err2 := os.Stat(file)
+		if err2 == nil {
+            fmt.Printf("Logging: Can't log to %s: %s\n", file, err);
+			return
+	    }
+        if err2 == nil {
+			if !os.IsNotExist(err2) {
+	            fmt.Printf("Logging: Ignoring attempt to create %s: %s\n", file, err2);
+				return
+			}
+	    }
+
+        // Attempt to create the file because it doesn't already exist
+        fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_EXCL, 0666)
         if (err != nil) {
             fmt.Printf("Logging: error creating file %s: %s\n", file, err);
             return;

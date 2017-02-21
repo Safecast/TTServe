@@ -53,6 +53,7 @@ func SafecastReadValue(deviceId uint32) (isAvail bool, sv SafecastValue) {
 		    valueToRead := SafecastValue{}
             err = json.Unmarshal(contents, &valueToRead)
             if err == nil {
+				fmt.Printf("*** %s appears to be corrupt ***\n", filename);
                 return true, valueToRead
             }
         }
@@ -397,7 +398,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     // Write it to the file
     filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", sc.DeviceId) + ".json"
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
-    fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
+    fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_EXCL|os.O_CREATE, 0666)
     if err == nil {
         fd.WriteString(string(valueJSON));
         fd.Close();
