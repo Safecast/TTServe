@@ -11,6 +11,8 @@ import (
     "fmt"
     "time"
     "io"
+    "io/ioutil"
+    "encoding/json"
 )
 
 // Handle inbound HTTP requests to fetch log files
@@ -42,6 +44,22 @@ func inboundWebGatewayHandler(rw http.ResponseWriter, req *http.Request) {
         }
     }
 
-    fmt.Printf("%s Gateway update\n", time.Now().Format(logDateFormat))
+	// We have an update request
+    body, err := ioutil.ReadAll(req.Body)
+    if err != nil {
+        fmt.Printf("GW: Error reading HTTP request body: \n%v\n", req)
+        return
+    }
+
+	// Unmarshal it
+    var ttg TTGateReq
+
+    err = json.Unmarshal(body, &ttg)
+    if err != nil {
+        fmt.Printf("*** Received badly formatted Device Update request:\n%v\n", body)
+        return
+    }
+
+    fmt.Printf("%s Gateway update: \n%s\n%v\n", time.Now().Format(logDateFormat), string(body), ttg)
 
 }

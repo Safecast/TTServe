@@ -5,11 +5,19 @@
 package main
 
 type TTGateReq struct {
-	Payload    []byte  `json:"payload"`
-	Longitude  float32 `json:"longitude,omitempty"`
-	Latitude   float32 `json:"latitude,omitempty"`
-	Altitude   int32   `json:"altitude,omitempty"`
-	Snr        float32 `json:"snr,omitempty"`
-	Location   string  `json:"location,omitempty"`
-	Transport  string  `json:"transport,omitempty"`
+
+	// Message info
+	Payload				[]byte		`json:"payload,omitempty"`
+	Longitude			float32		`json:"longitude,omitempty"`
+	Latitude			float32		`json:"latitude,omitempty"`
+	Altitude			int32		`json:"altitude,omitempty"`
+	Snr					float32		`json:"snr,omitempty"`
+	Location			string		`json:"location,omitempty"`
+	Transport			string		`json:"transport,omitempty"`
+
+	// Gateway info
+	GatewayName			string		`json:"gateway_name,omitempty"`
+	IPInfo				IPInfoData	`json:"gateway_location,omitempty"`
+	MessagesReceived	uint32		`json:"gateway_received,omitempty"`
+
 }
