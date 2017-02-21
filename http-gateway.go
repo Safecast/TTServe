@@ -60,7 +60,7 @@ func inboundWebGatewayHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    fmt.Printf("%s Gateway update: \n%s\n%v\n", time.Now().Format(logDateFormat), string(body), ttg)
+    fmt.Printf("%s Received gateway update for %s\n", time.Now().Format(logDateFormat), ttg.GatewayId)
 	go SafecastWriteGateway(ttg)
 
 }
