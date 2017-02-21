@@ -17,14 +17,14 @@ import (
 // The data structure for the "Value" files
 type SafecastGateway struct {
 	UploadedAt	string		`json:"when_uploaded,omitempty"`
-    ttg			TTGateReq   `json:"current_values,omitempty"`
+    Ttg			TTGateReq   `json:"current_values,omitempty"`
 }
 
 // Get the current value
 func SafecastReadGateway(gatewayId string) (isAvail bool, sv SafecastGateway) {
     valueEmpty := SafecastGateway{}
 	valueEmpty.UploadedAt = time.Now().UTC().Format("2006-01-02 15:04:05 UTC")
-    valueEmpty.ttg.GatewayId = gatewayId
+    valueEmpty.Ttg.GatewayId = gatewayId
 
     // Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTServerGatewayPath + "/" + fmt.Sprintf("%d", gatewayId) + ".json"
@@ -79,7 +79,7 @@ func SafecastWriteGateway(ttg TTGateReq) {
 
 	// Copy over all the values directly.  If someday we need to aggregate
 	// values rather than replace them, this is the place to do it
-	value.ttg = ttg
+	value.Ttg = ttg
 	
 	// Update the uploaded at
 	value.UploadedAt = time.Now().UTC().Format("2006-01-02 15:04:05 UTC")
@@ -106,18 +106,18 @@ func SafecastGetGatewaySummary(GatewayId string) (Label string, Loc string, Summ
     }
 
     // Get the label
-	label := value.ttg.GatewayName;
+	label := value.Ttg.GatewayName;
 
 	// Get a summary of the location
-	loc := fmt.Sprintf("%s,%s", value.ttg.IPInfo.City, value.ttg.IPInfo.Country)
-	if value.ttg.IPInfo.City == "" {
-		loc = value.ttg.IPInfo.Country
+	loc := fmt.Sprintf("%s,%s", value.Ttg.IPInfo.City, value.Ttg.IPInfo.Country)
+	if value.Ttg.IPInfo.City == "" {
+		loc = value.Ttg.IPInfo.Country
 	}
 
     // Build the summary
     s := ""
 
-	s += fmt.Sprintf("%d", value.ttg.MessagesReceived)
+	s += fmt.Sprintf("%d", value.Ttg.MessagesReceived)
 
     // Done
     return label, loc, s
