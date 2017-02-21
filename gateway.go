@@ -28,7 +28,7 @@ func SafecastReadGateway(gatewayId string) (isAvail bool, sv SafecastGateway) {
     valueEmpty.Ttg.GatewayId = gatewayId
 
     // Generate the filename, which we'll use twice
-    filename := SafecastDirectory() + TTServerGatewayPath + "/" + fmt.Sprintf("%d", gatewayId) + ".json"
+    filename := SafecastDirectory() + TTServerGatewayPath + "/" + gatewayId + ".json"
 
     // If the file doesn't exist, don't even try
     _, err := os.Stat(filename)
