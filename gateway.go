@@ -100,18 +100,16 @@ func SafecastWriteGateway(ttg TTGateReq) {
 func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc string, Summary string) {
 
 	// Read the file
-	fmt.Printf("Reading: '%s'\n", GatewayId);
 	isAvail, value := SafecastReadGateway(GatewayId)
     if !isAvail {
         return "", "", ""
     }
-	fmt.Printf("%v\n", value);
 
     // Get the label
 	label := value.Ttg.GatewayName;
 
 	// Get a summary of the location
-	loc := fmt.Sprintf("%s,%s", value.Ttg.IPInfo.City, value.Ttg.IPInfo.Country)
+	loc := fmt.Sprintf("%s, %s", value.Ttg.IPInfo.City, value.Ttg.IPInfo.Country)
 	if value.Ttg.IPInfo.City == "" {
 		loc = value.Ttg.IPInfo.Country
 	}
@@ -154,12 +152,12 @@ func sendSafecastGatewaySummaryToSlack() {
 						if s != "" {
 							s += fmt.Sprintf("\n");
 						}
-				        s += fmt.Sprintf("<http://%s%s%s|%s> ", TTServerHTTPAddress, TTServerTopicGateway2, gatewayID, gatewayID)
-						if label != "" {
-							s += fmt.Sprintf(" (%s)", label)
-						}
+				        s += fmt.Sprintf("<http://%s%s%s|%s>", TTServerHTTPAddress, TTServerTopicGateway2, gatewayID, gatewayID)
 						if loc != "" {
 							s += fmt.Sprintf("%s ", loc)
+						}
+						if label != "" {
+							s += fmt.Sprintf(" \"%s\"", label)
 						}
 						if summary != "" {
 							s += fmt.Sprintf("\n%s", summary)
