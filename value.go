@@ -49,13 +49,13 @@ func SafecastReadValue(deviceId uint32) (isAvail bool, sv SafecastValue) {
 
         // Read the file and unmarshall if no error
         contents, errRead := ioutil.ReadFile(filename)
-        if err == nil {
+        if errRead == nil {
 		    valueToRead := SafecastValue{}
-            err = json.Unmarshal(contents, &valueToRead)
-            if err == nil {
-				fmt.Printf("*** %s appears to be corrupt ***\n", filename);
+            errRead = json.Unmarshal(contents, &valueToRead)
+            if errRead == nil {
                 return true, valueToRead
             }
+			fmt.Printf("*** %s appears to be corrupt ***\n", filename);
         }
 		err = errRead
 		
