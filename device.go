@@ -216,7 +216,7 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool, fDetails bool) {
         gps := ""
         summary := ""
         if fDetails {
-            label, gps, summary = SafecastGetSummary(id)
+            label, gps, summary = SafecastGetValueSummary(id)
         }
 
         s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicValue, id, id)

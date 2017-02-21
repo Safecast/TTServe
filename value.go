@@ -406,7 +406,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
 }
 
 // Get summary of a device
-func SafecastGetSummary(DeviceId uint32) (Label string, Gps string, Summary string) {
+func SafecastGetValueSummary(DeviceId uint32) (Label string, Gps string, Summary string) {
 
 	// Read the file
 	isAvail, value := SafecastReadValue(DeviceId)
