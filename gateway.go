@@ -8,24 +8,24 @@ package main
 
 import (
     "os"
-	"time"
+    "time"
     "fmt"
-	"strings"
-	"strconv"
+    "strings"
+    "strconv"
     "io/ioutil"
     "encoding/json"
 )
 
 // The data structure for the "Value" files
 type SafecastGateway struct {
-	UploadedAt	string		`json:"when_uploaded,omitempty"`
-    Ttg			TTGateReq   `json:"current_values,omitempty"`
+    UploadedAt  string      `json:"when_uploaded,omitempty"`
+    Ttg         TTGateReq   `json:"current_values,omitempty"`
 }
 
 // Get the current value
 func SafecastReadGateway(gatewayId string) (isAvail bool, sv SafecastGateway) {
     valueEmpty := SafecastGateway{}
-	valueEmpty.UploadedAt = time.Now().UTC().Format("2006-01-02 15:04:05 UTC")
+    valueEmpty.UploadedAt = time.Now().UTC().Format("2006-01-02 15:04:05 UTC")
     valueEmpty.Ttg.GatewayId = gatewayId
 
     // Generate the filename, which we'll use twice
@@ -47,14 +47,14 @@ func SafecastReadGateway(gatewayId string) (isAvail bool, sv SafecastGateway) {
         // Read the file and unmarshall if no error
         contents, errRead := ioutil.ReadFile(filename)
         if err == nil {
-		    valueToRead := SafecastGateway{}
+            valueToRead := SafecastGateway{}
             err = json.Unmarshal(contents, &valueToRead)
             if err == nil {
                 return true, valueToRead
             }
         }
-		err = errRead
-		
+        err = errRead
+
         // Delay before trying again
         time.Sleep(10 * time.Second)
 
@@ -79,12 +79,12 @@ func SafecastWriteGateway(ttg TTGateReq) {
         return
     }
 
-	// Copy over all the values directly.  If someday we need to aggregate
-	// values rather than replace them, this is the place to do it
-	value.Ttg = ttg
-	
-	// Update the uploaded at
-	value.UploadedAt = time.Now().UTC().Format("2006-01-02 15:04:05 UTC")
+    // Copy over all the values directly.  If someday we need to aggregate
+    // values rather than replace them, this is the place to do it
+    value.Ttg = ttg
+
+    // Update the uploaded at
+    value.UploadedAt = time.Now().UTC().Format("2006-01-02 15:04:05 UTC")
 
     // Write it to the file
     filename := SafecastDirectory() + TTServerGatewayPath + "/" + ttg.GatewayId + ".json"
@@ -100,41 +100,44 @@ func SafecastWriteGateway(ttg TTGateReq) {
 // Get summary of a device
 func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc string, Summary string) {
 
-	// Read the file
-	isAvail, value := SafecastReadGateway(GatewayId)
+    // Read the file
+    isAvail, value := SafecastReadGateway(GatewayId)
     if !isAvail {
         return "", "", ""
     }
 
     // Get the label
-	label := value.Ttg.GatewayName;
+    label := value.Ttg.GatewayName;
 
-	// Get a summary of the location
-	loc := fmt.Sprintf("%s, %s", value.Ttg.IPInfo.City, value.Ttg.IPInfo.Country)
-	if value.Ttg.IPInfo.City == "" {
-		loc = value.Ttg.IPInfo.Country
-	}
+    // Get a summary of the location
+    loc := fmt.Sprintf("%s, %s", value.Ttg.IPInfo.City, value.Ttg.IPInfo.Country)
+    if value.Ttg.IPInfo.City == "" {
+        loc = value.Ttg.IPInfo.Country
+    }
 
     // Build the summary
     s := ""
 
-	s += bol
-	s += fmt.Sprintf("%d Received", value.Ttg.MessagesReceived)
+    if value.Ttg.MessagesReceived != 0 {
 
-	// Iterate over devices
-	devicelist := value.Ttg.DevicesSeen
-	devices := strings.Split(devicelist, ",")
-	for i, d := range devices {
-		if i == 0 {
-			s += bol
-		} else {
-			s += " "
-		}
-		i64, _ := strconv.ParseUint(d, 10, 32)
-		deviceID := uint32(i64)
-        s += fmt.Sprintf("<http://%s%s%d|%010d>", TTServerHTTPAddress, TTServerTopicValue, deviceID, deviceID)
-	}
-	
+        s += bol
+
+        if value.Ttg.DevicesSeen == "" {
+            s += fmt.Sprintf("%d messages received", value.Ttg.MessagesReceived)
+        } else {
+            s += fmt.Sprintf("%d received from ", value.Ttg.MessagesReceived)
+
+            // Iterate over devices
+            devicelist := value.Ttg.DevicesSeen
+            devices := strings.Split(devicelist, ",")
+            for _, d := range devices {
+                i64, _ := strconv.ParseUint(d, 10, 32)
+                deviceID := uint32(i64)
+                s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicValue, deviceID, deviceID)
+            }
+        }
+    }
+
     // Done
     return label, loc, s
 
@@ -144,9 +147,9 @@ func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc 
 // Get a summary of devices that are older than this many minutes ago
 func sendSafecastGatewaySummaryToSlack() {
 
-	// Build the summary string
-	s := ""
-	
+    // Build the summary string
+    s := ""
+
     // Loop over the file system, tracking all devices
     files, err := ioutil.ReadDir(SafecastDirectory() + TTServerGatewayPath)
     if err == nil {
@@ -162,22 +165,22 @@ func sendSafecastGatewaySummaryToSlack() {
 
                 // Track the device
                 if gatewayID != "" {
-					label, loc, summary := SafecastGetGatewaySummary(gatewayID, "    ")
-					if summary != "" {
-						if s != "" {
-							s += fmt.Sprintf("\n");
-						}
-				        s += fmt.Sprintf("<http://%s%s%s|%s>", TTServerHTTPAddress, TTServerTopicGateway2, gatewayID, gatewayID)
-						if loc != "" {
-							s += fmt.Sprintf(" %s", loc)
-						}
-						if label != "" {
-							s += fmt.Sprintf(" \"%s\"", label)
-						}
-						if summary != "" {
-							s += fmt.Sprintf("\n%s", summary)
-						}
-					}
+                    label, loc, summary := SafecastGetGatewaySummary(gatewayID, "    ")
+                    if summary != "" {
+                        if s != "" {
+                            s += fmt.Sprintf("\n");
+                        }
+                        s += fmt.Sprintf("<http://%s%s%s|%s>", TTServerHTTPAddress, TTServerTopicGateway2, gatewayID, gatewayID)
+                        if loc != "" {
+                            s += fmt.Sprintf(" %s", loc)
+                        }
+                        if label != "" {
+                            s += fmt.Sprintf(" \"%s\"", label)
+                        }
+                        if summary != "" {
+                            s += fmt.Sprintf("\n%s", summary)
+                        }
+                    }
                 }
 
             }
@@ -185,9 +188,9 @@ func sendSafecastGatewaySummaryToSlack() {
     }
 
     // Send it to Slack
-	if s == "" {
-		s = "No gateways have recently reported"
-	}
+    if s == "" {
+        s = "No gateways have recently reported"
+    }
     sendToSafecastOps(s, SLACK_MSG_REPLY)
-	
+
 }
