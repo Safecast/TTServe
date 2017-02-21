@@ -123,7 +123,6 @@ func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc 
 	if err == nil {
 	    minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
 		if minutesAgo >= 0 {
-			s += "\n"
 	        s += bol
 			s += fmt.Sprintf("Last seen %d minutes ago", minutesAgo)
 		}
@@ -132,6 +131,10 @@ func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc 
 	// Messages Received
     if value.Ttg.MessagesReceived != 0 {
 
+		if s != "" {
+			s += "\n"
+		}
+		
         s += bol
 
         if value.Ttg.DevicesSeen == "" {
