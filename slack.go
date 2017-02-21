@@ -2,7 +2,7 @@
 // Use of this source code is governed by licenses granted by the
 // copyright holder including that found in the LICENSE file.
 
-// Slack channel handling, both inbound and outbound
+// Slack channel handling, both inbound and outbound 
 package main
 
 import (
@@ -101,7 +101,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             sendSafecastDeviceSummaryToSlack(true, true)
         }
 
-    case "gateway":
+    case "ttgate":
         if messageAfterFirstWord == "" {
             sendSafecastGatewaySummaryToSlack()
         }
