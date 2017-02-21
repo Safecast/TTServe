@@ -25,7 +25,7 @@ type SafecastGateway struct {
 // Get the current value
 func SafecastReadGateway(gatewayId string) (isAvail bool, sv SafecastGateway) {
     valueEmpty := SafecastGateway{}
-    valueEmpty.UploadedAt = time.Now().UTC().Format("2006-01-02 15:04:05 UTC")
+    valueEmpty.UploadedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
     valueEmpty.Ttg.GatewayId = gatewayId
 
     // Generate the filename, which we'll use twice
@@ -84,7 +84,7 @@ func SafecastWriteGateway(ttg TTGateReq) {
     value.Ttg = ttg
 
     // Update the uploaded at
-    value.UploadedAt = time.Now().UTC().Format("2006-01-02 15:04:05 UTC")
+    value.UploadedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
     // Write it to the file
     filename := SafecastDirectory() + TTServerGatewayPath + "/" + ttg.GatewayId + ".json"
@@ -118,6 +118,18 @@ func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc 
     // Build the summary
     s := ""
 
+	// When active
+    whenSeen, err := time.Parse("2006-01-02T15:04:05Z", value.UploadedAt)
+	if err == nil {
+	    minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
+		if minutesAgo >= 0 {
+			s += "\n"
+	        s += bol
+			s += fmt.Sprintf("Last seen %d minutes ago", minutesAgo)
+		}
+	}
+	
+	// Messages Received
     if value.Ttg.MessagesReceived != 0 {
 
         s += bol
