@@ -97,13 +97,15 @@ func SafecastWriteGateway(ttg TTGateReq) {
 }
 
 // Get summary of a device
-func SafecastGetGatewaySummary(GatewayId string) (Label string, Loc string, Summary string) {
+func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc string, Summary string) {
 
 	// Read the file
+	fmt.Printf("Reading: '%s'\n", GatewayId);
 	isAvail, value := SafecastReadGateway(GatewayId)
     if !isAvail {
         return "", "", ""
     }
+	fmt.Printf("%v\n", value);
 
     // Get the label
 	label := value.Ttg.GatewayName;
@@ -117,7 +119,8 @@ func SafecastGetGatewaySummary(GatewayId string) (Label string, Loc string, Summ
     // Build the summary
     s := ""
 
-	s += fmt.Sprintf("%d", value.Ttg.MessagesReceived)
+	s += bol
+	s += fmt.Sprintf("%d Received", value.Ttg.MessagesReceived)
 
     // Done
     return label, loc, s
@@ -146,7 +149,7 @@ func sendSafecastGatewaySummaryToSlack() {
 
                 // Track the device
                 if gatewayID != "" {
-					label, loc, summary := SafecastGetGatewaySummary(gatewayID)
+					label, loc, summary := SafecastGetGatewaySummary(gatewayID, "    ")
 					if summary != "" {
 						if s != "" {
 							s += fmt.Sprintf("\n");
