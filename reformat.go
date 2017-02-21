@@ -169,7 +169,7 @@ func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data
                         unrecognized = unrecognized + ","
                     }
                     unrecognized = unrecognized + "\"" + field[0] + "\":\"" + field[1] + "\""
-                case "DeviceId":
+                case "DeviceID":
                 case "Temperature":
                 }
             }
