@@ -101,6 +101,11 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             sendSafecastDeviceSummaryToSlack(true, true)
         }
 
+    case "gateway":
+        if messageAfterFirstWord == "" {
+            sendSafecastGatewaySummaryToSlack()
+        }
+
     case "pending":
         fallthrough
     case "outbound":

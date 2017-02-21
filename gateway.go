@@ -10,6 +10,7 @@ import (
     "os"
 	"time"
     "fmt"
+	"strings"
     "io/ioutil"
     "encoding/json"
 )
@@ -121,4 +122,56 @@ func SafecastGetGatewaySummary(GatewayId string) (Label string, Loc string, Summ
     // Done
     return label, loc, s
 
+}
+
+
+// Get a summary of devices that are older than this many minutes ago
+func sendSafecastGatewaySummaryToSlack() {
+
+	// Build the summary string
+	s := ""
+	
+    // Loop over the file system, tracking all devices
+    files, err := ioutil.ReadDir(SafecastDirectory() + TTServerGatewayPath)
+    if err == nil {
+
+        // Iterate over each of the values
+        for _, file := range files {
+
+            if !file.IsDir() {
+
+                // Extract gateway ID from filename
+                Str0 := file.Name()
+                gatewayID := strings.Split(Str0, ".")[0]
+
+                // Track the device
+                if gatewayID != "" {
+					label, loc, summary := SafecastGetGatewaySummary(gatewayID)
+					if summary != "" {
+						if s != "" {
+							s += fmt.Sprintf("\n");
+						}
+				        s += fmt.Sprintf("<http://%s%s%s|%s> ", TTServerHTTPAddress, TTServerTopicGateway2, gatewayID, gatewayID)
+						if label != "" {
+							s += fmt.Sprintf(" (%s)", label)
+						}
+						if loc != "" {
+							s += fmt.Sprintf("%s ", loc)
+						}
+						if summary != "" {
+							s += fmt.Sprintf("\n%s", summary)
+						}
+					}
+                }
+
+            }
+        }
+    }
+
+    // Send it to Slack
+	if s == "" {
+		s = "No gateways have recently reported"
+	}
+    sendToSafecastOps(s, SLACK_MSG_REPLY)
+	
 }
