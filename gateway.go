@@ -11,6 +11,7 @@ import (
 	"time"
     "fmt"
 	"strings"
+	"strconv"
     "io/ioutil"
     "encoding/json"
 )
@@ -120,6 +121,20 @@ func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc 
 	s += bol
 	s += fmt.Sprintf("%d Received", value.Ttg.MessagesReceived)
 
+	// Iterate over devices
+	devicelist := value.Ttg.DevicesSeen
+	devices := strings.Split(devicelist, ",")
+	for i, d := range devices {
+		if i == 0 {
+			s += bol
+		} else {
+			s += " "
+		}
+		i64, _ := strconv.ParseUint(d, 10, 32)
+		deviceID := uint32(i64)
+        s += fmt.Sprintf("<http://%s%s%d|%010d>", TTServerHTTPAddress, TTServerTopicValue, deviceID, deviceID)
+	}
+	
     // Done
     return label, loc, s
 
