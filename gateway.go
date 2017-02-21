@@ -122,7 +122,7 @@ func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc 
     whenSeen, err := time.Parse("2006-01-02T15:04:05Z", value.UploadedAt)
 	if err == nil {
 	    minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
-		if minutesAgo >= 0 {
+		if minutesAgo > 60 {
 	        s += bol
 			s += fmt.Sprintf("Last seen %d minutes ago", minutesAgo)
 		}
