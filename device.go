@@ -143,7 +143,7 @@ func sendHelloToNewDevices() {
         if deviceID > 1048576 {
 
             // Read the current value, or a blank value structure if it's blank
-            _, value := SafecastReadValue(deviceID)
+            _, _, value := SafecastReadValue(deviceID)
 
             // Check to see if it has a required stats field
             if value.Dev == nil || value.Dev.AppVersion == nil {

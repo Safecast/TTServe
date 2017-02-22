@@ -16,9 +16,6 @@ import (
     "encoding/json"
 )
 
-// Debug
-var valueDebug = false
-
 // The data structure for the "Value" files
 type SafecastValue struct {
     SafecastData            `json:"current_values,omitempty"`
@@ -30,13 +27,9 @@ type SafecastValue struct {
 }
 
 // Get the current value
-func SafecastReadValue(deviceId uint32) (isAvail bool, sv SafecastValue) {
+func SafecastReadValue(deviceId uint32) (isAvail bool, isEmpty bool, sv SafecastValue) {
     valueEmpty := SafecastValue{}
     valueEmpty.DeviceId = uint64(deviceId);
-
-    if valueDebug {
-        fmt.Printf("ReadValue(%d)\n", deviceId)
-    }
 
     // Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", deviceId) + ".json"
@@ -45,9 +38,9 @@ func SafecastReadValue(deviceId uint32) (isAvail bool, sv SafecastValue) {
     _, err := os.Stat(filename)
     if err != nil {
         if os.IsNotExist(err) {
-            return true, valueEmpty
+            return true, true, valueEmpty
         }
-        return false, valueEmpty
+        return false, true, valueEmpty
     }
 
     // Try reading the file several times, now that we know it exists,
@@ -60,26 +53,23 @@ func SafecastReadValue(deviceId uint32) (isAvail bool, sv SafecastValue) {
             valueToRead := SafecastValue{}
             errRead = json.Unmarshal(contents, &valueToRead)
             if errRead == nil {
-                if valueDebug {
-                    fmt.Printf("ReadValue(%d) -> \n%v\n\n", deviceId, valueToRead)
-                }
-                return true, valueToRead
+                return true, false, valueToRead
             }
             fmt.Printf("*** %s appears to be corrupt ***\n", filename);
-			return true, valueEmpty
+            return true, true, valueEmpty
         }
         err = errRead
 
         // Delay before trying again
-        time.Sleep(10 * time.Second)
+        time.Sleep(5 * time.Second)
 
     }
 
     // Error
     if os.IsNotExist(err) {
-        return true, valueEmpty
+        return true, true, valueEmpty
     }
-    return false, valueEmpty
+    return false, true, valueEmpty
 
 }
 
@@ -90,23 +80,15 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     var ChangedOpc = false
     var ChangedGeiger = false
 
-    if valueDebug {
-        fmt.Printf("WriteValue(%d)\n", sc.DeviceId)
-    }
-
     // Use the supplied upload time as our modification time
     sc.UploadedAt = &UploadedAt
 
     // Read the current value, or a blank value structure if it's blank
-    isAvail, value := SafecastReadValue(uint32(sc.DeviceId))
+    isAvail, _, value := SafecastReadValue(uint32(sc.DeviceId))
 
     // Exit if error, so that we don't overwrite in cases of contention
     if !isAvail {
         return
-    }
-
-    if valueDebug {
-        fmt.Printf("WriteValue(%d==%d)\n", sc.DeviceId, value.DeviceId)
     }
 
     // Update the current values, but only if modified
@@ -414,28 +396,38 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         value.IPInfo = ipInfo
     }
 
-    // Write it to the file
+    // Write it to the file until it's written correctly, to allow for concurrency
     filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", sc.DeviceId) + ".json"
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
-    fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
-    if err == nil {
+
+    for {
+
+		// Write the value
+        fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
+		if err != nil {
+		    fmt.Printf("*** Unable to write %s: %v\n", filename, err)
+			break
+		}
         fd.WriteString(string(valueJSON));
         fd.Close();
-	    if valueDebug {
-	        fmt.Printf("WriteValue(%d):\n%s\n", sc.DeviceId, string(valueJSON))
-	    }
-		return
+
+		// Delay, to increase the chance that we will catch a concurrent update/overwrite
+        time.Sleep(time.Duration(random(1, 6)) * time.Second)
+
+		// Do an integrity check, and re-write the value if necessary
+	    _, isEmpty, _ := SafecastReadValue(uint32(sc.DeviceId))
+		if !isEmpty {
+			break
+		}
     }
 
-	fmt.Printf("*** Unable to write %s: %v\n", filename, err)
-	
 }
 
 // Get summary of a device
 func SafecastGetValueSummary(DeviceId uint32) (Label string, Gps string, Summary string) {
 
     // Read the file
-    isAvail, value := SafecastReadValue(DeviceId)
+    isAvail, _, value := SafecastReadValue(DeviceId)
     if !isAvail {
         return "", "", ""
     }

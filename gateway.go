@@ -23,7 +23,7 @@ type SafecastGateway struct {
 }
 
 // Get the current value
-func SafecastReadGateway(gatewayId string) (isAvail bool, sv SafecastGateway) {
+func SafecastReadGateway(gatewayId string) (isAvail bool, isEmpty bool, sv SafecastGateway) {
     valueEmpty := SafecastGateway{}
     valueEmpty.UploadedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
     valueEmpty.Ttg.GatewayId = gatewayId
@@ -35,9 +35,9 @@ func SafecastReadGateway(gatewayId string) (isAvail bool, sv SafecastGateway) {
     _, err := os.Stat(filename)
     if err != nil {
         if os.IsNotExist(err) {
-            return true, valueEmpty
+            return true, true, valueEmpty
         }
-        return false, valueEmpty
+        return false, true, valueEmpty
     }
 
     // Try reading the file several times, now that we know it exists,
@@ -50,23 +50,23 @@ func SafecastReadGateway(gatewayId string) (isAvail bool, sv SafecastGateway) {
             valueToRead := SafecastGateway{}
             errRead = json.Unmarshal(contents, &valueToRead)
             if errRead == nil {
-                return true, valueToRead
+                return true, false, valueToRead
             }
 			fmt.Printf("*** %s appears to be corrupt - erasing ***\n", filename);
-			return true, valueEmpty
+			return true, true, valueEmpty
         }
         err = errRead
 
         // Delay before trying again
-        time.Sleep(10 * time.Second)
+        time.Sleep(5 * time.Second)
 
     }
 
     // Error
     if os.IsNotExist(err) {
-        return true, valueEmpty
+        return true, true, valueEmpty
     }
-    return false, valueEmpty
+    return false, true, valueEmpty
 
 }
 
@@ -74,7 +74,7 @@ func SafecastReadGateway(gatewayId string) (isAvail bool, sv SafecastGateway) {
 func SafecastWriteGateway(ttg TTGateReq) {
 
     // Read the current value, or a blank value structure if it's blank
-    isAvail, value := SafecastReadGateway(ttg.GatewayId)
+    isAvail, _, value := SafecastReadGateway(ttg.GatewayId)
 
     // Exit if error, so that we don't overwrite in cases of contention
     if !isAvail {
@@ -91,14 +91,28 @@ func SafecastWriteGateway(ttg TTGateReq) {
     // Write it to the file
     filename := SafecastDirectory() + TTServerGatewayPath + "/" + ttg.GatewayId + ".json"
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
-    fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
-    if err == nil {
+
+
+    for {
+
+		// Write the value
+        fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
+		if err != nil {
+		    fmt.Printf("*** Unable to write %s: %v\n", filename, err)
+			break
+		}
         fd.WriteString(string(valueJSON));
         fd.Close();
-		return
-    }
 
-	fmt.Printf("*** Unable to write %s: %v\n", filename, err)
+		// Delay, to increase the chance that we will catch a concurrent update/overwrite
+        time.Sleep(time.Duration(random(1, 6)) * time.Second)
+
+		// Do an integrity check, and re-write the value if necessary
+	    _, isEmpty, _ := SafecastReadGateway(ttg.GatewayId)
+		if !isEmpty {
+			break
+		}
+    }
 
 }
 
@@ -106,7 +120,7 @@ func SafecastWriteGateway(ttg TTGateReq) {
 func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc string, Summary string) {
 
     // Read the file
-    isAvail, value := SafecastReadGateway(GatewayId)
+    isAvail, _, value := SafecastReadGateway(GatewayId)
     if !isAvail {
         return "", "", ""
     }
