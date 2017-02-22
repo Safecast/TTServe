@@ -385,7 +385,8 @@ func endTransaction(transaction int, url string, errstr string) {
             httpTransactionErrorString = errstr
             httpTransactionErrorFirst = false
         }
-        fmt.Printf("%s <<<    [%d] *** after %d seconds, ERROR uploading to %s %s\n\n", time.Now().Format(logDateFormat), transaction, duration, url, errstr)
+        fmt.Printf("%s <<<    [%d] *** ERROR\n", time.Now().Format(logDateFormat), transaction)
+        ILog(fmt.Sprintf("After %d seconds, error uploading to %s %s\n", duration, url, errstr))
     } else {
         if (duration < 5) {
             fmt.Printf("%s <<<    [%d]\n", time.Now().Format(logDateFormat), transaction);
@@ -463,12 +464,8 @@ func isDuplicate(checksum uint32) bool {
 func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
     if (httpTransactionErrors != 0) {
         if (httpTransactionErrors == 1) {
-            // As of 10/2016, I've chosen to suppress single-instance errors simply because they occur too frequently,
-            // i.e. every day or few days.  When we ultimately move the dev server to AWS, we should re-enable this.
-            if (false) {
-                sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to %s:%s)",
+            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to %s:%s)",
                     httpTransactionErrorTime, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS);
-            }
         } else {
             sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading in %d minutes to %s:%s)",
                 httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS);
