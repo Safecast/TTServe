@@ -60,7 +60,7 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
 	    }
 
         // Attempt to create the file because it doesn't already exist
-        fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_EXCL, 0666)
+        fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
         if (err != nil) {
             fmt.Printf("Logging: error creating %s: %s\n", file, err);
             return;
@@ -103,7 +103,7 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
 	    }
 
         // Attempt to create the file because it doesn't already exist
-        fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE|os.O_EXCL, 0666)
+        fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
         if (err != nil) {
             fmt.Printf("Logging: error creating file %s: %s\n", file, err);
             return;

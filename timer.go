@@ -114,7 +114,7 @@ func ControlFileTime(controlfilename string, message string) (restartTime time.T
 
     // Overwrite the file if requested to do so
     if (message != "") {
-        fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_EXCL|os.O_CREATE, 0666)
+        fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
         if (err == nil) {
             fd.WriteString(message);
             fd.Close();

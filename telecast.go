@@ -136,7 +136,7 @@ func sendCommand(sender string, deviceID uint32, message string) {
 
     // Write it to a file, overwriting if it already exists
     file := SafecastCommandFilename(deviceID)
-    fd, err := os.OpenFile(file, os.O_RDWR|os.O_TRUNC|os.O_EXCL|os.O_CREATE, 0666)
+    fd, err := os.OpenFile(file, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
     if (err != nil) {
         fmt.Printf("SendCommand: error creating file %s: %s\n", file, err);
         return;

@@ -134,7 +134,7 @@ func stampSet(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isVal
             sfJSON, _ := json.Marshal(sf)
 
             file := stampFilename(DeviceId)
-            fd, err := os.OpenFile(file, os.O_RDWR|os.O_TRUNC|os.O_EXCL|os.O_CREATE, 0666)
+            fd, err := os.OpenFile(file, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
             if (err != nil) {
                 fmt.Printf("error creating file %s: %s\n", file, err);
             } else {

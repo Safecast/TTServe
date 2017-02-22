@@ -90,7 +90,7 @@ func SafecastWriteGateway(ttg TTGateReq) {
     // Write it to the file
     filename := SafecastDirectory() + TTServerGatewayPath + "/" + ttg.GatewayId + ".json"
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
-    fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_EXCL|os.O_CREATE, 0666)
+    fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
     if err == nil {
         fd.WriteString(string(valueJSON));
         fd.Close();
