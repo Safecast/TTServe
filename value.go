@@ -80,6 +80,11 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     var ChangedOpc = false
     var ChangedGeiger = false
 
+	// Delay a random amount just in case we get called very quickly
+	// with two sequential values by the same device.  While no guarantee,
+	// this reduces the chance that we will overwrite each other
+    time.Sleep(time.Duration(random(1, 6)) * time.Second)
+	
     // Use the supplied upload time as our modification time
     sc.UploadedAt = &UploadedAt
 
