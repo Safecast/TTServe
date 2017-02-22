@@ -17,7 +17,7 @@ import (
 )
 
 // Debug
-var valueDebug = true
+var valueDebug = false
 
 // The data structure for the "Value" files
 type SafecastValue struct {
