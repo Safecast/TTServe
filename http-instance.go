@@ -39,11 +39,10 @@ func inboundWebInstanceHandler(rw http.ResponseWriter, req *http.Request) {
 }
 
 // Get the current log file name for the current instance
-func InstanceLogFilename(extension string) string {
-    directory := SafecastDirectory()
+func ILogFilename(extension string) string {
     prefix := time.Now().UTC().Format("2006-01-")
-    file := directory + TTServerInstancePath + "/" + prefix + TTServeInstanceID + extension
-    return file
+	filename := prefix + TTServeInstanceID + extension
+    return filename
 }
 
 // Log a string to the instance's log file
@@ -59,7 +58,7 @@ func ILog(sWithoutDate string) {
 	fmt.Printf("%s", s)
 	
     // Open it
-	file := InstanceLogFilename(".log")
+    file := SafecastDirectory() + TTServerInstancePath + "/" + ILogFilename(".log")
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
     if (err != nil) {
 
