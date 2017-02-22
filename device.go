@@ -28,10 +28,10 @@ type seenDevice struct {
 var seenDevices []seenDevice
 
 // Class used to sort seen devices
-type ByKey []seenDevice
-func (a ByKey) Len() int      { return len(a) }
-func (a ByKey) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ByKey) Less(i, j int) bool {
+type ByDeviceKey []seenDevice
+func (a ByDeviceKey) Len() int      { return len(a) }
+func (a ByDeviceKey) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByDeviceKey) Less(i, j int) bool {
     // Primary:
     // By capture time, most recent last (so that the most recent is nearest your attention, at the bottom in Slack)
     if a[i].seen.Before(a[j].seen) {
@@ -198,7 +198,7 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool, fDetails bool) {
 
     // Next sort the device list
     sortedDevices := seenDevices
-    sort.Sort(ByKey(sortedDevices))
+    sort.Sort(ByDeviceKey(sortedDevices))
 
     // Finally, sweep over all these devices in sorted order,
     // generating a single large text string to be sent as a Slack message

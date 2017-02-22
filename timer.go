@@ -29,6 +29,7 @@ func timer15m() {
         // We do this before the first sleep so we have a list of device ASAP
         if ThisServerIsMonitor {
             sendExpiredSafecastDevicesToSlack()
+            sendExpiredSafecastGatewaysToSlack()
         }
 
         // Sleep
