@@ -95,7 +95,10 @@ func SafecastWriteGateway(ttg TTGateReq) {
     if err == nil {
         fd.WriteString(string(valueJSON));
         fd.Close();
+		return
     }
+
+	fmt.Printf("*** Unable to write %s: %v\n", filename, err)
 
 }
 

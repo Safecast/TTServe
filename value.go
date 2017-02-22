@@ -424,6 +424,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
 	    if valueDebug {
 	        fmt.Printf("WriteValue(%d):\n%s\n", sc.DeviceId, string(valueJSON))
 	    }
+		return
     }
 
 	fmt.Printf("*** Unable to write %s: %v\n", filename, err)
