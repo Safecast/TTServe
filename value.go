@@ -44,8 +44,8 @@ func SafecastReadValue(deviceId uint32) (isAvail bool, isReset bool, sv Safecast
         return false, true, valueEmpty
     }
 
-    // Try reading the file several times, now that we know it exists,
-    // just to deal with issues of contention
+    // Try reading the file several times, now that we know it exists.
+    // We retry just in case of file system errors on contention.
     for i:=0; i<5; i++ {
 
         // Read the file and unmarshall if no error
@@ -56,7 +56,11 @@ func SafecastReadValue(deviceId uint32) (isAvail bool, isReset bool, sv Safecast
             if errRead == nil {
                 return true, false, valueToRead
             }
-            fmt.Printf("*** %s appears to be corrupt ***\n", filename);
+			// Malformed JSON can easily occur because of multiple concurrent
+			// writers, and so this self-corrects the situation.
+			if false {
+	            fmt.Printf("*** %s appears to be corrupt ***\n", filename);
+			}
             return true, true, valueEmpty
         }
         err = errRead
@@ -84,11 +88,15 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
 	
 	// Delay a random amount just in case we get called very quickly
 	// with two sequential values by the same device.  While no guarantee,
-	// this reduces the chance that we will overwrite each other
+	// this reduces the chance that we will overwrite each other.
+	// This happens ALL THE TIME when there are multiple LoRa gateways
+	// that receive and upload the same message from the same device,
+	// and are typically received by different TTSERVE instances because
+	// of load balancing.  This simply reduces the possibility of
+	// file corruption due to multiple concurrent writers.  (The corruption
+	// is self-correcting, but it's still good to avoid.)
 	sleepSeconds := random(0, 30)
-	fmt.Printf("Delaying by %d seconds\n", sleepSeconds)
     time.Sleep(time.Duration(sleepSeconds) * time.Second)
-	fmt.Printf("Done delaying by %d seconds\n", sleepSeconds)
 	
     // Use the supplied upload time as our modification time
     sc.UploadedAt = &UploadedAt

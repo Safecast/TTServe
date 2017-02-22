@@ -41,8 +41,8 @@ func SafecastReadGateway(gatewayId string) (isAvail bool, isReset bool, sv Safec
         return false, true, valueEmpty
     }
 
-    // Try reading the file several times, now that we know it exists,
-    // just to deal with issues of contention
+    // Try reading the file several times, now that we know it exists.
+    // We retry just in case of file system errors on contention.
     for i:=0; i<5; i++ {
 
         // Read the file and unmarshall if no error
@@ -53,7 +53,11 @@ func SafecastReadGateway(gatewayId string) (isAvail bool, isReset bool, sv Safec
             if errRead == nil {
                 return true, false, valueToRead
             }
-			fmt.Printf("*** %s appears to be corrupt - erasing ***\n", filename);
+			// Malformed JSON can easily occur because of multiple concurrent
+			// writers, and so this self-corrects the situation.
+			if false {
+				fmt.Printf("*** %s appears to be corrupt - erasing ***\n", filename);
+			}
 			return true, true, valueEmpty
         }
         err = errRead
