@@ -34,7 +34,7 @@ func inboundWebInstanceHandler(rw http.ResponseWriter, req *http.Request) {
     secret := Str[0]
     filename := Str[1]
 	if secret != ILogSecret() {
-	    fmt.Printf("%s Ssecret %d != %d\n", time.Now().Format(logDateFormat), secret, ILogSecret)
+	    fmt.Printf("%s Ssecret %s != %s\n", time.Now().Format(logDateFormat), secret, ILogSecret())
 		return
 	}		
 
