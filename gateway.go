@@ -52,7 +52,8 @@ func SafecastReadGateway(gatewayId string) (isAvail bool, sv SafecastGateway) {
             if errRead == nil {
                 return true, valueToRead
             }
-			fmt.Printf("*** %s appears to be corrupt ***\n", filename);
+			fmt.Printf("*** %s appears to be corrupt - erasing ***\n", filename);
+			return true, valueEmpty
         }
         err = errRead
 

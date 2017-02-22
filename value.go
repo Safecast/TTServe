@@ -66,6 +66,7 @@ func SafecastReadValue(deviceId uint32) (isAvail bool, sv SafecastValue) {
                 return true, valueToRead
             }
             fmt.Printf("*** %s appears to be corrupt ***\n", filename);
+			return true, valueEmpty
         }
         err = errRead
 
