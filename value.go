@@ -8,13 +8,16 @@ package main
 
 import (
     "os"
-	"time"
+    "time"
     "net/http"
     "fmt"
     "io/ioutil"
     "strings"
     "encoding/json"
 )
+
+// Debug
+var valueDebug = true
 
 // The data structure for the "Value" files
 type SafecastValue struct {
@@ -30,6 +33,10 @@ type SafecastValue struct {
 func SafecastReadValue(deviceId uint32) (isAvail bool, sv SafecastValue) {
     valueEmpty := SafecastValue{}
     valueEmpty.DeviceId = uint64(deviceId);
+
+    if valueDebug {
+        fmt.Printf("ReadValue(%d)\n", deviceId)
+    }
 
     // Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", deviceId) + ".json"
@@ -50,15 +57,18 @@ func SafecastReadValue(deviceId uint32) (isAvail bool, sv SafecastValue) {
         // Read the file and unmarshall if no error
         contents, errRead := ioutil.ReadFile(filename)
         if errRead == nil {
-		    valueToRead := SafecastValue{}
+            valueToRead := SafecastValue{}
             errRead = json.Unmarshal(contents, &valueToRead)
             if errRead == nil {
+                if valueDebug {
+                    fmt.Printf("ReadValue(%d) -> \n%v\n\n", deviceId, valueToRead)
+                }
                 return true, valueToRead
             }
-			fmt.Printf("*** %s appears to be corrupt ***\n", filename);
+            fmt.Printf("*** %s appears to be corrupt ***\n", filename);
         }
-		err = errRead
-		
+        err = errRead
+
         // Delay before trying again
         time.Sleep(10 * time.Second)
 
@@ -79,6 +89,10 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     var ChangedOpc = false
     var ChangedGeiger = false
 
+    if valueDebug {
+        fmt.Printf("WriteValue(%d)\n", sc.DeviceId)
+    }
+
     // Use the supplied upload time as our modification time
     sc.UploadedAt = &UploadedAt
 
@@ -88,6 +102,10 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     // Exit if error, so that we don't overwrite in cases of contention
     if !isAvail {
         return
+    }
+
+    if valueDebug {
+        fmt.Printf("WriteValue(%d==%d)\n", sc.DeviceId, value.DeviceId)
     }
 
     // Update the current values, but only if modified
@@ -402,15 +420,20 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     if err == nil {
         fd.WriteString(string(valueJSON));
         fd.Close();
+	    if valueDebug {
+	        fmt.Printf("WriteValue(%d):\n%s\n", sc.DeviceId, string(valueJSON))
+	    }
     }
 
+	fmt.Printf("*** Unable to write %s: %v\n", filename, err)
+	
 }
 
 // Get summary of a device
 func SafecastGetValueSummary(DeviceId uint32) (Label string, Gps string, Summary string) {
 
-	// Read the file
-	isAvail, value := SafecastReadValue(DeviceId)
+    // Read the file
+    isAvail, value := SafecastReadValue(DeviceId)
     if !isAvail {
         return "", "", ""
     }
