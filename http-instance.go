@@ -63,7 +63,9 @@ func ILogFilename(extension string) string {
 func ILogSecret() string {
 	timestr := AllServersSlackHealthRequestTime.Format(logDateFormat)
     checksum := crc32.ChecksumIEEE([]byte(timestr))
-	return fmt.Sprintf("%d", checksum)
+	checkstr := fmt.Sprintf("%d", checksum)
+	fmt.Printf("ILogSecret: %s == %s (%d)\n", timestr, checkstr, checksum)
+	return checkstr
 }
 
 // Log a string to the instance's log file
