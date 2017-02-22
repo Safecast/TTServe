@@ -43,7 +43,7 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
     file := SafecastLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".json")
 
     // Open it
-    fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_EXCL, 0666)
+    fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
     if (err != nil) {
 
 		// Don't attempt to create it if it already exists
@@ -86,7 +86,7 @@ func SafecastCSVLog(UploadedAt string, sd SafecastData) {
     file := SafecastLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".csv")
 
     // Open it
-    fd, err := os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_EXCL, 0666)
+    fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
     if (err != nil) {
 
 		// Don't attempt to create it if it already exists

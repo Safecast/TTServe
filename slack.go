@@ -129,7 +129,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 		ControlFileTime(TTServerRestartAllControlFile, user)
 
     case "health":
-        sendToSafecastOps(fmt.Sprintf("Checking health of all instances..."), SLACK_MSG_UNSOLICITED)
+        sendToSafecastOps(fmt.Sprintf("Checking health of all service instances..."), SLACK_MSG_UNSOLICITED)
 		ControlFileTime(TTServerHealthControlFile, user)
 
     case "send":

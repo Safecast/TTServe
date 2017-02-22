@@ -43,8 +43,8 @@ func timer15m() {
         }
 
         // Post stats
-        fmt.Printf("\n%s Stats: UDP:%d HTTPDevice:%d HTTPGateway:%d HTTPRelay:%d HTTPRedirect:%d TTN:%d\n\n", time.Now().Format(logDateFormat),
-            CountUDP, CountHTTPDevice, CountHTTPGateway, CountHTTPRelay, CountHTTPRedirect, CountTTN)
+        ILog(fmt.Sprintf("Stats: UDP:%d HTTPDevice:%d HTTPGateway:%d HTTPRelay:%d HTTPRedirect:%d TTN:%d\n\n",
+            CountUDP, CountHTTPDevice, CountHTTPGateway, CountHTTPRelay, CountHTTPRedirect, CountTTN))
 
     }
 
@@ -74,11 +74,11 @@ func ServerHealthCheck() string {
     minutesAgo -= hoursAgo * 60
     hoursAgo -= daysAgo * 24
     if daysAgo != 0 {
-        s = fmt.Sprintf("TTServe %s last restarted %dd %dh %dm ago", TTServeInstanceID, daysAgo, hoursAgo, minutesAgo)
+        s = fmt.Sprintf("%s last restarted %dd %dh %dm ago", TTServeInstanceID, daysAgo, hoursAgo, minutesAgo)
     } else if hoursAgo != 0 {
-        s = fmt.Sprintf("TTServe %s last restarted %dh %dm ago", TTServeInstanceID, hoursAgo, minutesAgo)
+        s = fmt.Sprintf("%s last restarted %dh %dm ago", TTServeInstanceID, hoursAgo, minutesAgo)
     } else {
-        s = fmt.Sprintf("TTServe %s last restarted %dm ago", TTServeInstanceID, minutesAgo)
+        s = fmt.Sprintf("%s last restarted %dm ago", TTServeInstanceID, minutesAgo)
     }
     return s
 }
@@ -89,13 +89,13 @@ func ControlFileCheck() {
     // Slack restart
     if (ControlFileTime(TTServerRestartAllControlFile, "") != AllServersSlackRestartRequestTime) {
         sendToSafecastOps(fmt.Sprintf("** %s restarting **", ThisServerAddressIPv4), SLACK_MSG_UNSOLICITED)
-        fmt.Printf("\n***\n***\n*** RESTARTING because of Slack 'restart' command\n***\n***\n\n")
+        ILog(fmt.Sprintf("\n***\n***\n*** RESTARTING because of Slack 'restart' command\n***\n***\n\n"))
         os.Exit(0)
     }
 
     // Github restart
     if (ControlFileTime(TTServerRestartGithubControlFile, "") != AllServersGithubRestartRequestTime) {
-        fmt.Printf("\n***\n***\n*** RESTARTING because of Github push command\n***\n***\n\n")
+        ILog(fmt.Sprintf("\n***\n***\n*** RESTARTING because of Github push command\n***\n***\n\n"))
         os.Exit(0)
     }
 
