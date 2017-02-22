@@ -148,7 +148,7 @@ func signalHandler() {
     for {
         switch <-ch {
         case syscall.SIGINT:
-            fmt.Printf("\n***\n***\n*** Exiting at user's request \n***\n***\n\n")
+            fmt.Printf("\n***\n***\n*** Exiting because of SIGNAL \n***\n***\n\n")
             os.Exit(0)
         case syscall.SIGTERM:
 			FtpStop()
