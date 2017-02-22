@@ -10,6 +10,7 @@ import (
     "net/http"
     "fmt"
 	"time"
+    "hash/crc32"
 	"strings"
     "io"
 )
@@ -21,8 +22,21 @@ func inboundWebInstanceHandler(rw http.ResponseWriter, req *http.Request) {
     rw.Header().Set("Content-Type", "text/plain")
 
     // Log it
-    filename := req.RequestURI[len(TTServerTopicInstance):]
-    fmt.Printf("%s Device information request for %s\n", time.Now().Format(logDateFormat), filename)
+    fn := req.RequestURI[len(TTServerTopicInstance):]
+    fmt.Printf("%s instance information request for %s\n", time.Now().Format(logDateFormat), fn)
+
+	// Crack the secret
+    Str := strings.Split(fn, "$")
+	if len(Str) != 2 {
+	    fmt.Printf("Badly formatted instance request\n", time.Now().Format(logDateFormat))
+		return
+	}		
+    secret := Str[0]
+    filename := Str[1]
+	if secret != ILogSecret() {
+	    fmt.Printf("Ssecret %d != %d\n", time.Now().Format(logDateFormat), secret, ILogSecret)
+		return
+	}		
 
     // Open the file
     file := SafecastDirectory() + TTServerInstancePath + "/" + filename
@@ -43,6 +57,13 @@ func ILogFilename(extension string) string {
     prefix := time.Now().UTC().Format("2006-01-")
 	filename := prefix + TTServeInstanceID + extension
     return filename
+}
+
+// A secret that only allows the URLs from the health command to function
+func ILogSecret() string {
+	timestr := AllServersSlackHealthRequestTime.Format(logDateFormat)
+    checksum := crc32.ChecksumIEEE([]byte(timestr))
+	return fmt.Sprintf("%d", checksum)
 }
 
 // Log a string to the instance's log file
