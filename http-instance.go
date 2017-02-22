@@ -28,13 +28,13 @@ func inboundWebInstanceHandler(rw http.ResponseWriter, req *http.Request) {
 	// Crack the secret
     Str := strings.Split(fn, "$")
 	if len(Str) != 2 {
-	    fmt.Printf("Badly formatted instance request\n", time.Now().Format(logDateFormat))
+	    fmt.Printf("%s Badly formatted instance request\n", time.Now().Format(logDateFormat))
 		return
 	}		
     secret := Str[0]
     filename := Str[1]
 	if secret != ILogSecret() {
-	    fmt.Printf("Ssecret %d != %d\n", time.Now().Format(logDateFormat), secret, ILogSecret)
+	    fmt.Printf("%s Ssecret %d != %d\n", time.Now().Format(logDateFormat), secret, ILogSecret)
 		return
 	}		
 
