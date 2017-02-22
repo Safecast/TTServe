@@ -60,8 +60,14 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq.Snr = ttg.Snr
         AppReq.Location = ttg.Location
 
+		// Figure out the transport based upon whether or not a gateway ID was included
+		Transport := "lora-http:"+ipv4(req.RemoteAddr)
+		if ttg.GatewayId != "" {
+			Transport = "lora:"+ttg.GatewayId
+		}
+
         // Process it
-        ReplyToDeviceId = processBuffer(AppReq, "Lora gateway", "lora-http:"+ipv4(req.RemoteAddr), ttg.Payload)
+        ReplyToDeviceId = processBuffer(AppReq, "Lora gateway", Transport, ttg.Payload)
         CountHTTPGateway++;
 
     }
