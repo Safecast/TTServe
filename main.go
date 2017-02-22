@@ -19,6 +19,9 @@ import (
 // Main entry point for app
 func main() {
 
+	// Init our utility package
+	UtilInit()
+	
     // Spawn our signal handler
     go signalHandler()
 

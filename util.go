@@ -11,9 +11,16 @@ import (
 	"strings"
 )
 
+// Initialize package
+func UtilInit() {
+
+	// Initialize the random number generator
+	rand.Seed(time.Now().Unix())
+
+}
+
 // Get a random number in a range
 func random(min, max int) int {
-	rand.Seed(time.Now().Unix())
 	return rand.Intn(max - min) + min
 }
 

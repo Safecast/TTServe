@@ -85,7 +85,10 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
 	// Delay a random amount just in case we get called very quickly
 	// with two sequential values by the same device.  While no guarantee,
 	// this reduces the chance that we will overwrite each other
-    time.Sleep(time.Duration(random(1, 6)) * time.Second)
+	sleepSeconds := random(0, 30)
+	fmt.Printf("Delaying by %d seconds\n", sleepSeconds)
+    time.Sleep(time.Duration(sleepSeconds) * time.Second)
+	fmt.Printf("Done delaying by %d seconds\n", sleepSeconds)
 	
     // Use the supplied upload time as our modification time
     sc.UploadedAt = &UploadedAt

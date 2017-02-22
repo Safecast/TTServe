@@ -64,8 +64,6 @@ func AppReqHandler() {
         fmt.Printf("%v\n", msg);
 
         // Display info about the received message
-        deviceID := TelecastDeviceId(msg)
-        fmt.Printf("%s sent by %d\n", time.Now().Format(logDateFormat), deviceID)
         if (msg.RelayDevice1 != nil) {
             fmt.Printf("%s RELAYED thru hop #1 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice1())
         }
