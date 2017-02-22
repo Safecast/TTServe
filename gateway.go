@@ -96,7 +96,7 @@ func SafecastWriteGateway(ttg TTGateReq) {
     for {
 
 		// Write the value
-        fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
+        fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
 		if err != nil {
 		    fmt.Printf("*** Unable to write %s: %v\n", filename, err)
 			break

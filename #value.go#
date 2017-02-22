@@ -403,7 +403,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     for {
 
 		// Write the value
-        fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+        fd, err := os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
 		if err != nil {
 		    fmt.Printf("*** Unable to write %s: %v\n", filename, err)
 			break
@@ -413,7 +413,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
 
 		// Delay, to increase the chance that we will catch a concurrent update/overwrite
         time.Sleep(time.Duration(random(1, 6)) * time.Second)
-
+d
 		// Do an integrity check, and re-write the value if necessary
 	    _, isEmpty, _ := SafecastReadValue(uint32(sc.DeviceId))
 		if !isEmpty {
