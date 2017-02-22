@@ -88,10 +88,9 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     // Use the supplied upload time as our modification time
     sc.UploadedAt = &UploadedAt
 
-    // Read the current value, or a blank value structure if it's blank
+    // Read the current value, or a blank value structure if it's blank.
+	// If the value isn't available it's because of a nonrecoverable  error.
     isAvail, _, value := SafecastReadValue(uint32(sc.DeviceId))
-
-    // Exit if error, so that we don't overwrite in cases of contention
     if !isAvail {
         return
     }
