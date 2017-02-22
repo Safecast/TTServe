@@ -67,7 +67,7 @@ func timer12h() {
 
 // Server health check
 func ServerHealthCheck() string {
-    log := fmt.Sprintf("<http://%s%s%s|log>", TTServerHTTPAddress, TTServerTopicInstance, ILogFilename(".log"))
+    log := fmt.Sprintf("<http://%s%s%s|%s>", TTServerHTTPAddress, TTServerTopicInstance, ILogFilename(".log"), TTServeInstanceID)
     s := ""
     var minutesAgo uint32 = uint32(int64(time.Now().Sub(ThisServerBootTime) / time.Minute))
     var hoursAgo uint32 = minutesAgo / 60
@@ -75,11 +75,11 @@ func ServerHealthCheck() string {
     minutesAgo -= hoursAgo * 60
     hoursAgo -= daysAgo * 24
     if daysAgo != 0 {
-        s = fmt.Sprintf("%s %s last restarted %dd %dh %dm ago", log, TTServeInstanceID, daysAgo, hoursAgo, minutesAgo)
+        s = fmt.Sprintf("%s last restarted %dd %dh %dm ago", log, daysAgo, hoursAgo, minutesAgo)
     } else if hoursAgo != 0 {
-        s = fmt.Sprintf("%s %s last restarted %dh %dm ago", log, TTServeInstanceID, hoursAgo, minutesAgo)
+        s = fmt.Sprintf("%s last restarted %dh %dm ago", log, hoursAgo, minutesAgo)
     } else {
-        s = fmt.Sprintf("%s %s last restarted %dm ago", log, TTServeInstanceID, minutesAgo)
+        s = fmt.Sprintf("%s last restarted %dm ago", log, minutesAgo)
     }
     return s
 }
