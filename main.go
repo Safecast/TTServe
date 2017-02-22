@@ -14,6 +14,7 @@ import (
     "io/ioutil"
     "net/http"
     "time"
+    "encoding/json"
 )
 
 // Main entry point for app
@@ -41,6 +42,28 @@ func main() {
         os.Exit(0)
     }
     ThisServerAddressIPv4 = string(bytes.TrimSpace(buf))
+
+	// Get AWS info about this instance
+    rsp, erraws := http.Get("http://169.254.169.254/latest/dynamic/instance-identity/document")
+    if erraws != nil {
+        fmt.Printf("Can't get our own instance info: %v\n", erraws);
+//        os.Exit(0)
+    }
+    defer rsp.Body.Close()
+    buf, errread := ioutil.ReadAll(rsp.Body)
+    if errread != nil {
+        fmt.Printf("Error fetching instance info: %v\n", errread);
+//        os.Exit(0)
+    }
+
+    err = json.Unmarshal(buf, &AWSInstance)
+    if err != nil {
+        fmt.Printf("*** Badly formatted AWS Info ***\n");
+//		os.Exit(0)
+    }
+	
+	fmt.Printf("AWS Instance ID: %s\n", AWSInstance.InstanceId)
+	fmt.Printf("%s\n%v\n", string(buf), AWSInstance)
 
     // Look up the two IP addresses that we KNOW have only a single A record,
     // and determine if WE are the server for those protocols
