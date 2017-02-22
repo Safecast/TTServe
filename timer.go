@@ -102,8 +102,8 @@ func ControlFileCheck() {
 
     // Heath
     if (ControlFileTime(TTServerHealthControlFile, "") != AllServersSlackHealthRequestTime) {
-        sendToSafecastOps(ServerHealthCheck(), SLACK_MSG_UNSOLICITED)
         AllServersSlackHealthRequestTime = ControlFileTime(TTServerHealthControlFile, "")
+        sendToSafecastOps(ServerHealthCheck(), SLACK_MSG_UNSOLICITED)
     }
 
 }
