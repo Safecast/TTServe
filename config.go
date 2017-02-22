@@ -72,6 +72,7 @@ const TTServerFTPCertPath = "/cert/ftp"
 const TTServerRestartGithubControlFile = "restart_github.txt"
 const TTServerRestartAllControlFile = "restart_all.txt"
 const TTServerHealthControlFile = "health.txt"
+var TTServeInstanceID = ""
 
 // TTSERVE's address and ports
 const TTServerHTTPAddress = "tt.safecast.org"

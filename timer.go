@@ -74,11 +74,11 @@ func ServerHealthCheck() string {
     minutesAgo -= hoursAgo * 60
     hoursAgo -= daysAgo * 24
     if daysAgo != 0 {
-        s = fmt.Sprintf("TTServe %s last restarted %dd %dh %dm ago", ThisServerAddressIPv4, daysAgo, hoursAgo, minutesAgo)
+        s = fmt.Sprintf("TTServe %s last restarted %dd %dh %dm ago", TTServeInstanceID, daysAgo, hoursAgo, minutesAgo)
     } else if hoursAgo != 0 {
-        s = fmt.Sprintf("TTServe %s last restarted %dh %dm ago", ThisServerAddressIPv4, hoursAgo, minutesAgo)
+        s = fmt.Sprintf("TTServe %s last restarted %dh %dm ago", TTServeInstanceID, hoursAgo, minutesAgo)
     } else {
-        s = fmt.Sprintf("TTServe %s last restarted %dm ago", ThisServerAddressIPv4, minutesAgo)
+        s = fmt.Sprintf("TTServe %s last restarted %dm ago", TTServeInstanceID, minutesAgo)
     }
     return s
 }

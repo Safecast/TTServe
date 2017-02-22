@@ -64,6 +64,8 @@ func main() {
 	
 	fmt.Printf("Now running in AWS %s as Instance ID %s\n", AWSInstance.Region, AWSInstance.InstanceId)
 
+	TTServeInstanceID = AWSInstance.InstanceId
+
     // Look up the two IP addresses that we KNOW have only a single A record,
     // and determine if WE are the server for those protocols
     addrs, err := net.LookupHost(TTServerUDPAddress)
