@@ -64,7 +64,6 @@ func ILogSecret() string {
 	timestr := AllServersSlackHealthRequestTime.Format(logDateFormat)
     checksum := crc32.ChecksumIEEE([]byte(timestr))
 	checkstr := fmt.Sprintf("%d", checksum)
-	fmt.Printf("ILogSecret: %s == %s (%d)\n", timestr, checkstr, checksum)
 	return checkstr
 }
 
