@@ -27,7 +27,7 @@ type SafecastValue struct {
 }
 
 // Get the current value
-func SafecastReadValue(deviceId uint32) (isAvail bool, isEmpty bool, sv SafecastValue) {
+func SafecastReadValue(deviceId uint32) (isAvail bool, isReset bool, sv SafecastValue) {
     valueEmpty := SafecastValue{}
     valueEmpty.DeviceId = uint64(deviceId);
 
@@ -38,7 +38,8 @@ func SafecastReadValue(deviceId uint32) (isAvail bool, isEmpty bool, sv Safecast
     _, err := os.Stat(filename)
     if err != nil {
         if os.IsNotExist(err) {
-            return true, true, valueEmpty
+			// We did not reinitialize it; it's truly empty.
+            return true, false, valueEmpty
         }
         return false, true, valueEmpty
     }
@@ -79,7 +80,8 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     var ChangedPms = false
     var ChangedOpc = false
     var ChangedGeiger = false
-
+	var value SafecastValue
+	
 	// Delay a random amount just in case we get called very quickly
 	// with two sequential values by the same device.  While no guarantee,
 	// this reduces the chance that we will overwrite each other
@@ -90,11 +92,19 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
 
     // Read the current value, or a blank value structure if it's blank.
 	// If the value isn't available it's because of a nonrecoverable  error.
-    isAvail, _, value := SafecastReadValue(uint32(sc.DeviceId))
-    if !isAvail {
-        return
-    }
-
+	// If it was reset, try waiting around a bit until it is fixed.
+	for i:=0; i<5; i++ {
+	    isAvail, isReset, rvalue := SafecastReadValue(uint32(sc.DeviceId))
+		value = rvalue
+	    if !isAvail {
+	        return
+	    }
+		if !isReset {
+			break
+		}
+        time.Sleep(time.Duration(random(1, 6)) * time.Second)
+	}
+	
     // Update the current values, but only if modified
     if sc.UploadedAt != nil {
         value.UploadedAt = sc.UploadedAt

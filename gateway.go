@@ -23,7 +23,7 @@ type SafecastGateway struct {
 }
 
 // Get the current value
-func SafecastReadGateway(gatewayId string) (isAvail bool, isEmpty bool, sv SafecastGateway) {
+func SafecastReadGateway(gatewayId string) (isAvail bool, isReset bool, sv SafecastGateway) {
     valueEmpty := SafecastGateway{}
     valueEmpty.UploadedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
     valueEmpty.Ttg.GatewayId = gatewayId
@@ -35,7 +35,8 @@ func SafecastReadGateway(gatewayId string) (isAvail bool, isEmpty bool, sv Safec
     _, err := os.Stat(filename)
     if err != nil {
         if os.IsNotExist(err) {
-            return true, true, valueEmpty
+			// We did not reinitialize it; it's truly empty.
+            return true, false, valueEmpty
         }
         return false, true, valueEmpty
     }
@@ -72,14 +73,22 @@ func SafecastReadGateway(gatewayId string) (isAvail bool, isEmpty bool, sv Safec
 
 // Save the last value in a file
 func SafecastWriteGateway(ttg TTGateReq) {
-
-    // Read the current value, or a blank value structure if it's blank
-    isAvail, _, value := SafecastReadGateway(ttg.GatewayId)
-
-    // Exit if error, so that we don't overwrite in cases of contention
-    if !isAvail {
-        return
-    }
+	var value SafecastGateway
+	
+    // Read the current value, or a blank value structure if it's blank.
+	// If the value isn't available it's because of a nonrecoverable  error.
+	// If it was reset, try waiting around a bit until it is fixed.
+	for i:=0; i<5; i++ {
+	    isAvail, isReset, rvalue := SafecastReadGateway(ttg.GatewayId)
+		value = rvalue
+	    if !isAvail {
+	        return
+	    }
+		if !isReset {
+			break
+		}
+        time.Sleep(time.Duration(random(1, 6)) * time.Second)
+	}
 
     // Copy over all the values directly.  If someday we need to aggregate
     // values rather than replace them, this is the place to do it
