@@ -152,7 +152,7 @@ func sendExpiredSafecastGatewaysToSlack() {
 }
 
 // Get a summary of devices that are older than this many minutes ago
-func sendSafecastGatewaySummaryToSlack() {
+func sendSafecastGatewaySummaryToSlack(header string) {
 
     // First, age out the expired devices and recompute when last seen
     sendExpiredSafecastGatewaysToSlack()
@@ -162,7 +162,7 @@ func sendSafecastGatewaySummaryToSlack() {
     sort.Sort(ByGatewayKey(sortedGateways))
 
     // Build the summary string
-    s := ""
+    s := header
 
     // Finally, sweep over all these devices in sorted order,
     // generating a single large text string to be sent as a Slack message

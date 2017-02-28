@@ -97,11 +97,11 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         fallthrough
     case "ttnode":
         if messageAfterFirstWord == "" {
-            sendSafecastDeviceSummaryToSlack(false, false)
+            sendSafecastDeviceSummaryToSlack("", false, false)
         } else if messageAfterFirstWord == "detail" || messageAfterFirstWord == "details" {
-            sendSafecastDeviceSummaryToSlack(false, true)
+            sendSafecastDeviceSummaryToSlack("", false, true)
         } else if messageAfterFirstWord == "mobile" {
-            sendSafecastDeviceSummaryToSlack(true, true)
+            sendSafecastDeviceSummaryToSlack("", true, true)
         }
 
     case "gateway":
@@ -110,7 +110,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         fallthrough
     case "ttgate":
         if messageAfterFirstWord == "" {
-            sendSafecastGatewaySummaryToSlack()
+            sendSafecastGatewaySummaryToSlack("")
         }
 
     case "server":
@@ -119,14 +119,14 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         fallthrough
     case "ttserve":
         if messageAfterFirstWord == "" {
-            sendSafecastServerSummaryToSlack()
+            sendSafecastServerSummaryToSlack("")
         }
 
     case "status":
         if messageAfterFirstWord == "" {
-            sendSafecastServerSummaryToSlack()
-            sendSafecastGatewaySummaryToSlack()
-            sendSafecastDeviceSummaryToSlack(false, false)
+            sendSafecastServerSummaryToSlack("Servers")
+            sendSafecastGatewaySummaryToSlack("Gateways")
+            sendSafecastDeviceSummaryToSlack("Devices", false, false)
         }
 
     case "pending":

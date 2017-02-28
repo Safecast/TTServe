@@ -191,7 +191,7 @@ func sendExpiredSafecastDevicesToSlack() {
 }
 
 // Get a summary of devices that are older than this many minutes ago
-func sendSafecastDeviceSummaryToSlack(fWrap bool, fDetails bool) {
+func sendSafecastDeviceSummaryToSlack(header string, fWrap bool, fDetails bool) {
 
     // First, age out the expired devices and recompute when last seen
     sendExpiredSafecastDevicesToSlack()
@@ -202,13 +202,11 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool, fDetails bool) {
 
     // Finally, sweep over all these devices in sorted order,
     // generating a single large text string to be sent as a Slack message
-    s := "No devices yet."
+    s := header
     for i := 0; i < len(sortedDevices); i++ {
         id := sortedDevices[i].deviceid
 
-        if i == 0 {
-            s = ""
-        } else {
+        if i != 0 {
             s = fmt.Sprintf("%s\n", s)
         }
 
