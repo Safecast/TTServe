@@ -41,6 +41,7 @@ func HttpInboundHandler() {
     // Spin up log handlers
     http.HandleFunc(TTServerTopicDeviceLog, inboundWebLogHandler)
     http.HandleFunc(TTServerTopicDeviceStatus, inboundWebDeviceStatusHandler)
+    http.HandleFunc(TTServerTopicServerLog, inboundWebServerLogHandler)
     http.HandleFunc(TTServerTopicServerStatus, inboundWebServerStatusHandler)
     http.HandleFunc(TTServerTopicGatewayStatusUpdate, inboundWebGatewayStatusHandler)
     http.HandleFunc(TTServerTopicGatewayStatus, inboundWebGatewayStatusHandler)

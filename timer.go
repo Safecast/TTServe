@@ -18,6 +18,9 @@ func timer1m() {
         // Restart this instance if instructed to do so
         ControlFileCheck()
 
+		// Write out current status to the file system
+		SafecastWriteServerStatus()
+		
     }
 }
 
@@ -43,10 +46,6 @@ func timer15m() {
             MqqtSubscriptionNotifier()
         }
 
-        // Post stats
-        ILog(fmt.Sprintf("Stats: UDP:%d HTTPDevice:%d HTTPGateway:%d HTTPRelay:%d HTTPRedirect:%d TTN:%d\n\n",
-            CountUDP, CountHTTPDevice, CountHTTPGateway, CountHTTPRelay, CountHTTPRedirect, CountTTN))
-
     }
 
 }
@@ -66,45 +65,20 @@ func timer12h() {
     }
 }
 
-// Server health check
-func ServerHealthCheck() string {
-    log := fmt.Sprintf("<http://%s%s%s$%s|%s>", TTServerHTTPAddress, TTServerTopicServerStatus, ILogSecret(), ILogFilename(".log"), TTServeInstanceID)
-    s := ""
-    var minutesAgo uint32 = uint32(int64(time.Now().Sub(ThisServerBootTime) / time.Minute))
-    var hoursAgo uint32 = minutesAgo / 60
-    var daysAgo uint32 = hoursAgo / 24
-    minutesAgo -= hoursAgo * 60
-    hoursAgo -= daysAgo * 24
-    if daysAgo != 0 {
-        s = fmt.Sprintf("%s last restarted %dd %dh %dm ago", log, daysAgo, hoursAgo, minutesAgo)
-    } else if hoursAgo != 0 {
-        s = fmt.Sprintf("%s last restarted %dh %dm ago", log, hoursAgo, minutesAgo)
-    } else {
-        s = fmt.Sprintf("%s last restarted %dm ago", log, minutesAgo)
-    }
-    return s
-}
-
 // Check to see if we should restart
 func ControlFileCheck() {
 
     // Slack restart
     if (ControlFileTime(TTServerRestartAllControlFile, "") != AllServersSlackRestartRequestTime) {
         sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServeInstanceID), SLACK_MSG_UNSOLICITED)
-        ILog(fmt.Sprintf("\n***\n*** RESTARTING at %s because of Slack 'restart' command\n***\n\n", time.Now().Format(logDateFormat)))
+        ServerLog(fmt.Sprintf("\n***\n*** RESTARTING at %s because of Slack 'restart' command\n***\n\n", time.Now().Format(logDateFormat)))
         os.Exit(0)
     }
 
     // Github restart
     if (ControlFileTime(TTServerRestartGithubControlFile, "") != AllServersGithubRestartRequestTime) {
-        ILog(fmt.Sprintf("\n***\n*** RESTARTING at %s because of Github push command\n***\n\n", time.Now().Format(logDateFormat)))
+        ServerLog(fmt.Sprintf("\n***\n*** RESTARTING at %s because of Github push command\n***\n\n", time.Now().Format(logDateFormat)))
         os.Exit(0)
-    }
-
-    // Heath
-    if (ControlFileTime(TTServerHealthControlFile, "") != AllServersSlackHealthRequestTime) {
-        AllServersSlackHealthRequestTime = ControlFileTime(TTServerHealthControlFile, "")
-        sendToSafecastOps(ServerHealthCheck(), SLACK_MSG_UNSOLICITED)
     }
 
 }
@@ -127,7 +101,7 @@ func ControlFileTime(controlfilename string, message string) (restartTime time.T
     file, err := os.Stat(filename)
     if err != nil {
         fmt.Printf("*** Error fetching file time for %s: %v\n", filename, err)
-        return ThisServerBootTime
+        return stats.Started
     }
 
     return file.ModTime()

@@ -44,7 +44,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     ReplyToDeviceId = processBuffer(AppReq, "TTN", "ttn-http:"+ttn.DevID, ttn.PayloadRaw)
-    CountTTN++
+    stats.CountHTTPTTN++
 
     // Outbound message processing
     if (ReplyToDeviceId != 0) {

@@ -47,7 +47,7 @@ func UdpInboundHandler() {
             data, err := json.Marshal(ttg)
             if err == nil {
                 go UploadToWebLoadBalancer(data, n, ipv4(addr.String()))
-                CountUDP++;
+                stats.CountUDP++;
             }
 
         }

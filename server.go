@@ -2,7 +2,7 @@
 // Use of this source code is governed by licenses granted by the
 // copyright holder including that found in the LICENSE file.
 
-// Gateway monitoring
+// Server monitoring
 package main
 
 import (
@@ -14,23 +14,23 @@ import (
 )
 
 // Warning behavior
-const gatewayWarningAfterMinutes = 90
+const serverWarningAfterMinutes = 5
 
 // Describes every device that has sent us a message
-type seenGateway struct {
-    gatewayid           string
+type seenServer struct {
+    serverid            string
     seen                time.Time
     everRecentlySeen    bool
     notifiedAsUnseen    bool
     minutesAgo          int64
 }
-var seenGateways []seenGateway
+var seenServers []seenServer
 
 // Class used to sort seen devices
-type ByGatewayKey []seenGateway
-func (a ByGatewayKey) Len() int      { return len(a) }
-func (a ByGatewayKey) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ByGatewayKey) Less(i, j int) bool {
+type ByServerKey []seenServer
+func (a ByServerKey) Len() int      { return len(a) }
+func (a ByServerKey) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByServerKey) Less(i, j int) bool {
     // Primary:
     // By capture time, most recent last (so that the most recent is nearest your attention, at the bottom in Slack)
     if a[i].seen.Before(a[j].seen) {
@@ -40,30 +40,30 @@ func (a ByGatewayKey) Less(i, j int) bool {
     }
     // Secondary
     // In an attempt to keep things reasonably deterministic, compare strings
-    if strings.Compare(a[i].gatewayid, a[j].gatewayid) < 0 {
+    if strings.Compare(a[i].serverid, a[j].serverid) < 0 {
         return true
-    } else if strings.Compare(a[i].gatewayid, a[j].gatewayid) > 0 {
+    } else if strings.Compare(a[i].serverid, a[j].serverid) > 0 {
         return false
     }
     return false
 }
 
 // Keep track of all devices that have logged data via ttserve
-func trackGateway(GatewayId string, whenSeen time.Time) {
-    var dev seenGateway
-    dev.gatewayid = GatewayId
+func trackServer(ServerId string, whenSeen time.Time) {
+    var dev seenServer
+    dev.serverid = ServerId
 
     // Attempt to update the existing entry if we can find it
     found := false
-    for i := 0; i < len(seenGateways); i++ {
-        if dev.gatewayid == seenGateways[i].gatewayid {
+    for i := 0; i < len(seenServers); i++ {
+        if dev.serverid == seenServers[i].serverid {
             // Only pay attention to things that have truly recently come or gone
             minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
             if (minutesAgo < deviceWarningAfterMinutes) {
-                seenGateways[i].everRecentlySeen = true
+                seenServers[i].everRecentlySeen = true
                 // Notify when the device comes back
-                if seenGateways[i].notifiedAsUnseen {
-                    minutesAgo := int64(time.Now().Sub(seenGateways[i].seen) / time.Minute)
+                if seenServers[i].notifiedAsUnseen {
+                    minutesAgo := int64(time.Now().Sub(seenServers[i].seen) / time.Minute)
                     hoursAgo := minutesAgo / 60
                     daysAgo := hoursAgo / 24
                     message := fmt.Sprintf("%d minutes", minutesAgo)
@@ -73,14 +73,14 @@ func trackGateway(GatewayId string, whenSeen time.Time) {
                     case minutesAgo >= 120:
                         message = fmt.Sprintf("~%d hours", hoursAgo)
                     }
-                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s has returned after %s away", seenGateways[i].gatewayid, message), SLACK_MSG_UNSOLICITED)
+                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Server %s has returned after %s away", seenServers[i].serverid, message), SLACK_MSG_UNSOLICITED)
                 }
                 // Mark as having been seen on the latest date of any file having that time
-                seenGateways[i].notifiedAsUnseen = false;
+                seenServers[i].notifiedAsUnseen = false;
             }
             // Always track the most recent seen date
-            if (seenGateways[i].seen.Before(whenSeen)) {
-                seenGateways[i].seen = whenSeen
+            if (seenServers[i].seen.Before(whenSeen)) {
+                seenServers[i].seen = whenSeen
             }
             found = true
             break
@@ -93,16 +93,16 @@ func trackGateway(GatewayId string, whenSeen time.Time) {
         minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
         dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes
         dev.notifiedAsUnseen = false
-        seenGateways = append(seenGateways, dev)
+        seenServers = append(seenServers, dev)
     }
 
 }
 
 // Update the list of seen devices
-func trackAllGateways() {
+func trackAllServers() {
 
     // Loop over the file system, tracking all devices
-    files, err := ioutil.ReadDir(SafecastDirectory() + TTGatewayStatusPath)
+    files, err := ioutil.ReadDir(SafecastDirectory() + TTServerStatusPath)
     if err == nil {
 
         // Iterate over each of the values
@@ -112,11 +112,11 @@ func trackAllGateways() {
 
                 // Extract device ID from filename
                 Str0 := file.Name()
-                gatewayID := strings.Split(Str0, ".")[0]
+                serverID := strings.Split(Str0, ".")[0]
 
                 // Track the device
-                if gatewayID != "" {
-                    trackGateway(gatewayID, file.ModTime())
+                if serverID != "" {
+                    trackServer(serverID, file.ModTime())
                 }
 
             }
@@ -125,72 +125,68 @@ func trackAllGateways() {
 }
 
 // Update message ages and notify
-func sendExpiredSafecastGatewaysToSlack() {
+func sendExpiredSafecastServersToSlack() {
 
     // Update the in-memory list of seen devices
-    trackAllGateways()
+    trackAllServers()
 
     // Compute an expiration time
     expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes) * time.Minute))
 
-    // Sweep through all gateways that we've seen
-    for i := 0; i < len(seenGateways); i++ {
+    // Sweep through all servers that we've seen
+    for i := 0; i < len(seenServers); i++ {
 
         // Update when we've last seen the device
-        seenGateways[i].minutesAgo = int64(time.Now().Sub(seenGateways[i].seen) / time.Minute)
+        seenServers[i].minutesAgo = int64(time.Now().Sub(seenServers[i].seen) / time.Minute)
 
         // Notify Slack once and only once when a device has expired
-        if !seenGateways[i].notifiedAsUnseen && seenGateways[i].everRecentlySeen {
-            if seenGateways[i].seen.Before(expiration) {
-                seenGateways[i].notifiedAsUnseen = true
-                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s hasn't been seen for %d minutes",
-                    seenGateways[i].gatewayid,
-                    seenGateways[i].minutesAgo), SLACK_MSG_UNSOLICITED)
+        if !seenServers[i].notifiedAsUnseen && seenServers[i].everRecentlySeen {
+            if seenServers[i].seen.Before(expiration) {
+                seenServers[i].notifiedAsUnseen = true
+                sendToSafecastOps(fmt.Sprintf("** Warning **  Server %s hasn't been seen for %d minutes",
+                    seenServers[i].serverid,
+                    seenServers[i].minutesAgo), SLACK_MSG_UNSOLICITED)
             }
         }
     }
 }
 
 // Get a summary of devices that are older than this many minutes ago
-func sendSafecastGatewaySummaryToSlack() {
+func sendSafecastServerSummaryToSlack() {
 
     // First, age out the expired devices and recompute when last seen
-    sendExpiredSafecastGatewaysToSlack()
+    sendExpiredSafecastServersToSlack()
 
     // Next sort the device list
-    sortedGateways := seenGateways
-    sort.Sort(ByGatewayKey(sortedGateways))
+    sortedServers := seenServers
+    sort.Sort(ByServerKey(sortedServers))
 
     // Build the summary string
     s := ""
 
     // Finally, sweep over all these devices in sorted order,
     // generating a single large text string to be sent as a Slack message
-    for i := 0; i < len(sortedGateways); i++ {
-        gatewayID := sortedGateways[i].gatewayid
+    for i := 0; i < len(sortedServers); i++ {
+        serverID := sortedServers[i].serverid
 
         // Emit info about the device
-        label, loc, summary := SafecastGetGatewaySummary(gatewayID, "    ")
+        summary := SafecastGetServerSummary(serverID, "    ")
         if summary != "" {
             if s != "" {
                 s += fmt.Sprintf("\n");
             }
-            s += fmt.Sprintf("<http://%s%s%s|%s>", TTServerHTTPAddress, TTServerTopicGatewayStatus, gatewayID, gatewayID)
-            if loc != "" {
-                s += fmt.Sprintf(" %s", loc)
-            }
-            if label != "" {
-                s += fmt.Sprintf(" \"%s\"", label)
-            }
+            s += fmt.Sprintf("<http://%s%s%s|%s>", TTServerHTTPAddress, TTServerTopicServerStatus, serverID, serverID)
+			s += " "
+            s += fmt.Sprintf("<http://%s%s%s$%s|log>", TTServerHTTPAddress, TTServerTopicServerLog, ServerLogSecret(), ServerLogFilename(".log"))
             if summary != "" {
-                s += fmt.Sprintf("\n%s", summary)
+                s += fmt.Sprintf(" %s", summary)
             }
         }
     }
 
     // Send it to Slack
     if s == "" {
-        s = "No gateways have recently reported"
+        s = "No servers have recently reported"
     }
     sendToSafecastOps(s, SLACK_MSG_REPLY)
 

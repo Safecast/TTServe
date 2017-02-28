@@ -58,7 +58,7 @@ func MqqtInboundHandler() {
             fmt.Printf("\n%s Received %d-byte payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), AppReq.Transport)
             AppReq.UploadedAt = nowInUTC()
 			AppReqPush(AppReq)
-            CountTTN++
+            stats.CountMQQTTTN++
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.

@@ -27,7 +27,7 @@ func main() {
     go signalHandler()
 
     // Remember boot time
-    ThisServerBootTime = time.Now()
+	stats.Started = time.Now()
 
     // Get our external IP address
     rsp, err := http.Get("http://checkip.amazonaws.com")
@@ -42,7 +42,8 @@ func main() {
         os.Exit(0)
     }
     ThisServerAddressIPv4 = string(bytes.TrimSpace(buf))
-
+	stats.AddressIPv4 = ThisServerAddressIPv4
+	
 	// Get AWS info about this instance
     rsp, erraws := http.Get("http://169.254.169.254/latest/dynamic/instance-identity/document")
     if erraws != nil {
@@ -56,16 +57,16 @@ func main() {
         os.Exit(0)
     }
 
-    err = json.Unmarshal(buf, &AWSInstance)
+    err = json.Unmarshal(buf, &stats.AWSInstance)
     if err != nil {
         fmt.Printf("*** Badly formatted AWS Info ***\n");
 		os.Exit(0)
     }
 	
-	fmt.Printf("Now running in AWS %s as Instance ID %s\n", AWSInstance.Region, AWSInstance.InstanceId)
+	fmt.Printf("Now running in AWS %s as Instance ID %s\n", stats.AWSInstance.Region, stats.AWSInstance.InstanceId)
 
-	TTServeInstanceID = AWSInstance.InstanceId
-	ILog(fmt.Sprintf("\n\n***\n*** STARTUP at %s\n***\n\n", time.Now().Format(logDateFormat)))
+	TTServeInstanceID = stats.AWSInstance.InstanceId
+	ServerLog(fmt.Sprintf("\n\n***\n*** STARTUP at %s\n***\n\n", time.Now().Format(logDateFormat)))
 
     // Look up the two IP addresses that we KNOW have only a single A record,
     // and determine if WE are the server for those protocols
@@ -106,7 +107,6 @@ func main() {
     // Get the date/time of the special files that we monitor
     AllServersSlackRestartRequestTime = ControlFileTime(TTServerRestartAllControlFile, "")
     AllServersGithubRestartRequestTime = ControlFileTime(TTServerRestartGithubControlFile, "")
-    AllServersSlackHealthRequestTime = ControlFileTime(TTServerHealthControlFile, "")
 
 	// Synchronously init the app request queue before anyone tries to service it or push to it
     AppReqInit()

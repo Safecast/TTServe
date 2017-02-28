@@ -2,7 +2,7 @@
 // Use of this source code is governed by licenses granted by the
 // copyright holder including that found in the LICENSE file.
 
-// Tracking and handling of device entities
+// Device monitoring
 package main
 
 import (

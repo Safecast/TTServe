@@ -28,15 +28,14 @@ var SafecastUploadURLs = [...]string {
     "http://ingest.safecast.org/v1/measurements",
 }
 
-// AWS-specific info
-var AWSInstance AWSInstanceIdentity
-
 // Slack service info
 const SLACK_OPS_NONE =	   -1
 const SLACK_OPS_SAFECAST =	0
 const SLACK_OPS_ROZZIE =	1
 const SLACK_OPS_MUSTI =		2
 var SlackCommandSource = SLACK_OPS_NONE
+
+var SlackCommandTime time.Time
 
 const SLACK_MSG_UNSOLICITED =		0
 const SLACK_MSG_UNSOLICITED_OPS =	1
@@ -66,14 +65,14 @@ const TTDeviceStampPath = "/device-stamp"
 const TTDeviceStatusPath = "/device-status"
 const TTServerLogPath = "/server-log"
 const TTServerStatusPath = "/server-status"
-const TTGatewayLogPath = "/gateway-log"
+const TTGatewayStatusPath = "/gateway-status"
 const TTServerCommandPath = "/command"
 const TTServerControlPath = "/control"
 const TTServerBuildPath = "/build"
 const TTServerFTPCertPath = "/cert/ftp"
+const TTServerSlackCommandControlFile = "slack_command.txt"
 const TTServerRestartGithubControlFile = "restart_github.txt"
 const TTServerRestartAllControlFile = "restart_all.txt"
-const TTServerHealthControlFile = "health.txt"
 var TTServeInstanceID = ""
 
 // TTSERVE's address and ports
@@ -89,8 +88,9 @@ const TTServerFTPPort int = 8083					// plus 8084 plus the entire passive range
 const TTServerTopicSend string = "/send"
 const TTServerTopicRoot1 string = "/index.html"
 const TTServerTopicRoot2 string = "/index.htm"
-const TTServerTopicDeviceLog string = "/log/"
+const TTServerTopicDeviceLog string = "/device-log/"
 const TTServerTopicDeviceStatus string = "/device/"
+const TTServerTopicServerLog string = "/server-log/"
 const TTServerTopicServerStatus string = "/server/"
 const TTServerTopicGatewayStatusUpdate string = "/gateway"
 const TTServerTopicGatewayStatus string = "/gateway/"
@@ -109,7 +109,6 @@ var   ThisServerIsMonitor = false
 var   ThisServerBootTime time.Time
 var   AllServersSlackRestartRequestTime time.Time
 var   AllServersGithubRestartRequestTime time.Time
-var   AllServersSlackHealthRequestTime time.Time
 
 // Buffered I/O header formats coordinated with TTNODE.  Note that although we are now starting
 // with version number 0, we special-case version number 8 because of the old style "single protocl buffer"
@@ -121,9 +120,16 @@ const BUFF_FORMAT_SINGLE_PB byte =  8
 const logDateFormat string = "2006-01-02 15:04:05"
 
 // Global Server Stats
-var CountUDP = 0
-var CountHTTPDevice = 0
-var CountHTTPGateway = 0
-var CountHTTPRelay = 0
-var CountHTTPRedirect = 0
-var CountTTN = 0
+type TTServeStatus struct {
+	Started				time.Time		`json:"started,omitempty"`
+	AddressIPv4			string			`json:"ip,omitempty"`
+	AWSInstance			AWSInstanceIdentity	`json:"aws,omitempty"`
+	CountUDP			uint32			`json:"received_device_udp,omitempty"`
+	CountHTTPDevice		uint32			`json:"received_device_http,omitempty"`
+	CountHTTPGateway	uint32			`json:"received_gateway_http,omitempty"`
+	CountHTTPRelay		uint32			`json:"received_ttserve_http,omitempty"`
+	CountHTTPRedirect	uint32			`json:"received_redirect_http,omitempty"`
+	CountHTTPTTN		uint32			`json:"received_ttn_http,omitempty"`
+	CountMQQTTTN		uint32			`json:"received_ttn_mqqt,omitempty"`
+}
+var stats TTServeStatus

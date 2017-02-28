@@ -82,7 +82,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     SafecastV1Upload(body, SafecastV1UploadURL+req.RequestURI, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
     SafecastUpload(UploadedAt, sd)
     SafecastWriteToLogs(UploadedAt, sd)
-    CountHTTPRedirect++
+    stats.CountHTTPRedirect++
 
     // It is an error if there is a pending outbound payload for this device, so remove it and report it
     isAvailable, _ := TelecastOutboundPayload(deviceID)

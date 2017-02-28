@@ -40,7 +40,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Process it.  Note there is no possibility of a reply.
         processBuffer(AppReq, "device on cellular", ttg.Transport, ttg.Payload)
-        CountHTTPRelay++;
+        stats.CountHTTPRelay++;
 
     }
 
@@ -68,7 +68,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Process it
         ReplyToDeviceId = processBuffer(AppReq, "Lora gateway", Transport, ttg.Payload)
-        CountHTTPGateway++;
+        stats.CountHTTPGateway++;
 
     }
 
@@ -84,7 +84,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Process it
         ReplyToDeviceId = processBuffer(AppReq, "device on cellular", "device-http:"+ipv4(req.RemoteAddr), buf)
-        CountHTTPDevice++;
+        stats.CountHTTPDevice++;
 
     }
 

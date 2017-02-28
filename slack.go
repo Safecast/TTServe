@@ -2,7 +2,7 @@
 // Use of this source code is governed by licenses granted by the
 // copyright holder including that found in the LICENSE file.
 
-// Slack channel handling, both inbound and outbound 
+// Slack channel handling, both inbound and outbound
 package main
 
 import (
@@ -71,39 +71,62 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-	// Figure out who is sending this to us
-	SlackCommandSource = SLACK_OPS_NONE
+    // Remember when this command was received, and make sure
+    // that all other instances also know that precise time
+    SlackCommandTime = time.Now()
+    ControlFileTime(TTServerSlackCommandControlFile, user)
+
+    // Figure out who is sending this to us
+    SlackCommandSource = SLACK_OPS_NONE
     for source, tok := range SlackInboundTokens {
-		if tok == token {
-			SlackCommandSource = source
-		}
-	}
-	if SlackCommandSource == SLACK_OPS_NONE {
-		fmt.Printf("*** Slack command from uknown token: %s\n", token)
-		return
-	}
-	
+        if tok == token {
+            SlackCommandSource = source
+        }
+    }
+    if SlackCommandSource == SLACK_OPS_NONE {
+        fmt.Printf("*** Slack command from uknown token: %s\n", token)
+        return
+    }
+
     // Process queries
     switch argsLC[0] {
 
-    case "status":
+    case "device":
+        fallthrough
+    case "devices":
+        fallthrough
+    case "ttnode":
         if messageAfterFirstWord == "" {
             sendSafecastDeviceSummaryToSlack(false, false)
-        }
-
-    case "details":
-        if messageAfterFirstWord == "" {
+        } else if messageAfterFirstWord == "detail" || messageAfterFirstWord == "details" {
             sendSafecastDeviceSummaryToSlack(false, true)
-        }
-
-    case "mobile":
-        if messageAfterFirstWord == "" {
+        } else if messageAfterFirstWord == "mobile" {
             sendSafecastDeviceSummaryToSlack(true, true)
         }
 
+    case "gateway":
+        fallthrough
+    case "gateways":
+        fallthrough
     case "ttgate":
         if messageAfterFirstWord == "" {
             sendSafecastGatewaySummaryToSlack()
+        }
+
+    case "server":
+        fallthrough
+    case "servers":
+        fallthrough
+    case "ttserve":
+        if messageAfterFirstWord == "" {
+            sendSafecastServerSummaryToSlack()
+        }
+
+    case "status":
+        if messageAfterFirstWord == "" {
+            sendSafecastServerSummaryToSlack()
+            sendSafecastGatewaySummaryToSlack()
+            sendSafecastDeviceSummaryToSlack(false, false)
         }
 
     case "pending":
@@ -126,22 +149,18 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
     case "restart":
         sendToSafecastOps(fmt.Sprintf("Restarting all instances..."), SLACK_MSG_UNSOLICITED)
-		ControlFileTime(TTServerRestartAllControlFile, user)
-
-    case "health":
-        sendToSafecastOps(fmt.Sprintf("Checking health of all service instances..."), SLACK_MSG_UNSOLICITED)
-		ControlFileTime(TTServerHealthControlFile, user)
+        ControlFileTime(TTServerRestartAllControlFile, user)
 
     case "send":
         if len(args) == 1 {
             sendToSafecastOps("Command format: send <deviceID> <message>", SLACK_MSG_REPLY)
-		} else if len(args) == 2 {
-			switch argsLC[1] {
-			case "hello":
-	            sendHelloToNewDevices()
-			default:
-	            sendToSafecastOps("Unrecognized subcommand of 'send'", SLACK_MSG_REPLY)
-			}
+        } else if len(args) == 2 {
+            switch argsLC[1] {
+            case "hello":
+                sendHelloToNewDevices()
+            default:
+                sendToSafecastOps("Unrecognized subcommand of 'send'", SLACK_MSG_REPLY)
+            }
         } else {
             i64, err := strconv.ParseUint(args[1], 10, 32)
             deviceID := uint32(i64)
@@ -171,17 +190,17 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 // within an HTTP request handler that must return so as to flush the response buffer
 // back to the callers.
 func sendToSafecastOps(msg string, destination int) {
-	if destination == SLACK_MSG_UNSOLICITED {
-	    for _, url := range SlackOutboundURLs {
-		    go sendToOpsViaSlack(msg, url)
-		}
-	} else if destination == SLACK_MSG_UNSOLICITED_OPS {
-		go sendToOpsViaSlack(msg, SlackOutboundURLs[SLACK_OPS_SAFECAST])
-	} else {
-		if SlackCommandSource != SLACK_OPS_NONE {
-			go sendToOpsViaSlack(msg, SlackOutboundURLs[SlackCommandSource])
-		}
-	}
+    if destination == SLACK_MSG_UNSOLICITED {
+        for _, url := range SlackOutboundURLs {
+            go sendToOpsViaSlack(msg, url)
+        }
+    } else if destination == SLACK_MSG_UNSOLICITED_OPS {
+        go sendToOpsViaSlack(msg, SlackOutboundURLs[SLACK_OPS_SAFECAST])
+    } else {
+        if SlackCommandSource != SLACK_OPS_NONE {
+            go sendToOpsViaSlack(msg, SlackOutboundURLs[SlackCommandSource])
+        }
+    }
 }
 
 // Send a text string to the TTN  #ops channel

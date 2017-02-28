@@ -40,6 +40,24 @@ func nowInUTC() string {
     return time.Now().UTC().Format("2006-01-02T15:04:05Z")
 }
 
+// How long ago, readably
+func Ago(when time.Time) string {
+    var minutesAgo uint32 = uint32(int64(time.Now().Sub(when) / time.Minute))
+    var hoursAgo uint32 = minutesAgo / 60
+    var daysAgo uint32 = hoursAgo / 24
+    minutesAgo -= hoursAgo * 60
+    hoursAgo -= daysAgo * 24
+	s := ""
+    if daysAgo != 0 {
+        s = fmt.Sprintf("%dd %dh", daysAgo, hoursAgo)
+    } else if hoursAgo != 0 {
+        s = fmt.Sprintf("%dh %dm", hoursAgo, minutesAgo)
+    } else {
+        s = fmt.Sprintf("%dm", minutesAgo)
+    }
+	return s
+}
+
 // Extract just the IPV4 address, eliminating the port
 func ipv4(Str1 string) string {
     Str2 := strings.Split(Str1, ":")

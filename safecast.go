@@ -386,7 +386,7 @@ func endTransaction(transaction int, url string, errstr string) {
             httpTransactionErrorFirst = false
         }
         fmt.Printf("%s <<<    [%d] *** ERROR\n", time.Now().Format(logDateFormat), transaction)
-        ILog(fmt.Sprintf("After %d seconds, error uploading to %s %s\n", duration, url, errstr))
+        ServerLog(fmt.Sprintf("After %d seconds, error uploading to %s %s\n", duration, url, errstr))
     } else {
         if (duration < 5) {
             fmt.Printf("%s <<<    [%d]\n", time.Now().Format(logDateFormat), transaction);
