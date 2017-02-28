@@ -16,13 +16,13 @@ import (
 )
 
 // Handle inbound HTTP requests to fetch log files
-func inboundWebInstanceHandler(rw http.ResponseWriter, req *http.Request) {
+func inboundWebServerStatusHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Set response mime type
     rw.Header().Set("Content-Type", "text/plain")
 
     // Log it
-    fn := req.RequestURI[len(TTServerTopicInstance):]
+    fn := req.RequestURI[len(TTServerTopicServerStatus):]
     fmt.Printf("%s instance information request for %s\n", time.Now().Format(logDateFormat), fn)
 
 	// Crack the secret
@@ -39,7 +39,7 @@ func inboundWebInstanceHandler(rw http.ResponseWriter, req *http.Request) {
 	}		
 
     // Open the file
-    file := SafecastDirectory() + TTServerInstancePath + "/" + filename
+    file := SafecastDirectory() + TTServerLogPath + "/" + filename
     fd, err := os.Open(file)
     if err != nil {
         io.WriteString(rw, errorString(err))
@@ -80,7 +80,7 @@ func ILog(sWithoutDate string) {
 	fmt.Printf("%s", s)
 	
     // Open it
-    file := SafecastDirectory() + TTServerInstancePath + "/" + ILogFilename(".log")
+    file := SafecastDirectory() + TTServerLogPath + "/" + ILogFilename(".log")
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
     if (err != nil) {
 

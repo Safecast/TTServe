@@ -16,8 +16,8 @@ import (
     "encoding/json"
 )
 
-// The data structure for the "Value" files
-type SafecastValue struct {
+// The data structure for the "Device Status" files
+type SafecastDeviceStatus struct {
     SafecastData            `json:"current_values,omitempty"`
     LocationHistory         [5]SafecastData `json:"location_history,omitempty"`
     GeigerHistory           [5]SafecastData `json:"geiger_history,omitempty"`
@@ -27,12 +27,12 @@ type SafecastValue struct {
 }
 
 // Get the current value
-func SafecastReadValue(deviceId uint32) (isAvail bool, isReset bool, sv SafecastValue) {
-    valueEmpty := SafecastValue{}
+func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv SafecastDeviceStatus) {
+    valueEmpty := SafecastDeviceStatus{}
     valueEmpty.DeviceId = uint64(deviceId);
 
     // Generate the filename, which we'll use twice
-    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", deviceId) + ".json"
+    filename := SafecastDirectory() + TTDeviceStatusPath + "/" + fmt.Sprintf("%d", deviceId) + ".json"
 
     // If the file doesn't exist, don't even try
     _, err := os.Stat(filename)
@@ -51,7 +51,7 @@ func SafecastReadValue(deviceId uint32) (isAvail bool, isReset bool, sv Safecast
         // Read the file and unmarshall if no error
         contents, errRead := ioutil.ReadFile(filename)
         if errRead == nil {
-            valueToRead := SafecastValue{}
+            valueToRead := SafecastDeviceStatus{}
             errRead = json.Unmarshal(contents, &valueToRead)
             if errRead == nil {
                 return true, false, valueToRead
@@ -79,12 +79,12 @@ func SafecastReadValue(deviceId uint32) (isAvail bool, isReset bool, sv Safecast
 }
 
 // Save the last value in a file
-func SafecastWriteValue(UploadedAt string, sc SafecastData) {
+func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
     var ChangedLocation = false
     var ChangedPms = false
     var ChangedOpc = false
     var ChangedGeiger = false
-	var value SafecastValue
+	var value SafecastDeviceStatus
 	
 	// Delay a random amount just in case we get called very quickly
 	// with two sequential values by the same device.  While no guarantee,
@@ -105,7 +105,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
 	// If the value isn't available it's because of a nonrecoverable  error.
 	// If it was reset, try waiting around a bit until it is fixed.
 	for i:=0; i<5; i++ {
-	    isAvail, isReset, rvalue := SafecastReadValue(uint32(sc.DeviceId))
+	    isAvail, isReset, rvalue := SafecastReadDeviceStatus(uint32(sc.DeviceId))
 		value = rvalue
 	    if !isAvail {
 	        return
@@ -422,7 +422,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
     }
 
     // Write it to the file until it's written correctly, to allow for concurrency
-    filename := SafecastDirectory() + TTServerValuePath + "/" + fmt.Sprintf("%d", sc.DeviceId) + ".json"
+    filename := SafecastDirectory() + TTDeviceStatusPath + "/" + fmt.Sprintf("%d", sc.DeviceId) + ".json"
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
 
     for {
@@ -440,7 +440,7 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
         time.Sleep(time.Duration(random(1, 6)) * time.Second)
 
 		// Do an integrity check, and re-write the value if necessary
-	    _, isEmpty, _ := SafecastReadValue(uint32(sc.DeviceId))
+	    _, isEmpty, _ := SafecastReadDeviceStatus(uint32(sc.DeviceId))
 		if !isEmpty {
 			break
 		}
@@ -449,10 +449,10 @@ func SafecastWriteValue(UploadedAt string, sc SafecastData) {
 }
 
 // Get summary of a device
-func SafecastGetValueSummary(DeviceId uint32) (Label string, Gps string, Summary string) {
+func SafecastGetDeviceStatusSummary(DeviceId uint32) (Label string, Gps string, Summary string) {
 
     // Read the file
-    isAvail, _, value := SafecastReadValue(DeviceId)
+    isAvail, _, value := SafecastReadDeviceStatus(DeviceId)
     if !isAvail {
         return "", "", ""
     }

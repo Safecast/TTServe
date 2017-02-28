@@ -12,35 +12,25 @@ import (
     "encoding/json"
 )
 
-// Get path of the safecast directory
-func SafecastDirectory() string {
-    directory := os.Args[1]
-    if (directory == "") {
-        fmt.Printf("TTSERVE: first argument must be folder containing safecast data!\n")
-        os.Exit(0)
-    }
-    return(directory)
-}
-
 // Construct path of a log file
-func SafecastLogFilename(DeviceId string, Extension string) string {
+func SafecastDeviceLogFilename(DeviceId string, Extension string) string {
     directory := SafecastDirectory()
     prefix := time.Now().UTC().Format("2006-01-")
-    file := directory + TTServerLogPath + "/" + prefix + DeviceId + Extension
+    file := directory + TTDeviceLogPath + "/" + prefix + DeviceId + Extension
     return file
 }
 
 // Write to both logs
 func SafecastWriteToLogs(UploadedAt string, sd SafecastData) {
-    go SafecastWriteValue(UploadedAt, sd)
-    SafecastJSONLog(UploadedAt, sd)
-    SafecastCSVLog(UploadedAt, sd)
+    go SafecastWriteDeviceStatus(UploadedAt, sd)
+    SafecastJSONDeviceLog(UploadedAt, sd)
+    SafecastCSVDeviceLog(UploadedAt, sd)
 }
 
 // Write the value to the log
-func SafecastJSONLog(UploadedAt string, sd SafecastData) {
+func SafecastJSONDeviceLog(UploadedAt string, sd SafecastData) {
 
-    file := SafecastLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".json")
+    file := SafecastDeviceLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".json")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
@@ -80,10 +70,10 @@ func SafecastJSONLog(UploadedAt string, sd SafecastData) {
 }
 
 // Write the value to the log
-func SafecastCSVLog(UploadedAt string, sd SafecastData) {
+func SafecastCSVDeviceLog(UploadedAt string, sd SafecastData) {
 
     // Extract the device number and form a filename
-    file := SafecastLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".csv")
+    file := SafecastDeviceLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".csv")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)

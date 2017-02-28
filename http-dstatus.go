@@ -14,17 +14,17 @@ import (
 )
 
 // Handle inbound HTTP requests to fetch log files
-func inboundWebValueHandler(rw http.ResponseWriter, req *http.Request) {
+func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Set response mime type
     rw.Header().Set("Content-Type", "application/json")
 
     // Log it
-    filename := req.RequestURI[len(TTServerTopicValue):]
+    filename := req.RequestURI[len(TTServerTopicDeviceStatus):]
     fmt.Printf("%s Device information request for %s\n", time.Now().Format(logDateFormat), filename)
 
     // Open the file
-    file := SafecastDirectory() + TTServerValuePath + "/" + filename + ".json"
+    file := SafecastDirectory() + TTDeviceStatusPath + "/" + filename + ".json"
     fd, err := os.Open(file)
     if err != nil {
         io.WriteString(rw, errorString(err))

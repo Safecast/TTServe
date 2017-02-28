@@ -20,11 +20,11 @@ func inboundWebLogHandler(rw http.ResponseWriter, req *http.Request) {
     rw.Header().Set("Content-Type", "application/json")
 
     // Log it
-    filename := req.RequestURI[len(TTServerTopicLog):]
+    filename := req.RequestURI[len(TTServerTopicDeviceLog):]
     fmt.Printf("%s LOG request for %s\n", time.Now().Format(logDateFormat), filename)
 
     // Open the file
-    file := SafecastDirectory() + TTServerLogPath + "/" + filename
+    file := SafecastDirectory() + TTDeviceLogPath + "/" + filename
     fd, err := os.Open(file)
     if err != nil {
         io.WriteString(rw, errorString(err))

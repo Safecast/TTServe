@@ -5,6 +5,7 @@
 package main
 
 import (
+	"os"
 	"fmt"
 	"math/rand"
 	"time"
@@ -22,6 +23,16 @@ func UtilInit() {
 // Get a random number in a range
 func random(min, max int) int {
 	return rand.Intn(max - min) + min
+}
+
+// Get path of the safecast directory
+func SafecastDirectory() string {
+    directory := os.Args[1]
+    if (directory == "") {
+        fmt.Printf("TTSERVE: first argument must be folder containing safecast data!\n")
+        os.Exit(0)
+    }
+    return(directory)
 }
 
 // Get the current time in UTC as a string

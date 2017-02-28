@@ -49,7 +49,7 @@ var substituteCapturedAt string
 // Construct the path of a command file
 func stampFilename(DeviceId uint32) string {
     directory := SafecastDirectory()
-    file := directory + TTServerStampPath + "/" + fmt.Sprintf("%d", DeviceId) + ".json"
+    file := directory + TTDeviceStampPath + "/" + fmt.Sprintf("%d", DeviceId) + ".json"
     return file
 }
 

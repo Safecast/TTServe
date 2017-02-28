@@ -103,7 +103,7 @@ func trackDevice(DeviceId uint32, whenSeen time.Time) {
 func trackAllDevices() {
 
     // Loop over the file system, tracking all devices
-    files, err := ioutil.ReadDir(SafecastDirectory() + TTServerValuePath)
+    files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceStatusPath)
     if err == nil {
 
         // Iterate over each of the values
@@ -143,7 +143,7 @@ func sendHelloToNewDevices() {
         if deviceID > 1048576 {
 
             // Read the current value, or a blank value structure if it's blank
-            _, _, value := SafecastReadValue(deviceID)
+            _, _, value := SafecastReadDeviceStatus(deviceID)
 
             // Check to see if it has a required stats field
             if value.Dev == nil || value.Dev.AppVersion == nil {
@@ -216,10 +216,10 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool, fDetails bool) {
         gps := ""
         summary := ""
         if fDetails {
-            label, gps, summary = SafecastGetValueSummary(id)
+            label, gps, summary = SafecastGetDeviceStatusSummary(id)
         }
 
-        s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicValue, id, id)
+        s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicDeviceStatus, id, id)
 
         if fWrap {
             if label != "" {
@@ -228,8 +228,8 @@ func sendSafecastDeviceSummaryToSlack(fWrap bool, fDetails bool) {
             s += "\n        "
         }
 
-        s += fmt.Sprintf("<http://%s%s%s%d.json|log> ", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
-        s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>", TTServerHTTPAddress, TTServerTopicLog, time.Now().UTC().Format("2006-01-"), id)
+        s += fmt.Sprintf("<http://%s%s%s%d.json|log> ", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), id)
+        s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), id)
 
         if fDetails {
             if gps != "" {

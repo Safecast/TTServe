@@ -16,20 +16,20 @@ import (
 )
 
 // Handle inbound HTTP requests to fetch log files
-func inboundWebGatewayHandler(rw http.ResponseWriter, req *http.Request) {
+func inboundWebGatewayStatusHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Set response mime type
     rw.Header().Set("Content-Type", "application/json")
 
     // Log it
-    if req.RequestURI != TTServerGatewayPath {
-        filename := req.RequestURI[len(TTServerTopicGateway2):]
+    if req.RequestURI != TTGatewayLogPath {
+        filename := req.RequestURI[len(TTServerTopicGatewayStatus):]
         if filename != "" {
 
             fmt.Printf("%s Gateway information request for %s\n", time.Now().Format(logDateFormat), filename)
 
             // Open the file
-            file := SafecastDirectory() + TTServerGatewayPath + "/" + filename + ".json"
+            file := SafecastDirectory() + TTGatewayLogPath + "/" + filename + ".json"
             fd, err := os.Open(file)
             if err != nil {
                 io.WriteString(rw, errorString(err))
