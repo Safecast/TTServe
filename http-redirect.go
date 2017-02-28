@@ -51,6 +51,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
+	// Report where we got it from
     var net Net
     transportStr := deviceType+":"+ipv4(req.RemoteAddr)
     net.Transport = &transportStr
@@ -59,7 +60,14 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     fmt.Printf("\n%s Received payload for %d from %s\n", time.Now().Format(logDateFormat), sd.DeviceId, transportStr)
     fmt.Printf("%s\n", body)
 
-    // Fill in the minimums so as to prevent faults
+	// If the data doesn't have anything useful in it, optimize it completely away.  This is
+	// observed to happen for Safecast Air from time to time
+	if sd.Opc == nil && sd.Pms == nil && sd.Env == nil && sd.Lnd == nil && sd.Bat == nil && sd.Dev == nil {
+	    fmt.Printf("%s *** Ignoring because message contains no data\n", time.Now().Format(logDateFormat))
+		return
+	}
+
+    // Fill in the minimums so as to prevent faults in V1 processing
     if sdV1.Unit == nil {
         s := ""
         sdV1.Unit = &s
@@ -68,6 +76,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         v := float32(0)
         sdV1.Value = &v
     }
+
     // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
     UploadedAt := nowInUTC()
     SafecastV1Upload(body, SafecastV1UploadURL+req.RequestURI, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
