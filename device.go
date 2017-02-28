@@ -206,8 +206,8 @@ func sendSafecastDeviceSummaryToSlack(header string, fWrap bool, fDetails bool) 
     for i := 0; i < len(sortedDevices); i++ {
         id := sortedDevices[i].deviceid
 
-        if i != 0 {
-            s = fmt.Sprintf("%s\n", s)
+        if s != "" {
+            s += fmt.Sprintf("\n")
         }
 
         label := ""

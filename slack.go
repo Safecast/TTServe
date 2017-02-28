@@ -122,11 +122,13 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             sendSafecastServerSummaryToSlack("")
         }
 
+    case "summary":
+		fallthrough
     case "status":
         if messageAfterFirstWord == "" {
-            sendSafecastServerSummaryToSlack("Servers")
-            sendSafecastGatewaySummaryToSlack("Gateways")
-            sendSafecastDeviceSummaryToSlack("Devices", false, false)
+            sendSafecastServerSummaryToSlack("== Servers ==")
+            sendSafecastGatewaySummaryToSlack("== Gateways ==")
+            sendSafecastDeviceSummaryToSlack("== Devices ==", false, false)
         }
 
     case "pending":
