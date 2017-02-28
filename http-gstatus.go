@@ -22,7 +22,7 @@ func inboundWebGatewayStatusHandler(rw http.ResponseWriter, req *http.Request) {
     rw.Header().Set("Content-Type", "application/json")
 
     // Log it
-    if req.RequestURI != TTGatewayLogPath {
+    if req.RequestURI != TTGatewayLogPath && len(req.RequestURI) > len(TTServerTopicGatewayStatus) {
         filename := req.RequestURI[len(TTServerTopicGatewayStatus):]
         if filename != "" {
 
