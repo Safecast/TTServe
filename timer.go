@@ -90,7 +90,7 @@ func ControlFileCheck() {
 
     // Slack restart
     if (ControlFileTime(TTServerRestartAllControlFile, "") != AllServersSlackRestartRequestTime) {
-        sendToSafecastOps(fmt.Sprintf("** %s restarting **", ThisServerAddressIPv4), SLACK_MSG_UNSOLICITED)
+        sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServeInstanceID), SLACK_MSG_UNSOLICITED)
         ILog(fmt.Sprintf("\n***\n*** RESTARTING at %s because of Slack 'restart' command\n***\n\n", time.Now().Format(logDateFormat)))
         os.Exit(0)
     }
