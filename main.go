@@ -17,7 +17,7 @@ import (
     "encoding/json"
 )
 
-// Main entry for the service
+// Main service entry point
 func main() {
 
 	// Init our utility package
