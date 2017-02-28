@@ -97,7 +97,7 @@ func ControlFileCheck() {
 
     // Github restart
     if (ControlFileTime(TTServerRestartGithubControlFile, "") != AllServersGithubRestartRequestTime) {
-        ILog(fmt.Sprintf("\n***\n*** RESTARTING at because of Github push command\n***\n\n", time.Now().Format(logDateFormat)))
+        ILog(fmt.Sprintf("\n***\n*** RESTARTING at %s because of Github push command\n***\n\n", time.Now().Format(logDateFormat)))
         os.Exit(0)
     }
 
