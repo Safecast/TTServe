@@ -61,13 +61,14 @@ var SlackOutboundURLs = [...]string {
 }
 
 // Paths for the file system shared among all TTSERVE instances
-const TTServerLogPath = "/log"
-const TTServerStampPath = "/stamp"
 const TTServerCommandPath = "/command"
 const TTServerControlPath = "/control"
-const TTServerValuePath = "/value"
-const TTServerInstancePath = "/instance"
-const TTServerGatewayPath = "/gateway"
+const TTServerLogPath = "/device-log"
+const TTServerStampPath = "/device-stamp"
+const TTServerValuePath = "/device-status"
+const TTServerInstancePath = "/server-log"
+const TTServerStatusPath = "/server-status"
+const TTServerGatewayPath = "/gateway-log"
 const TTServerBuildPath = "/build"
 const TTServerFTPCertPath = "/cert/ftp"
 const TTServerRestartGithubControlFile = "restart_github.txt"
