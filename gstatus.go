@@ -18,8 +18,10 @@ import (
 
 // The data structure for the "Gateway Status" files
 type SafecastGatewayStatus struct {
-    UpdatedAt  string      `json:"when_updated,omitempty"`
+    UpdatedAt   string      `json:"when_updated,omitempty"`
     Ttg         TTGateReq   `json:"current_values,omitempty"`
+	// for backward compatibility - you can remove after 2017-04
+    UploadedAt  string      `json:"when_uploaded,omitempty"`
 }
 
 // Get the current value
@@ -51,6 +53,11 @@ func SafecastReadGatewayStatus(gatewayId string) (isAvail bool, isReset bool, sv
             valueToRead := SafecastGatewayStatus{}
             errRead = json.Unmarshal(contents, &valueToRead)
             if errRead == nil {
+				// Backward compatbility with old field names
+				if valueToRead.UploadedAt != "" {
+					valueToRead.UpdatedAt = valueToRead.UploadedAt
+					valueToRead.UploadedAt = ""
+				}
                 return true, false, valueToRead
             }
             // Malformed JSON can easily occur because of multiple concurrent

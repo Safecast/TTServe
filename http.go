@@ -43,8 +43,8 @@ func HttpInboundHandler() {
     http.HandleFunc(TTServerTopicDeviceStatus, inboundWebDeviceStatusHandler)
     http.HandleFunc(TTServerTopicServerLog, inboundWebServerLogHandler)
     http.HandleFunc(TTServerTopicServerStatus, inboundWebServerStatusHandler)
-    http.HandleFunc(TTServerTopicGatewayUpdate, inboundWebGatewayUpdateHandler)
     http.HandleFunc(TTServerTopicGatewayStatus, inboundWebGatewayStatusHandler)
+    http.HandleFunc(TTServerTopicGatewayUpdate, inboundWebGatewayUpdateHandler)
 
     // Spin up functions available on all roles
     http.HandleFunc(TTServerTopicSend, inboundWebSendHandler)
