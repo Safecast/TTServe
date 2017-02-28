@@ -14,7 +14,7 @@ import (
 )
 
 // Warning behavior
-const serverWarningAfterMinutes = 5
+const serverWarningAfterMinutes = 10
 
 // Describes every device that has sent us a message
 type seenServer struct {

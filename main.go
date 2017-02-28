@@ -108,6 +108,9 @@ func main() {
     AllServersSlackRestartRequestTime = ControlFileTime(TTServerRestartAllControlFile, "")
     AllServersGithubRestartRequestTime = ControlFileTime(TTServerRestartGithubControlFile, "")
 
+	// Write out initial status to the file system
+	SafecastWriteServerStatus()
+
 	// Synchronously init the app request queue before anyone tries to service it or push to it
     AppReqInit()
 

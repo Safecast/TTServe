@@ -18,14 +18,14 @@ import (
 
 // The data structure for the "Gateway Status" files
 type SafecastGatewayStatus struct {
-    UploadedAt  string      `json:"when_uploaded,omitempty"`
+    UpdatedAt  string      `json:"when_updated,omitempty"`
     Ttg         TTGateReq   `json:"current_values,omitempty"`
 }
 
 // Get the current value
 func SafecastReadGatewayStatus(gatewayId string) (isAvail bool, isReset bool, sv SafecastGatewayStatus) {
     valueEmpty := SafecastGatewayStatus{}
-    valueEmpty.UploadedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+    valueEmpty.UpdatedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
     valueEmpty.Ttg.GatewayId = gatewayId
 
     // Generate the filename, which we'll use twice
@@ -99,7 +99,7 @@ func SafecastWriteGatewayStatus(ttg TTGateReq) {
     value.Ttg = ttg
 
     // Update the uploaded at
-    value.UploadedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+    value.UpdatedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
     // Write it to the file
     filename := SafecastDirectory() + TTGatewayStatusPath + "/" + ttg.GatewayId + ".json"
@@ -151,7 +151,7 @@ func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc 
     s := ""
 
     // When active
-    whenSeen, err := time.Parse("2006-01-02T15:04:05Z", value.UploadedAt)
+    whenSeen, err := time.Parse("2006-01-02T15:04:05Z", value.UpdatedAt)
     if err == nil {
         minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
         if minutesAgo > 60 {

@@ -16,13 +16,36 @@ import (
 )
 
 // Handle inbound HTTP requests to fetch log files
+func inboundWebGatewayUpdateHandler(rw http.ResponseWriter, req *http.Request) {
+
+	// We have an update request
+    body, err := ioutil.ReadAll(req.Body)
+    if err != nil {
+        fmt.Printf("GW: Error reading HTTP request body: \n%v\n", req)
+        return
+    }
+
+	// Unmarshal it
+    var ttg TTGateReq
+
+    err = json.Unmarshal(body, &ttg)
+    if err != nil {
+        fmt.Printf("*** Received badly formatted Device Update request:\n%v\n", body)
+        return
+    }
+
+    fmt.Printf("%s Received gateway update for %s\n", time.Now().Format(logDateFormat), ttg.GatewayId)
+	go SafecastWriteGatewayStatus(ttg)
+}
+
+// Handle inbound HTTP requests to fetch log files
 func inboundWebGatewayStatusHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Set response mime type
     rw.Header().Set("Content-Type", "application/json")
 
     // Log it
-    if req.RequestURI != TTGatewayStatusPath && len(req.RequestURI) > len(TTServerTopicGatewayStatus) {
+    if len(req.RequestURI) > len(TTServerTopicGatewayStatus) {
         filename := req.RequestURI[len(TTServerTopicGatewayStatus):]
         if filename != "" {
 
@@ -43,24 +66,5 @@ func inboundWebGatewayStatusHandler(rw http.ResponseWriter, req *http.Request) {
 
         }
     }
-
-	// We have an update request
-    body, err := ioutil.ReadAll(req.Body)
-    if err != nil {
-        fmt.Printf("GW: Error reading HTTP request body: \n%v\n", req)
-        return
-    }
-
-	// Unmarshal it
-    var ttg TTGateReq
-
-    err = json.Unmarshal(body, &ttg)
-    if err != nil {
-        fmt.Printf("*** Received badly formatted Device Update request:\n%v\n", body)
-        return
-    }
-
-    fmt.Printf("%s Received gateway update for %s\n", time.Now().Format(logDateFormat), ttg.GatewayId)
-	go SafecastWriteGatewayStatus(ttg)
 
 }

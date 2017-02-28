@@ -15,14 +15,14 @@ import (
 
 // The data structure for the "Server Status" files
 type SafecastServerStatus struct {
-    UploadedAt  string			`json:"when_uploaded,omitempty"`
+    UpdatedAt  string			`json:"when_updated,omitempty"`
     Tts         TTServeStatus   `json:"current_values,omitempty"`
 }
 
 // Get the current value
 func SafecastReadServerStatus(serverId string) (isAvail bool, isReset bool, sv SafecastServerStatus) {
     valueEmpty := SafecastServerStatus{}
-    valueEmpty.UploadedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+    valueEmpty.UpdatedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 	valueEmpty.Tts = stats
 
     // Generate the filename, which we'll use twice

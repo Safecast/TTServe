@@ -33,6 +33,7 @@ func timer15m() {
         if ThisServerIsMonitor {
             sendExpiredSafecastDevicesToSlack()
             sendExpiredSafecastGatewaysToSlack()
+            sendExpiredSafecastServersToSlack()
         }
 
         // Sleep
