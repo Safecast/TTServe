@@ -13,13 +13,15 @@ import (
 // General periodic housekeeping
 func timer1m() {
     for {
-        time.Sleep(1 * 60 * time.Second)
 
         // Restart this instance if instructed to do so
         ControlFileCheck()
 
 		// Write out current status to the file system
 		SafecastWriteServerStatus()
+
+		// Sleep
+        time.Sleep(1 * 60 * time.Second)
 		
     }
 }
