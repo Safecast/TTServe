@@ -451,15 +451,17 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 // Get summary of a device
 func SafecastGetDeviceStatusSummary(DeviceId uint32) (Label string, Gps string, Summary string) {
 
+	// Default the label for special device types that have no label
+	label := SafecastV1DeviceType(DeviceId)
+
     // Read the file
     isAvail, _, value := SafecastReadDeviceStatus(DeviceId)
     if !isAvail {
-        return "", "", ""
+        return label, "", ""
     }
 
     // Get the label
-    label := ""
-    if value.Dev != nil && value.Dev.DeviceLabel != nil {
+    if label == "" && value.Dev != nil && value.Dev.DeviceLabel != nil {
         label = *value.Dev.DeviceLabel
     }
 

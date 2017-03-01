@@ -11,10 +11,20 @@ import (
     "strconv"
 )
 
+// Get the type of a device
+func SafecastV1DeviceType(deviceid uint32) string {
+    if (deviceid >= 100000 && deviceid < 199999) {
+		return "pointcast"
+	}
+    if (deviceid >= 50000 && deviceid < 59999) {
+        return "safecast-air"
+	}
+	return ""	
+}
+
 // Reformat a special V1 payload to Current
 func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data SafecastData) {
     var sd SafecastData
-    var devicetype = ""
 
     // Required field
     if v1.DeviceId == nil {
@@ -23,16 +33,15 @@ func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data
     }
 
     // Detect what range it is within, and process the conversion differently
+    devicetype := SafecastV1DeviceType(*v1.DeviceId)
     isPointcast := false
-    if (*v1.DeviceId >= 100000 && *v1.DeviceId < 199999) {
+    if devicetype == "pointcast" {
         isPointcast = true
-        devicetype = "pointcast"
         sd.DeviceId = uint64(*v1.DeviceId / 10)
     }
     isSafecastAir := false
-    if (*v1.DeviceId >= 50000 && *v1.DeviceId < 59999) {
+    if devicetype == "safecast-air" {
         isSafecastAir = true
-        devicetype = "safecast-air"
         sd.DeviceId = uint64(*v1.DeviceId)
     }
     if !isPointcast && !isSafecastAir {
