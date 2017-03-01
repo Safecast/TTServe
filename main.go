@@ -62,11 +62,10 @@ func main() {
         fmt.Printf("*** Badly formatted AWS Info ***\n");
 		os.Exit(0)
     }
-	
-	fmt.Printf("Now running in AWS %s as Instance ID %s\n", stats.AWSInstance.Region, stats.AWSInstance.InstanceId)
 
 	TTServeInstanceID = stats.AWSInstance.InstanceId
 	ServerLog(fmt.Sprintf("*** STARTUP at %s\n", time.Now().Format(logDateFormat)))
+	fmt.Printf("%s *** AWS Instance ID %s in Region %s\n", time.Now().Format(logDateFormat), stats.AWSInstance.InstanceId, stats.AWSInstance.Region)
 
     // Look up the two IP addresses that we KNOW have only a single A record,
     // and determine if WE are the server for those protocols

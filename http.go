@@ -17,21 +17,13 @@ func HttpInboundHandler() {
 
     // Spin up functions only available on the monitor role, of which there is only one
     if ThisServerIsMonitor {
-
         http.HandleFunc(TTServerTopicGithub, inboundWebGithubHandler)
-        fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServerFTPAddress, TTServerHTTPPort, TTServerTopicGithub)
-
         http.HandleFunc(TTServerTopicSlack, inboundWebSlackHandler)
-        fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServerFTPAddress, TTServerHTTPPort, TTServerTopicSlack)
-
     }
 
     // Spin up TTN
     if !TTNMQQTMode {
-
         http.HandleFunc(TTServerTopicTTN, inboundWebTTNHandler)
-        fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServerHTTPAddress, TTServerHTTPPort, TTServerTopicTTN)
-
     }
 
     // Spin up handler to handle misc web ping requests
@@ -48,13 +40,10 @@ func HttpInboundHandler() {
 
     // Spin up functions available on all roles
     http.HandleFunc(TTServerTopicSend, inboundWebSendHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServerHTTPAddress, TTServerHTTPPort, TTServerTopicSend)
 
     http.HandleFunc(TTServerTopicRedirect1, inboundWebRedirectHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServerHTTPAddress, TTServerHTTPPort, TTServerTopicRedirect1)
 
     http.HandleFunc(TTServerTopicRedirect2, inboundWebRedirectHandler)
-    fmt.Printf("Now handling inbound HTTP on: %s%s%s\n", TTServerHTTPAddress, TTServerHTTPPort, TTServerTopicRedirect2)
 
     go func() {
         http.ListenAndServe(TTServerHTTPPortAlternate, nil)
