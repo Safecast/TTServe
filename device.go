@@ -270,9 +270,6 @@ func sendSafecastDeviceSummaryToSlack(header string, fWrap bool, fDetails bool) 
                 s += summary
             }
             if (!fWrap) {
-                if label != "" {
-                    s += "\"" + label + "\" "
-                }
                 s += ")"
             }
         }
