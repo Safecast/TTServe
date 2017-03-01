@@ -72,13 +72,13 @@ func ControlFileCheck() {
     // Slack restart
     if (ControlFileTime(TTServerRestartAllControlFile, "") != AllServersSlackRestartRequestTime) {
         sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServeInstanceID), SLACK_MSG_UNSOLICITED)
-        ServerLog(fmt.Sprintf("\n***\n*** RESTARTING at %s because of Slack 'restart' command\n***\n\n", time.Now().Format(logDateFormat)))
+        ServerLog(fmt.Sprintf("*** RESTARTING at %s because of Slack 'restart' command\n", time.Now().Format(logDateFormat)))
         os.Exit(0)
     }
 
     // Github restart
     if (ControlFileTime(TTServerRestartGithubControlFile, "") != AllServersGithubRestartRequestTime) {
-        ServerLog(fmt.Sprintf("\n***\n*** RESTARTING at %s because of Github push command\n***\n\n", time.Now().Format(logDateFormat)))
+        ServerLog(fmt.Sprintf("*** RESTARTING at %s because of Github push command\n", time.Now().Format(logDateFormat)))
         os.Exit(0)
     }
 

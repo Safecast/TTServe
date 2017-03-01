@@ -66,7 +66,7 @@ func main() {
 	fmt.Printf("Now running in AWS %s as Instance ID %s\n", stats.AWSInstance.Region, stats.AWSInstance.InstanceId)
 
 	TTServeInstanceID = stats.AWSInstance.InstanceId
-	ServerLog(fmt.Sprintf("\n\n***\n*** STARTUP at %s\n***\n\n", time.Now().Format(logDateFormat)))
+	ServerLog(fmt.Sprintf("*** STARTUP at %s\n", time.Now().Format(logDateFormat)))
 
     // Look up the two IP addresses that we KNOW have only a single A record,
     // and determine if WE are the server for those protocols
@@ -151,7 +151,7 @@ func signalHandler() {
     for {
         switch <-ch {
         case syscall.SIGINT:
-            fmt.Printf("\n***\n*** Exiting %s because of SIGNAL \n***\n\n", time.Now().Format(logDateFormat))
+            fmt.Printf("*** Exiting %s because of SIGNAL \n", time.Now().Format(logDateFormat))
             os.Exit(0)
         case syscall.SIGTERM:
 			FtpStop()
