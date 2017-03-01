@@ -45,6 +45,7 @@ func main() {
 	stats.AddressIPv4 = ThisServerAddressIPv4
 	
 	// Get AWS info about this instance
+	// https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-identity-documents.html
     rsp, erraws := http.Get("http://169.254.169.254/latest/dynamic/instance-identity/document")
     if erraws != nil {
         fmt.Printf("Can't get our own instance info: %v\n", erraws);
@@ -56,10 +57,6 @@ func main() {
         fmt.Printf("Error fetching instance info: %v\n", errread);
         os.Exit(0)
     }
-
-	if (true) {
-		fmt.Printf("AWS:\n%s\n", string(buf))
-	}
 	
     err = json.Unmarshal(buf, &stats.AWSInstance)
     if err != nil {
