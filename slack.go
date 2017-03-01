@@ -20,7 +20,7 @@ import (
 // Slack webhook
 func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     stats.Count.HTTP++;
-	stats.Count.HTTPSlack++
+    stats.Count.HTTPSlack++
 
     // Unpack the request
     body, err := ioutil.ReadAll(req.Body)
@@ -59,6 +59,16 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     args := strings.Split(message, " ")
     argsLC := strings.Split(strings.ToLower(message), " ")
 
+	firstArgLC := ""
+	if len(args) > 1 {
+		firstArgLC = argsLC[1]
+	}
+
+	secondArgLC := ""
+	if len(args) > 2 {
+		secondArgLC = argsLC[2]
+	}
+	
     messageAfterFirstWord := ""
     if len(args) > 1 {
         messageAfterFirstWord = strings.Join(args[1:], " ")
@@ -90,6 +100,10 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
+	// Process common argument
+    fMobile := firstArgLC == "mobile" || secondArgLC == "mobile"
+    fDetails := fMobile || firstArgLC == "detail" || firstArgLC == "details" || secondArgLC == "detail" || secondArgLC == "details"
+
     // Process queries
     switch argsLC[0] {
 
@@ -98,42 +112,30 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     case "devices":
         fallthrough
     case "ttnode":
-        if messageAfterFirstWord == "" {
-            sendSafecastDeviceSummaryToSlack("", false, false)
-        } else if messageAfterFirstWord == "detail" || messageAfterFirstWord == "details" {
-            sendSafecastDeviceSummaryToSlack("", false, true)
-        } else if messageAfterFirstWord == "mobile" {
-            sendSafecastDeviceSummaryToSlack("", true, true)
-        }
+        sendSafecastDeviceSummaryToSlack("", fMobile, fDetails)
 
     case "gateway":
         fallthrough
     case "gateways":
         fallthrough
     case "ttgate":
-        if messageAfterFirstWord == "" {
-            sendSafecastGatewaySummaryToSlack("")
-        }
+        sendSafecastGatewaySummaryToSlack("", fMobile, fDetails)
 
     case "server":
         fallthrough
     case "servers":
         fallthrough
     case "ttserve":
-        if messageAfterFirstWord == "" {
-            sendSafecastServerSummaryToSlack("")
-        }
+        sendSafecastServerSummaryToSlack("", fMobile, fDetails)
 
     case "summary":
-		fallthrough
+        fallthrough
     case "status":
-        if messageAfterFirstWord == "" {
-            go sendSafecastServerSummaryToSlack("== Servers ==")
-		    time.Sleep(2 * time.Second)
-            go sendSafecastGatewaySummaryToSlack("== Gateways ==")
-		    time.Sleep(2 * time.Second)
-            go sendSafecastDeviceSummaryToSlack("== Devices ==", false, false)
-        }
+        go sendSafecastServerSummaryToSlack("== Servers ==", fMobile, fDetails)
+        time.Sleep(2 * time.Second)
+        go sendSafecastGatewaySummaryToSlack("== Gateways ==", fMobile, fDetails)
+        time.Sleep(2 * time.Second)
+        go sendSafecastDeviceSummaryToSlack("== Devices ==", fMobile, fDetails)
 
     case "pending":
         fallthrough

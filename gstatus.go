@@ -137,12 +137,12 @@ func SafecastWriteGatewayStatus(ttg TTGateReq) {
 }
 
 // Get summary of a device
-func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc string, Summary string) {
+func SafecastGetGatewaySummary(GatewayId string, bol string, fDetails bool) (Summary string) {
 
     // Read the file
     isAvail, _, value := SafecastReadGatewayStatus(GatewayId)
     if !isAvail {
-        return "", "", ""
+        return ""
     }
 
     // Get the label
@@ -157,24 +157,25 @@ func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc 
     // Build the summary
     s := ""
 
-    // When active
-    whenSeen, err := time.Parse("2006-01-02T15:04:05Z", value.UpdatedAt)
-    if err == nil {
-        minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
-        if minutesAgo > 60 {
-            s += bol
-            s += fmt.Sprintf("Last seen %s ago", Ago(whenSeen))
-        }
-    }
+	// How long ago
+	whenSeen, err := time.Parse("2006-01-02T15:04:05Z", value.UpdatedAt)
+	if err == nil {
+	    s += fmt.Sprintf("%s", Ago(whenSeen))
+	}
+	
+	// Label
+	if label != "" {
+		s += fmt.Sprintf(" \"%s\"", label)
+	}
+	
+	// Location
+	if fDetails && loc != "" {
+		s += "\n" + bol + loc
+	}
 
-    // Messages Received
-    if value.Ttg.MessagesReceived != 0 {
-
-        if s != "" {
-            s += "\n"
-        }
-
-        s += bol
+	// Received
+    if fDetails && value.Ttg.MessagesReceived != 0 {
+		s += "\n" + bol
 
         if value.Ttg.DevicesSeen == "" {
             s += fmt.Sprintf("%d messages received", value.Ttg.MessagesReceived)
@@ -193,6 +194,6 @@ func SafecastGetGatewaySummary(GatewayId string, bol string) (Label string, Loc 
     }
 
     // Done
-    return label, loc, s
+    return s
 
 }

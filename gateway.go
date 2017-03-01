@@ -6,7 +6,7 @@
 package main
 
 import (
-	"sort"
+    "sort"
     "time"
     "fmt"
     "strings"
@@ -152,7 +152,7 @@ func sendExpiredSafecastGatewaysToSlack() {
 }
 
 // Get a summary of devices that are older than this many minutes ago
-func sendSafecastGatewaySummaryToSlack(header string) {
+func sendSafecastGatewaySummaryToSlack(header string, fWrap bool, fDetails bool) {
 
     // First, age out the expired devices and recompute when last seen
     sendExpiredSafecastGatewaysToSlack()
@@ -170,20 +170,14 @@ func sendSafecastGatewaySummaryToSlack(header string) {
         gatewayID := sortedGateways[i].gatewayid
 
         // Emit info about the device
-        label, loc, summary := SafecastGetGatewaySummary(gatewayID, "    ")
+        summary := SafecastGetGatewaySummary(gatewayID, "    ", fDetails)
         if summary != "" {
             if s != "" {
                 s += fmt.Sprintf("\n");
             }
             s += fmt.Sprintf("<http://%s%s%s|%s>", TTServerHTTPAddress, TTServerTopicGatewayStatus, gatewayID, gatewayID)
-            if loc != "" {
-                s += fmt.Sprintf(" %s", loc)
-            }
-            if label != "" {
-                s += fmt.Sprintf(" \"%s\"", label)
-            }
             if summary != "" {
-                s += fmt.Sprintf("\n%s", summary)
+                s += fmt.Sprintf(" %s", summary)
             }
         }
     }
