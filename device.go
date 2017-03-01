@@ -244,18 +244,7 @@ func sendSafecastDeviceSummaryToSlack(header string, fWrap bool, fDetails bool) 
         if sortedDevices[i].minutesAgo == 0 {
             s = fmt.Sprintf("%s just now", s)
         } else {
-            var minutesAgo uint32 = uint32(sortedDevices[i].minutesAgo)
-            var hoursAgo uint32 = minutesAgo / 60
-            var daysAgo uint32 = hoursAgo / 24
-            minutesAgo -= hoursAgo * 60
-            hoursAgo -= daysAgo * 24
-            if daysAgo != 0 {
-                s = fmt.Sprintf("%s %dd %dh %dm ago", s, daysAgo, hoursAgo, minutesAgo)
-            } else if hoursAgo != 0 {
-                s = fmt.Sprintf("%s %dh %dm ago", s, hoursAgo, minutesAgo)
-            } else {
-                s = fmt.Sprintf("%s %02dm ago", s, minutesAgo)
-            }
+            s = fmt.Sprintf("%s %s ago", s, AgoMinutes(uint32(sortedDevices[i].minutesAgo)))
         }
 
         if !fWrap && label != "" {
