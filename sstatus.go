@@ -52,7 +52,7 @@ func SafecastReadServerStatus(serverId string) (isAvail bool, isReset bool, sv S
             }
             // Malformed JSON can easily occur because of multiple concurrent
             // writers, and so this self-corrects the situation.
-            if false {
+            if true {
                 fmt.Printf("*** %s appears to be corrupt - erasing ***\n", filename);
             }
             return true, true, valueEmpty
