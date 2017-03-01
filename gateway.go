@@ -170,7 +170,7 @@ func sendSafecastGatewaySummaryToSlack(header string, fWrap bool, fDetails bool)
         gatewayID := sortedGateways[i].gatewayid
 
         // Emit info about the device
-        summary := SafecastGetGatewaySummary(gatewayID, "    ", fDetails)
+        summary := SafecastGetGatewaySummary(gatewayID, "    ", fWrap, fDetails)
         if summary != "" {
             if s != "" {
                 s += fmt.Sprintf("\n");

@@ -137,7 +137,7 @@ func SafecastWriteGatewayStatus(ttg TTGateReq) {
 }
 
 // Get summary of a device
-func SafecastGetGatewaySummary(GatewayId string, bol string, fDetails bool) (Summary string) {
+func SafecastGetGatewaySummary(GatewayId string, bol string, fMobile bool, fDetails bool) (Summary string) {
 
     // Read the file
     isAvail, _, value := SafecastReadGatewayStatus(GatewayId)
@@ -177,7 +177,7 @@ func SafecastGetGatewaySummary(GatewayId string, bol string, fDetails bool) (Sum
     if fDetails && value.Ttg.MessagesReceived != 0 {
 		s += "\n" + bol
 
-        if value.Ttg.DevicesSeen == "" {
+        if value.Ttg.DevicesSeen == "" || fMobile {
             s += fmt.Sprintf("%d messages received", value.Ttg.MessagesReceived)
         } else {
             s += fmt.Sprintf("%d received from ", value.Ttg.MessagesReceived)
