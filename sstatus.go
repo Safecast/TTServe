@@ -96,8 +96,12 @@ func SafecastWriteServerStatus() {
 
     // Write it to the file
     filename := SafecastDirectory() + TTServerStatusPath + "/" + TTServeInstanceID + ".json"
-    valueJSON, _ := json.MarshalIndent(value, "", "    ")
-
+    valueJSON, err := json.MarshalIndent(value, "", "    ")
+	if err != nil {
+		fmt.Printf("Error writing to '%s': \n%v\n", filename, value)
+		return
+	}
+	
     for {
 
         // Write the value
