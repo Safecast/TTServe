@@ -94,6 +94,9 @@ func SafecastWriteServerStatus() {
 	// Update the modification date
     value.UpdatedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
+	// Update the data
+	value.Tts = stats
+
     // Write it to the file
     filename := SafecastDirectory() + TTServerStatusPath + "/" + TTServeInstanceID + ".json"
     valueJSON, err := json.MarshalIndent(value, "", "    ")
