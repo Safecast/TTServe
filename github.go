@@ -31,12 +31,12 @@ func inboundWebGithubHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Handle 'git commit -mm' and 'git commit -amm', used in dev intermediate builds, in a more aesthetically pleasing manner.
     if p.HeadCommit.Commit.Message == "m" {
-        fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n",
+        fmt.Printf("*** RESTARTING because\n*** %s\n",
             fmt.Sprintf("%s pushed %s's commit to GitHub", p.Pusher.Name, p.HeadCommit.Commit.Committer.Name))
     } else {
         sendToSafecastOps(fmt.Sprintf("** Restarting ** %s %s",
             p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message), SLACK_MSG_UNSOLICITED)
-        fmt.Printf("\n***\n***\n*** RESTARTING because\n*** %s\n***\n***\n\n",
+        fmt.Printf("*** RESTARTING because\n*** %s\n",
             fmt.Sprintf("%s pushed %s's commit to GitHub: %s",
                 p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
     }
