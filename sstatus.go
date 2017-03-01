@@ -94,8 +94,25 @@ func SafecastWriteServerStatus() {
 	// Update the modification date
     value.UpdatedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
-	// Update the data
-	value.Tts = stats
+	// Copy certain fields directly
+	value.Tts.AddressIPv4 = stats.AddressIPv4
+	value.Tts.AWSInstance = stats.AWSInstance
+	
+	// Update the data that we accumulate across sessions
+	value.Tts.CountUDP += stats.CountUDP
+	stats.CountUDP = 0
+	value.Tts.CountHTTPDevice += stats.CountHTTPDevice
+	stats.CountHTTPDevice = 0
+	value.Tts.CountHTTPGateway += stats.CountHTTPGateway
+	stats.CountHTTPGateway = 0
+	value.Tts.CountHTTPRelay += stats.CountHTTPRelay
+	stats.CountHTTPRelay = 0
+	value.Tts.CountHTTPRedirect += stats.CountHTTPRedirect
+	stats.CountHTTPRedirect = 0
+	value.Tts.CountHTTPTTN += stats.CountHTTPTTN
+	stats.CountHTTPTTN = 0
+	value.Tts.CountMQQTTTN += stats.CountMQQTTTN
+	stats.CountMQQTTTN = 0
 
     // Write it to the file
     filename := SafecastDirectory() + TTServerStatusPath + "/" + TTServeInstanceID + ".json"
