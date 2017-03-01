@@ -8,14 +8,16 @@ import (
 	"os"
 	"fmt"
 	"time"
+    "encoding/json"
 )
 
 // General periodic housekeeping
 func timer1m() {
     for {
 
-		foo := fmt.Sprintf("%v", stats.Count)
-		fmt.Printf("%s\n", foo)
+        statsdata, _ := json.Marshal(&stats.Count)
+		statsstr := string(statsdata)
+		fmt.Printf("%s\n", statsstr)
 		
         // Restart this instance if instructed to do so
         ControlFileCheck()
