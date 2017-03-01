@@ -195,8 +195,12 @@ func SafecastSummarizeStatsDelta() string {
 	diff.HTTPTTN = thisCount.HTTPTTN - prevCount.HTTPTTN
 	diff.MQQTTTN = thisCount.MQQTTTN - prevCount.MQQTTTN
 	
-	// Output stats
-    statsdata, _ := json.Marshal(&diff)
+	// Return the jsonified summary
+    statsdata, err := json.Marshal(&diff)
+	if err != nil {
+		return ""
+	}
+	
 	return string(statsdata)
 
 }

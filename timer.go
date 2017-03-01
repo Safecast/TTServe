@@ -22,12 +22,6 @@ func timer1m() {
 
 		// Sleep
         time.Sleep(1 * 60 * time.Second)
-
-		// Update and output the stats
-		summary := SafecastSummarizeStatsDelta()
-		if summary != "" {
-			ServerLog(fmt.Sprintf("%s\n", summary))
-		}
 		
     }
 }
@@ -70,6 +64,12 @@ func timer12h() {
 
         // Snooze
         time.Sleep(12 * 60 * 60 * time.Second)
+
+		// Update and output the stats
+		summary := SafecastSummarizeStatsDelta()
+		if summary != "" {
+			ServerLog(fmt.Sprintf("%s\n", summary))
+		}
 
     }
 }
