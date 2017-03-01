@@ -14,10 +14,6 @@ import (
 // General periodic housekeeping
 func timer1m() {
     for {
-
-		// Output stats
-        statsdata, _ := json.Marshal(&stats.Count)
-		ServerLog(fmt.Sprintf("Stats:\n%s\n", string(statsdata)))
 		
         // Restart this instance if instructed to do so
         ControlFileCheck()
@@ -69,6 +65,10 @@ func timer12h() {
 
         // Snooze
         time.Sleep(12 * 60 * 60 * time.Second)
+
+		// Output stats
+        statsdata, _ := json.Marshal(&stats.Count)
+		ServerLog(fmt.Sprintf("Stats:\n%s\n", string(statsdata)))
 
     }
 }
