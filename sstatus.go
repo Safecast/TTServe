@@ -184,6 +184,11 @@ func SafecastGetServerSummary(ServerId string, bol string) string {
     // When active
     s += fmt.Sprintf("alive for %s", Ago(value.Tts.Started))
 
+	// If this is the current server, point that out
+	if (ServerId == TTServeInstanceID) {
+		s += " \"monitor\""
+	}
+
     // Done
     return s
 

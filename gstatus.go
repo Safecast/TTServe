@@ -160,7 +160,7 @@ func SafecastGetGatewaySummary(GatewayId string, bol string, fMobile bool, fDeta
 	// How long ago
 	whenSeen, err := time.Parse("2006-01-02T15:04:05Z", value.UpdatedAt)
 	if err == nil {
-	    s += fmt.Sprintf("%s", Ago(whenSeen))
+	    s += fmt.Sprintf("%s ago", Ago(whenSeen))
 	}
 	
 	// Label
