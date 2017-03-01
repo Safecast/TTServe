@@ -15,9 +15,9 @@ import (
 func timer1m() {
     for {
 
+		// Output stats
         statsdata, _ := json.Marshal(&stats.Count)
-		statsstr := string(statsdata)
-		fmt.Printf("%s\n", statsstr)
+		ServerLog(fmt.Sprintf("Stats:\n%s\n", string(statsdata)))
 		
         // Restart this instance if instructed to do so
         ControlFileCheck()
