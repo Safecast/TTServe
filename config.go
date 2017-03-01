@@ -126,6 +126,9 @@ type TTServeStatus struct {
 	Services			string			`json:"services,omitempty"`
 	AWSInstance			AWSInstanceIdentity	`json:"aws,omitempty"`
 	CountUDP			uint32			`json:"received_device_udp,omitempty"`
+	CountHTTP			uint32			`json:"received_all_http,omitempty"`
+	CountHTTPSlack		uint32			`json:"received_slack_http,omitempty"`
+	CountHTTPGithub		uint32			`json:"received_github_http,omitempty"`
 	CountHTTPDevice		uint32			`json:"received_device_http,omitempty"`
 	CountHTTPGateway	uint32			`json:"received_gateway_http,omitempty"`
 	CountHTTPRelay		uint32			`json:"received_ttserve_http,omitempty"`

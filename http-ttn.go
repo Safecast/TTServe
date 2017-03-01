@@ -20,6 +20,8 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
     var ttn UplinkMessage
     var ReplyToDeviceId uint32 = 0
 
+    stats.CountHTTP++
+
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
         fmt.Printf("Error reading HTTP request body: \n%v\n", req)

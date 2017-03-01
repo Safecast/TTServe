@@ -17,6 +17,7 @@ import (
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     var sdV1 *SafecastDataV1
+    stats.CountHTTP++
 
     // Read the body as a byte array
     body, err := ioutil.ReadAll(req.Body)

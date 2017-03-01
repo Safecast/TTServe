@@ -15,7 +15,9 @@ import (
 
 // Github webhook
 func inboundWebGithubHandler(rw http.ResponseWriter, req *http.Request) {
-
+    stats.CountHTTP++;
+	stats.CountHTTPGithub++
+	
 	// Unpack the request
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {

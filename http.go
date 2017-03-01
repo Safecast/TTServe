@@ -26,35 +26,32 @@ func HttpInboundHandler() {
         http.HandleFunc(TTServerTopicTTN, inboundWebTTNHandler)
     }
 
-    // Spin up handler to handle misc web ping requests
+    // Spin up misc handlers
     http.HandleFunc(TTServerTopicRoot1, inboundWebRootHandler)
     http.HandleFunc(TTServerTopicRoot2, inboundWebRootHandler)
-
-    // Spin up log handlers
-    http.HandleFunc(TTServerTopicDeviceLog, inboundWebLogHandler)
+    http.HandleFunc(TTServerTopicDeviceLog, inboundWebDeviceLogHandler)
     http.HandleFunc(TTServerTopicDeviceStatus, inboundWebDeviceStatusHandler)
     http.HandleFunc(TTServerTopicServerLog, inboundWebServerLogHandler)
     http.HandleFunc(TTServerTopicServerStatus, inboundWebServerStatusHandler)
     http.HandleFunc(TTServerTopicGatewayStatus, inboundWebGatewayStatusHandler)
     http.HandleFunc(TTServerTopicGatewayUpdate, inboundWebGatewayUpdateHandler)
-
-    // Spin up functions available on all roles
     http.HandleFunc(TTServerTopicSend, inboundWebSendHandler)
-
     http.HandleFunc(TTServerTopicRedirect1, inboundWebRedirectHandler)
-
     http.HandleFunc(TTServerTopicRedirect2, inboundWebRedirectHandler)
 
+	// Listen on the alternate HTTP port
     go func() {
         http.ListenAndServe(TTServerHTTPPortAlternate, nil)
     }()
 
+	// Listen on the primary HTTP port
     http.ListenAndServe(TTServerHTTPPort, nil)
 
 }
 
 // Handle inbound HTTP requests for root
 func inboundWebRootHandler(rw http.ResponseWriter, req *http.Request) {
+    stats.CountHTTP++
     io.WriteString(rw, fmt.Sprintf("Hello. (%s)\n", ThisServerAddressIPv4))
 }
 

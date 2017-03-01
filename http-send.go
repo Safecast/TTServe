@@ -19,6 +19,7 @@ import (
 func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
     var AppReq IncomingAppReq
     var ReplyToDeviceId uint32 = 0
+    stats.CountHTTP++
 
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
