@@ -24,9 +24,9 @@ func timer1m() {
         time.Sleep(1 * 60 * time.Second)
 
 		// Update and output the stats
-		summary := SafecastSummarizeStats()
+		summary := SafecastSummarizeStatsDelta()
 		if summary != "" {
-			ServerLog(fmt.Sprintf("Stats:\n%s\n", summary))
+			ServerLog(fmt.Sprintf("%s\n", summary))
 		}
 		
     }

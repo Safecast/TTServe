@@ -158,14 +158,14 @@ func SafecastWriteServerStatus() {
 // Get a running total of server stats
 var lastCount TTServeCounts
 var firstSummary = true
-func SafecastSummarizeStats() string {
+func SafecastSummarizeStatsDelta() string {
 	
 	// First, make sure that they're up to date on the service
 	SafecastWriteServerStatus()
 
 	// Read them
     isAvail, isReset, value := SafecastReadServerStatus(TTServeInstanceID)
-	if isAvail || isReset {
+	if !isAvail || isReset {
 		return ""
 	}
 
