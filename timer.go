@@ -8,7 +8,6 @@ import (
 	"os"
 	"fmt"
 	"time"
-    "encoding/json"
 )
 
 // General periodic housekeeping
@@ -23,6 +22,12 @@ func timer1m() {
 
 		// Sleep
         time.Sleep(1 * 60 * time.Second)
+
+		// Update and output the stats
+		summary := SafecastSummarizeStats()
+		if summary != "" {
+			ServerLog(fmt.Sprintf("Stats:\n%s\n", summary))
+		}
 		
     }
 }
@@ -65,10 +70,6 @@ func timer12h() {
 
         // Snooze
         time.Sleep(12 * 60 * 60 * time.Second)
-
-		// Output stats
-        statsdata, _ := json.Marshal(&stats.Count)
-		ServerLog(fmt.Sprintf("Stats:\n%s\n", string(statsdata)))
 
     }
 }

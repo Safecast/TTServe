@@ -155,6 +155,52 @@ func SafecastWriteServerStatus() {
 
 }
 
+// Get a running total of server stats
+var lastCount TTServeCounts
+var firstSummary = true
+func SafecastSummarizeStats() string {
+	
+	// First, make sure that they're up to date on the service
+	SafecastWriteServerStatus()
+
+	// Read them
+    isAvail, isReset, value := SafecastReadServerStatus(TTServeInstanceID)
+	if isAvail || isReset {
+		return ""
+	}
+
+	// Extract the current counts, and update them for next iteration
+	prevCount := lastCount
+	thisCount := value.Tts.Count
+	lastCount = thisCount
+	
+	// If this is the first time through, just remember them
+	if firstSummary {
+		firstSummary = false
+		return ""
+	}
+
+	// Compute the difference
+	var diff = TTServeCounts{}
+	diff.Restarts = thisCount.Restarts - prevCount.Restarts
+	diff.UDP = thisCount.UDP - prevCount.UDP
+	diff.HTTP = thisCount.HTTP - prevCount.HTTP
+	diff.HTTPSlack = thisCount.HTTPSlack - prevCount.HTTPSlack
+	diff.HTTPGithub = thisCount.HTTPGithub - prevCount.HTTPGithub
+	diff.HTTPGUpdate = thisCount.HTTPGUpdate - prevCount.HTTPGUpdate
+	diff.HTTPDevice = thisCount.HTTPDevice - prevCount.HTTPDevice
+	diff.HTTPGateway = thisCount.HTTPGateway - prevCount.HTTPGateway
+	diff.HTTPRelay = thisCount.HTTPRelay - prevCount.HTTPRelay
+	diff.HTTPRedirect = thisCount.HTTPRedirect - prevCount.HTTPRedirect
+	diff.HTTPTTN = thisCount.HTTPTTN - prevCount.HTTPTTN
+	diff.MQQTTTN = thisCount.MQQTTTN - prevCount.MQQTTTN
+	
+	// Output stats
+    statsdata, _ := json.Marshal(&diff)
+	return string(statsdata)
+
+}
+
 // Get summary of a server
 func SafecastGetServerSummary(ServerId string, bol string) string {
 
