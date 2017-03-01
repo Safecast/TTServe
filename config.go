@@ -130,9 +130,10 @@ type TTServeStatus struct {
 	CountHTTP			uint32			`json:"received_all_http,omitempty"`
 	CountHTTPSlack		uint32			`json:"received_slack_http,omitempty"`
 	CountHTTPGithub		uint32			`json:"received_github_http,omitempty"`
-	CountHTTPDevice		uint32			`json:"received_device_http,omitempty"`
-	CountHTTPGateway	uint32			`json:"received_gateway_http,omitempty"`
-	CountHTTPRelay		uint32			`json:"received_ttserve_http,omitempty"`
+	CountHTTPGUpdate	uint32			`json:"received_gateway_update_http,omitempty"`
+	CountHTTPDevice		uint32			`json:"received_device_msg_http,omitempty"`
+	CountHTTPGateway	uint32			`json:"received_gateway_msg_http,omitempty"`
+	CountHTTPRelay		uint32			`json:"received_udp_to_http,omitempty"`
 	CountHTTPRedirect	uint32			`json:"received_redirect_http,omitempty"`
 	CountHTTPTTN		uint32			`json:"received_ttn_http,omitempty"`
 	CountMQQTTTN		uint32			`json:"received_ttn_mqqt,omitempty"`

@@ -37,6 +37,7 @@ func inboundWebGatewayUpdateHandler(rw http.ResponseWriter, req *http.Request) {
 
     fmt.Printf("%s Received gateway update for %s\n", time.Now().Format(logDateFormat), ttg.GatewayId)
 	go SafecastWriteGatewayStatus(ttg)
+    stats.CountHTTPGUpdate++
 }
 
 // Handle inbound HTTP requests to fetch log files
