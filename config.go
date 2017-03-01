@@ -122,7 +122,7 @@ const logDateFormat string = "2006-01-02 15:04:05"
 // Global Server Stats
 type TTServeStatus struct {
 	Started				time.Time		`json:"started,omitempty"`
-	AddressIPv4			string			`json:"ip,omitempty"`
+	AddressIPv4			string			`json:"publicIp,omitempty"`
 	AWSInstance			AWSInstanceIdentity	`json:"aws,omitempty"`
 	CountUDP			uint32			`json:"received_device_udp,omitempty"`
 	CountHTTPDevice		uint32			`json:"received_device_http,omitempty"`
