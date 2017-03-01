@@ -65,7 +65,7 @@ func main() {
 
 	TTServeInstanceID = stats.AWSInstance.InstanceId
 	ServerLog(fmt.Sprintf("*** STARTUP at %s\n", time.Now().Format(logDateFormat)))
-	fmt.Printf("%s *** AWS Instance ID %s in Region %s\n", time.Now().Format(logDateFormat), stats.AWSInstance.InstanceId, stats.AWSInstance.Region)
+	fmt.Printf("%s *** AWS %s instance %s\n", time.Now().Format(logDateFormat), stats.AWSInstance.Region, stats.AWSInstance.InstanceId)
 
     // Look up the two IP addresses that we KNOW have only a single A record,
     // and determine if WE are the server for those protocols
