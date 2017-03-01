@@ -95,6 +95,7 @@ func trackDevice(DeviceId uint32, whenSeen time.Time) {
         minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
         dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes
         dev.notifiedAsUnseen = false
+		dev.label = SafecastV1DeviceType(dev.deviceid)
         seenDevices = append(seenDevices, dev)
     }
 
@@ -216,6 +217,7 @@ func sendSafecastDeviceSummaryToSlack(header string, fWrap bool, fDetails bool) 
         summary := ""
         if fDetails {
             label, gps, summary = SafecastGetDeviceStatusSummary(id)
+			// Refresh cached label
 			sortedDevices[i].label = label
         }
 

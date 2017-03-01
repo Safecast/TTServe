@@ -13,11 +13,16 @@ import (
 
 // Get the type of a device
 func SafecastV1DeviceType(deviceid uint32) string {
-    if (deviceid >= 100000 && deviceid < 199999) {
+	// For true V2 numbering space
+    if (deviceid >= 10000 && deviceid < 19999) {
 		return "pointcast"
 	}
     if (deviceid >= 50000 && deviceid < 59999) {
         return "safecast-air"
+	}
+	// For V1 numbering space
+    if (deviceid >= 100000 && deviceid < 199999) {
+		return "pointcast"
 	}
 	return ""	
 }
