@@ -94,24 +94,24 @@ func SafecastWriteServerStatus() {
 	// Update the modification date
     value.UpdatedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
-	// Copy certain fields directly
-	value.Tts.AddressIPv4 = stats.AddressIPv4
-	value.Tts.AWSInstance = stats.AWSInstance
-	
-	// Update the data that we accumulate across sessions
-	value.Tts.CountUDP += stats.CountUDP
+	// By default, copy all Tts fields
+	prevTts := value.Tts
+	value.Tts = stats
+		
+	// For certain fields, be additive to the prior values
+	value.Tts.CountUDP += prevTts.CountUDP
 	stats.CountUDP = 0
-	value.Tts.CountHTTPDevice += stats.CountHTTPDevice
+	value.Tts.CountHTTPDevice += prevTts.CountHTTPDevice
 	stats.CountHTTPDevice = 0
-	value.Tts.CountHTTPGateway += stats.CountHTTPGateway
+	value.Tts.CountHTTPGateway += prevTts.CountHTTPGateway
 	stats.CountHTTPGateway = 0
-	value.Tts.CountHTTPRelay += stats.CountHTTPRelay
+	value.Tts.CountHTTPRelay += prevTts.CountHTTPRelay
 	stats.CountHTTPRelay = 0
-	value.Tts.CountHTTPRedirect += stats.CountHTTPRedirect
+	value.Tts.CountHTTPRedirect += prevTts.CountHTTPRedirect
 	stats.CountHTTPRedirect = 0
-	value.Tts.CountHTTPTTN += stats.CountHTTPTTN
+	value.Tts.CountHTTPTTN += prevTts.CountHTTPTTN
 	stats.CountHTTPTTN = 0
-	value.Tts.CountMQQTTTN += stats.CountMQQTTTN
+	value.Tts.CountMQQTTTN += prevTts.CountMQQTTTN
 	stats.CountMQQTTTN = 0
 
     // Write it to the file
