@@ -99,8 +99,16 @@ func SafecastWriteServerStatus() {
 	value.Tts = stats
 		
 	// For certain fields, be additive to the prior values
+	value.Tts.CountRestarts += prevTts.CountRestarts
+	stats.CountRestarts = 0
 	value.Tts.CountUDP += prevTts.CountUDP
 	stats.CountUDP = 0
+	value.Tts.CountHTTP += prevTts.CountHTTP
+	stats.CountHTTP = 0
+	value.Tts.CountHTTPSlack += prevTts.CountHTTPSlack
+	stats.CountHTTPSlack = 0
+	value.Tts.CountHTTPGithub += prevTts.CountHTTPGithub
+	stats.CountHTTPGithub = 0
 	value.Tts.CountHTTPDevice += prevTts.CountHTTPDevice
 	stats.CountHTTPDevice = 0
 	value.Tts.CountHTTPGateway += prevTts.CountHTTPGateway

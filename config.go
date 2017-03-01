@@ -125,6 +125,7 @@ type TTServeStatus struct {
 	AddressIPv4			string			`json:"publicIp,omitempty"`
 	Services			string			`json:"services,omitempty"`
 	AWSInstance			AWSInstanceIdentity	`json:"aws,omitempty"`
+	CountRestarts		uint32			`json:"restarts,omitempty"`
 	CountUDP			uint32			`json:"received_device_udp,omitempty"`
 	CountHTTP			uint32			`json:"received_all_http,omitempty"`
 	CountHTTPSlack		uint32			`json:"received_slack_http,omitempty"`
