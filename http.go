@@ -51,7 +51,7 @@ func HttpInboundHandler() {
 
 // Handle inbound HTTP requests for root
 func inboundWebRootHandler(rw http.ResponseWriter, req *http.Request) {
-    stats.CountHTTP++
+    stats.Count.HTTP++
     io.WriteString(rw, fmt.Sprintf("Hello. (%s)\n", ThisServerAddressIPv4))
 }
 

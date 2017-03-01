@@ -17,7 +17,7 @@ import (
 
 // Handle inbound HTTP requests to fetch log files
 func inboundWebGatewayUpdateHandler(rw http.ResponseWriter, req *http.Request) {
-    stats.CountHTTP++
+    stats.Count.HTTP++
 
 	// We have an update request
     body, err := ioutil.ReadAll(req.Body)
@@ -37,12 +37,12 @@ func inboundWebGatewayUpdateHandler(rw http.ResponseWriter, req *http.Request) {
 
     fmt.Printf("%s Received gateway update for %s\n", time.Now().Format(logDateFormat), ttg.GatewayId)
 	go SafecastWriteGatewayStatus(ttg)
-    stats.CountHTTPGUpdate++
+    stats.Count.HTTPGUpdate++
 }
 
 // Handle inbound HTTP requests to fetch log files
 func inboundWebGatewayStatusHandler(rw http.ResponseWriter, req *http.Request) {
-    stats.CountHTTP++
+    stats.Count.HTTP++
 
     // Set response mime type
     rw.Header().Set("Content-Type", "application/json")

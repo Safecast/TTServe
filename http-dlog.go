@@ -15,7 +15,7 @@ import (
 
 // Handle inbound HTTP requests to fetch log files
 func inboundWebDeviceLogHandler(rw http.ResponseWriter, req *http.Request) {
-    stats.CountHTTP++
+    stats.Count.HTTP++
 
     // Set response mime type
     rw.Header().Set("Content-Type", "application/json")

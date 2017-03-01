@@ -95,34 +95,34 @@ func SafecastWriteServerStatus() {
     value.UpdatedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
 	// By default, copy all Tts fields
-	prevTts := value.Tts
+	prevCount := value.Tts.Count
 	value.Tts = stats
 		
 	// For certain fields, be additive to the prior values
-	value.Tts.CountRestarts += prevTts.CountRestarts
-	stats.CountRestarts = 0
-	value.Tts.CountUDP += prevTts.CountUDP
-	stats.CountUDP = 0
-	value.Tts.CountHTTP += prevTts.CountHTTP
-	stats.CountHTTP = 0
-	value.Tts.CountHTTPSlack += prevTts.CountHTTPSlack
-	stats.CountHTTPSlack = 0
-	value.Tts.CountHTTPGithub += prevTts.CountHTTPGithub
-	stats.CountHTTPGithub = 0
-	value.Tts.CountHTTPGUpdate += prevTts.CountHTTPGUpdate
-	stats.CountHTTPGUpdate = 0
-	value.Tts.CountHTTPDevice += prevTts.CountHTTPDevice
-	stats.CountHTTPDevice = 0
-	value.Tts.CountHTTPGateway += prevTts.CountHTTPGateway
-	stats.CountHTTPGateway = 0
-	value.Tts.CountHTTPRelay += prevTts.CountHTTPRelay
-	stats.CountHTTPRelay = 0
-	value.Tts.CountHTTPRedirect += prevTts.CountHTTPRedirect
-	stats.CountHTTPRedirect = 0
-	value.Tts.CountHTTPTTN += prevTts.CountHTTPTTN
-	stats.CountHTTPTTN = 0
-	value.Tts.CountMQQTTTN += prevTts.CountMQQTTTN
-	stats.CountMQQTTTN = 0
+	value.Tts.Count.Restarts += prevCount.Restarts
+	stats.Count.Restarts = 0
+	value.Tts.Count.UDP += prevCount.UDP
+	stats.Count.UDP = 0
+	value.Tts.Count.HTTP += prevCount.HTTP
+	stats.Count.HTTP = 0
+	value.Tts.Count.HTTPSlack += prevCount.HTTPSlack
+	stats.Count.HTTPSlack = 0
+	value.Tts.Count.HTTPGithub += prevCount.HTTPGithub
+	stats.Count.HTTPGithub = 0
+	value.Tts.Count.HTTPGUpdate += prevCount.HTTPGUpdate
+	stats.Count.HTTPGUpdate = 0
+	value.Tts.Count.HTTPDevice += prevCount.HTTPDevice
+	stats.Count.HTTPDevice = 0
+	value.Tts.Count.HTTPGateway += prevCount.HTTPGateway
+	stats.Count.HTTPGateway = 0
+	value.Tts.Count.HTTPRelay += prevCount.HTTPRelay
+	stats.Count.HTTPRelay = 0
+	value.Tts.Count.HTTPRedirect += prevCount.HTTPRedirect
+	stats.Count.HTTPRedirect = 0
+	value.Tts.Count.HTTPTTN += prevCount.HTTPTTN
+	stats.Count.HTTPTTN = 0
+	value.Tts.Count.MQQTTTN += prevCount.MQQTTTN
+	stats.Count.MQQTTTN = 0
 
     // Write it to the file
     filename := SafecastDirectory() + TTServerStatusPath + "/" + TTServeInstanceID + ".json"

@@ -14,6 +14,9 @@ import (
 func timer1m() {
     for {
 
+		foo := fmt.Sprintf("%v", stats.Count)
+		fmt.Printf("%s\n", foo)
+		
         // Restart this instance if instructed to do so
         ControlFileCheck()
 

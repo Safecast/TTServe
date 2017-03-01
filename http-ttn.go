@@ -20,7 +20,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
     var ttn UplinkMessage
     var ReplyToDeviceId uint32 = 0
 
-    stats.CountHTTP++
+    stats.Count.HTTP++
 
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
@@ -46,7 +46,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     ReplyToDeviceId = processBuffer(AppReq, "TTN", "ttn-http:"+ttn.DevID, ttn.PayloadRaw)
-    stats.CountHTTPTTN++
+    stats.Count.HTTPTTN++
 
     // Outbound message processing
     if (ReplyToDeviceId != 0) {

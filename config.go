@@ -120,22 +120,25 @@ const BUFF_FORMAT_SINGLE_PB byte =  8
 const logDateFormat string = "2006-01-02 15:04:05"
 
 // Global Server Stats
+type TTServeCounts struct {
+	Restarts		uint32			`json:"restarts,omitempty"`
+	UDP				uint32			`json:"received_device_udp,omitempty"`
+	HTTP			uint32			`json:"received_all_http,omitempty"`
+	HTTPSlack		uint32			`json:"received_slack_http,omitempty"`
+	HTTPGithub		uint32			`json:"received_github_http,omitempty"`
+	HTTPGUpdate		uint32			`json:"received_gateway_update_http,omitempty"`
+	HTTPDevice		uint32			`json:"received_device_msg_http,omitempty"`
+	HTTPGateway		uint32			`json:"received_gateway_msg_http,omitempty"`
+	HTTPRelay		uint32			`json:"received_udp_to_http,omitempty"`
+	HTTPRedirect	uint32			`json:"received_redirect_http,omitempty"`
+	HTTPTTN			uint32			`json:"received_ttn_http,omitempty"`
+	MQQTTTN			uint32			`json:"received_ttn_mqqt,omitempty"`
+}
 type TTServeStatus struct {
 	Started				time.Time		`json:"started,omitempty"`
 	AddressIPv4			string			`json:"publicIp,omitempty"`
 	Services			string			`json:"services,omitempty"`
 	AWSInstance			AWSInstanceIdentity	`json:"aws,omitempty"`
-	CountRestarts		uint32			`json:"restarts,omitempty"`
-	CountUDP			uint32			`json:"received_device_udp,omitempty"`
-	CountHTTP			uint32			`json:"received_all_http,omitempty"`
-	CountHTTPSlack		uint32			`json:"received_slack_http,omitempty"`
-	CountHTTPGithub		uint32			`json:"received_github_http,omitempty"`
-	CountHTTPGUpdate	uint32			`json:"received_gateway_update_http,omitempty"`
-	CountHTTPDevice		uint32			`json:"received_device_msg_http,omitempty"`
-	CountHTTPGateway	uint32			`json:"received_gateway_msg_http,omitempty"`
-	CountHTTPRelay		uint32			`json:"received_udp_to_http,omitempty"`
-	CountHTTPRedirect	uint32			`json:"received_redirect_http,omitempty"`
-	CountHTTPTTN		uint32			`json:"received_ttn_http,omitempty"`
-	CountMQQTTTN		uint32			`json:"received_ttn_mqqt,omitempty"`
+	Count				TTServeCounts	`json:"counts,omitempty"`
 }
 var stats TTServeStatus

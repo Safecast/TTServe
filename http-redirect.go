@@ -17,7 +17,7 @@ import (
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     var sdV1 *SafecastDataV1
-    stats.CountHTTP++
+    stats.Count.HTTP++
 
     // Read the body as a byte array
     body, err := ioutil.ReadAll(req.Body)
@@ -83,7 +83,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     SafecastV1Upload(body, SafecastV1UploadURL+req.RequestURI, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
     SafecastUpload(UploadedAt, sd)
     SafecastWriteToLogs(UploadedAt, sd)
-    stats.CountHTTPRedirect++
+    stats.Count.HTTPRedirect++
 
     // It is an error if there is a pending outbound payload for this device, so remove it and report it
     isAvailable, _ := TelecastOutboundPayload(deviceID)

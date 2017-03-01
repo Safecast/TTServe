@@ -28,7 +28,7 @@ func main() {
 
     // Remember boot time
 	stats.Started = time.Now()
-	stats.CountRestarts++
+	stats.Count.Restarts++
 	
     // Get our external IP address
     rsp, err := http.Get("http://checkip.amazonaws.com")

@@ -19,8 +19,8 @@ import (
 
 // Slack webhook
 func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
-    stats.CountHTTP++;
-	stats.CountHTTPSlack++
+    stats.Count.HTTP++;
+	stats.Count.HTTPSlack++
 
     // Unpack the request
     body, err := ioutil.ReadAll(req.Body)
