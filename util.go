@@ -47,7 +47,9 @@ func AgoMinutes(minutesAgo uint32) string {
     minutesAgo -= hoursAgo * 60
     hoursAgo -= daysAgo * 24
 	s := ""
-    if daysAgo > 2 {
+    if daysAgo >= 14 {
+        s = fmt.Sprintf("%d weeks", daysAgo/14)
+    } else if daysAgo > 2 {
         s = fmt.Sprintf("%d days", daysAgo)
     } else if daysAgo != 0 {
         s = fmt.Sprintf("%dd %dh", daysAgo, hoursAgo)
