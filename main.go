@@ -64,7 +64,7 @@ func main() {
     }
 
 	TTServeInstanceID = stats.AWSInstance.InstanceId
-	ServerLog(fmt.Sprintf("*** STARTUP at %s\n", time.Now().Format(logDateFormat)))
+	ServerLog(fmt.Sprintf("*** STARTUP\n"))
 	fmt.Printf("%s *** AWS %s %s\n", time.Now().Format(logDateFormat), stats.AWSInstance.Region, stats.AWSInstance.InstanceId)
 
     // Look up the two IP addresses that we KNOW have only a single A record,
