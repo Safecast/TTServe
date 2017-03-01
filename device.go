@@ -20,6 +20,7 @@ const deviceWarningAfterMinutes = 90
 // Describes every device that has sent us a message
 type seenDevice struct {
     deviceid            uint32
+	label				string
     seen                time.Time
     everRecentlySeen    bool
     notifiedAsUnseen    bool
@@ -210,11 +211,12 @@ func sendSafecastDeviceSummaryToSlack(header string, fWrap bool, fDetails bool) 
             s += fmt.Sprintf("\n")
         }
 
-        label := ""
+        label := sortedDevices[i].label
         gps := ""
         summary := ""
         if fDetails {
             label, gps, summary = SafecastGetDeviceStatusSummary(id)
+			sortedDevices[i].label = label
         }
 
         s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicDeviceStatus, id, id)
