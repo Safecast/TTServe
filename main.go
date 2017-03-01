@@ -119,21 +119,32 @@ func main() {
 
     // Init our web request inbound server
     go HttpInboundHandler()
+	stats.Services = "HTTP"
 
     // Init our UDP single-sample upload request inbound server
     if ThisServerServesUDP {
         go UdpInboundHandler()
+		stats.Services += ", UDP"
     }
 
     // Init our FTP server
     if ThisServerServesFTP {
         go FtpInboundHandler()
+		stats.Services += ", FTP"
     }
 
     // Spawn the TTNhandlers
     if ThisServerServesMQQT {
         go MqqtInboundHandler()
+		stats.Services += ", MQQT"
     }
+
+	// If this server is the monitor, indicate our other services
+	if ThisServerIsMonitor {
+		stats.Services += ", SLACK"
+		stats.Services += ", GITHUB"
+		stats.Services += ", WATCHDOG"
+	}
 
     // Spawn timer tasks, assuming the role of one of them
     go timer12h()
