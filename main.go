@@ -57,6 +57,10 @@ func main() {
         os.Exit(0)
     }
 
+	if (true) {
+		fmt.Printf("AWS:\n%s\n", string(buf))
+	}
+	
     err = json.Unmarshal(buf, &stats.AWSInstance)
     if err != nil {
         fmt.Printf("*** Badly formatted AWS Info ***\n");
