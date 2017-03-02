@@ -36,7 +36,7 @@ func getRequestorIPv4(r *http.Request) string {
 			// header can contain spaces too, strip those out.
 			realIP := net.ParseIP(ip)
 //ozzie
-			fmt.Printf("ip=%v realIP=%v\n")
+			fmt.Printf("ip=%v realIP=%v\n", ip, realIP)
 			if !realIP.IsGlobalUnicast() || isPrivateSubnet(realIP) {
 				// bad address, go to next
 				continue
