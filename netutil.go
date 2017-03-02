@@ -29,8 +29,8 @@ func ipv4(Str1 string) string {
 func getRequestorIPv4(r *http.Request) (IPstr string, isReal bool) {
 	for _, h := range []string{"X-Forwarded-For", "X-Real-Ip"} {
 //ozzie
-		fmt.Printf("h='%s'\n", h)
 		addresses := strings.Split(r.Header.Get(h), ",")
+		fmt.Printf("h='%s' addresses='%s'\n", h, addresses)
 		// march from right to left until we get a public address
 		// that will be the address right before our proxy.
 		for i := len(addresses) -1 ; i >= 0; i-- {
