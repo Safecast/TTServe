@@ -68,15 +68,6 @@ func Ago(when time.Time) string {
 	return AgoMinutes(uint32(int64(time.Now().Sub(when) / time.Minute)))
 }
 
-// Extract just the IPV4 address, eliminating the port
-func ipv4(Str1 string) string {
-    Str2 := strings.Split(Str1, ":")
-    if len(Str2) > 0 {
-        return Str2[0]
-    }
-    return Str1
-}
-
 // Function to clean up an error string to eliminate the filename
 func errorString(err error) string {
     errString := fmt.Sprintf("%s", err)

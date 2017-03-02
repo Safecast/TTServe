@@ -29,13 +29,14 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // Decode the request with custom marshaling
     sdV1, err = SafecastV1Decode(bytes.NewReader(body))
     if err != nil {
+		remoteAddr := getRequestorIPv4(req)
 //		This check just makes it a bit less noisy at the console
 //      if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
 		if true {
             if err == io.EOF {
-                fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr));
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), req.RequestURI, remoteAddr);
             } else {
-                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr), err);
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), req.RequestURI, remoteAddr, err);
             }
             if len(body) != 0 {
                 fmt.Printf("%s\n", string(body));
@@ -56,7 +57,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// Report where we got it from
     var net Net
-    transportStr := deviceType+":"+ipv4(req.RemoteAddr)
+    transportStr := deviceType+":" + getRequestorIPv4(req)
     net.Transport = &transportStr
     sd.Net = &net
 
