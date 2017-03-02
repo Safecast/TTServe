@@ -6,7 +6,6 @@
 package main
 
 import (
-	"fmt"
 	"net"
     "net/http"
 	"strings"
@@ -28,17 +27,13 @@ func ipv4(Str1 string) string {
 // Thanks to https://husobee.github.io/golang/ip-address/2015/12/17/remote-ip-go.html
 func getRequestorIPv4(r *http.Request) (IPstr string, isReal bool) {
 	for _, h := range []string{"X-Forwarded-For", "X-Real-Ip"} {
-//ozzie
 		addresses := strings.Split(r.Header.Get(h), ",")
-		fmt.Printf("h='%s' addresses='%s'\n", h, addresses)
 		// march from right to left until we get a public address
 		// that will be the address right before our proxy.
 		for i := len(addresses) -1 ; i >= 0; i-- {
 			ip := strings.TrimSpace(addresses[i])
 			// header can contain spaces too, strip those out.
 			realIP := net.ParseIP(ip)
-//ozzie
-			fmt.Printf("ip=%v realIP=%v\n", ip, realIP)
 			if !realIP.IsGlobalUnicast() || isPrivateSubnet(realIP) {
 				// bad address, go to next
 				continue

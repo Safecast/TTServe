@@ -17,7 +17,16 @@ import (
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     var sdV1 *SafecastDataV1
-    stats.Count.HTTP++
+
+	// Get the remote address, and only add this to the count if it's likely from
+	// the internal HTTP load balancer.
+	remoteAddr, isReal := getRequestorIPv4(req)
+	if !isReal {
+		remoteAddr = "internal address"
+	}
+    if (isReal || req.RequestURI != "/") {
+	    stats.Count.HTTP++
+	}
 
     // Read the body as a byte array
     body, err := ioutil.ReadAll(req.Body)
@@ -29,13 +38,8 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // Decode the request with custom marshaling
     sdV1, err = SafecastV1Decode(bytes.NewReader(body))
     if err != nil {
-		remoteAddr, isReal := getRequestorIPv4(req)
-//		This check just makes it a bit less noisy at the console
-//      if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
-		if true {
-			if !isReal {
-				remoteAddr = "internal address"
-			}
+		// Eliminate a bit of the noise caused by load balancer health checks
+	    if (isReal || req.RequestURI != "/") {
             if err == io.EOF {
                 fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), req.RequestURI, remoteAddr);
             } else {
@@ -45,9 +49,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
                 fmt.Printf("%s\n", string(body));
             }
         }
-        if (req.RequestURI == "/") {
-            io.WriteString(rw, fmt.Sprintf("Live Free or Die. (%s)\n", ThisServerAddressIPv4))
-        }
+        io.WriteString(rw, fmt.Sprintf("Live Free or Die.\n"))
         return
     }
 
