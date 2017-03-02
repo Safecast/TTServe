@@ -41,6 +41,12 @@ func timer15m() {
         // Sleep
         time.Sleep(15 * 60 * time.Second)
 
+		// Update and output the stats
+		summary := SafecastSummarizeStatsDelta()
+		if summary != "" {
+			ServerLog(fmt.Sprintf("%s\n", summary))
+		}
+
         // Post Safecast errors
         sendSafecastCommsErrorsToSlack(15)
 
@@ -64,12 +70,6 @@ func timer12h() {
 
         // Snooze
         time.Sleep(12 * 60 * 60 * time.Second)
-
-		// Update and output the stats
-		summary := SafecastSummarizeStatsDelta()
-		if summary != "" {
-			ServerLog(fmt.Sprintf("%s\n", summary))
-		}
 
     }
 }
