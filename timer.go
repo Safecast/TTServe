@@ -21,7 +21,7 @@ func timer1m() {
 		SafecastWriteServerStatus()
 
 		// Sleep
-        time.Sleep(1 * 60 * time.Second)
+        time.Sleep(1 * time.Minute)
 		
     }
 }
@@ -39,13 +39,7 @@ func timer15m() {
         }
 
         // Sleep
-        time.Sleep(15 * 60 * time.Second)
-
-		// Update and output the stats
-		summary := SafecastSummarizeStatsDelta()
-		if summary != "" {
-			ServerLog(fmt.Sprintf("%s\n", summary))
-		}
+        time.Sleep(15 * time.Minute)
 
         // Post Safecast errors
         sendSafecastCommsErrorsToSlack(15)
@@ -63,13 +57,19 @@ func timer15m() {
 func timer12h() {
     for {
 
+		// Update/output stats, returning "" on first iteration and when nothing has changed)
+		summary := SafecastSummarizeStatsDelta()
+		if summary != "" {
+			ServerLog(fmt.Sprintf("%s\n", summary))
+		}
+
         // Send a hello message to devices that have never reported stats
         if ThisServerIsMonitor {
             sendHelloToNewDevices()
         }
 
         // Snooze
-        time.Sleep(12 * 60 * 60 * time.Second)
+        time.Sleep(12 * time.Hour)
 
     }
 }

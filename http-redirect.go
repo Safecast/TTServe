@@ -29,7 +29,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // Decode the request with custom marshaling
     sdV1, err = SafecastV1Decode(bytes.NewReader(body))
     if err != nil {
-        if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
+//		This check just makes it a bit less noisy at the console
+//      if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
+		if true {
             if err == io.EOF {
                 fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), req.RequestURI, ipv4(req.RemoteAddr));
             } else {

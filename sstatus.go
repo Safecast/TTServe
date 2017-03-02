@@ -138,7 +138,7 @@ func SafecastSummarizeStatsDelta() string {
     thisCount := value.Tts.Count
     lastCount = thisCount
 
-    // If this is the first time through, just remember them
+    // If this is the first time through, all we're doing is initializing lastCount
     if firstSummary {
         firstSummary = false
         return ""
