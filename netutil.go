@@ -26,7 +26,7 @@ func ipv4(Str1 string) string {
 // nodes such as the AWS Route 53 load balancer.  This is a vast improvement
 // over just calling ipv4(req.RemoteAddr), which returns the internal LB address.
 // Thanks to https://husobee.github.io/golang/ip-address/2015/12/17/remote-ip-go.html
-func getRequestorIPv4(r *http.Request) string {
+func getRequestorIPv4(r *http.Request) (IPstr string, isReal bool) {
 	for _, h := range []string{"X-Forwarded-For", "X-Real-Ip"} {
 		addresses := strings.Split(r.Header.Get(h), ",")
 		// march from right to left until we get a public address
@@ -41,10 +41,10 @@ func getRequestorIPv4(r *http.Request) string {
 				// bad address, go to next
 				continue
 			}
-			return ip
+			return ip, true
 		}
 	}
-	return ipv4(r.RemoteAddr)
+	return ipv4(r.RemoteAddr), !isPrivateSubnet(net.ParseIP(r.RemoteAddr))
 }
 
 // Private IP ranges

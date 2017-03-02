@@ -62,7 +62,8 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq.Location = ttg.Location
 
 		// Figure out the transport based upon whether or not a gateway ID was included
-		Transport := "lora-http:" + getRequestorIPv4(req)
+		requestor, _ := getRequestorIPv4(req)
+		Transport := "lora-http:" + requestor
 		if ttg.GatewayId != "" {
 			Transport = "lora:"+ttg.GatewayId
 		}
@@ -84,7 +85,8 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         // Process it
-        ReplyToDeviceId = processBuffer(AppReq, "device on cellular", "device-http:"+getRequestorIPv4(req), buf)
+		requestor, _ := getRequestorIPv4(req)
+        ReplyToDeviceId = processBuffer(AppReq, "device on cellular", "device-http:"+requestor, buf)
         stats.Count.HTTPDevice++;
 
     }

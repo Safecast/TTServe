@@ -29,10 +29,13 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // Decode the request with custom marshaling
     sdV1, err = SafecastV1Decode(bytes.NewReader(body))
     if err != nil {
-		remoteAddr := getRequestorIPv4(req)
+		remoteAddr, isReal := getRequestorIPv4(req)
 //		This check just makes it a bit less noisy at the console
 //      if (req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
 		if true {
+			if !isReal {
+				remoteAddr = "internal address"
+			}
             if err == io.EOF {
                 fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), req.RequestURI, remoteAddr);
             } else {
@@ -57,7 +60,8 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// Report where we got it from
     var net Net
-    transportStr := deviceType+":" + getRequestorIPv4(req)
+	requestor, _ := getRequestorIPv4(req)
+    transportStr := deviceType+":" + requestor
     net.Transport = &transportStr
     sd.Net = &net
 
