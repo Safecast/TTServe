@@ -44,7 +44,7 @@ func getRequestorIPv4(r *http.Request) (IPstr string, isReal bool) {
 			return ip, true
 		}
 	}
-	return ipv4(r.RemoteAddr), !isPrivateSubnet(net.ParseIP(r.RemoteAddr))
+	return ipv4(r.RemoteAddr), !isPrivateSubnet(net.ParseIP(ipv4(r.RemoteAddr)))
 }
 
 // Private IP ranges
