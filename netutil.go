@@ -6,6 +6,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
     "net/http"
 	"strings"
@@ -34,6 +35,8 @@ func getRequestorIPv4(r *http.Request) string {
 			ip := strings.TrimSpace(addresses[i])
 			// header can contain spaces too, strip those out.
 			realIP := net.ParseIP(ip)
+//ozzie
+			fmt.Printf("ip=%v realIP=%v\n")
 			if !realIP.IsGlobalUnicast() || isPrivateSubnet(realIP) {
 				// bad address, go to next
 				continue
@@ -41,7 +44,7 @@ func getRequestorIPv4(r *http.Request) string {
 			return ip
 		}
 	}
-	return ""
+	return ipv4(r.RemoteAddr)
 }
 
 // Private IP ranges
