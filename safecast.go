@@ -231,21 +231,38 @@ func SendSafecastMessage(SeqNo int, msg ttproto.Telecast, checksum uint32, Uploa
         sd.Env = &env
     }
 
-    // Net
-    var net Net
-    var donet = false
+	// Service
+    var svc Service
+    var dosvc = false
+
+    if UploadedAt != "" {
+        svc.UploadedAt = &UploadedAt
+        dosvc = true
+    }
+    if Transport != "" {
+        svc.Transport = &Transport
+        dosvc = true
+    }
+
+    if dosvc {
+        sd.Service = &svc
+    }
+	
+    // Gateway
+    var gate Gateway
+    var dogate = false
 
     if Transport != "" {
-        net.Transport = &Transport
-        donet = true
+        svc.Transport = &Transport
+        dosvc = true
     }
     if msg.WirelessSnr != nil {
-        net.SNR = msg.WirelessSnr
-        donet = true
+        gate.SNR = msg.WirelessSnr
+        dogate = true
     }
 
-    if donet {
-        sd.Net = &net
+    if dogate {
+        sd.Gateway = &gate
     }
 
     // Pms
@@ -357,7 +374,7 @@ func SendSafecastMessage(SeqNo int, msg ttproto.Telecast, checksum uint32, Uploa
     SafecastWriteToLogs(UploadedAt, sd)
 
     // Upload
-    SafecastUpload(UploadedAt, sd)
+    SafecastUpload(sd)
 
 }
 
@@ -511,18 +528,18 @@ func SafecastV1Upload(body []byte, url string, unit string, value string) bool {
 }
 
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
-func SafecastUpload(UploadedAt string, sd SafecastData) bool {
+func SafecastUpload(sd SafecastData) bool {
 
     // Upload to all URLs
     for _, url := range SafecastUploadURLs {
-        go doUploadToSafecast(UploadedAt, sd, url)
+        go doUploadToSafecast(sd, url)
     }
 
     return true
 }
 
 // Upload a Safecast data structure to the Safecast service
-func doUploadToSafecast(UploadedAt string, sd SafecastData, url string) bool {
+func doUploadToSafecast(sd SafecastData, url string) bool {
 
     var CapturedAt string = ""
     if sd.CapturedAt != nil {
@@ -530,7 +547,6 @@ func doUploadToSafecast(UploadedAt string, sd SafecastData, url string) bool {
     }
     transaction := beginTransaction("V2", "captured", CapturedAt)
 
-    sd.UploadedAt = &UploadedAt
     scJSON, _ := json.Marshal(sd)
 
     if (false) {

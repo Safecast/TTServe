@@ -153,16 +153,22 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             value.Env.Press = sc.Env.Press
         }
     }
-    if sc.Net != nil {
-        var net Net
-        if value.Net == nil {
-            value.Net = &net
+    if sc.Gateway != nil {
+        var gate Gateway
+        if value.Gateway == nil {
+            value.Gateway = &gate
         }
-        if sc.SNR != nil {
-            value.Net.SNR = sc.Net.SNR
+        if sc.Gateway.SNR != nil {
+            value.Gateway.SNR = sc.Gateway.SNR
         }
-        if sc.Transport != nil {
-            value.Net.Transport = sc.Net.Transport
+    }
+    if sc.Service != nil {
+        var svc Service
+        if value.Service == nil {
+            value.Service = &svc
+        }
+        if sc.Service.Transport != nil {
+            value.Service.Transport = sc.Service.Transport
         }
     }
     if sc.Loc != nil {
@@ -398,9 +404,9 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
     // If the current transport has an IP address, try to
     // get the IP info
 
-    if value.Net != nil && value.Net.Transport != nil {
+    if value.Service != nil && value.Service.Transport != nil {
         ipInfo := IPInfoData{}
-        Str1 := strings.Split(*value.Net.Transport, ":")
+        Str1 := strings.Split(*value.Service.Transport, ":")
         IP := Str1[len(Str1)-1]
         Str2 := strings.Split(IP, ".")
         isValidIP := len(Str1) > 1 && len(Str2) == 4

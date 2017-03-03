@@ -18,6 +18,9 @@ import (
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     var sdV1 *SafecastDataV1
 
+	// Remember when it was uploaded to us
+    UploadedAt := nowInUTC()
+	
 	// Get the remote address, and only add this to the count if it's likely from
 	// the internal HTTP load balancer.
 	remoteAddr, isReal := getRequestorIPv4(req)
@@ -60,12 +63,13 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-	// Report where we got it from
-    var net Net
+	// Report where we got it from, and when we got it
+    var svc Service
+	svc.UploadedAt = &UploadedAt
 	requestor, _ := getRequestorIPv4(req)
     transportStr := deviceType+":" + requestor
-    net.Transport = &transportStr
-    sd.Net = &net
+    svc.Transport = &transportStr
+    sd.Service = &svc
 
     fmt.Printf("\n%s Received payload for %d from %s\n", time.Now().Format(logDateFormat), sd.DeviceId, transportStr)
     fmt.Printf("%s\n", body)
@@ -88,9 +92,8 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
-    UploadedAt := nowInUTC()
     SafecastV1Upload(body, SafecastV1UploadURL+req.RequestURI, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
-    SafecastUpload(UploadedAt, sd)
+    SafecastUpload(sd)
     SafecastWriteToLogs(UploadedAt, sd)
     stats.Count.HTTPRedirect++
 

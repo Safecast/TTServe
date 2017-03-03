@@ -259,13 +259,13 @@ func SafecastCSVDeviceLog(UploadedAt string, sd SafecastData) {
             s += fmt.Sprintf(",%f", *sd.Bat.Current)
         }
     }
-    if sd.Net == nil {
+    if sd.Gateway == nil {
         s += ","
     } else {
-        if sd.Net.SNR == nil {
+        if sd.Gateway.SNR == nil {
             s += ","
         } else {
-            s += fmt.Sprintf(",%f", *sd.Net.SNR)
+            s += fmt.Sprintf(",%f", *sd.Gateway.SNR)
         }
     }
     if sd.Env == nil {
