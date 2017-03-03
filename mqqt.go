@@ -7,7 +7,7 @@
 package main
 
 import (
-	"time"
+    "time"
     "fmt"
     MQTT "github.com/eclipse/paho.mqtt.golang"
     "encoding/json"
@@ -29,7 +29,7 @@ func MqqtInboundHandler() {
     // Set up our internal message queues
     ttnUpQ = make(chan MQTT.Message, 5)
 
-	// Now that the queue is created, monitor it
+    // Now that the queue is created, monitor it
     go MqqtSubscriptionMonitor()
 
     // Dequeue and process the messages as they're enqueued
@@ -46,12 +46,15 @@ func MqqtInboundHandler() {
             // Copy fields to the app request structure
             AppReq.Payload = ttn.PayloadRaw
             AppReq.TTNDevID = ttn.DevID
-			if ttn.Metadata.Latitude != 0 {
-	            AppReq.GwLatitude = &ttn.Metadata.Latitude
-	            AppReq.GwLongitude = &ttn.Metadata.Longitude
-				alt := float32(ttn.Metadata.Altitude)
-	            AppReq.GwAltitude = &alt
-			}
+            tt := time.Time(ttn.Metadata.Time)
+            ts := tt.UTC().Format("2006-01-02T15:04:05Z")
+            AppReq.GwReceivedAt = &ts
+            if ttn.Metadata.Latitude != 0 {
+                AppReq.GwLatitude = &ttn.Metadata.Latitude
+                AppReq.GwLongitude = &ttn.Metadata.Longitude
+                alt := float32(ttn.Metadata.Altitude)
+                AppReq.GwAltitude = &alt
+            }
             if (len(ttn.Metadata.Gateways) >= 1) {
                 AppReq.GwSnr = &ttn.Metadata.Gateways[0].SNR
                 AppReq.GwLocation = &ttn.Metadata.Gateways[0].GtwID
@@ -60,7 +63,7 @@ func MqqtInboundHandler() {
             AppReq.SvTransport = "ttn-mqqt:" + AppReq.TTNDevID
             fmt.Printf("\n%s Received %d-byte payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), AppReq.SvTransport)
             AppReq.SvUploadedAt = nowInUTC()
-			AppReqPush(AppReq)
+            AppReqPush(AppReq)
             stats.Count.MQQTTTN++
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we

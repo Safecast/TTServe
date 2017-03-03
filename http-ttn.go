@@ -37,6 +37,9 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Copy fields to the app request structure
     AppReq.TTNDevID = ttn.DevID
+	tt := time.Time(ttn.Metadata.Time)
+	ts := tt.UTC().Format("2006-01-02T15:04:05Z")
+	AppReq.GwReceivedAt = &ts
 	if ttn.Metadata.Longitude != 0 {
 	    AppReq.GwLongitude = &ttn.Metadata.Longitude
 	    AppReq.GwLatitude = &ttn.Metadata.Latitude
