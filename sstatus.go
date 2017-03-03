@@ -186,7 +186,7 @@ func SafecastGetServerSummary(ServerId string, bol string) string {
 
 	// If this is the current server, point that out
 	if (ServerId == TTServeInstanceID) {
-		s += " \"monitor\""
+		s += " *"
 	}
 
     // Done
