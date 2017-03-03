@@ -260,19 +260,19 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         dogate = true
 	}
     if req.GwReceivedAt != nil {
-        gate.ReceivedAt =req.GwReceivedAt
+        gate.ReceivedAt = req.GwReceivedAt
         dogate = true
     }
     if req.GwLatitude != nil {
-        gate.Lat =req.GwLatitude
+        gate.Lat = req.GwLatitude
         dogate = true
     }
     if req.GwLongitude != nil {
-        gate.Lon =req.GwLongitude
+        gate.Lon = req.GwLongitude
         dogate = true
     }
     if req.GwAltitude != nil {
-        gate.Alt =req.GwAltitude
+        gate.Alt = req.GwAltitude
         dogate = true
     }
 
