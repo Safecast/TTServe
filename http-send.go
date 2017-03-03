@@ -64,6 +64,9 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 		if ttg.Snr != 0 {
 	        AppReq.GwSnr = &ttg.Snr
 		}
+		if ttg.ReceivedAt != "" {
+	        AppReq.GwReceivedAt = &ttg.ReceivedAt
+		}
 		if ttg.Location != "" {
 	        AppReq.GwLocation = &ttg.Location
 		}
