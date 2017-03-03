@@ -36,11 +36,11 @@ type receivedMessage struct {
 var recentlyReceived [25]receivedMessage
 
 // Process an inbound Safecast message, as an asynchronous goroutine
-func SendSafecastMessage(SeqNo int, msg ttproto.Telecast, checksum uint32, UploadedAt string, Transport string) {
+func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint32) {
 
     // To ensure a best-efforts sequencing in log, impose a delay in proportion to sequencing
-    if SeqNo != 0 {
-        time.Sleep(time.Duration(SeqNo) * time.Minute)
+    if req.SeqNo != 0 {
+        time.Sleep(time.Duration(req.SeqNo) * time.Minute)
     }
 
     // Discard it if it's a duplicate
@@ -235,12 +235,12 @@ func SendSafecastMessage(SeqNo int, msg ttproto.Telecast, checksum uint32, Uploa
     var svc Service
     var dosvc = false
 
-    if UploadedAt != "" {
-        svc.UploadedAt = &UploadedAt
+    if req.SvUploadedAt != "" {
+        svc.UploadedAt = &req.SvUploadedAt
         dosvc = true
     }
-    if Transport != "" {
-        svc.Transport = &Transport
+    if req.SvTransport != "" {
+        svc.Transport = &req.SvTransport
         dosvc = true
     }
 
@@ -252,12 +252,27 @@ func SendSafecastMessage(SeqNo int, msg ttproto.Telecast, checksum uint32, Uploa
     var gate Gateway
     var dogate = false
 
-    if Transport != "" {
-        svc.Transport = &Transport
-        dosvc = true
-    }
     if msg.WirelessSnr != nil {
         gate.SNR = msg.WirelessSnr
+        dogate = true
+    } else if req.GwSnr != nil {
+        gate.SNR = req.GwSnr
+        dogate = true
+	}
+    if req.GwReceivedAt != nil {
+        gate.ReceivedAt =req.GwReceivedAt
+        dogate = true
+    }
+    if req.GwLatitude != nil {
+        gate.Lat =req.GwLatitude
+        dogate = true
+    }
+    if req.GwLongitude != nil {
+        gate.Lon =req.GwLongitude
+        dogate = true
+    }
+    if req.GwAltitude != nil {
+        gate.Alt =req.GwAltitude
         dogate = true
     }
 
@@ -371,7 +386,7 @@ func SendSafecastMessage(SeqNo int, msg ttproto.Telecast, checksum uint32, Uploa
     }
 
     // Log as accurately as we can with regard to what came in
-    SafecastWriteToLogs(UploadedAt, sd)
+    SafecastWriteToLogs(req.SvUploadedAt, sd)
 
     // Upload
     SafecastUpload(sd)

@@ -14,8 +14,9 @@ type Service struct {
 // Gateway-supplied metadata
 type Gateway struct {
 	SNR *float32			`json:"gateway_lora_snr,omitempty"`
-	Lat float32				`json:"gateway_loc_lat,omitempty"`
-	Lon float32				`json:"gateway_loc_lon,omitempty"`
+	ReceivedAt *string		`json:"gateway_received,omitempty"`
+	Lat *float32			`json:"gateway_loc_lat,omitempty"`
+	Lon *float32			`json:"gateway_loc_lon,omitempty"`
 	Alt *float32			`json:"gateway_loc_alt,omitempty"`
 }
 

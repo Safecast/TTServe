@@ -37,12 +37,15 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Copy fields to the app request structure
     AppReq.TTNDevID = ttn.DevID
-    AppReq.Longitude = ttn.Metadata.Longitude
-    AppReq.Latitude = ttn.Metadata.Latitude
-    AppReq.Altitude = float32(ttn.Metadata.Altitude)
+	if ttn.Metadata.Longitude != 0 {
+	    AppReq.GwLongitude = &ttn.Metadata.Longitude
+	    AppReq.GwLatitude = &ttn.Metadata.Latitude
+		alt := float32(ttn.Metadata.Altitude)
+	    AppReq.GwAltitude = &alt
+	}
     if (len(ttn.Metadata.Gateways) >= 1) {
-        AppReq.Snr = ttn.Metadata.Gateways[0].SNR
-        AppReq.Location = ttn.Metadata.Gateways[0].GtwID
+        AppReq.GwSnr = &ttn.Metadata.Gateways[0].SNR
+        AppReq.GwLocation = &ttn.Metadata.Gateways[0].GtwID
     }
 
     ReplyToDeviceId = processBuffer(AppReq, "TTN", "ttn-http:"+ttn.DevID, ttn.PayloadRaw)

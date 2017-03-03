@@ -60,7 +60,7 @@ func processBuffer(req IncomingAppReq, from string, transport string, buf []byte
     var ReplyToDeviceId uint32 = 0
     var AppReq IncomingAppReq = req
 
-    AppReq.Transport = transport
+    AppReq.SvTransport = transport
 
     buf_format := buf[0]
     buf_length := len(buf)
@@ -69,23 +69,22 @@ func processBuffer(req IncomingAppReq, from string, transport string, buf []byte
 
     case BUFF_FORMAT_SINGLE_PB: {
 
-        fmt.Printf("\n%s Received %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.Transport)
+        fmt.Printf("\n%s Received %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
 
-        // Construct an app request, with ServerTime in case the payload lacked CapturedAt
+        // Construct an app request
         AppReq.Payload = buf
-        AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
         // Extract the device ID from the message, which we will need later
         _, ReplyToDeviceId = getReplyDeviceIdFromPayload(AppReq.Payload)
 
         // Enqueue the app request
-        AppReq.UploadedAt = nowInUTC()
+        AppReq.SvUploadedAt = nowInUTC()
 		AppReqPush(AppReq)
     }
 
     case BUFF_FORMAT_PB_ARRAY: {
 
-        fmt.Printf("\n%s Received %d-byte BUFFERED payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.Transport)
+        fmt.Printf("\n%s Received %d-byte BUFFERED payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
 
         if !validBulkPayload(buf, buf_length) {
             return 0
@@ -118,14 +117,11 @@ func processBuffer(req IncomingAppReq, from string, transport string, buf []byte
 				AppReq.SeqNo = 0
 			}
 
-            // Add ServerTime in case the payload lacked CapturedAt
-            AppReq.ServerTime = time.Now().UTC().Format("2006-01-02T15:04:05Z")
-
             fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload),
-                i+1, count, from, AppReq.Transport)
+                i+1, count, from, AppReq.SvTransport)
 
             // Enqueue AppReq
-            AppReq.UploadedAt = UploadedAt
+            AppReq.SvUploadedAt = UploadedAt
 			AppReqPush(AppReq)
 
             // Bump the payload offset

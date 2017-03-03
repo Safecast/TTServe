@@ -55,11 +55,18 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         // Copy into the app req structure
-        AppReq.Latitude = ttg.Latitude
-        AppReq.Longitude = ttg.Longitude
-        AppReq.Altitude = float32(ttg.Altitude)
-        AppReq.Snr = ttg.Snr
-        AppReq.Location = ttg.Location
+		if ttg.Latitude != 0 {
+	        AppReq.GwLatitude = &ttg.Latitude
+	        AppReq.GwLongitude = &ttg.Longitude
+			alt := float32(ttg.Altitude)
+	        AppReq.GwAltitude = &alt
+		}
+		if ttg.Snr != 0 {
+	        AppReq.GwSnr = &ttg.Snr
+		}
+		if ttg.Location != "" {
+	        AppReq.GwLocation = &ttg.Location
+		}
 
 		// Figure out the transport based upon whether or not a gateway ID was included
 		requestor, _ := getRequestorIPv4(req)

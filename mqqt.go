@@ -46,17 +46,20 @@ func MqqtInboundHandler() {
             // Copy fields to the app request structure
             AppReq.Payload = ttn.PayloadRaw
             AppReq.TTNDevID = ttn.DevID
-            AppReq.Longitude = ttn.Metadata.Longitude
-            AppReq.Latitude = ttn.Metadata.Latitude
-            AppReq.Altitude = float32(ttn.Metadata.Altitude)
+			if ttn.Metadata.Latitude != 0 {
+	            AppReq.GwLatitude = &ttn.Metadata.Latitude
+	            AppReq.GwLongitude = &ttn.Metadata.Longitude
+				alt := float32(ttn.Metadata.Altitude)
+	            AppReq.GwAltitude = &alt
+			}
             if (len(ttn.Metadata.Gateways) >= 1) {
-                AppReq.Snr = ttn.Metadata.Gateways[0].SNR
-                AppReq.Location = ttn.Metadata.Gateways[0].GtwID
+                AppReq.GwSnr = &ttn.Metadata.Gateways[0].SNR
+                AppReq.GwLocation = &ttn.Metadata.Gateways[0].GtwID
             }
 
-            AppReq.Transport = "ttn-mqqt:" + AppReq.TTNDevID
-            fmt.Printf("\n%s Received %d-byte payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), AppReq.Transport)
-            AppReq.UploadedAt = nowInUTC()
+            AppReq.SvTransport = "ttn-mqqt:" + AppReq.TTNDevID
+            fmt.Printf("\n%s Received %d-byte payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), AppReq.SvTransport)
+            AppReq.SvUploadedAt = nowInUTC()
 			AppReqPush(AppReq)
             stats.Count.MQQTTTN++
 

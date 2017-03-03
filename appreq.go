@@ -16,16 +16,16 @@ import (
 // Common app request
 type IncomingAppReq struct {
     Payload []byte
-    Longitude   float32
-    Latitude    float32
-    Altitude    float32
-    Snr         float32
-    Location    string
-    ServerTime  string
-    Transport   string
-    UploadedAt  string
-    TTNDevID    string
-    SeqNo       int
+    GwLongitude   *float32
+    GwLatitude    *float32
+    GwAltitude    *float32
+    GwSnr         *float32
+    GwLocation    *string
+    GwReceivedAt  *string
+    SvTransport   string
+    SvUploadedAt  string
+    TTNDevID      string
+    SeqNo         int
 }
 
 var MAX_REQQ_PENDING int = 100
@@ -100,7 +100,7 @@ func AppReqHandler() {
         case ttproto.Telecast_BGEIGIE_NANO:
             fallthrough
         case ttproto.Telecast_SOLARCAST:
-            go SendSafecastMessage(AppReq.SeqNo, *msg, checksum, AppReq.UploadedAt, AppReq.Transport)
+            go SendSafecastMessage(AppReq, *msg, checksum)
 
             // Handle messages from non-safecast devices
         default:

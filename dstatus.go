@@ -169,6 +169,18 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         if sc.Gateway.SNR != nil {
             value.Gateway.SNR = sc.Gateway.SNR
         }
+        if sc.Gateway.ReceivedAt != nil {
+            value.Gateway.ReceivedAt = sc.Gateway.ReceivedAt
+        }
+        if sc.Gateway.Lat != nil {
+            value.Gateway.Lat = sc.Gateway.Lat
+        }
+        if sc.Gateway.Lon != nil {
+            value.Gateway.Lat = sc.Gateway.Lat
+        }
+        if sc.Gateway.Alt != nil {
+            value.Gateway.Lat = sc.Gateway.Lat
+        }
     }
     if sc.Service != nil {
         var svc Service
