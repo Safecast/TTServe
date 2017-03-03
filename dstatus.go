@@ -99,7 +99,11 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
     time.Sleep(time.Duration(sleepSeconds) * time.Second)
 	
     // Use the supplied upload time as our modification time
-    sc.UploadedAt = &UploadedAt
+	if sc.Service == nil {
+		var svc Service
+		sc.Service = &svc
+	}
+    sc.Service.UploadedAt = &UploadedAt
 
     // Read the current value, or a blank value structure if it's blank.
 	// If the value isn't available it's because of a nonrecoverable  error.
@@ -117,8 +121,12 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 	}
 	
     // Update the current values, but only if modified
-    if sc.UploadedAt != nil {
-        value.UploadedAt = sc.UploadedAt
+    if sc.Service != nil && sc.Service.UploadedAt != nil {
+		if value.Service == nil {
+			var svc Service
+			value.Service = &svc
+		}
+        value.Service.UploadedAt = sc.Service.UploadedAt
     }
     if sc.CapturedAt != nil {
         value.CapturedAt = sc.CapturedAt
@@ -348,7 +356,10 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 
     // Calculate a time of the shuffle, allowing for the fact that our preferred time
     // CapturedAt may not be available.
-    ShuffledAt := value.UploadedAt
+	ShuffledAt := &UploadedAt
+	if value.Service != nil {
+	    ShuffledAt = value.Service.UploadedAt
+	}
     if value.CapturedAt != nil {
         ShuffledAt = value.CapturedAt
     }

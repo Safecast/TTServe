@@ -59,7 +59,11 @@ func SafecastJSONDeviceLog(UploadedAt string, sd SafecastData) {
     }
 
     // Turn stats into a safe string writing
-    sd.UploadedAt = &UploadedAt
+	if sd.Service == nil {
+		var svc Service
+		sd.Service = &svc
+	}
+    sd.Service.UploadedAt = &UploadedAt
     scJSON, _ := json.Marshal(sd)
     fd.WriteString(string(scJSON));
     fd.WriteString("\r\n,\r\n");
@@ -186,8 +190,8 @@ func SafecastCSVDeviceLog(UploadedAt string, sd SafecastData) {
 
     // Convert the times to something that can be parsed by Excel
     zTime := ""
-    if sd.UploadedAt != nil {
-        zTime = fmt.Sprintf("%s", *sd.UploadedAt)
+    if sd.Service != nil && sd.Service.UploadedAt != nil {
+        zTime = fmt.Sprintf("%s", *sd.Service.UploadedAt)
     } else if UploadedAt != "" {
         zTime = UploadedAt
     }
