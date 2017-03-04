@@ -196,24 +196,27 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         if (value.Loc == nil) {
             value.Loc = &loc
         }
-        if (value.Loc.Lat != sc.Loc.Lat || value.Loc.Lon != sc.Loc.Lon) {
+        if value.Loc.Lat != sc.Loc.Lat || value.Loc.Lon != sc.Loc.Lon || value.Loc.Alt != sc.Loc.Alt {
+	        value.Loc = sc.Loc
             ChangedLocation = true
         }
-        value.Loc = sc.Loc
     }
     if sc.Pms != nil {
         var pms Pms
         if (value.Pms == nil) {
             value.Pms = &pms
         }
-        if sc.Pms.Pm01_0 != nil {
+		if sc.Pms.Pm01_0 != nil && *value.Pms.Pm01_0 != *sc.Pms.Pm01_0 {
             value.Pms.Pm01_0 = sc.Pms.Pm01_0
+	        ChangedPms = true
         }
-        if sc.Pms.Pm02_5 != nil {
+        if sc.Pms.Pm02_5 != nil && *value.Pms.Pm02_5 != *sc.Pms.Pm02_5 {
             value.Pms.Pm02_5 = sc.Pms.Pm02_5
+	        ChangedPms = true
         }
-        if sc.Pms.Pm10_0 != nil {
+        if sc.Pms.Pm10_0 != nil && *value.Pms.Pm10_0 != *sc.Pms.Pm10_0 {
             value.Pms.Pm10_0 = sc.Pms.Pm10_0
+	        ChangedPms = true
         }
         if sc.Pms.CountSecs != nil {
             value.Pms.Count00_30 = sc.Pms.Count00_30
@@ -223,22 +226,25 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             value.Pms.Count05_00 = sc.Pms.Count05_00
             value.Pms.Count10_00 = sc.Pms.Count10_00
             value.Pms.CountSecs = sc.Pms.CountSecs
+	        ChangedPms = true
         }
-        ChangedPms = true
     }
     if sc.Opc != nil {
         var opc Opc
         if (value.Opc == nil) {
             value.Opc = &opc
         }
-        if sc.Opc.Pm01_0 != nil {
+        if sc.Opc.Pm01_0 != nil && *value.Opc.Pm01_0 != *sc.Opc.Pm01_0 {
             value.Opc.Pm01_0 = sc.Opc.Pm01_0
+	        ChangedOpc = true
         }
-        if sc.Opc.Pm02_5 != nil {
+        if sc.Opc.Pm02_5 != nil && *value.Opc.Pm02_5 != *sc.Opc.Pm02_5 {
             value.Opc.Pm02_5 = sc.Opc.Pm02_5
+	        ChangedOpc = true
         }
-        if sc.Opc.Pm10_0 != nil {
+        if sc.Opc.Pm10_0 != nil && *value.Opc.Pm10_0 != *sc.Opc.Pm10_0 {
             value.Opc.Pm10_0 = sc.Opc.Pm10_0
+	        ChangedOpc = true
         }
         if sc.Opc.CountSecs != nil {
             value.Opc.Count00_38 = sc.Opc.Count00_38
@@ -248,8 +254,8 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             value.Opc.Count05_00 = sc.Opc.Count05_00
             value.Opc.Count10_00 = sc.Opc.Count10_00
             value.Opc.CountSecs = sc.Opc.CountSecs
+	        ChangedOpc = true
         }
-        ChangedOpc = true
     }
     if sc.Lnd != nil {
         var lnd Lnd
@@ -261,30 +267,30 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             if value.Lnd.U7318 == nil {
                 value.Lnd.U7318 = &val
             }
-            if (*value.Lnd.U7318 != *sc.Lnd.U7318) {
+            if *value.Lnd.U7318 != *sc.Lnd.U7318 {
+	            value.Lnd.U7318 = sc.Lnd.U7318
                 ChangedGeiger = true
             }
-            value.Lnd.U7318 = sc.Lnd.U7318
         }
         if sc.Lnd.C7318 != nil {
             var val float32
             if value.Lnd.C7318 == nil {
                 value.Lnd.C7318 = &val
             }
-            if (*value.Lnd.C7318 != *sc.Lnd.C7318) {
+            if *value.Lnd.C7318 != *sc.Lnd.C7318 {
+	            value.Lnd.C7318 = sc.Lnd.C7318
                 ChangedGeiger = true
             }
-            value.Lnd.C7318 = sc.Lnd.C7318
         }
         if sc.Lnd.EC7128 != nil {
             var val float32
             if value.Lnd.EC7128 == nil {
                 value.Lnd.EC7128 = &val
             }
-            if (*value.Lnd.EC7128 != *sc.Lnd.EC7128) {
+            if *value.Lnd.EC7128 != *sc.Lnd.EC7128 {
+	            value.Lnd.EC7128 = sc.Lnd.EC7128
                 ChangedGeiger = true
             }
-            value.Lnd.EC7128 = sc.Lnd.EC7128
         }
     }
     if sc.Dev != nil {
