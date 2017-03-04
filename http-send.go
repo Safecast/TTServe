@@ -40,11 +40,6 @@ func newAppReq(ttg *TTGateReq, Transport string) IncomingAppReq {
 
     AppReq.SvTransport = Transport
 
-	// debug
-	if true {
-		fmt.Printf("TTGateReq: \n%v\nAppReq: \n%v\n", ttg, AppReq)
-	}
-
 	return AppReq
 	
 }
