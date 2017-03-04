@@ -56,11 +56,9 @@ func inboundWebRootHandler(rw http.ResponseWriter, req *http.Request) {
 }
 
 // Process a payload buffer
-func processBuffer(req IncomingAppReq, from string, transport string, buf []byte) (DeviceId uint32) {
+func processBuffer(req IncomingAppReq, from string, buf []byte) (DeviceId uint32) {
     var ReplyToDeviceId uint32 = 0
     var AppReq IncomingAppReq = req
-
-    AppReq.SvTransport = transport
 
     buf_format := buf[0]
     buf_length := len(buf)

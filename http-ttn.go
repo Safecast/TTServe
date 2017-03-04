@@ -50,8 +50,9 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq.GwSnr = &ttn.Metadata.Gateways[0].SNR
         AppReq.GwLocation = &ttn.Metadata.Gateways[0].GtwID
     }
+	AppReq.SvTransport = "ttn-http:" + ttn.DevID
 
-    ReplyToDeviceId = processBuffer(AppReq, "TTN", "ttn-http:"+ttn.DevID, ttn.PayloadRaw)
+    ReplyToDeviceId = processBuffer(AppReq, "TTN", ttn.PayloadRaw)
     stats.Count.HTTPTTN++
 
     // Outbound message processing

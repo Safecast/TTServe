@@ -15,9 +15,42 @@ import (
     "encoding/json"
 )
 
+// Unpack common AppReq fields from an incoming TTGateReq
+func newAppReq(ttg *TTGateReq, Transport string) IncomingAppReq {
+    var AppReq IncomingAppReq
+
+    if ttg.Latitude != 0 {
+        AppReq.GwLatitude = &ttg.Latitude
+        AppReq.GwLongitude = &ttg.Longitude
+        alt := float32(ttg.Altitude)
+        AppReq.GwAltitude = &alt
+    }
+
+    if ttg.Snr != 0 {
+        AppReq.GwSnr = &ttg.Snr
+    }
+
+    if ttg.ReceivedAt != "" {
+        AppReq.GwReceivedAt = &ttg.ReceivedAt
+    }
+
+    if ttg.Location != "" {
+        AppReq.GwLocation = &ttg.Location
+    }
+
+    AppReq.SvTransport = Transport
+
+	// debug
+	if true {
+		fmt.Printf("TTGateReq: \n%v\nAppReq: \n%v\n", ttg, AppReq)
+	}
+
+	return AppReq
+	
+}
+
 // Handle inbound HTTP requests from the gateway or directly from the device
 func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
-    var AppReq IncomingAppReq
     var ReplyToDeviceId uint32 = 0
     stats.Count.HTTP++
 
@@ -39,8 +72,11 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
             return
         }
 
+        // Use the TTGateReq to initialize a new AppReq
+        AppReq := newAppReq(&ttg, ttg.Transport)
+
         // Process it.  Note there is no possibility of a reply.
-        processBuffer(AppReq, "device on cellular", ttg.Transport, ttg.Payload)
+        processBuffer(AppReq, "device on cellular", ttg.Payload)
         stats.Count.HTTPRelay++;
 
     }
@@ -54,32 +90,18 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
             return
         }
 
-        // Copy into the app req structure
-		if ttg.Latitude != 0 {
-	        AppReq.GwLatitude = &ttg.Latitude
-	        AppReq.GwLongitude = &ttg.Longitude
-			alt := float32(ttg.Altitude)
-	        AppReq.GwAltitude = &alt
-		}
-		if ttg.Snr != 0 {
-	        AppReq.GwSnr = &ttg.Snr
-		}
-		if ttg.ReceivedAt != "" {
-	        AppReq.GwReceivedAt = &ttg.ReceivedAt
-		}
-		if ttg.Location != "" {
-	        AppReq.GwLocation = &ttg.Location
-		}
-
-		// Figure out the transport based upon whether or not a gateway ID was included
-		requestor, _ := getRequestorIPv4(req)
+	    // Figure out the transport based upon whether or not a gateway ID was included
+	    requestor, _ := getRequestorIPv4(req)
 		Transport := "lora-http:" + requestor
-		if ttg.GatewayId != "" {
-			Transport = "lora:"+ttg.GatewayId
-		}
+	    if ttg.GatewayId != "" {
+	        Transport = "lora:"+ttg.GatewayId
+	    }
+
+        // Use the TTGateReq to initialize a new AppReq
+        AppReq := newAppReq(&ttg, Transport)
 
         // Process it
-        ReplyToDeviceId = processBuffer(AppReq, "Lora gateway", Transport, ttg.Payload)
+        ReplyToDeviceId = processBuffer(AppReq, "Lora gateway", ttg.Payload)
         stats.Count.HTTPGateway++;
 
     }
@@ -94,9 +116,13 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
             return
         }
 
-        // Process it
-		requestor, _ := getRequestorIPv4(req)
-        ReplyToDeviceId = processBuffer(AppReq, "device on cellular", "device-http:"+requestor, buf)
+
+        // Initialize a new AppReq
+		AppReq := IncomingAppReq{}
+        requestor, _ := getRequestorIPv4(req)
+	    AppReq.SvTransport = "device-http:" + requestor
+			
+        ReplyToDeviceId = processBuffer(AppReq, "device on cellular", buf)
         stats.Count.HTTPDevice++;
 
     }
