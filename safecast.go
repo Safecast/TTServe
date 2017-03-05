@@ -386,6 +386,10 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         sd.Lnd = &lnd
     }
 
+	// Generate the CRC of the original device data
+	crc32 := CrcSafecastData(sd)
+	sd.Service.Crc32 = &crc32
+
     // Log as accurately as we can with regard to what came in
     SafecastWriteToLogs(req.SvUploadedAt, sd)
 
@@ -578,15 +582,10 @@ func doUploadToSafecast(sd SafecastData, url string) bool {
         CapturedAt = *sd.CapturedAt
     }
     transaction := beginTransaction("V2", "captured", CapturedAt)
-
-	// Generate the CRC of the original device data
-	crc32 := CrcSafecastData(sd)
-	sd.Service.Crc32 = &crc32
 	
-	// Now, do the final marshaling
+	// Marshal it to json text
     scJSON, _ := json.Marshal(sd)
-
-    if (true) {
+    if (false) {
         fmt.Printf("%s\n", scJSON)
     }
 
