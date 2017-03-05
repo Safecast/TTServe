@@ -554,7 +554,7 @@ func CrcSafecastData(sd SafecastData) uint32 {
     scJSON, _ := json.Marshal(sd)
 	crc := crc32.ChecksumIEEE([]byte(scJSON))
     if (true) {
-        fmt.Printf("CRC32 %d:\n%s\n", scJSON)
+        fmt.Printf("CRC32 %d:\n%s\n", crc, scJSON)
     }
 
 	// Return the CRC
