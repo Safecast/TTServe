@@ -129,7 +129,7 @@ type SafecastData struct {
 	*Dev					`json:",omitempty"`
 
 	// Metadata added as the above is being
-	*Service				`json:",omitempty"`
 	*Gateway				`json:",omitempty"`
+	*Service				`json:",omitempty"`
 
 }
