@@ -553,9 +553,6 @@ func CrcSafecastData(sd SafecastData) uint32 {
 	// Marshall into JSON
     scJSON, _ := json.Marshal(sd)
 	crc := crc32.ChecksumIEEE([]byte(scJSON))
-    if (true) {
-        fmt.Printf("CRC32 %d:\n%s\n", crc, scJSON)
-    }
 
 	// Return the CRC
 	return crc
@@ -589,7 +586,7 @@ func doUploadToSafecast(sd SafecastData, url string) bool {
 	// Now, do the final marshaling
     scJSON, _ := json.Marshal(sd)
 
-    if (false) {
+    if (true) {
         fmt.Printf("%s\n", scJSON)
     }
 
