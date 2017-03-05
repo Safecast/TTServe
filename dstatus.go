@@ -38,7 +38,7 @@ func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv S
     _, err := os.Stat(filename)
     if err != nil {
         if os.IsNotExist(err) {
-			// We did not reinitialize it; it's truly empty.
+            // We did not reinitialize it; it's truly empty.
             return true, false, valueEmpty
         }
         return false, true, valueEmpty
@@ -56,11 +56,11 @@ func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv S
             if errRead == nil {
                 return true, false, valueToRead
             }
-			// Malformed JSON can easily occur because of multiple concurrent
-			// writers, and so this self-corrects the situation.
-			if false {
-	            fmt.Printf("*** %s appears to be corrupt ***\n", filename);
-			}
+            // Malformed JSON can easily occur because of multiple concurrent
+            // writers, and so this self-corrects the situation.
+            if false {
+                fmt.Printf("*** %s appears to be corrupt ***\n", filename);
+            }
             return true, true, valueEmpty
         }
         err = errRead
@@ -84,48 +84,48 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
     var ChangedPms = false
     var ChangedOpc = false
     var ChangedGeiger = false
-	var value SafecastDeviceStatus
-	
-	// Delay a random amount just in case we get called very quickly
-	// with two sequential values by the same device.  While no guarantee,
-	// this reduces the chance that we will overwrite each other.
-	// This happens ALL THE TIME when there are multiple LoRa gateways
-	// that receive and upload the same message from the same device,
-	// and are typically received by different TTSERVE instances because
-	// of load balancing.  This simply reduces the possibility of
-	// file corruption due to multiple concurrent writers.  (The corruption
-	// is self-correcting, but it's still good to avoid.)
-	sleepSeconds := random(0, 30)
+    var value SafecastDeviceStatus
+
+    // Delay a random amount just in case we get called very quickly
+    // with two sequential values by the same device.  While no guarantee,
+    // this reduces the chance that we will overwrite each other.
+    // This happens ALL THE TIME when there are multiple LoRa gateways
+    // that receive and upload the same message from the same device,
+    // and are typically received by different TTSERVE instances because
+    // of load balancing.  This simply reduces the possibility of
+    // file corruption due to multiple concurrent writers.  (The corruption
+    // is self-correcting, but it's still good to avoid.)
+    sleepSeconds := random(0, 30)
     time.Sleep(time.Duration(sleepSeconds) * time.Second)
-	
+
     // Use the supplied upload time as our modification time
-	if sc.Service == nil {
-		var svc Service
-		sc.Service = &svc
-	}
+    if sc.Service == nil {
+        var svc Service
+        sc.Service = &svc
+    }
     sc.Service.UploadedAt = &UploadedAt
 
     // Read the current value, or a blank value structure if it's blank.
-	// If the value isn't available it's because of a nonrecoverable  error.
-	// If it was reset, try waiting around a bit until it is fixed.
-	for i:=0; i<5; i++ {
-	    isAvail, isReset, rvalue := SafecastReadDeviceStatus(uint32(sc.DeviceId))
-		value = rvalue
-	    if !isAvail {
-	        return
-	    }
-		if !isReset {
-			break
-		}
+    // If the value isn't available it's because of a nonrecoverable  error.
+    // If it was reset, try waiting around a bit until it is fixed.
+    for i:=0; i<5; i++ {
+        isAvail, isReset, rvalue := SafecastReadDeviceStatus(uint32(sc.DeviceId))
+        value = rvalue
+        if !isAvail {
+            return
+        }
+        if !isReset {
+            break
+        }
         time.Sleep(time.Duration(random(1, 6)) * time.Second)
-	}
-	
+    }
+
     // Update the current values, but only if modified
     if sc.Service != nil && sc.Service.UploadedAt != nil {
-		if value.Service == nil {
-			var svc Service
-			value.Service = &svc
-		}
+        if value.Service == nil {
+            var svc Service
+            value.Service = &svc
+        }
         value.Service.UploadedAt = sc.Service.UploadedAt
     }
     if sc.CapturedAt != nil {
@@ -197,7 +197,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             value.Loc = &loc
         }
         if value.Loc.Lat != sc.Loc.Lat || value.Loc.Lon != sc.Loc.Lon || value.Loc.Alt != sc.Loc.Alt {
-	        value.Loc = sc.Loc
+            value.Loc = sc.Loc
             ChangedLocation = true
         }
     }
@@ -206,27 +206,45 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         if (value.Pms == nil) {
             value.Pms = &pms
         }
-		if sc.Pms.Pm01_0 != nil && *value.Pms.Pm01_0 != *sc.Pms.Pm01_0 {
+        if sc.Pms.Pm01_0 != nil && *value.Pms.Pm01_0 != *sc.Pms.Pm01_0 {
             value.Pms.Pm01_0 = sc.Pms.Pm01_0
-	        ChangedPms = true
+            ChangedPms = true
         }
         if sc.Pms.Pm02_5 != nil && *value.Pms.Pm02_5 != *sc.Pms.Pm02_5 {
             value.Pms.Pm02_5 = sc.Pms.Pm02_5
-	        ChangedPms = true
+            ChangedPms = true
         }
         if sc.Pms.Pm10_0 != nil && *value.Pms.Pm10_0 != *sc.Pms.Pm10_0 {
             value.Pms.Pm10_0 = sc.Pms.Pm10_0
-	        ChangedPms = true
+            ChangedPms = true
         }
-        if sc.Pms.CountSecs != nil {
+        if sc.Pms.Count00_30 != nil && *value.Pms.Count00_30 != *sc.Pms.Count00_30 {
             value.Pms.Count00_30 = sc.Pms.Count00_30
+            ChangedPms = true
+        }
+        if sc.Pms.Count00_50 != nil && *value.Pms.Count00_50 != *sc.Pms.Count00_50 {
             value.Pms.Count00_50 = sc.Pms.Count00_50
+            ChangedPms = true
+        }
+        if sc.Pms.Count01_00 != nil && *value.Pms.Count01_00 != *sc.Pms.Count01_00 {
             value.Pms.Count01_00 = sc.Pms.Count01_00
+            ChangedPms = true
+        }
+        if sc.Pms.Count02_50 != nil && *value.Pms.Count02_50 != *sc.Pms.Count02_50 {
             value.Pms.Count02_50 = sc.Pms.Count02_50
+            ChangedPms = true
+        }
+        if sc.Pms.Count05_00 != nil && *value.Pms.Count05_00 != *sc.Pms.Count05_00 {
             value.Pms.Count05_00 = sc.Pms.Count05_00
+            ChangedPms = true
+        }
+        if sc.Pms.Count10_00 != nil && *value.Pms.Count10_00 != *sc.Pms.Count10_00 {
             value.Pms.Count10_00 = sc.Pms.Count10_00
+            ChangedPms = true
+        }
+        if sc.Pms.CountSecs != nil && *value.Pms.CountSecs != *sc.Pms.CountSecs {
             value.Pms.CountSecs = sc.Pms.CountSecs
-	        ChangedPms = true
+            ChangedPms = true
         }
     }
     if sc.Opc != nil {
@@ -236,26 +254,44 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         }
         if sc.Opc.Pm01_0 != nil && *value.Opc.Pm01_0 != *sc.Opc.Pm01_0 {
             value.Opc.Pm01_0 = sc.Opc.Pm01_0
-	        ChangedOpc = true
+            ChangedOpc = true
         }
         if sc.Opc.Pm02_5 != nil && *value.Opc.Pm02_5 != *sc.Opc.Pm02_5 {
             value.Opc.Pm02_5 = sc.Opc.Pm02_5
-	        ChangedOpc = true
+            ChangedOpc = true
         }
         if sc.Opc.Pm10_0 != nil && *value.Opc.Pm10_0 != *sc.Opc.Pm10_0 {
             value.Opc.Pm10_0 = sc.Opc.Pm10_0
-	        ChangedOpc = true
+            ChangedOpc = true
         }
-        if sc.Opc.CountSecs != nil {
-            value.Opc.Count00_38 = sc.Opc.Count00_38
-            value.Opc.Count00_54 = sc.Opc.Count00_54
-            value.Opc.Count01_00 = sc.Opc.Count01_00
-            value.Opc.Count02_10 = sc.Opc.Count02_10
-            value.Opc.Count05_00 = sc.Opc.Count05_00
-            value.Opc.Count10_00 = sc.Opc.Count10_00
-            value.Opc.CountSecs = sc.Opc.CountSecs
+		if sc.Opc.Count00_38 != nil && *value.Opc.Count00_38 != *sc.Opc.Count00_38 {
+	        value.Opc.Count00_38 = sc.Opc.Count00_38
 	        ChangedOpc = true
-        }
+		}
+		if sc.Opc.Count00_54 != nil && *value.Opc.Count00_54 != *sc.Opc.Count00_54 {
+	        value.Opc.Count00_54 = sc.Opc.Count00_54
+	        ChangedOpc = true
+		}
+		if sc.Opc.Count01_00 != nil && *value.Opc.Count01_00 != *sc.Opc.Count01_00 {
+	        value.Opc.Count01_00 = sc.Opc.Count01_00
+	        ChangedOpc = true
+		}
+		if sc.Opc.Count02_10 != nil && *value.Opc.Count02_10 != *sc.Opc.Count02_10 {
+	        value.Opc.Count02_10 = sc.Opc.Count02_10
+	        ChangedOpc = true
+		}
+		if sc.Opc.Count05_00 != nil && *value.Opc.Count05_00 != *sc.Opc.Count05_00 {
+	        value.Opc.Count05_00 = sc.Opc.Count05_00
+	        ChangedOpc = true
+		}
+		if sc.Opc.Count10_00 != nil && *value.Opc.Count10_00 != *sc.Opc.Count10_00 {
+	        value.Opc.Count10_00 = sc.Opc.Count10_00
+	        ChangedOpc = true
+		}
+		if sc.Opc.CountSecs != nil && *value.Opc.CountSecs != *sc.Opc.CountSecs {
+	        value.Opc.CountSecs = sc.Opc.CountSecs
+	        ChangedOpc = true
+		}
     }
     if sc.Lnd != nil {
         var lnd Lnd
@@ -268,7 +304,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
                 value.Lnd.U7318 = &val
             }
             if *value.Lnd.U7318 != *sc.Lnd.U7318 {
-	            value.Lnd.U7318 = sc.Lnd.U7318
+                value.Lnd.U7318 = sc.Lnd.U7318
                 ChangedGeiger = true
             }
         }
@@ -278,7 +314,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
                 value.Lnd.C7318 = &val
             }
             if *value.Lnd.C7318 != *sc.Lnd.C7318 {
-	            value.Lnd.C7318 = sc.Lnd.C7318
+                value.Lnd.C7318 = sc.Lnd.C7318
                 ChangedGeiger = true
             }
         }
@@ -288,7 +324,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
                 value.Lnd.EC7128 = &val
             }
             if *value.Lnd.EC7128 != *sc.Lnd.EC7128 {
-	            value.Lnd.EC7128 = sc.Lnd.EC7128
+                value.Lnd.EC7128 = sc.Lnd.EC7128
                 ChangedGeiger = true
             }
         }
@@ -374,10 +410,10 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 
     // Calculate a time of the shuffle, allowing for the fact that our preferred time
     // CapturedAt may not be available.
-	ShuffledAt := &UploadedAt
-	if value.Service != nil {
-	    ShuffledAt = value.Service.UploadedAt
-	}
+    ShuffledAt := &UploadedAt
+    if value.Service != nil {
+        ShuffledAt = value.Service.UploadedAt
+    }
     if value.CapturedAt != nil {
         ShuffledAt = value.CapturedAt
     }
@@ -462,23 +498,23 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 
     for {
 
-		// Write the value
+        // Write the value
         fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
-		if err != nil {
-		    fmt.Printf("*** Unable to write %s: %v\n", filename, err)
-			break
-		}
+        if err != nil {
+            fmt.Printf("*** Unable to write %s: %v\n", filename, err)
+            break
+        }
         fd.WriteString(string(valueJSON));
         fd.Close();
 
-		// Delay, to increase the chance that we will catch a concurrent update/overwrite
+        // Delay, to increase the chance that we will catch a concurrent update/overwrite
         time.Sleep(time.Duration(random(1, 6)) * time.Second)
 
-		// Do an integrity check, and re-write the value if necessary
-	    _, isEmpty, _ := SafecastReadDeviceStatus(uint32(sc.DeviceId))
-		if !isEmpty {
-			break
-		}
+        // Do an integrity check, and re-write the value if necessary
+        _, isEmpty, _ := SafecastReadDeviceStatus(uint32(sc.DeviceId))
+        if !isEmpty {
+            break
+        }
     }
 
 }
@@ -486,8 +522,8 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 // Get summary of a device
 func SafecastGetDeviceStatusSummary(DeviceId uint32) (Label string, Gps string, Summary string) {
 
-	// Default the label for special device types that have no label
-	label := SafecastV1DeviceType(DeviceId)
+    // Default the label for special device types that have no label
+    label := SafecastV1DeviceType(DeviceId)
 
     // Read the file
     isAvail, _, value := SafecastReadDeviceStatus(DeviceId)
