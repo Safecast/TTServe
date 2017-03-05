@@ -9,6 +9,7 @@ package main
 type Service struct {
 	UploadedAt *string		`json:"service_uploaded,omitempty"`
     Transport *string		`json:"service_transport,omitempty"`
+	Crc32 *uint32			`json:"service_crc32,omitempty"`
 }
 
 // Gateway-supplied metadata
