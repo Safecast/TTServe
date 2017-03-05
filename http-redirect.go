@@ -92,8 +92,8 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
 	// Generate the CRC of the original device data
-	crc32 := CrcSafecastData(sd)
-	sd.Service.Crc32 = &crc32
+	hash := HashSafecastData(sd)
+	sd.Service.HashMd5 = &hash
 
     // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
     SafecastV1Upload(body, SafecastV1UploadURL+req.RequestURI, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
