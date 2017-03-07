@@ -206,43 +206,54 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         if (value.Pms == nil) {
             value.Pms = &pms
         }
-        if sc.Pms.Pm01_0 != nil && (value.Pms.Pm01_0 == nil || *value.Pms.Pm01_0 != *sc.Pms.Pm01_0) {
-            value.Pms.Pm01_0 = sc.Pms.Pm01_0
-            ChangedPms = true
+        if sc.Pms.Pm01_0 != nil {
+            if value.Pms.Pm01_0 == nil {
+	            var val float32
+                value.Pms.Pm01_0 = &val
+            }
+            if *value.Pms.Pm01_0 != *sc.Pms.Pm01_0 {
+                value.Pms.Pm01_0 = sc.Pms.Pm01_0
+                ChangedPms = true
+            }
         }
-        if sc.Pms.Pm02_5 != nil && (value.Pms.Pm02_5 == nil || *value.Pms.Pm02_5 != *sc.Pms.Pm02_5) {
+        if sc.Pms.Pm02_5 != nil {
+			var val float32
+			if value.Pms.Pm02_5 == nil {
+				value.Pms.Pm02_5 = &val
+			}
+			if *value.Pms.Pm02_5 != *sc.Pms.Pm02_5 {			
             value.Pms.Pm02_5 = sc.Pms.Pm02_5
             ChangedPms = true
         }
-        if sc.Pms.Pm10_0 != nil && (value.Pms.Pm10_0 == nil || *value.Pms.Pm10_0 != *sc.Pms.Pm10_0) {
+        if sc.Pms.Pm10_0 != nil && *value.Pms.Pm10_0 != *sc.Pms.Pm10_0 {
             value.Pms.Pm10_0 = sc.Pms.Pm10_0
             ChangedPms = true
         }
-        if sc.Pms.Count00_30 != nil && (value.Pms.Count00_30 == nil || *value.Pms.Count00_30 != *sc.Pms.Count00_30) {
+        if sc.Pms.Count00_30 != nil && *value.Pms.Count00_30 != *sc.Pms.Count00_30 {
             value.Pms.Count00_30 = sc.Pms.Count00_30
             ChangedPms = true
         }
-        if sc.Pms.Count00_50 != nil && (value.Pms.Count00_50 == nil || *value.Pms.Count00_50 != *sc.Pms.Count00_50) {
+        if sc.Pms.Count00_50 != nil && *value.Pms.Count00_50 != *sc.Pms.Count00_50 {
             value.Pms.Count00_50 = sc.Pms.Count00_50
             ChangedPms = true
         }
-        if sc.Pms.Count01_00 != nil && (value.Pms.Count01_00 == nil || *value.Pms.Count01_00 != *sc.Pms.Count01_00) {
+        if sc.Pms.Count01_00 != nil && *value.Pms.Count01_00 != *sc.Pms.Count01_00 {
             value.Pms.Count01_00 = sc.Pms.Count01_00
             ChangedPms = true
         }
-        if sc.Pms.Count02_50 != nil && (value.Pms.Count02_50 == nil || *value.Pms.Count02_50 != *sc.Pms.Count02_50) {
+        if sc.Pms.Count02_50 != nil && *value.Pms.Count02_50 != *sc.Pms.Count02_50 {
             value.Pms.Count02_50 = sc.Pms.Count02_50
             ChangedPms = true
         }
-        if sc.Pms.Count05_00 != nil && (value.Pms.Count05_00 == nil || *value.Pms.Count05_00 != *sc.Pms.Count05_00) {
+        if sc.Pms.Count05_00 != nil && *value.Pms.Count05_00 != *sc.Pms.Count05_00 {
             value.Pms.Count05_00 = sc.Pms.Count05_00
             ChangedPms = true
         }
-        if sc.Pms.Count10_00 != nil && (value.Pms.Count10_00 == nil || *value.Pms.Count10_00 != *sc.Pms.Count10_00) {
+        if sc.Pms.Count10_00 != nil && *value.Pms.Count10_00 != *sc.Pms.Count10_00 {
             value.Pms.Count10_00 = sc.Pms.Count10_00
             ChangedPms = true
         }
-        if sc.Pms.CountSecs != nil && (value.Pms.CountSecs == nil || *value.Pms.CountSecs != *sc.Pms.CountSecs) {
+        if sc.Pms.CountSecs != nil && *value.Pms.CountSecs != *sc.Pms.CountSecs {
             value.Pms.CountSecs = sc.Pms.CountSecs
             ChangedPms = true
         }
@@ -252,46 +263,46 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         if (value.Opc == nil) {
             value.Opc = &opc
         }
-        if sc.Opc.Pm01_0 != nil && (value.Opc.Pm01_0 == nil || *value.Opc.Pm01_0 != *sc.Opc.Pm01_0) {
+        if sc.Opc.Pm01_0 != nil && *value.Opc.Pm01_0 != *sc.Opc.Pm01_0 {
             value.Opc.Pm01_0 = sc.Opc.Pm01_0
             ChangedOpc = true
         }
-        if sc.Opc.Pm02_5 != nil && (value.Opc.Pm02_5 == nil || *value.Opc.Pm02_5 != *sc.Opc.Pm02_5) {
+        if sc.Opc.Pm02_5 != nil && *value.Opc.Pm02_5 != *sc.Opc.Pm02_5 {
             value.Opc.Pm02_5 = sc.Opc.Pm02_5
             ChangedOpc = true
         }
-        if sc.Opc.Pm10_0 != nil && (value.Opc.Pm10_0 == nil || *value.Opc.Pm10_0 != *sc.Opc.Pm10_0) {
+        if sc.Opc.Pm10_0 != nil && *value.Opc.Pm10_0 != *sc.Opc.Pm10_0 {
             value.Opc.Pm10_0 = sc.Opc.Pm10_0
             ChangedOpc = true
         }
-		if sc.Opc.Count00_38 != nil && (value.Opc.Count00_38 == nil || *value.Opc.Count00_38 != *sc.Opc.Count00_38) {
-	        value.Opc.Count00_38 = sc.Opc.Count00_38
-	        ChangedOpc = true
-		}
-		if sc.Opc.Count00_54 != nil && (value.Opc.Count00_54 == nil || *value.Opc.Count00_54 != *sc.Opc.Count00_54) {
-	        value.Opc.Count00_54 = sc.Opc.Count00_54
-	        ChangedOpc = true
-		}
-		if sc.Opc.Count01_00 != nil && (value.Opc.Count01_00 == nil || *value.Opc.Count01_00 != *sc.Opc.Count01_00) {
-	        value.Opc.Count01_00 = sc.Opc.Count01_00
-	        ChangedOpc = true
-		}
-		if sc.Opc.Count02_10 != nil && (value.Opc.Count02_10 == nil || *value.Opc.Count02_10 != *sc.Opc.Count02_10) {
-	        value.Opc.Count02_10 = sc.Opc.Count02_10
-	        ChangedOpc = true
-		}
-		if sc.Opc.Count05_00 != nil && (value.Opc.Count05_00 == nil || *value.Opc.Count05_00 != *sc.Opc.Count05_00) {
-	        value.Opc.Count05_00 = sc.Opc.Count05_00
-	        ChangedOpc = true
-		}
-		if sc.Opc.Count10_00 != nil && (value.Opc.Count10_00 == nil || *value.Opc.Count10_00 != *sc.Opc.Count10_00) {
-	        value.Opc.Count10_00 = sc.Opc.Count10_00
-	        ChangedOpc = true
-		}
-		if sc.Opc.CountSecs != nil && (value.Opc.CountSecs == nil || *value.Opc.CountSecs != *sc.Opc.CountSecs) {
-	        value.Opc.CountSecs = sc.Opc.CountSecs
-	        ChangedOpc = true
-		}
+        if sc.Opc.Count00_38 != nil && *value.Opc.Count00_38 != *sc.Opc.Count00_38 {
+            value.Opc.Count00_38 = sc.Opc.Count00_38
+            ChangedOpc = true
+        }
+        if sc.Opc.Count00_54 != nil && *value.Opc.Count00_54 != *sc.Opc.Count00_54 {
+            value.Opc.Count00_54 = sc.Opc.Count00_54
+            ChangedOpc = true
+        }
+        if sc.Opc.Count01_00 != nil && *value.Opc.Count01_00 != *sc.Opc.Count01_00 {
+            value.Opc.Count01_00 = sc.Opc.Count01_00
+            ChangedOpc = true
+        }
+        if sc.Opc.Count02_10 != nil && *value.Opc.Count02_10 != *sc.Opc.Count02_10 {
+            value.Opc.Count02_10 = sc.Opc.Count02_10
+            ChangedOpc = true
+        }
+        if sc.Opc.Count05_00 != nil && *value.Opc.Count05_00 != *sc.Opc.Count05_00 {
+            value.Opc.Count05_00 = sc.Opc.Count05_00
+            ChangedOpc = true
+        }
+        if sc.Opc.Count10_00 != nil && *value.Opc.Count10_00 != *sc.Opc.Count10_00 {
+            value.Opc.Count10_00 = sc.Opc.Count10_00
+            ChangedOpc = true
+        }
+        if sc.Opc.CountSecs != nil && *value.Opc.CountSecs != *sc.Opc.CountSecs {
+            value.Opc.CountSecs = sc.Opc.CountSecs
+            ChangedOpc = true
+        }
     }
     if sc.Lnd != nil {
         var lnd Lnd
