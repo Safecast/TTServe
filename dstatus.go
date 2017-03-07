@@ -176,10 +176,10 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             value.Gateway.Lat = sc.Gateway.Lat
         }
         if sc.Gateway.Lon != nil {
-            value.Gateway.Lat = sc.Gateway.Lat
+            value.Gateway.Lon = sc.Gateway.Lon
         }
         if sc.Gateway.Alt != nil {
-            value.Gateway.Lat = sc.Gateway.Lat
+            value.Gateway.Alt = sc.Gateway.Alt
         }
     }
     if sc.Service != nil {
@@ -193,10 +193,10 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
     }
     if sc.Loc != nil {
         var loc Loc
-        if (value.Loc == nil) {
+        if value.Loc == nil {
             value.Loc = &loc
         }
-        if value.Loc.Lat != sc.Loc.Lat || value.Loc.Lon != sc.Loc.Lon || value.Loc.Alt != sc.Loc.Alt {
+        if value.Loc.Lat != sc.Loc.Lat || value.Loc.Lon != sc.Loc.Lon {
             value.Loc = sc.Loc
             ChangedLocation = true
         }
