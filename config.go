@@ -84,6 +84,7 @@ var   TTServerFTPAddressIPv4 = ""					// Looked up dynamically
 const TTServerHTTPPort string = ":80"
 const TTServerHTTPPortAlternate string = ":8080"
 const TTServerUDPPort string = ":8081"
+const TTServerTCPPort string = ":8082"
 const TTServerFTPPort int = 8083					// plus 8084 plus the entire passive range
 const TTServerTopicSend string = "/send"
 const TTServerTopicRoot1 string = "/index.html"
@@ -123,6 +124,7 @@ const logDateFormat string = "2006-01-02 15:04:05"
 type TTServeCounts struct {
 	Restarts		uint32			`json:"restarts,omitempty"`
 	UDP				uint32			`json:"received_device_udp,omitempty"`
+	TCP				uint32			`json:"received_device_tcp,omitempty"`
 	HTTP			uint32			`json:"received_all_http,omitempty"`
 	HTTPSlack		uint32			`json:"received_slack_http,omitempty"`
 	HTTPGithub		uint32			`json:"received_github_http,omitempty"`

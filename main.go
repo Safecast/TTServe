@@ -83,6 +83,12 @@ func main() {
     TTServerUDPAddressIPv4 = addrs[0]
     ThisServerServesUDP = TTServerUDPAddressIPv4 == ThisServerAddressIPv4
 
+	// We all support TCP
+    ThisServerServesTCP := true
+
+	// We all support HTTP
+	ThisServerServesHTTP := true
+	
 	// Configure FTP
     addrs, err = net.LookupHost(TTServerFTPAddress)
     if err != nil {
@@ -116,13 +122,21 @@ func main() {
     go AppReqHandler()
 
     // Init our web request inbound server
-    go HttpInboundHandler()
-	stats.Services = "HTTP"
+	if ThisServerServesHTTP {
+	    go HttpInboundHandler()
+		stats.Services = "HTTP"
+	}
 
     // Init our UDP single-sample upload request inbound server
     if ThisServerServesUDP {
         go UdpInboundHandler()
 		stats.Services += ", UDP"
+    }
+
+    // Init our TCP server
+    if ThisServerServesTCP {
+        go TcpInboundHandler()
+		stats.Services += ", TCP"
     }
 
     // Init our FTP server

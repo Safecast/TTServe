@@ -22,7 +22,7 @@ var (
 // Kick off inbound messages coming from all sources, then serve HTTP
 func FtpInboundHandler() {
 
-    fmt.Printf("Now handling inbound FTP on %s:%d\n", TTServerFTPAddress, TTServerFTPPort)
+    fmt.Printf("Now handling inbound FTP on :%d\n", TTServerFTPPort)
 
     ftpServer = ftp.NewFtpServer(NewFtpDriver())
     err := ftpServer.ListenAndServe()

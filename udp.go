@@ -17,7 +17,7 @@ import (
 // Kick off UDP single-upload request server
 func UdpInboundHandler() {
 
-    fmt.Printf("Now handling inbound UDP on: %s%s\n", TTServerUDPAddress, TTServerUDPPort)
+    fmt.Printf("Now handling inbound UDP on: %s\n", TTServerUDPPort)
 
     ServerAddr, err := net.ResolveUDPAddr("udp", TTServerUDPPort)
     if err != nil {
@@ -38,7 +38,6 @@ func UdpInboundHandler() {
         n, addr, err := ServerConn.ReadFromUDP(buf)
         if (err != nil) {
             fmt.Printf("UDP read error: \n%v\n", err)
-            time.Sleep(1 * 60 * time.Second)
         } else {
 
             ttg := &TTGateReq{}
@@ -46,7 +45,7 @@ func UdpInboundHandler() {
             ttg.Transport = "device-udp:" + ipv4(addr.String())
             data, err := json.Marshal(ttg)
             if err == nil {
-                go UploadToWebLoadBalancer(data, n, ipv4(addr.String()))
+                go UploadToWebLoadBalancer(data, n, ttg.Transport)
                 stats.Count.UDP++;
             }
 
@@ -57,10 +56,10 @@ func UdpInboundHandler() {
 }
 
 // Upload a Safecast data structure the load balancer for the web service
-func UploadToWebLoadBalancer(data []byte, datalen int, addr string) {
+func UploadToWebLoadBalancer(data []byte, datalen int, transport string) {
 
     if true {
-        fmt.Printf("\n%s Received %d-byte UDP payload from %s, routing to LB\n", time.Now().Format(logDateFormat), datalen, addr)
+        fmt.Printf("\n%s Received %d-byte payload from %s, routing to LB\n", time.Now().Format(logDateFormat), datalen, transport)
     }
 
     url := "http://" + TTServerHTTPAddress + TTServerHTTPPort + TTServerTopicSend
