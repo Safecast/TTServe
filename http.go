@@ -41,10 +41,12 @@ func HttpInboundHandler() {
 
 	// Listen on the alternate HTTP port
     go func() {
+	    fmt.Printf("Now handling inbound HTTP on %s\n", TTServerHTTPPortAlternate)
         http.ListenAndServe(TTServerHTTPPortAlternate, nil)
     }()
 
 	// Listen on the primary HTTP port
+    fmt.Printf("Now handling inbound HTTP on %s\n", TTServerHTTPPort)
     http.ListenAndServe(TTServerHTTPPort, nil)
 
 }

@@ -14,7 +14,7 @@ import (
 // Kick off TCP single-upload request server
 func TcpInboundHandler() {
 
-    fmt.Printf("Now handling inbound TCP on: %s\n", TTServerTCPPort)
+    fmt.Printf("Now handling inbound TCP on %s\n", TTServerTCPPort)
 
     ServerAddr, err := net.ResolveTCPAddr("tcp", TTServerTCPPort)
     if err != nil {

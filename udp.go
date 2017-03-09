@@ -17,7 +17,7 @@ import (
 // Kick off UDP single-upload request server
 func UdpInboundHandler() {
 
-    fmt.Printf("Now handling inbound UDP on: %s\n", TTServerUDPPort)
+    fmt.Printf("Now handling inbound UDP on %s\n", TTServerUDPPort)
 
     ServerAddr, err := net.ResolveUDPAddr("udp", TTServerUDPPort)
     if err != nil {
