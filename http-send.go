@@ -8,7 +8,6 @@ package main
 import (
     "net/http"
     "fmt"
-    "time"
     "io"
     "io/ioutil"
     "encoding/hex"
@@ -16,7 +15,7 @@ import (
 )
 
 // Unpack common AppReq fields from an incoming TTGateReq
-func newAppReq(ttg *TTGateReq, Transport string) IncomingAppReq {
+func newAppReqFromGateway(ttg *TTGateReq, Transport string) IncomingAppReq {
     var AppReq IncomingAppReq
 
     if ttg.Latitude != 0 {
@@ -40,8 +39,8 @@ func newAppReq(ttg *TTGateReq, Transport string) IncomingAppReq {
 
     AppReq.SvTransport = Transport
 
-	return AppReq
-	
+    return AppReq
+
 }
 
 // Handle inbound HTTP requests from the gateway or directly from the device
@@ -68,10 +67,10 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         // Use the TTGateReq to initialize a new AppReq
-        AppReq := newAppReq(&ttg, ttg.Transport)
+        AppReq := newAppReqFromGateway(&ttg, ttg.Transport)
 
         // Process it.  Note there is no possibility of a reply.
-        processBuffer(AppReq, "device on cellular", ttg.Payload)
+        AppReqPushPayload(AppReq, ttg.Payload, "device directly")
         stats.Count.HTTPRelay++;
 
     }
@@ -85,18 +84,18 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
             return
         }
 
-	    // Figure out the transport based upon whether or not a gateway ID was included
-	    requestor, _ := getRequestorIPv4(req)
-		Transport := "lora-http:" + requestor
-	    if ttg.GatewayId != "" {
-	        Transport = "lora:"+ttg.GatewayId
-	    }
+        // Figure out the transport based upon whether or not a gateway ID was included
+        requestor, _ := getRequestorIPv4(req)
+        Transport := "lora-http:" + requestor
+        if ttg.GatewayId != "" {
+            Transport = "lora:"+ttg.GatewayId
+        }
 
         // Use the TTGateReq to initialize a new AppReq
-        AppReq := newAppReq(&ttg, Transport)
+        AppReq := newAppReqFromGateway(&ttg, Transport)
 
         // Process it
-        ReplyToDeviceId = processBuffer(AppReq, "Lora gateway", ttg.Payload)
+        ReplyToDeviceId = AppReqPushPayload(AppReq, ttg.Payload, "Lora gateway")
         stats.Count.HTTPGateway++;
 
     }
@@ -111,13 +110,13 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
             return
         }
 
-
         // Initialize a new AppReq
-		AppReq := IncomingAppReq{}
+        AppReq := IncomingAppReq{}
         requestor, _ := getRequestorIPv4(req)
-	    AppReq.SvTransport = "device-http:" + requestor
-			
-        ReplyToDeviceId = processBuffer(AppReq, "device on cellular", buf)
+        AppReq.SvTransport = "device-http:" + requestor
+
+		// Push it
+        ReplyToDeviceId = AppReqPushPayload(AppReq, buf, "device directly")
         stats.Count.HTTPDevice++;
 
     }
@@ -134,23 +133,14 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
     // Outbound message processing
     if (ReplyToDeviceId != 0) {
 
-        // Wait for up to five seconds for a reply to appear.  It's no big deal if we miss it,
-        // though, because it'll just be picked up on the next call
+        // See if there's an outbound message waiting for this device.
+        isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)
+        if (isAvailable) {
 
-        for i:=0; i<5; i++ {
-
-            // See if there's an outbound message waiting for this device.
-            isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)
-            if (isAvailable) {
-
-                // Responses for now are always hex-encoded for easy device processing
-                hexPayload := hex.EncodeToString(payload)
-                io.WriteString(rw, hexPayload)
-                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED)
-                break
-            }
-
-            time.Sleep(1 * time.Second)
+            // Responses for now are always hex-encoded for easy device processing
+            hexPayload := hex.EncodeToString(payload)
+            io.WriteString(rw, hexPayload)
+            sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED)
         }
 
     }

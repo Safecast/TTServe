@@ -52,16 +52,11 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
     }
 	AppReq.SvTransport = "ttn-http:" + ttn.DevID
 
-    ReplyToDeviceId = processBuffer(AppReq, "TTN", ttn.PayloadRaw)
+    ReplyToDeviceId = AppReqPushPayload(AppReq, ttn.PayloadRaw, "TTN")
     stats.Count.HTTPTTN++
 
     // Outbound message processing
     if (ReplyToDeviceId != 0) {
-
-        // Delay just in case there's a chance that request processing may generate a reply
-        // to this request.  It's no big deal if we miss it, though, because it will just be
-        // picked up on the next call.
-        time.Sleep(1 * time.Second)
 
         // See if there's an outbound message waiting for this device.
         isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)

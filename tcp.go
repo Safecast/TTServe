@@ -8,7 +8,6 @@ package main
 import (
     "net"
     "fmt"
-    "encoding/json"
 )
 
 // Kick off TCP single-upload request server
@@ -32,32 +31,45 @@ func TcpInboundHandler() {
     for {
         buf := make([]byte, 4096)
 
-		conn, err := ServerConn.AcceptTCP()
-		if err != nil {
-			fmt.Printf("Error accepting TCP session: \n%v\n", err)
-			continue
-		}
-
-		n, err := conn.Read(buf)
-		if err != nil {
-			fmt.Printf("TCP read error: \n%v\n", err)
-			conn.Close()
-			continue
-		}
-
-		remoteaddr := ipv4(conn.RemoteAddr().String())
-
-		conn.Close()
-
-        ttg := &TTGateReq{}
-        ttg.Payload = buf[0:n]
-        ttg.Transport = "device-tcp:" + remoteaddr
-        data, err := json.Marshal(ttg)
-        if err == nil {
-            go UploadToWebLoadBalancer(data, n, ttg.Transport)
-            stats.Count.TCP++;
+        conn, err := ServerConn.AcceptTCP()
+        if err != nil {
+            fmt.Printf("Error accepting TCP session: \n%v\n", err)
+            continue
         }
 
+        n, err := conn.Read(buf)
+        if err != nil {
+            fmt.Printf("TCP read error: \n%v\n", err)
+            conn.Close()
+            continue
+        }
+
+        remoteaddr := ipv4(conn.RemoteAddr().String())
+
+        // Initialize a new AppReq
+        AppReq := IncomingAppReq{}
+        AppReq.SvTransport = "device-tcp:" + remoteaddr
+
+        // Push it
+        ReplyToDeviceId := AppReqPushPayload(AppReq, buf[0:n], "device directly")
+        stats.Count.TCP++;
+
+        // Is there a device ID to reply to?
+        if (ReplyToDeviceId != 0) {
+
+            // See if there's an outbound message waiting for this device.
+            isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)
+            if (isAvailable) {
+
+                // Responses are binary on TCP
+                conn.Write(payload)
+                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED)
+            }
+
+        }
+
+        // Close the connection
+        conn.Close()
 
     }
 
