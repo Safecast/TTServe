@@ -83,13 +83,13 @@ func main() {
     TTServerUDPAddressIPv4 = addrs[0]
     ThisServerServesUDP = TTServerUDPAddressIPv4 == ThisServerAddressIPv4
 
-	// We all support TCP
+	// We all support TCP because it's load-balanced.
     ThisServerServesTCP := true
 
-	// We all support HTTP
+	// We all support HTTP because it's load-balanced.
 	ThisServerServesHTTP := true
 	
-	// Configure FTP
+	// Configure FTP, which only runs on the primary server because it's not load-balanced.
     addrs, err = net.LookupHost(TTServerFTPAddress)
     if err != nil {
         fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err);
