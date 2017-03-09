@@ -37,10 +37,6 @@ func TcpInboundHandler() {
             continue
         }
 
-		if (true) {
-			fmt.Printf("******* ACCEPTED TCP CONNECTION *******\n");
-		}
-
         n, err := conn.Read(buf)
         if err != nil {
             fmt.Printf("TCP read error: \n%v\n", err)
