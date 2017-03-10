@@ -198,6 +198,8 @@ func SafecastCSVDeviceLog(UploadedAt string, sd SafecastData) {
     t, err := time.Parse("2006-01-02T15:04:05Z", zTime)
     if err == nil {
         zTime = t.UTC().Format("2006-01-02 15:04:05")
+//ozzie
+		fmt.Printf("%s ||| %s ||| %s\n", zTime, t.UTC().Format("2006-01-02 15:04:05"), t.Format("2006-01-02 15:04:05"))
     }
     s += zTime
 
