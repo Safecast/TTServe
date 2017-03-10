@@ -10,6 +10,7 @@ type Service struct {
 	UploadedAt *string		`json:"service_uploaded,omitempty"`
     Transport *string		`json:"service_transport,omitempty"`
 	HashMd5 *string			`json:"service_md5,omitempty"`
+	Handler *string			`json:"service_handler,omitempty"`
 }
 
 // Gateway-supplied metadata

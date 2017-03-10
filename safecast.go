@@ -587,6 +587,9 @@ func doUploadToSafecast(sd SafecastData, url string) bool {
         CapturedAt = *sd.CapturedAt
     }
     transaction := beginTransaction("V2", "captured", CapturedAt)
+
+	// Add info about the server instance that actually did the upload
+	sd.Service.Handler = &TTServeInstanceID
 	
 	// Marshal it to json text
     scJSON, _ := json.Marshal(sd)
