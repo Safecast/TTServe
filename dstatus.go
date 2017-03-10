@@ -520,7 +520,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 }
 
 // Get summary of a device
-func SafecastGetDeviceStatusSummary(DeviceId uint32) (Label string, Gps string, Summary string) {
+func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label string, Gps string, Summary string) {
 
     // Default the label for special device types that have no label
     label := SafecastV1DeviceType(DeviceId)
@@ -528,7 +528,15 @@ func SafecastGetDeviceStatusSummary(DeviceId uint32) (Label string, Gps string, 
     // Read the file
     isAvail, _, value := SafecastReadDeviceStatus(DeviceId)
     if !isAvail {
-        return label, "", ""
+        return "", label, "", ""
+    }
+
+    // Get the DevEUI, which must be precisely 16 characters
+	ttnDevEui := ""
+    if value.Dev != nil && value.Dev.TtnParams != nil {
+		if len(*value.Dev.TtnParams) == 16 {
+			ttnDevEui = *value.Dev.TtnParams
+		}
     }
 
     // Get the label
@@ -583,6 +591,6 @@ func SafecastGetDeviceStatusSummary(DeviceId uint32) (Label string, Gps string, 
     }
 
     // Done
-    return label, gps, s
+    return ttnDevEui, label, gps, s
 
 }

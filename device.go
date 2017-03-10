@@ -216,7 +216,7 @@ func sendSafecastDeviceSummaryToSlack(header string, fWrap bool, fDetails bool) 
         gps := ""
         summary := ""
         if fDetails {
-            label, gps, summary = SafecastGetDeviceStatusSummary(id)
+            _, label, gps, summary = SafecastGetDeviceStatusSummary(id)
 			// Refresh cached label
 			sortedDevices[i].label = label
         }
@@ -265,6 +265,29 @@ func sendSafecastDeviceSummaryToSlack(header string, fWrap bool, fDetails bool) 
             }
         }
 
+    }
+
+    // Send it to Slack
+    sendToSafecastOps(s, SLACK_MSG_REPLY)
+
+}
+
+// Get a summary of devices that are older than this many minutes ago
+func generateTTNCTLDeviceRegistrationScript() {
+
+    // First, age out the expired devices and recompute when last seen
+    sendExpiredSafecastDevicesToSlack()
+
+    // Next sort the device list
+    sortedDevices := seenDevices
+    sort.Sort(ByDeviceKey(sortedDevices))
+
+    // Sweep over devices and generate the TTNCTL commands, newest first
+    s := ""
+    for i := 0; i < len(sortedDevices); i++ {
+        id := sortedDevices[i].deviceid
+        deveui, _, _, _ := SafecastGetDeviceStatusSummary(id)
+        s += fmt.Sprintf("ttnctl devices register %s\n", deveui)
     }
 
     // Send it to Slack

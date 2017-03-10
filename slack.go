@@ -137,6 +137,9 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         time.Sleep(2 * time.Second)
         go sendSafecastDeviceSummaryToSlack("== Devices ==", fMobile, fDetails)
 
+    case "deveui":
+		generateTTNCTLDeviceRegistrationScript()
+
     case "pending":
         fallthrough
     case "outbound":
