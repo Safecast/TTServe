@@ -169,8 +169,12 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         dev.Dfu = msg.StatsDfu
         dodev = true
     }
-    if msg.StatsModules != nil {
-        dev.Modules = msg.StatsModules
+    if msg.StatsModuleLora != nil {
+        dev.ModuleLora = msg.StatsModuleLora
+        dodev = true
+    }
+    if msg.StatsModuleFona != nil {
+        dev.ModuleFona = msg.StatsModuleFona
         dodev = true
     }
     if msg.StatsDeviceLabel != nil {

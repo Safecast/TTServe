@@ -107,7 +107,8 @@ type Dev struct {
     NTPCount *uint32		`json:"dev_ntp_count,omitempty"`
 	LastFailure *string		`json:"dev_last_failure,omitempty"`
 	Status *string			`json:"dev_status,omitempty"`
-	Modules *string			`json:"dev_modules,omitempty"`
+	ModuleLora *string		`json:"dev_module_lora,omitempty"`
+	ModuleFona *string		`json:"dev_module_fona,omitempty"`
 }
 
 // Note that this structure has been designed so that we could convert, at a later date,
