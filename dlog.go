@@ -168,6 +168,12 @@ func SafecastCSVDeviceLog(UploadedAt string, sd SafecastData) {
         if sd.Dev.Dfu != nil {
             stats += fmt.Sprintf("DFU:%s ", *sd.Dev.Dfu)
         }
+        if sd.Dev.ModuleLora != nil {
+            stats += fmt.Sprintf("DFU:%s ", *sd.Dev.ModuleLora)
+        }
+        if sd.Dev.ModuleFona != nil {
+            stats += fmt.Sprintf("DFU:%s ", *sd.Dev.ModuleFona)
+        }
         if sd.Dev.DeviceLabel != nil {
             stats += fmt.Sprintf("Label:%s ", *sd.Dev.DeviceLabel)
         }

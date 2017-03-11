@@ -385,6 +385,12 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         if sc.Dev.Iccid != nil {
             value.Dev.Iccid = sc.Dev.Iccid
         }
+        if sc.Dev.ModuleLora != nil {
+            value.Dev.ModuleLora = sc.Dev.ModuleLora
+        }
+        if sc.Dev.ModuleFona != nil {
+            value.Dev.ModuleFona = sc.Dev.ModuleFona
+        }
         if sc.Dev.Cpsi != nil {
             value.Dev.Cpsi = sc.Dev.Cpsi
         }
