@@ -48,7 +48,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     // Discard it if it's a duplicate
     if isDuplicate(checksum) {
         fmt.Printf("%s DISCARDING duplicate message\n", time.Now().Format(logDateFormat));
-        return
+
     }
 
     // Process stamps by adding or removing fields from the message
@@ -167,10 +167,6 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     }
     if msg.StatsDfu != nil {
         dev.Dfu = msg.StatsDfu
-        dodev = true
-    }
-    if msg.StatsModules != nil {
-        dev.Modules = msg.StatsModules
         dodev = true
     }
     if msg.StatsDeviceLabel != nil {
