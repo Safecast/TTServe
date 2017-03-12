@@ -9,6 +9,7 @@ import (
     "fmt"
     "strings"
     "strconv"
+	"github.com/google/open-location-code/go"
 )
 
 // Get the type of a device
@@ -74,6 +75,8 @@ func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data
             alt := float32(*v1.Height)
             loc.Alt = &alt
         }
+		Olc := olc.Encode(float64(loc.Lat), float64(loc.Lon), 0)
+		loc.Olc = &Olc;
         sd.Loc = &loc
     }
 
