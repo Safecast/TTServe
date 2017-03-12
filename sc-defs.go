@@ -27,6 +27,7 @@ type Loc struct {
 	Lat float32				`json:"loc_lat"`
 	Lon float32				`json:"loc_lon"`
 	Alt *float32			`json:"loc_alt,omitempty"`
+	Motion bool				`json:"loc_motion,omitempty"`
 }
 
 // Device Battery Performance Data - all are optional

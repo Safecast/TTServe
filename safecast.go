@@ -97,15 +97,22 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     }
 
     // Loc
-    if msg.Latitude != nil && msg.Longitude != nil {
+    if msg.Latitude != nil || msg.Longitude != nil || msg.Motion != nil {
         var loc Loc
-        loc.Lat = msg.GetLatitude()
-        loc.Lon = msg.GetLongitude()
+		if msg.Latitude != nil {
+	        loc.Lat = msg.GetLatitude()
+		}
+		if msg.Longitude != nil {
+	        loc.Lon = msg.GetLongitude()
+		}
         if msg.Altitude != nil {
             var alt float32
             alt = float32(msg.GetAltitude())
             loc.Alt = &alt
         }
+		if msg.Motion != nil {
+	        loc.Motion = msg.GetMotion()
+		}
         sd.Loc = &loc
     }
 
