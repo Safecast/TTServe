@@ -399,6 +399,9 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
 	hash := HashSafecastData(sd)
 	sd.Service.HashMd5 = &hash
 
+	// Add info about the server instance that actually did the upload
+	sd.Service.Handler = &TTServeInstanceID
+
     // Log as accurately as we can with regard to what came in
     SafecastWriteToLogs(req.SvUploadedAt, sd)
 
@@ -595,9 +598,6 @@ func doUploadToSafecast(sd SafecastData, url string) bool {
         CapturedAt = *sd.CapturedAt
     }
     transaction := beginTransaction("V2", "captured", CapturedAt)
-
-	// Add info about the server instance that actually did the upload
-	sd.Service.Handler = &TTServeInstanceID
 	
 	// Marshal it to json text
     scJSON, _ := json.Marshal(sd)

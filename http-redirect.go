@@ -95,6 +95,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	hash := HashSafecastData(sd)
 	sd.Service.HashMd5 = &hash
 
+	// Add info about the server instance that actually did the upload
+	sd.Service.Handler = &TTServeInstanceID
+
     // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
     SafecastV1Upload(body, SafecastV1UploadURL+req.RequestURI, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
     SafecastUpload(sd)
