@@ -16,6 +16,7 @@ import (
     "encoding/json"
 	"crypto/md5"
     "github.com/safecast/ttproto/golang"
+	"github.com/google/open-location-code/go"
 )
 
 // For dealing with transaction timeouts
@@ -99,6 +100,10 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     // Loc
     if msg.Latitude != nil || msg.Longitude != nil || msg.Motion != nil {
         var loc Loc
+		if msg.Latitude != nil && msg.Longitude != nil {
+			Olc := olc.Encode(float64(msg.GetLatitude()), float64(msg.GetLongitude()), 0)
+			loc.Olc = &Olc;
+		}
 		if msg.Latitude != nil {
 	        loc.Lat = msg.GetLatitude()
 		}
