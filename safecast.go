@@ -548,6 +548,8 @@ func SafecastV1Upload(body []byte, url string, unit string, value string) bool {
         Timeout: time.Second * 15,
     }
     resp, err := httpclient.Do(req)
+//ozzie
+	fmt.Printf("HTTP POST to '%s': %v\n%s\n", url, err, string(body))
 
     errString := ""
     if (err == nil) {
