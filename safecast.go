@@ -548,8 +548,6 @@ func SafecastV1Upload(body []byte, url string, unit string, value string) bool {
         Timeout: time.Second * 15,
     }
     resp, err := httpclient.Do(req)
-//ozzie
-	fmt.Printf("HTTP POST to '%s': %v\n%s\n", url, err, string(body))
 
     errString := ""
     if (err == nil) {
@@ -564,9 +562,13 @@ func SafecastV1Upload(body []byte, url string, unit string, value string) bool {
 
 	// On 2017-02-17 I disabled errors uploading to V1 servers, because it's no longer
 	// interesting relative to uploads to the new "Ingest" servers.
-	if false {
+	// On 2017-03-13 I re-enabled after "connection refused" errors
+	if true {
 	    endTransaction(transaction, url, errString)
 	} else {
+		if (errString != "") {
+			fmt.Printf("*** Error uploading to Safecast V1: %v\n", errString)
+		}
 	    endTransaction(transaction, url, "")
 	}
 	
