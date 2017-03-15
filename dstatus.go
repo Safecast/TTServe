@@ -416,10 +416,8 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 
     // Calculate a time of the shuffle, allowing for the fact that our preferred time
     // CapturedAt may not be available.
-    ShuffledAt := &UploadedAt
-    if value.Service != nil {
-        ShuffledAt = value.Service.UploadedAt
-    }
+	now := nowInUTC()
+    ShuffledAt := &now
     if value.CapturedAt != nil {
         ShuffledAt = value.CapturedAt
     }
