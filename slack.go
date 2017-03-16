@@ -183,6 +183,19 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             }
         }
 
+    case "clear":
+        if len(args) == 2 {
+            i64, err := strconv.ParseUint(args[1], 10, 32)
+            deviceID := uint32(i64)
+            if err != nil {
+                sendToSafecastOps("Not a device ID.", SLACK_MSG_REPLY)
+            } else {
+				sendToSafecastOps(SafecastDeleteDeviceStatus(deviceID), SLACK_MSG_REPLY)
+            }
+        } else {
+            sendToSafecastOps("Command format: clear <deviceID>", SLACK_MSG_REPLY)
+        }
+
     case "hello":
         if len(args) == 1 {
             sendToSafecastOps(fmt.Sprintf("Hello back, %s.", user), SLACK_MSG_REPLY)
