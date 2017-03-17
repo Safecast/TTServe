@@ -15,7 +15,6 @@ import (
 // GOALS:
 //          - does a summary of total errors encountered
 //          - makes sure it got at least some data from each kind of sensor
-//          - makes sure it heard from both lora and fona
 //          - does some simple range check on each data value
 
 // Stats about a single measurement
@@ -28,6 +27,19 @@ type MeasurementStat struct {
     LoraTransport       bool
     FonaTransport       bool
     TestMeasurement     bool
+    ErrorsOpc			uint32
+    ErrorsPms			uint32
+    ErrorsBme0			uint32
+    ErrorsBme1			uint32
+    ErrorsLora			uint32
+    ErrorsFona			uint32
+    ErrorsGeiger		uint32
+    ErrorsMax01			uint32
+    ErrorsUgps			uint32
+    ErrorsLis			uint32
+    ErrorsSpi			uint32
+    ErrorsTwi			uint32
+    ErrorsTwiInfo		string
 }
 
 // Stats about all measurements
@@ -55,6 +67,19 @@ type MeasurementDataset struct {
     FonaTransports      uint32
 	LoraModule			string
 	FonaModule			string
+    MaxErrorsOpc		uint32
+    MaxErrorsPms		uint32
+    MaxErrorsBme0		uint32
+    MaxErrorsBme1		uint32
+    MaxErrorsLora		uint32
+    MaxErrorsFona		uint32
+    MaxErrorsGeiger		uint32
+    MaxErrorsMax01		uint32
+    MaxErrorsUgps		uint32
+    MaxErrorsLis		uint32
+    MaxErrorsSpi		uint32
+    MaxErrorsTwi		uint32
+    ErrorsTwiInfo		string
 }
 
 func NewMeasurementDataset(deviceidstr string, logRange string) MeasurementDataset {
@@ -109,12 +134,53 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 
 		if sd.Dev != nil {
 
-			if sd.ModuleLora != nil {
+			if sd.Dev.ModuleLora != nil {
 				stat.LoraModule = *sd.Dev.ModuleLora
 			}
-			if sd.ModuleFona != nil {
+			if sd.Dev.ModuleFona != nil {
 				stat.FonaModule = *sd.Dev.ModuleFona
 			}
+
+			if sd.Dev.ErrorsOpc != nil {
+				stat.ErrorsOpc = *sd.Dev.ErrorsOpc
+			}
+			if sd.Dev.ErrorsPms != nil {
+				stat.ErrorsPms = *sd.Dev.ErrorsPms
+			}
+			if sd.Dev.ErrorsBme0 != nil {
+				stat.ErrorsBme0 = *sd.Dev.ErrorsBme0
+			}
+			if sd.Dev.ErrorsBme1 != nil {
+				stat.ErrorsBme1 = *sd.Dev.ErrorsBme1
+			}
+			if sd.Dev.ErrorsLora != nil {
+				stat.ErrorsLora = *sd.Dev.ErrorsLora
+			}
+			if sd.Dev.ErrorsFona != nil {
+				stat.ErrorsFona = *sd.Dev.ErrorsFona
+			}
+			if sd.Dev.ErrorsGeiger != nil {
+				stat.ErrorsGeiger = *sd.Dev.ErrorsGeiger
+			}
+			if sd.Dev.ErrorsMax01 != nil {
+				stat.ErrorsMax01 = *sd.Dev.ErrorsMax01
+			}
+			if sd.Dev.ErrorsUgps != nil {
+				stat.ErrorsUgps = *sd.Dev.ErrorsUgps
+			}
+			if sd.Dev.ErrorsLis != nil {
+				stat.ErrorsLis = *sd.Dev.ErrorsLis
+			}
+			if sd.Dev.ErrorsSpi != nil {
+				stat.ErrorsSpi = *sd.Dev.ErrorsSpi
+			}
+			if sd.Dev.ErrorsTwi != nil {
+				stat.ErrorsTwi = *sd.Dev.ErrorsTwi
+			}
+			if sd.Dev.ErrorsTwiInfo != nil {
+				stat.ErrorsTwiInfo = *sd.Dev.ErrorsTwiInfo
+			}
+
 		}
 
 	}
@@ -212,6 +278,60 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
 	if stat.FonaModule != "" {
 		ds.FonaModule = stat.FonaModule
 	}
+
+	// Errors
+    if stat.ErrorsOpc > ds.MaxErrorsOpc {
+		ds.MaxErrorsOpc = stat.ErrorsOpc
+	}
+    if stat.ErrorsPms > ds.MaxErrorsPms {
+		ds.MaxErrorsPms = stat.ErrorsPms
+	}
+    if stat.ErrorsBme0 > ds.MaxErrorsBme0 {
+		ds.MaxErrorsBme0 = stat.ErrorsBme0
+	}
+    if stat.ErrorsBme1 > ds.MaxErrorsBme1 {
+		ds.MaxErrorsBme1 = stat.ErrorsBme1
+	}
+    if stat.ErrorsLora > ds.MaxErrorsLora {
+		ds.MaxErrorsLora = stat.ErrorsLora
+	}
+    if stat.ErrorsFona > ds.MaxErrorsFona {
+		ds.MaxErrorsFona = stat.ErrorsFona
+	}
+    if stat.ErrorsGeiger > ds.MaxErrorsGeiger {
+		ds.MaxErrorsGeiger = stat.ErrorsGeiger
+	}
+    if stat.ErrorsMax01 > ds.MaxErrorsMax01 {
+		ds.MaxErrorsMax01 = stat.ErrorsMax01
+	}
+    if stat.ErrorsUgps > ds.MaxErrorsUgps {
+		ds.MaxErrorsUgps = stat.ErrorsUgps
+	}
+    if stat.ErrorsLis > ds.MaxErrorsLis {
+		ds.MaxErrorsLis = stat.ErrorsLis
+	}
+    if stat.ErrorsSpi > ds.MaxErrorsSpi {
+		ds.MaxErrorsSpi = stat.ErrorsSpi
+	}
+    if stat.ErrorsTwi > ds.MaxErrorsTwi {
+		ds.MaxErrorsTwi = stat.ErrorsTwi
+	}
+	for _, staterr := range strings.Split(stat.ErrorsTwiInfo, ",") {
+		foundError := false
+		for _, c := range strings.Split(ds.ErrorsTwiInfo, ",") {
+			if c == staterr {
+				foundError = true
+				break
+			}
+		}
+		if !foundError {
+			if ds.ErrorsTwiInfo == "" {
+				ds.ErrorsTwiInfo = staterr
+			} else {
+				ds.ErrorsTwiInfo = ds.ErrorsTwiInfo + "," + staterr
+			}
+		}
+	}
 	
     // Done
 
@@ -254,6 +374,23 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	s += fmt.Sprintf("Transports: %s\n", ds.Transports)
 	s += fmt.Sprintf("%s: %.0f%% (%d)\n", ds.LoraModule, 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports)
 	s += fmt.Sprintf("%s: %.0f%% (%d)\n", ds.FonaModule, 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports)
+    s += fmt.Sprintf("\n")
+
+	// Errors
+	s += fmt.Sprintf("Max Error Counts:\n")
+	s += fmt.Sprintf("Opc:    %d\n", ds.MaxErrorsOpc)
+	s += fmt.Sprintf("Pms:    %d\n", ds.MaxErrorsPms)
+	s += fmt.Sprintf("Bme0:   %d\n", ds.MaxErrorsBme0)
+	s += fmt.Sprintf("Bme1:   %d\n", ds.MaxErrorsBme1)
+	s += fmt.Sprintf("Lora:   %d\n", ds.MaxErrorsLora)
+	s += fmt.Sprintf("Fona:   %d\n", ds.MaxErrorsFona)
+	s += fmt.Sprintf("Geiger: %d\n", ds.MaxErrorsGeiger)
+	s += fmt.Sprintf("Max01:  %d\n", ds.MaxErrorsMax01)
+	s += fmt.Sprintf("Ugps:   %d\n", ds.MaxErrorsUgps)
+	s += fmt.Sprintf("Lis:    %d\n", ds.MaxErrorsLis)
+	s += fmt.Sprintf("Spi:    %d\n", ds.MaxErrorsSpi)
+	s += fmt.Sprintf("Twi:    %d %s\n", ds.MaxErrorsTwi, ds.ErrorsTwiInfo)
+    s += fmt.Sprintf("\n")
 	
     // Done
     return s
