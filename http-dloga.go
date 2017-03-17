@@ -53,17 +53,17 @@ func inboundWebDeviceAnalyzeHandler(rw http.ResponseWriter, req *http.Request) {
 			continue
 		}
 
-		fmt.Printf("Data: \n%s\n%v\n", clean, value);
+		// Ignore old-format data that didn't have service_uploaded
+		if (value.Service == nil || value.Service.UploadedAt == nil) {
+			continue
+		}
 
 		// Write part of it
-		if value.Service.UploadedAt != nil {
-			io.WriteString(rw, "hi\n")
-//			io.WriteString(rw, fmt.Sprintf("Uploaded: %s\n", value.Service.UploadedAt))
+		io.WriteString(rw, fmt.Sprintf("Uploaded: %s\n", value.Service.UploadedAt))
 //			- does a summary of total errors encountered
 //			- makes sure it got at least some data from each kind of sensor
 //			- makes sure it heard from both lora and fona
 //			- does some simple range check on each data value
-		}
 
 	}
 
