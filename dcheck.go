@@ -113,7 +113,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 				stat.LoraModule = *sd.Dev.ModuleLora
 			}
 			if sd.ModuleFona != nil {
-				stat.LoraModule = *sd.Dev.ModuleLora
+				stat.FonaModule = *sd.Dev.ModuleFona
 			}
 		}
 
