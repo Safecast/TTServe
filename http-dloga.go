@@ -24,11 +24,13 @@ func inboundWebDeviceAnalyzeHandler(rw http.ResponseWriter, req *http.Request) {
     rw.Header().Set("Content-Type", "application/json")
 
     // Log it
-    filename := req.RequestURI[len(TTServerTopicDeviceLog):]
+    deviceidstr := req.RequestURI[len(TTServerTopicDeviceAnalyze):]
+    filename := fmt.Sprintf("%s%s%s.json", TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), deviceidstr)
+
     fmt.Printf("%s LOG ANALYSIS request for %s\n", time.Now().Format(logDateFormat), filename)
 
     // Open the file
-    file := SafecastDirectory() + TTDeviceLogPath + "/" + filename
+    file := SafecastDirectory() + filename
     fd, err := os.Open(file)
     if err != nil {
         io.WriteString(rw, errorString(err))
