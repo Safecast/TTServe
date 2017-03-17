@@ -183,7 +183,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             }
         }
 
-    case "clear":
+    case "clear-logs":
         if len(args) == 2 {
             i64, err := strconv.ParseUint(args[1], 10, 32)
             deviceID := uint32(i64)
