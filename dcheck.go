@@ -367,7 +367,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("** %s UTC\n", time.Now().Format(logDateFormat))
     s += fmt.Sprintf("\n")
 
-    s += fmt.Sprintf("Starts: %d\n", ds.Boots)
+    s += fmt.Sprintf("Boots: %d\n", ds.Boots)
     s += fmt.Sprintf("Uptime: %s max\n", AgoMinutes(ds.MaxUptimeMinutes))
     s += fmt.Sprintf("\n")
 
