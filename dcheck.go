@@ -1,4 +1,4 @@
-// Copyright 2017 Inca Roads LLC.  All rights reserved. 
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
 // Use of this source code is governed by licenses granted by the
 // copyright holder including that found in the LICENSE file.
 
@@ -82,7 +82,7 @@ type MeasurementDataset struct {
     ErrorsTwiInfo       string
     PrevUptimeMinutes   uint32
     MaxUptimeMinutes    uint32
-    Boots	            uint32
+    Boots               uint32
 }
 
 func NewMeasurementDataset(deviceidstr string, logRange string) MeasurementDataset {
@@ -367,9 +367,13 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("** %s UTC\n", time.Now().Format(logDateFormat))
     s += fmt.Sprintf("\n")
 
-    s += fmt.Sprintf("Boots: %d\n", ds.Boots)
-    s += fmt.Sprintf("Uptime: %s max\n", AgoMinutes(ds.MaxUptimeMinutes))
-    s += fmt.Sprintf("\n")
+    if ds.Boots > 1 {
+        s += fmt.Sprintf("Boots: %d\n", ds.Boots)
+	}
+	if ds.MaxUptimeMinutes != 0 {
+        s += fmt.Sprintf("Uptime: %s max\n", AgoMinutes(ds.MaxUptimeMinutes))
+        s += fmt.Sprintf("\n")
+    }
 
     s += fmt.Sprintf("Measurements: %d\n", ds.Measurements)
     s += fmt.Sprintf("Period: %s\n", ds.LogRange)
