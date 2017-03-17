@@ -611,16 +611,17 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 }
 
 // Save the last value in a file
-func SafecastDeleteDeviceStatus(DeviceId uint32) string {
+func SafecastDeleteDeviceStatusAndLog(DeviceId uint32) string {
 
-    filename := SafecastDirectory() + TTDeviceStatusPath + "/" + fmt.Sprintf("%d", DeviceId) + ".json"
+	filename := fmt.Sprintf("%d", DeviceId) + ".json"
 
-    err := os.Remove(filename)
-    if err == nil {
-        return "Device status cleared."
-    }
+    status_filename := TTDeviceStatusPath + "/" + filename
+    log_filename := TTServerLogPath + "/" + fmt.Sprintf("%s%s", time.Now().UTC().Format("2006-01-"), filename)
 
-    return(fmt.Sprintf("Unable to clear device status: no such device\n"))
+    os.Remove(SafecastDirectory() + status_filename)
+    os.Remove(SafecastDirectory() + log_filename)
+
+    return "Device status cleared."
 
 }
 

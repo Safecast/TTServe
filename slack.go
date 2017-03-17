@@ -190,7 +190,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             if err != nil {
                 sendToSafecastOps("Not a device ID.", SLACK_MSG_REPLY)
             } else {
-				sendToSafecastOps(SafecastDeleteDeviceStatus(deviceID), SLACK_MSG_REPLY)
+				sendToSafecastOps(SafecastDeleteDeviceStatusAndLog(deviceID), SLACK_MSG_REPLY)
             }
         } else {
             sendToSafecastOps("Command format: clear <deviceID>", SLACK_MSG_REPLY)
