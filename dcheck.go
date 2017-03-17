@@ -71,7 +71,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s := ""
 
     // High-level stats
-    s += fmt.Sprintf("** Health Check for Device %d\n** %s\n\n", time.Now().Format(logDateFormat), ds.DeviceId)
+    s += fmt.Sprintf("** Health Check for Device %d\n** %s\n\n", ds.DeviceId, time.Now().Format(logDateFormat))
 	s += fmt.Sprintf("Total Measurements: %d\n", ds.Measurements)
 	
     // Done
