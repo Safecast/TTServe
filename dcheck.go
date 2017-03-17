@@ -40,6 +40,7 @@ type MeasurementStat struct {
     ErrorsSpi           uint32
     ErrorsTwi           uint32
     ErrorsTwiInfo       string
+	UptimeMinutes		uint32
 }
 
 // Stats about all measurements
@@ -80,6 +81,9 @@ type MeasurementDataset struct {
     MaxErrorsSpi        uint32
     MaxErrorsTwi        uint32
     ErrorsTwiInfo       string
+	PrevUptimeMinutes	uint32
+	MaxUptimeMinutes	uint32
+	Reboots				uint32
 }
 
 func NewMeasurementDataset(deviceidstr string, logRange string) MeasurementDataset {
@@ -181,6 +185,10 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
                 stat.ErrorsTwiInfo = *sd.Dev.ErrorsTwiInfo
             }
 
+            if sd.Dev.UptimeMinutes != nil {
+                stat.UptimeMinutes = *sd.Dev.UptimeMinutes
+            }
+			
         }
 
     }
@@ -335,6 +343,15 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         }
     }
 
+	// Uptime
+	if stat.UptimeMinutes > ds.MaxUptimeMinutes {
+		ds.MaxUptimeMinutes = stat.UptimeMinutes
+	}
+	if stat.UptimeMinutes <= ds.PrevUptimeMinutes {
+		ds.Reboots++
+	}
+	ds.PrevUptimeMinutes = stat.UptimeMinutes
+
     // Done
 
 }
@@ -348,8 +365,20 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("** %s UTC\n", time.Now().Format(logDateFormat))
     s += fmt.Sprintf("\n")
 
+    s += fmt.Sprintf("Restarts: %d\n", ds.Reboots)
+    s += fmt.Sprintf("Max Uptime: %s\n", AgoMinutes(ds.MaxUptimeMinutes))
+    s += fmt.Sprintf("\n")
+
     s += fmt.Sprintf("Measurements: %d\n", ds.Measurements)
     s += fmt.Sprintf("Period: %s\n", ds.LogRange)
+    s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
+    s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
+    s += fmt.Sprintf("\n")
+    if ds.Measurements == 0 {
+        return s
+    }
+
+	// Uptime
     s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("\n")
