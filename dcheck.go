@@ -177,6 +177,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
 	}
 	foundTransport := false
 	for _, c := range strings.Split(ds.Transports, ",") {
+		fmt.Printf("c(%d)='%s' transport(%d)='%s'\n", c, len(c), stat.Transport, len(stat.Transport))
 		if c == stat.Transport {
 			foundTransport = true
 			break
