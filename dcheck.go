@@ -13,7 +13,6 @@ import (
 )
 
 // GOALS:
-//          - does a summary of total errors encountered
 //          - makes sure it got at least some data from each kind of sensor
 //          - does some simple range check on each data value
 
@@ -350,7 +349,9 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
 	if stat.UptimeMinutes < ds.PrevUptimeMinutes {
 		ds.Reboots++
 	}
-	ds.PrevUptimeMinutes = stat.UptimeMinutes
+	if stat.UptimeMinutes != 0 {
+		ds.PrevUptimeMinutes = stat.UptimeMinutes
+	}
 
     // Done
 
