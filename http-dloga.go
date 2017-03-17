@@ -6,7 +6,6 @@
 package main
 
 import (
-	"os"
     "net/http"
 	"io/ioutil"
 	"strings"
