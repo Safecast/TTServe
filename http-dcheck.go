@@ -58,11 +58,6 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 			continue
 		}
 
-		// Ignore old-format data that didn't have service_uploaded
-		if (value.Service == nil || value.Service.UploadedAt == nil) {
-			continue
-		}
-
 		// Take a measurement
 		MeasurementStat := CheckMeasurement(value)
 
