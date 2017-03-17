@@ -22,6 +22,8 @@ import (
 type MeasurementStat struct {
     Valid               bool
     Uploaded            time.Time
+	LoraModule			string
+	FonaModule			string
 	Transport			string
     LoraTransport       bool
     FonaTransport       bool
@@ -51,6 +53,8 @@ type MeasurementDataset struct {
 	Transports			string
     LoraTransports      uint32
     FonaTransports      uint32
+	LoraModule			string
+	FonaModule			string
 }
 
 func NewMeasurementDataset(deviceidstr string, logRange string) MeasurementDataset {
@@ -59,6 +63,8 @@ func NewMeasurementDataset(deviceidstr string, logRange string) MeasurementDatas
     ds.LogRange = logRange
     u64, _ := strconv.ParseUint(deviceidstr, 10, 32)
     ds.DeviceId = uint32(u64)
+	ds.LoraModule = "LoRa"
+	ds.FonaModule = "Fona"
 
     return ds
 
@@ -99,6 +105,16 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 				stat.FonaTransport = true
 			}
 
+		}
+
+		if sd.Dev != nil {
+
+			if sd.ModuleLora != nil {
+				stat.LoraModule = *sd.ModuleLora
+			}
+			if sd.ModuleFona != nil {
+				stat.LoraModule = *sd.ModuleLora
+			}
 		}
 
 	}
@@ -177,7 +193,6 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
 	}
 	foundTransport := false
 	for _, c := range strings.Split(ds.Transports, ",") {
-		fmt.Printf("c(%d)='%s' transport(%d)='%s' %d\n", len(c), c, len(stat.Transport), stat.Transport, c == stat.Transport)
 		if c == stat.Transport {
 			foundTransport = true
 			break
@@ -230,8 +245,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
 	// Network
 	s += fmt.Sprintf("Transports: %s\n", ds.Transports)
-	s += fmt.Sprintf("LoRa: %.0f%% (%d)\n", 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports)
-	s += fmt.Sprintf("Fona: %.0f%% (%d)\n", 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports)
+	s += fmt.Sprintf("%s: %.0f%% (%d)\n", ds.LoraModule, 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports)
+	s += fmt.Sprintf("%s: %.0f%% (%d)\n", ds.FonaModule, 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports)
 	
     // Done
     return s
