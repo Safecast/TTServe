@@ -24,7 +24,8 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Log it
     deviceidstr := req.RequestURI[len(TTServerTopicDeviceCheck):]
-    filename := fmt.Sprintf("%s/%s%s.json", TTDeviceLogPath, time.Now().UTC().Format("2006-01-"), deviceidstr)
+	timeRange := time.Now().UTC().Format("2006-01")
+    filename := fmt.Sprintf("%s/%s-%s.json", TTDeviceLogPath, timeRange, deviceidstr)
 
     fmt.Printf("%s LOG ANALYSIS request for %s\n", time.Now().Format(logDateFormat), filename)
 
@@ -36,7 +37,7 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
 	// Begin taking stats
-	stats := NewMeasurementDataset(deviceidstr)
+	stats := NewMeasurementDataset(deviceidstr, timeRange)
 
 	// Split the contents into a number of slices based on the commas
 	splitContents := strings.Split(string(contents), "\n,")

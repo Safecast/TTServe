@@ -28,6 +28,7 @@ type MeasurementStat struct {
 // Stats about all measurements
 type MeasurementDataset struct {
     DeviceId            uint32
+	LogRange			string
     FirstUpload         time.Time
     LastUpload          time.Time
     MinUploadGapMSecs   uint32
@@ -47,14 +48,15 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 
 }
 
-func NewMeasurementDataset(deviceidstr string) MeasurementDataset {
+func NewMeasurementDataset(deviceidstr string, logRange string) MeasurementDataset {
     ds := MeasurementDataset{}
 
-    // Parse the expected device ID
+	ds.LogRange = logRange
     u64, _ := strconv.ParseUint(deviceidstr, 10, 32)
     ds.DeviceId = uint32(u64)
 
     return ds
+
 }
 
 // Check an individual measurement
@@ -71,8 +73,12 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s := ""
 
     // High-level stats
-    s += fmt.Sprintf("** Health Check for Device %d\n** %s\n\n", ds.DeviceId, time.Now().Format(logDateFormat))
-	s += fmt.Sprintf("Total Measurements: %d\n", ds.Measurements)
+    s += fmt.Sprintf("** Health Check for Device %d\n", ds.DeviceId)
+	s += fmt.Sprintf("** %s UTC\n", time.Now().Format(logDateFormat))
+	s += fmt.Sprintf("\n")
+
+	s += fmt.Sprintf("All measurements gathered during %s\n", ds.LogRange)
+	s += fmt.Sprintf("Total measurements: %d\n", ds.Measurements)
 	
     // Done
 	return s
