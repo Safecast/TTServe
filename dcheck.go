@@ -8,6 +8,7 @@ package main
 import (
     "fmt"
     "strconv"
+	"strings"
     "time"
 )
 
@@ -21,6 +22,7 @@ import (
 type MeasurementStat struct {
     Valid               bool
     Uploaded            time.Time
+	Transport			string
     LoraTransport       bool
     FonaTransport       bool
     TestMeasurement     bool
@@ -46,8 +48,20 @@ type MeasurementDataset struct {
 	GapsGt5m			uint32
     Measurements        uint32
     TestMeasurements    bool
+	Transports			string
     LoraTransports      uint32
     FonaTransports      uint32
+}
+
+func NewMeasurementDataset(deviceidstr string, logRange string) MeasurementDataset {
+    ds := MeasurementDataset{}
+
+    ds.LogRange = logRange
+    u64, _ := strconv.ParseUint(deviceidstr, 10, 32)
+    ds.DeviceId = uint32(u64)
+
+    return ds
+
 }
 
 // Check an individual measurement
@@ -65,21 +79,32 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 
         stat.Uploaded, _ = time.Parse("2006-01-02T15:04:05Z", *sd.Service.UploadedAt)
 
-    }
+		if sd.Service.Transport != nil {
+			stat.Transport = *sd.Service.Transport
+	        str := strings.Split(stat.Transport, ":")
+			scheme := ""
+			if len(str) >= 1 {
+				scheme = str[0]
+			}
+			switch scheme {
+			case "lora":
+				fallthrough
+			case "ttn-http":
+				fallthrough
+			case "ttn-mqqt":
+				stat.LoraTransport = true
+			case "device-udp":
+				fallthrough
+			case "device-tcp":
+				stat.FonaTransport = true
+			}
 
+		}
+
+	}
+	
     // Done
     return stat
-
-}
-
-func NewMeasurementDataset(deviceidstr string, logRange string) MeasurementDataset {
-    ds := MeasurementDataset{}
-
-    ds.LogRange = logRange
-    u64, _ := strconv.ParseUint(deviceidstr, 10, 32)
-    ds.DeviceId = uint32(u64)
-
-    return ds
 
 }
 
@@ -92,7 +117,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
     }
     ds.Measurements++
 
-    // If the stat is out of date order, ignore it
+    // Timing
     if ds.Measurements == 1 {
         ds.OldestUpload = stat.Uploaded
         ds.NewestUpload = stat.Uploaded
@@ -143,6 +168,28 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
     }
     ds.NewestUpload = stat.Uploaded
 
+	// Transport
+	if stat.LoraTransport {
+		ds.LoraTransports++
+	}
+	if stat.FonaTransport {
+		ds.FonaTransports++
+	}
+	foundTransport := false
+	for _, c := range strings.Split(ds.Transports, ",") {
+		if c == stat.Transport {
+			foundTransport = true
+			break
+		}
+	}
+	if !foundTransport {
+		if ds.Transports == "" {
+			ds.Transports = stat.Transport
+		} else {
+			ds.Transports = stat.Transport + "," + stat.Transport
+		}
+	}
+			
     // Done
 
 }
@@ -156,8 +203,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("** %s UTC\n", time.Now().Format(logDateFormat))
     s += fmt.Sprintf("\n")
 
-    s += fmt.Sprintf("Period: %s\n", ds.LogRange)
     s += fmt.Sprintf("Measurements: %d\n", ds.Measurements)
+    s += fmt.Sprintf("Period: %s\n", ds.LogRange)
     s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("\n")
@@ -165,6 +212,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 		return s
 	}
 	
+	// Inter-measurement timing
     s += fmt.Sprintf("Gaps %s-%s\n", AgoMinutes(ds.MinUploadGapSecs/60), AgoMinutes(ds.MaxUploadGapSecs/60))
     s += fmt.Sprintf("Gaps >1w:   %.0f%% (%d)\n", 100*float32(ds.GapsGt1week)/float32(ds.Measurements), ds.GapsGt1week)
     s += fmt.Sprintf("Gaps >1d:   %.0f%% (%d)\n", 100*float32(ds.GapsGt1day)/float32(ds.Measurements), ds.GapsGt1day)
@@ -179,6 +227,11 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("Gaps <=5m:  %.0f%% (%d)\n", 100*float32(ds.Measurements-ds.GapsGt5m)/float32(ds.Measurements), ds.Measurements-ds.GapsGt5m)
     s += fmt.Sprintf("\n")
 
+	// Network
+	s += fmt.Sprintf("Transports: %s\n", ds.Transports)
+	s += fmt.Sprintf("LoRa: %.0f%% (%d)\n", 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports)
+	s += fmt.Sprintf("Fona: %.0f%% (%d)\n", 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports)
+	
     // Done
     return s
 }
