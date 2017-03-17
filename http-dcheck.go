@@ -2,7 +2,7 @@
 // Use of this source code is governed by licenses granted by the
 // copyright holder including that found in the LICENSE file.
 
-// Inbound support for the "/log" HTTP topic
+// Inbound support for the "/check" HTTP topic
 package main
 
 import (
@@ -35,6 +35,9 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
+	// Begin taking stats
+	stats := NewMeasurementDataset(deviceidstr)
+
 	// Split the contents into a number of slices based on the commas
 	splitContents := strings.Split(string(contents), "\n,")
 	for _, c := range splitContents {
@@ -45,11 +48,12 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 			continue
 		}
 
-		// Unmarshal it
+		// Unmarshal it.  Badly-formatted json occasionally occurs because of
+		// concurrent file writes to the log from different process instances,
+		// but this is rare - so no worry.
         value := SafecastData{}
         err = json.Unmarshal([]byte(clean), &value)
 		if err != nil {
-			fmt.Printf("Unable to unmarshal:\n%s\n", clean)
 			continue
 		}
 
@@ -58,15 +62,18 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 			continue
 		}
 
-		// Write part of it
-		io.WriteString(rw, fmt.Sprintf("Uploaded: %s\n", *value.Service.UploadedAt))
-//			- does a summary of total errors encountered
-//			- makes sure it got at least some data from each kind of sensor
-//			- makes sure it heard from both lora and fona
-//			- does some simple range check on each data value
+		// Take a measurement
+		MeasurementStat := CheckMeasurement(value)
+
+		// Aggregate statistics
+		AggregateMeasurementIntoDataset(&stats, MeasurementStat)
 
 	}
 
-	// Done
+	// Generate the summary of the aggregation
+	s := GenerateDatasetSummary(stats)
+	
+	// Write to the browser and exit
+	io.WriteString(rw, s)
 
 }
