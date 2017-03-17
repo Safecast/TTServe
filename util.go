@@ -55,10 +55,10 @@ func AgoMinutes(minutesAgo uint32) string {
         s = fmt.Sprintf("%dd %dh", daysAgo, hoursAgo)
     } else if hoursAgo != 0 {
         s = fmt.Sprintf("%dh %dm", hoursAgo, minutesAgo)
-    } else if minutesAgo < 100 {
-        s = fmt.Sprintf("%02dm", minutesAgo)
     } else if minutesAgo < 1 {
         s = fmt.Sprintf("<1m", minutesAgo)
+    } else if minutesAgo < 100 {
+        s = fmt.Sprintf("%02dm", minutesAgo)
     } else {
         s = fmt.Sprintf("%dm", minutesAgo)
     }
