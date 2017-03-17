@@ -110,10 +110,10 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 		if sd.Dev != nil {
 
 			if sd.ModuleLora != nil {
-				stat.LoraModule = *sd.ModuleLora
+				stat.LoraModule = *sd.Dev.ModuleLora
 			}
 			if sd.ModuleFona != nil {
-				stat.LoraModule = *sd.ModuleLora
+				stat.LoraModule = *sd.Dev.ModuleLora
 			}
 		}
 
@@ -205,7 +205,14 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
 			ds.Transports = ds.Transports + "," + stat.Transport
 		}
 	}
-			
+
+	if stat.LoraModule != "" {
+		ds.LoraModule = stat.LoraModule
+	}
+	if stat.FonaModule != "" {
+		ds.FonaModule = stat.FonaModule
+	}
+	
     // Done
 
 }
