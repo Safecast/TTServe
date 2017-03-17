@@ -176,6 +176,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("Gaps >15m:  %.0f%% (%d)\n", float32(ds.GapsGt15m)/float32(ds.Measurements), ds.GapsGt15m)
     s += fmt.Sprintf("Gaps >10m:  %.0f%% (%d)\n", float32(ds.GapsGt10m)/float32(ds.Measurements), ds.GapsGt10m)
     s += fmt.Sprintf("Gaps >5m:   %.0f%% (%d)\n", float32(ds.GapsGt5m)/float32(ds.Measurements), ds.GapsGt5m)
+    s += fmt.Sprintf("Gaps <=5m:  %.0f%% (%d)\n", float32(ds.Measurements-ds.GapsGt5m)/float32(ds.Measurements), ds.GapsGt5m)
 
     // Done
     return s
