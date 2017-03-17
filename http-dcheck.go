@@ -16,14 +16,14 @@ import (
 )
 
 // Handle inbound HTTP requests to do a quick analysis of a device's log file
-func inboundWebDeviceAnalyzeHandler(rw http.ResponseWriter, req *http.Request) {
+func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
     stats.Count.HTTP++
 
     // Set response mime type
     rw.Header().Set("Content-Type", "application/json")
 
     // Log it
-    deviceidstr := req.RequestURI[len(TTServerTopicDeviceAnalyze):]
+    deviceidstr := req.RequestURI[len(TTServerTopicDeviceCheck):]
     filename := fmt.Sprintf("%s/%s%s.json", TTDeviceLogPath, time.Now().UTC().Format("2006-01-"), deviceidstr)
 
     fmt.Printf("%s LOG ANALYSIS request for %s\n", time.Now().Format(logDateFormat), filename)
