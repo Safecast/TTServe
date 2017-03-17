@@ -623,7 +623,7 @@ func SafecastDeleteDeviceStatusAndLog(DeviceId uint32) string {
     os.Remove(SafecastDirectory() + json_filename)
     os.Remove(SafecastDirectory() + csv_filename)
 
-    return "Device status cleared."
+    return fmt.Sprintf("Device logs for %d have been deleted.", DeviceId)
 
 }
 
