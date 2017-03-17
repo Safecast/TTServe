@@ -165,7 +165,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("Min gap: %s\n", AgoMinutes(ds.MinUploadGapSecs/60))
-    s += fmt.Sprintf("Max gap: %s\n", AgoMinutes(ds.MaxUploadGapSecs))
+    s += fmt.Sprintf("Max gap: %s\n", AgoMinutes(ds.MaxUploadGapSecs/60))
     s += fmt.Sprintf("Gaps >1w:   %.0f%% (%d)\n", 100*float32(ds.GapsGt1week)/float32(ds.Measurements), ds.GapsGt1week)
     s += fmt.Sprintf("Gaps >1d:   %.0f%% (%d)\n", 100*float32(ds.GapsGt1day)/float32(ds.Measurements), ds.GapsGt1day)
     s += fmt.Sprintf("Gaps >12hr: %.0f%% (%d)\n", 100*float32(ds.GapsGt12hr)/float32(ds.Measurements), ds.GapsGt12hr)
