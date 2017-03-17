@@ -24,7 +24,7 @@ func inboundWebDeviceAnalyzeHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Log it
     deviceidstr := req.RequestURI[len(TTServerTopicDeviceAnalyze):]
-    filename := fmt.Sprintf("%s/%s%s.json", TTServerLogPath, time.Now().UTC().Format("2006-01-"), deviceidstr)
+    filename := fmt.Sprintf("%s/%s%s.json", TTDeviceLogPath, time.Now().UTC().Format("2006-01-"), deviceidstr)
 
     fmt.Printf("%s LOG ANALYSIS request for %s\n", time.Now().Format(logDateFormat), filename)
 
