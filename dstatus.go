@@ -151,13 +151,13 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         if value.Env == nil {
             value.Env = &env
         }
-        if sc.Temp != nil {
+        if sc.Env.Temp != nil {
             value.Env.Temp = sc.Env.Temp
         }
-        if sc.Humid != nil {
+        if sc.Env.Humid != nil {
             value.Env.Humid = sc.Env.Humid
         }
-        if sc.Press != nil {
+        if sc.Env.Press != nil {
             value.Env.Press = sc.Env.Press
         }
     }
@@ -264,34 +264,34 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             value.Opc.Pm10_0 = sc.Opc.Pm10_0
             ChangedOpc = true
         }
-		if sc.Opc.Count00_38 != nil && (value.Opc.Count00_38 == nil || *value.Opc.Count00_38 != *sc.Opc.Count00_38) {
-	        value.Opc.Count00_38 = sc.Opc.Count00_38
-	        ChangedOpc = true
-		}
-		if sc.Opc.Count00_54 != nil && (value.Opc.Count00_54 == nil || *value.Opc.Count00_54 != *sc.Opc.Count00_54) {
-	        value.Opc.Count00_54 = sc.Opc.Count00_54
-	        ChangedOpc = true
-		}
-		if sc.Opc.Count01_00 != nil && (value.Opc.Count01_00 == nil || *value.Opc.Count01_00 != *sc.Opc.Count01_00) {
-	        value.Opc.Count01_00 = sc.Opc.Count01_00
-	        ChangedOpc = true
-		}
-		if sc.Opc.Count02_10 != nil && (value.Opc.Count02_10 == nil || *value.Opc.Count02_10 != *sc.Opc.Count02_10) {
-	        value.Opc.Count02_10 = sc.Opc.Count02_10
-	        ChangedOpc = true
-		}
-		if sc.Opc.Count05_00 != nil && (value.Opc.Count05_00 == nil || *value.Opc.Count05_00 != *sc.Opc.Count05_00) {
-	        value.Opc.Count05_00 = sc.Opc.Count05_00
-	        ChangedOpc = true
-		}
-		if sc.Opc.Count10_00 != nil && (value.Opc.Count10_00 == nil || *value.Opc.Count10_00 != *sc.Opc.Count10_00) {
-	        value.Opc.Count10_00 = sc.Opc.Count10_00
-	        ChangedOpc = true
-		}
-		if sc.Opc.CountSecs != nil && (value.Opc.CountSecs == nil || *value.Opc.CountSecs != *sc.Opc.CountSecs) {
-	        value.Opc.CountSecs = sc.Opc.CountSecs
-	        ChangedOpc = true
-		}
+        if sc.Opc.Count00_38 != nil && (value.Opc.Count00_38 == nil || *value.Opc.Count00_38 != *sc.Opc.Count00_38) {
+            value.Opc.Count00_38 = sc.Opc.Count00_38
+            ChangedOpc = true
+        }
+        if sc.Opc.Count00_54 != nil && (value.Opc.Count00_54 == nil || *value.Opc.Count00_54 != *sc.Opc.Count00_54) {
+            value.Opc.Count00_54 = sc.Opc.Count00_54
+            ChangedOpc = true
+        }
+        if sc.Opc.Count01_00 != nil && (value.Opc.Count01_00 == nil || *value.Opc.Count01_00 != *sc.Opc.Count01_00) {
+            value.Opc.Count01_00 = sc.Opc.Count01_00
+            ChangedOpc = true
+        }
+        if sc.Opc.Count02_10 != nil && (value.Opc.Count02_10 == nil || *value.Opc.Count02_10 != *sc.Opc.Count02_10) {
+            value.Opc.Count02_10 = sc.Opc.Count02_10
+            ChangedOpc = true
+        }
+        if sc.Opc.Count05_00 != nil && (value.Opc.Count05_00 == nil || *value.Opc.Count05_00 != *sc.Opc.Count05_00) {
+            value.Opc.Count05_00 = sc.Opc.Count05_00
+            ChangedOpc = true
+        }
+        if sc.Opc.Count10_00 != nil && (value.Opc.Count10_00 == nil || *value.Opc.Count10_00 != *sc.Opc.Count10_00) {
+            value.Opc.Count10_00 = sc.Opc.Count10_00
+            ChangedOpc = true
+        }
+        if sc.Opc.CountSecs != nil && (value.Opc.CountSecs == nil || *value.Opc.CountSecs != *sc.Opc.CountSecs) {
+            value.Opc.CountSecs = sc.Opc.CountSecs
+            ChangedOpc = true
+        }
     }
     if sc.Lnd != nil {
         var lnd Lnd
@@ -333,6 +333,15 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         var dev Dev
         if value.Dev == nil {
             value.Dev = &dev
+        }
+        if sc.Dev.Temp != nil {
+            value.Dev.Temp = sc.Dev.Temp
+        }
+        if sc.Dev.Humid != nil {
+            value.Dev.Humid = sc.Dev.Humid
+        }
+        if sc.Dev.Press != nil {
+            value.Dev.Press = sc.Dev.Press
         }
         if sc.Dev.UptimeMinutes != nil {
             value.Dev.UptimeMinutes = sc.Dev.UptimeMinutes
@@ -412,11 +421,89 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         if sc.Dev.Status != nil {
             value.Dev.Status = sc.Dev.Status
         }
+
+        // Maximize error values that are supplied
+        if sc.Dev.ErrorsOpc != nil {
+            if value.Dev.ErrorsOpc == nil ||
+                (value.Dev.ErrorsOpc != nil && *sc.Dev.ErrorsOpc > *value.Dev.ErrorsOpc) {
+                value.Dev.ErrorsOpc = sc.Dev.ErrorsOpc
+            }
+        }
+        if sc.Dev.ErrorsPms != nil {
+			if value.Dev.ErrorsPms == nil ||
+				(value.Dev.ErrorsPms != nil && *sc.Dev.ErrorsPms > *value.Dev.ErrorsPms) {
+				value.Dev.ErrorsPms = sc.Dev.ErrorsPms
+			}
+        }
+        if sc.Dev.ErrorsBme0 != nil {
+			if value.Dev.ErrorsBme0 == nil ||
+				(value.Dev.ErrorsBme0 != nil && *sc.Dev.ErrorsBme0 > *value.Dev.ErrorsBme0) {
+				value.Dev.ErrorsBme0 = sc.Dev.ErrorsBme0
+			}
+        }
+        if sc.Dev.ErrorsBme1 != nil {
+			if value.Dev.ErrorsBme1 == nil ||
+				(value.Dev.ErrorsBme1 != nil && *sc.Dev.ErrorsBme1 > *value.Dev.ErrorsBme1) {
+				value.Dev.ErrorsBme1 = sc.Dev.ErrorsBme1
+			}
+        }
+        if sc.Dev.ErrorsLora != nil {
+			if value.Dev.ErrorsLora == nil ||
+				(value.Dev.ErrorsLora != nil && *sc.Dev.ErrorsLora > *value.Dev.ErrorsLora) {
+				value.Dev.ErrorsLora = sc.Dev.ErrorsLora
+			}
+        }
+        if sc.Dev.ErrorsFona != nil {
+			if value.Dev.ErrorsFona == nil ||
+				(value.Dev.ErrorsFona != nil && *sc.Dev.ErrorsFona > *value.Dev.ErrorsFona) {
+				value.Dev.ErrorsFona = sc.Dev.ErrorsFona
+			}
+        }
+        if sc.Dev.ErrorsGeiger != nil {
+			if value.Dev.ErrorsGeiger == nil ||
+				(value.Dev.ErrorsGeiger != nil && *sc.Dev.ErrorsGeiger > *value.Dev.ErrorsGeiger) {
+				value.Dev.ErrorsGeiger = sc.Dev.ErrorsGeiger
+			}
+        }
+        if sc.Dev.ErrorsMax01 != nil {
+			if value.Dev.ErrorsMax01 == nil ||
+				(value.Dev.ErrorsMax01 != nil && *sc.Dev.ErrorsMax01 > *value.Dev.ErrorsMax01) {
+				value.Dev.ErrorsMax01 = sc.Dev.ErrorsMax01
+			}
+        }
+        if sc.Dev.ErrorsUgps != nil {
+			if value.Dev.ErrorsUgps == nil ||
+				(value.Dev.ErrorsUgps != nil && *sc.Dev.ErrorsUgps > *value.Dev.ErrorsUgps) {
+				value.Dev.ErrorsUgps = sc.Dev.ErrorsUgps
+			}
+        }
+        if sc.Dev.ErrorsTwi != nil {
+			if value.Dev.ErrorsTwi == nil ||
+				(value.Dev.ErrorsTwi != nil && *sc.Dev.ErrorsTwi > *value.Dev.ErrorsTwi) {
+				value.Dev.ErrorsTwi = sc.Dev.ErrorsTwi
+			}
+        }
+        if sc.Dev.ErrorsTwiInfo != nil {
+            value.Dev.ErrorsTwiInfo = sc.Dev.ErrorsTwiInfo
+        }
+        if sc.Dev.ErrorsLis != nil {
+			if value.Dev.ErrorsLis == nil ||
+				(value.Dev.ErrorsLis != nil && *sc.Dev.ErrorsLis > *value.Dev.ErrorsLis) {
+				value.Dev.ErrorsLis = sc.Dev.ErrorsLis
+			}
+        }
+        if sc.Dev.ErrorsSpi != nil {
+			if value.Dev.ErrorsSpi == nil ||
+				(value.Dev.ErrorsSpi != nil && *sc.Dev.ErrorsSpi > *value.Dev.ErrorsSpi) {
+				value.Dev.ErrorsSpi = sc.Dev.ErrorsSpi
+			}
+        }
+
     }
 
     // Calculate a time of the shuffle, allowing for the fact that our preferred time
     // CapturedAt may not be available.
-	now := nowInUTC()
+    now := nowInUTC()
     ShuffledAt := &now
     if value.CapturedAt != nil {
         ShuffledAt = value.CapturedAt
@@ -530,10 +617,10 @@ func SafecastDeleteDeviceStatus(DeviceId uint32) string {
 
     err := os.Remove(filename)
     if err == nil {
-		return "Device status cleared."
-	}
+        return "Device status cleared."
+    }
 
-    return(fmt.Sprintf("Unable to clear device status: %s\n", err))
+    return(fmt.Sprintf("Unable to clear device status: no such device\n"))
 
 }
 
@@ -550,11 +637,11 @@ func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label strin
     }
 
     // Get the DevEUI, which must be precisely 16 characters
-	ttnDevEui := ""
+    ttnDevEui := ""
     if value.Dev != nil && value.Dev.TtnParams != nil {
-		if len(*value.Dev.TtnParams) == 16 {
-			ttnDevEui = *value.Dev.TtnParams
-		}
+        if len(*value.Dev.TtnParams) == 16 {
+            ttnDevEui = *value.Dev.TtnParams
+        }
     }
 
     // Get the label

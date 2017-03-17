@@ -27,7 +27,7 @@ type Loc struct {
 	Lat float32				`json:"loc_lat"`
 	Lon float32				`json:"loc_lon"`
 	Alt *float32			`json:"loc_alt,omitempty"`
-	Motion bool				`json:"loc_motion,omitempty"`
+	Motion *bool			`json:"loc_motion,omitempty"`
 	Olc *string				`json:"loc_olc,omitempty"`
 }
 
@@ -85,6 +85,7 @@ type Opc struct {
 
 // General Device Statistics - All Optional
 type Dev struct {
+	Test *bool				`json:"dev_test,omitempty"`
     DeviceLabel *string		`json:"dev_label,omitempty"`
     UptimeMinutes *uint32	`json:"dev_uptime,omitempty"`
     AppVersion *string		`json:"dev_firmware,omitempty"`
@@ -111,6 +112,22 @@ type Dev struct {
 	Status *string			`json:"dev_status,omitempty"`
 	ModuleLora *string		`json:"dev_module_lora,omitempty"`
 	ModuleFona *string		`json:"dev_module_fona,omitempty"`
+    Temp *float32			`json:"dev_temp,omitempty"`
+    Humid *float32			`json:"dev_humid,omitempty"`
+    Press *float32			`json:"dev_press,omitempty"`
+    ErrorsOpc *uint32		`json:"dev_err_opc,omitempty"`
+    ErrorsPms *uint32		`json:"dev_err_pms,omitempty"`
+    ErrorsBme0 *uint32		`json:"dev_err_bme0,omitempty"`
+    ErrorsBme1 *uint32		`json:"dev_err_bme1,omitempty"`
+    ErrorsLora *uint32		`json:"dev_err_lora,omitempty"`
+    ErrorsFona *uint32		`json:"dev_err_fona,omitempty"`
+    ErrorsGeiger *uint32	`json:"dev_err_geiger,omitempty"`
+    ErrorsMax01 *uint32		`json:"dev_err_max01,omitempty"`
+    ErrorsUgps *uint32		`json:"dev_err_ugps,omitempty"`
+    ErrorsTwi *uint32		`json:"dev_err_twi,omitempty"`
+    ErrorsTwiInfo *string	`json:"dev_err_twi_info,omitempty"`
+    ErrorsLis *uint32		`json:"dev_err_lis,omitempty"`
+    ErrorsSpi *uint32		`json:"dev_err_spi,omitempty"`
 }
 
 // Note that this structure has been designed so that we could convert, at a later date,

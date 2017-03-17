@@ -116,7 +116,8 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
             loc.Alt = &alt
         }
 		if msg.Motion != nil {
-	        loc.Motion = msg.GetMotion()
+			mode := msg.GetMotion()
+	        loc.Motion = &mode
 		}
         sd.Loc = &loc
     }
@@ -125,6 +126,23 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     var dev Dev
     var dodev = false
 
+	if msg.Test != nil {
+		mode := msg.GetTest()
+		dev.Test = &mode
+		dodev = true
+	}
+    if msg.EncTemp != nil {
+        dev.Temp = msg.EncTemp
+        dodev = true
+    }
+    if msg.EncHumid != nil {
+        dev.Humid = msg.EncHumid
+        dodev = true
+    }
+    if msg.EncPressure != nil {
+        dev.Press = msg.EncPressure
+        dodev = true
+    }
     if msg.StatsUptimeMinutes != nil {
         mins := msg.GetStatsUptimeMinutes()
         if msg.StatsUptimeDays != nil {
@@ -209,6 +227,59 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         dev.SensorParams = msg.StatsSensorParams
         dodev = true
     }
+	if msg.ErrorsOpc != nil {
+		dev.ErrorsOpc = msg.ErrorsOpc
+		dodev = true
+	}
+	if msg.ErrorsPms != nil {
+		dev.ErrorsPms = msg.ErrorsPms
+		dodev = true
+	}
+	if msg.ErrorsBme0 != nil {
+		dev.ErrorsBme0 = msg.ErrorsBme0
+		dodev = true
+	}
+	if msg.ErrorsBme1 != nil {
+		dev.ErrorsBme1 = msg.ErrorsBme1
+		dodev = true
+	}
+	if msg.ErrorsLora != nil {
+		dev.ErrorsLora = msg.ErrorsLora
+		dodev = true
+	}
+	if msg.ErrorsFona != nil {
+		dev.ErrorsFona = msg.ErrorsFona
+		dodev = true
+	}
+	if msg.ErrorsGeiger != nil {
+		dev.ErrorsGeiger = msg.ErrorsGeiger
+		dodev = true
+	}
+	if msg.ErrorsMax01 != nil {
+		dev.ErrorsMax01 = msg.ErrorsMax01
+		dodev = true
+	}
+	if msg.ErrorsUgps != nil {
+		dev.ErrorsUgps = msg.ErrorsUgps
+		dodev = true
+	}
+	if msg.ErrorsTwi != nil {
+		dev.ErrorsTwi = msg.ErrorsTwi
+		dodev = true
+	}
+	if msg.ErrorsTwiInfo != nil {
+		dev.ErrorsTwiInfo = msg.ErrorsTwiInfo
+		dodev = true
+	}
+	if msg.ErrorsLis != nil {
+		dev.ErrorsLis = msg.ErrorsLis
+		dodev = true
+	}
+	if msg.ErrorsSpi != nil {
+		dev.ErrorsSpi = msg.ErrorsSpi
+		dodev = true
+	}
+	
     if dodev {
         sd.Dev = &dev
     }
@@ -244,9 +315,11 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     }
     if msg.EnvHumid != nil {
         env.Humid = msg.EnvHumid
+        doenv = true
     }
     if msg.EnvPressure != nil {
         env.Press = msg.EnvPressure
+        doenv = true
     }
 
     if doenv {
