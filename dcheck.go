@@ -82,7 +82,7 @@ type MeasurementDataset struct {
     ErrorsTwiInfo       string
     PrevUptimeMinutes   uint32
     MaxUptimeMinutes    uint32
-    Reboots             uint32
+    Boots	            uint32
 }
 
 func NewMeasurementDataset(deviceidstr string, logRange string) MeasurementDataset {
@@ -93,6 +93,7 @@ func NewMeasurementDataset(deviceidstr string, logRange string) MeasurementDatas
     ds.DeviceId = uint32(u64)
     ds.LoraModule = "LoRa"
     ds.FonaModule = "Fona"
+    ds.Boots++
 
     return ds
 
@@ -347,9 +348,8 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         if stat.UptimeMinutes > ds.MaxUptimeMinutes {
             ds.MaxUptimeMinutes = stat.UptimeMinutes
         }
-		fmt.Printf("statuptimemins=%d ds.prevuptimeminutes=%d reboot=%d\n", stat.UptimeMinutes, ds.PrevUptimeMinutes, stat.UptimeMinutes < ds.PrevUptimeMinutes)
         if stat.UptimeMinutes < ds.PrevUptimeMinutes {
-            ds.Reboots++
+            ds.Boots++
         }
         ds.PrevUptimeMinutes = stat.UptimeMinutes
     }
@@ -367,8 +367,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("** %s UTC\n", time.Now().Format(logDateFormat))
     s += fmt.Sprintf("\n")
 
-    s += fmt.Sprintf("Restarts: %d\n", ds.Reboots)
-    s += fmt.Sprintf("Max Uptime: %s\n", AgoMinutes(ds.MaxUptimeMinutes))
+    s += fmt.Sprintf("Restarts: %d\n", ds.Boots)
+    s += fmt.Sprintf("Uptime: %s max\n", AgoMinutes(ds.MaxUptimeMinutes))
     s += fmt.Sprintf("\n")
 
     s += fmt.Sprintf("Measurements: %d\n", ds.Measurements)
