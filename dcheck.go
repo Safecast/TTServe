@@ -80,12 +80,12 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         stat.Uploaded, _ = time.Parse("2006-01-02T15:04:05Z", *sd.Service.UploadedAt)
 
 		if sd.Service.Transport != nil {
-			stat.Transport = *sd.Service.Transport
-	        str := strings.Split(stat.Transport, ":")
+	        str := strings.Split(*sd.Service.Transport, ":")
 			scheme := ""
 			if len(str) >= 1 {
 				scheme = str[0]
 			}
+			stat.Transport = scheme
 			switch scheme {
 			case "lora":
 				fallthrough
