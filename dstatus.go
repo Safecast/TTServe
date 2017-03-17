@@ -613,13 +613,15 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 // Save the last value in a file
 func SafecastDeleteDeviceStatusAndLog(DeviceId uint32) string {
 
-	filename := fmt.Sprintf("%d", DeviceId) + ".json"
+	filename := fmt.Sprintf("%d", DeviceId)
 
-    status_filename := TTDeviceStatusPath + "/" + filename
-    log_filename := TTServerLogPath + "/" + fmt.Sprintf("%s%s", time.Now().UTC().Format("2006-01-"), filename)
+    status_filename := TTDeviceStatusPath + "/" + filename + ".json"
+    json_filename := TTDeviceLogPath + "/" + fmt.Sprintf("%s%s.json", time.Now().UTC().Format("2006-01-"), filename)
+    csv_filename := TTDeviceLogPath + "/" + fmt.Sprintf("%s%s.csv", time.Now().UTC().Format("2006-01-"), filename)
 
     os.Remove(SafecastDirectory() + status_filename)
-    os.Remove(SafecastDirectory() + log_filename)
+    os.Remove(SafecastDirectory() + json_filename)
+    os.Remove(SafecastDirectory() + csv_filename)
 
     return "Device status cleared."
 
