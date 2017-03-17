@@ -6,7 +6,7 @@
 package main
 
 import (
-	"io"
+    "io"
     "net/http"
     "fmt"
     "bytes"
@@ -14,9 +14,9 @@ import (
     "strings"
     "strconv"
     "encoding/json"
-	"crypto/md5"
+    "crypto/md5"
     "github.com/safecast/ttproto/golang"
-	"github.com/google/open-location-code/go"
+    "github.com/google/open-location-code/go"
 )
 
 // For dealing with transaction timeouts
@@ -30,6 +30,9 @@ var httpTransactionErrorUrl string
 var httpTransactionErrorString string
 var httpTransactionErrors = 0
 var httpTransactionErrorFirst bool = true
+
+// Which V1 uploadURL to use
+var useV1PrimaryServer = true
 
 // Checksums of recently-processed messages
 type receivedMessage struct {
@@ -100,25 +103,25 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     // Loc
     if msg.Latitude != nil || msg.Longitude != nil || msg.Motion != nil {
         var loc Loc
-		if msg.Latitude != nil && msg.Longitude != nil {
-			Olc := olc.Encode(float64(msg.GetLatitude()), float64(msg.GetLongitude()), 0)
-			loc.Olc = &Olc;
-		}
-		if msg.Latitude != nil {
-	        loc.Lat = msg.GetLatitude()
-		}
-		if msg.Longitude != nil {
-	        loc.Lon = msg.GetLongitude()
-		}
+        if msg.Latitude != nil && msg.Longitude != nil {
+            Olc := olc.Encode(float64(msg.GetLatitude()), float64(msg.GetLongitude()), 0)
+            loc.Olc = &Olc;
+        }
+        if msg.Latitude != nil {
+            loc.Lat = msg.GetLatitude()
+        }
+        if msg.Longitude != nil {
+            loc.Lon = msg.GetLongitude()
+        }
         if msg.Altitude != nil {
             var alt float32
             alt = float32(msg.GetAltitude())
             loc.Alt = &alt
         }
-		if msg.Motion != nil {
-			mode := msg.GetMotion()
-	        loc.Motion = &mode
-		}
+        if msg.Motion != nil {
+            mode := msg.GetMotion()
+            loc.Motion = &mode
+        }
         sd.Loc = &loc
     }
 
@@ -126,11 +129,11 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     var dev Dev
     var dodev = false
 
-	if msg.Test != nil {
-		mode := msg.GetTest()
-		dev.Test = &mode
-		dodev = true
-	}
+    if msg.Test != nil {
+        mode := msg.GetTest()
+        dev.Test = &mode
+        dodev = true
+    }
     if msg.EncTemp != nil {
         dev.Temp = msg.EncTemp
         dodev = true
@@ -227,59 +230,59 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         dev.SensorParams = msg.StatsSensorParams
         dodev = true
     }
-	if msg.ErrorsOpc != nil {
-		dev.ErrorsOpc = msg.ErrorsOpc
-		dodev = true
-	}
-	if msg.ErrorsPms != nil {
-		dev.ErrorsPms = msg.ErrorsPms
-		dodev = true
-	}
-	if msg.ErrorsBme0 != nil {
-		dev.ErrorsBme0 = msg.ErrorsBme0
-		dodev = true
-	}
-	if msg.ErrorsBme1 != nil {
-		dev.ErrorsBme1 = msg.ErrorsBme1
-		dodev = true
-	}
-	if msg.ErrorsLora != nil {
-		dev.ErrorsLora = msg.ErrorsLora
-		dodev = true
-	}
-	if msg.ErrorsFona != nil {
-		dev.ErrorsFona = msg.ErrorsFona
-		dodev = true
-	}
-	if msg.ErrorsGeiger != nil {
-		dev.ErrorsGeiger = msg.ErrorsGeiger
-		dodev = true
-	}
-	if msg.ErrorsMax01 != nil {
-		dev.ErrorsMax01 = msg.ErrorsMax01
-		dodev = true
-	}
-	if msg.ErrorsUgps != nil {
-		dev.ErrorsUgps = msg.ErrorsUgps
-		dodev = true
-	}
-	if msg.ErrorsTwi != nil {
-		dev.ErrorsTwi = msg.ErrorsTwi
-		dodev = true
-	}
-	if msg.ErrorsTwiInfo != nil {
-		dev.ErrorsTwiInfo = msg.ErrorsTwiInfo
-		dodev = true
-	}
-	if msg.ErrorsLis != nil {
-		dev.ErrorsLis = msg.ErrorsLis
-		dodev = true
-	}
-	if msg.ErrorsSpi != nil {
-		dev.ErrorsSpi = msg.ErrorsSpi
-		dodev = true
-	}
-	
+    if msg.ErrorsOpc != nil {
+        dev.ErrorsOpc = msg.ErrorsOpc
+        dodev = true
+    }
+    if msg.ErrorsPms != nil {
+        dev.ErrorsPms = msg.ErrorsPms
+        dodev = true
+    }
+    if msg.ErrorsBme0 != nil {
+        dev.ErrorsBme0 = msg.ErrorsBme0
+        dodev = true
+    }
+    if msg.ErrorsBme1 != nil {
+        dev.ErrorsBme1 = msg.ErrorsBme1
+        dodev = true
+    }
+    if msg.ErrorsLora != nil {
+        dev.ErrorsLora = msg.ErrorsLora
+        dodev = true
+    }
+    if msg.ErrorsFona != nil {
+        dev.ErrorsFona = msg.ErrorsFona
+        dodev = true
+    }
+    if msg.ErrorsGeiger != nil {
+        dev.ErrorsGeiger = msg.ErrorsGeiger
+        dodev = true
+    }
+    if msg.ErrorsMax01 != nil {
+        dev.ErrorsMax01 = msg.ErrorsMax01
+        dodev = true
+    }
+    if msg.ErrorsUgps != nil {
+        dev.ErrorsUgps = msg.ErrorsUgps
+        dodev = true
+    }
+    if msg.ErrorsTwi != nil {
+        dev.ErrorsTwi = msg.ErrorsTwi
+        dodev = true
+    }
+    if msg.ErrorsTwiInfo != nil {
+        dev.ErrorsTwiInfo = msg.ErrorsTwiInfo
+        dodev = true
+    }
+    if msg.ErrorsLis != nil {
+        dev.ErrorsLis = msg.ErrorsLis
+        dodev = true
+    }
+    if msg.ErrorsSpi != nil {
+        dev.ErrorsSpi = msg.ErrorsSpi
+        dodev = true
+    }
+
     if dodev {
         sd.Dev = &dev
     }
@@ -326,7 +329,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         sd.Env = &env
     }
 
-	// Service
+    // Service
     var svc Service
     var dosvc = false
 
@@ -342,7 +345,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     if dosvc {
         sd.Service = &svc
     }
-	
+
     // Gateway
     var gate Gateway
     var dogate = false
@@ -353,7 +356,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     } else if req.GwSnr != nil {
         gate.SNR = req.GwSnr
         dogate = true
-	}
+    }
     if req.GwReceivedAt != nil {
         gate.ReceivedAt = req.GwReceivedAt
         dogate = true
@@ -480,12 +483,12 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         sd.Lnd = &lnd
     }
 
-	// Generate the hash of the original device data
-	hash := HashSafecastData(sd)
-	sd.Service.HashMd5 = &hash
+    // Generate the hash of the original device data
+    hash := HashSafecastData(sd)
+    sd.Service.HashMd5 = &hash
 
-	// Add info about the server instance that actually did the upload
-	sd.Service.Handler = &TTServeInstanceID
+    // Add info about the server instance that actually did the upload
+    sd.Service.Handler = &TTServeInstanceID
 
     // Log as accurately as we can with regard to what came in
     SafecastWriteToLogs(req.SvUploadedAt, sd)
@@ -599,7 +602,7 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
     if (httpTransactionErrors != 0) {
         if (httpTransactionErrors == 1) {
             sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to %s:%s)",
-                    httpTransactionErrorTime, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS);
+                httpTransactionErrorTime, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS);
         } else {
             sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading in %d minutes to %s:%s)",
                 httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS);
@@ -614,13 +617,32 @@ func SafecastV1Upload(body []byte, url string, unit string, value string) bool {
 
     transaction := beginTransaction("V1", unit, value)
 
-    req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+    domain := SafecastV1UploadURL1
+    if !useV1PrimaryServer {
+        domain = SafecastV1UploadURL2
+    }
+    req, _ := http.NewRequest("POST", domain + url, bytes.NewBuffer(body))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{
         Timeout: time.Second * 15,
     }
     resp, err := httpclient.Do(req)
+    if err != nil {
+        fmt.Printf("*** SafecastV1 upload err, switching server: %s\n", err)
+        useV1PrimaryServer = !useV1PrimaryServer
+        domain = SafecastV1UploadURL1
+        if !useV1PrimaryServer {
+            domain = SafecastV1UploadURL2
+        }
+        req, _ = http.NewRequest("POST", domain + url, bytes.NewBuffer(body))
+        req.Header.Set("User-Agent", "TTSERVE")
+        req.Header.Set("Content-Type", "application/json")
+        httpclient := &http.Client{
+            Timeout: time.Second * 15,
+        }
+        resp, err = httpclient.Do(req)
+    }
 
     errString := ""
     if (err == nil) {
@@ -633,39 +655,39 @@ func SafecastV1Upload(body []byte, url string, unit string, value string) bool {
         errString = s[len(s)-1]
     }
 
-	// On 2017-02-17 I disabled errors uploading to V1 servers, because it's no longer
-	// interesting relative to uploads to the new "Ingest" servers.
-	// On 2017-03-13 I re-enabled after "connection refused" errors
-	if true {
-	    endTransaction(transaction, url, errString)
-	} else {
-		if (errString != "") {
-			fmt.Printf("*** Error uploading to Safecast V1: %v\n", errString)
-		}
-	    endTransaction(transaction, url, "")
-	}
-	
+    // On 2017-02-17 I disabled errors uploading to V1 servers, because it's no longer
+    // interesting relative to uploads to the new "Ingest" servers.
+    // On 2017-03-13 I re-enabled after "connection refused" errors
+    if true {
+        endTransaction(transaction, url, errString)
+    } else {
+        if (errString != "") {
+            fmt.Printf("*** Error uploading to Safecast V1: %v\n", errString)
+        }
+        endTransaction(transaction, url, "")
+    }
+
     return errString == ""
 }
 
 // Generate a hasn of the data structure elements that came from the device
 func HashSafecastData(sd SafecastData) string {
 
-	// Remove everything that is not generated by the device
-	sd.Service = nil
-	sd.Gateway = nil
+    // Remove everything that is not generated by the device
+    sd.Service = nil
+    sd.Gateway = nil
 
-	// Marshall into JSON
+    // Marshall into JSON
     scJSON, _ := json.Marshal(sd)
 
-	// Compute the hash
-	h := md5.New()
-	io.WriteString(h, string(scJSON))
-	hexHash := fmt.Sprintf("%x", h.Sum(nil))
+    // Compute the hash
+    h := md5.New()
+    io.WriteString(h, string(scJSON))
+    hexHash := fmt.Sprintf("%x", h.Sum(nil))
 
-	// Return the CRC
-	return hexHash
-	
+    // Return the CRC
+    return hexHash
+
 }
 
 // Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
@@ -687,8 +709,8 @@ func doUploadToSafecast(sd SafecastData, url string) bool {
         CapturedAt = *sd.CapturedAt
     }
     transaction := beginTransaction("V2", "captured", CapturedAt)
-	
-	// Marshal it to json text
+
+    // Marshal it to json text
     scJSON, _ := json.Marshal(sd)
     if (false) {
         fmt.Printf("%s\n", scJSON)
