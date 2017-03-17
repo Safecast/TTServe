@@ -59,7 +59,7 @@ func inboundWebDeviceAnalyzeHandler(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		// Write part of it
-		io.WriteString(rw, fmt.Sprintf("Uploaded: %s\n", value.Service.UploadedAt))
+		io.WriteString(rw, fmt.Sprintf("Uploaded: %s\n", *value.Service.UploadedAt))
 //			- does a summary of total errors encountered
 //			- makes sure it got at least some data from each kind of sensor
 //			- makes sure it heard from both lora and fona
