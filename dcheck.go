@@ -347,7 +347,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
 	if stat.UptimeMinutes > ds.MaxUptimeMinutes {
 		ds.MaxUptimeMinutes = stat.UptimeMinutes
 	}
-	if stat.UptimeMinutes <= ds.PrevUptimeMinutes {
+	if stat.UptimeMinutes < ds.PrevUptimeMinutes {
 		ds.Reboots++
 	}
 	ds.PrevUptimeMinutes = stat.UptimeMinutes
