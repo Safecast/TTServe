@@ -7,6 +7,7 @@ package main
 
 import (
     "fmt"
+	"math"
     "strconv"
     "strings"
     "time"
@@ -853,6 +854,25 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
             s += fmt.Sprintf("  Twi    %d %s\n", i, ds.ErrorsTwiInfo)
         }
     }
+    s += fmt.Sprintf("\n")
+
+    // Solarcast summary
+    s += fmt.Sprintf("Solarcast Checklist:\n")
+
+    s += fmt.Sprintf("  Verification is done in a single session of >24 hours?  ");
+    if ds.Boots == 1 && uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Hour) > 24 {
+        s += fmt.Sprintf("PASS\n")
+    } else {
+        s += fmt.Sprintf(" -- \n");
+    }
+    s += fmt.Sprintf("  Roughly half of the transports are done using Lora vs Fona?  ")
+    diff := math.Abs(float64(ds.LoraTransports) - float64(ds.FonaTransports))
+    if (diff / float64(ds.Measurements)) <= 0.15 {
+        s += fmt.Sprintf("PASS\n")
+    } else {
+        s += fmt.Sprintf(" -- \n");
+    }
+
     s += fmt.Sprintf("\n")
 
     // Done
