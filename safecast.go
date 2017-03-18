@@ -659,12 +659,12 @@ func SafecastV1Upload(body []byte, url string, unit string, value string) bool {
     // interesting relative to uploads to the new "Ingest" servers.
     // On 2017-03-13 I re-enabled after "connection refused" errors
     if true {
-        endTransaction(transaction, url, errString)
+        endTransaction(transaction, domain, errString)
     } else {
         if (errString != "") {
             fmt.Printf("*** Error uploading to Safecast V1: %v\n", errString)
         }
-        endTransaction(transaction, url, "")
+        endTransaction(transaction, domain, "")
     }
 
     return errString == ""
