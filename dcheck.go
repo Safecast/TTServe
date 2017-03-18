@@ -302,18 +302,42 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
     }
 
     // Errors this session
-    ds.ThisErrorsOpc += stat.ErrorsOpc
-    ds.ThisErrorsPms += stat.ErrorsPms
-    ds.ThisErrorsBme0 += stat.ErrorsBme0
-    ds.ThisErrorsBme1 += stat.ErrorsBme1
-    ds.ThisErrorsLora += stat.ErrorsLora
-    ds.ThisErrorsFona += stat.ErrorsFona
-    ds.ThisErrorsGeiger += stat.ErrorsGeiger
-    ds.ThisErrorsMax01 += stat.ErrorsMax01
-    ds.ThisErrorsUgps += stat.ErrorsUgps
-    ds.ThisErrorsLis += stat.ErrorsLis
-    ds.ThisErrorsSpi += stat.ErrorsSpi
-    ds.ThisErrorsTwi += stat.ErrorsTwi
+    if stat.ErrorsOpc > ds.ThisErrorsOpc {
+		ds.ThisErrorsOpc = stat.ErrorsOpc
+	}
+    if stat.ErrorsPms > ds.ThisErrorsPms {
+		ds.ThisErrorsPms = stat.ErrorsPms
+	}
+    if stat.ErrorsBme0 > ds.ThisErrorsBme0 {
+		ds.ThisErrorsBme0 = stat.ErrorsBme0
+	}
+    if stat.ErrorsBme1 > ds.ThisErrorsBme1 {
+		ds.ThisErrorsBme1 = stat.ErrorsBme1
+	}
+    if stat.ErrorsLora > ds.ThisErrorsLora {
+		ds.ThisErrorsLora = stat.ErrorsLora
+	}
+    if stat.ErrorsFona > ds.ThisErrorsFona {
+		ds.ThisErrorsFona = stat.ErrorsFona
+	}
+    if stat.ErrorsGeiger > ds.ThisErrorsGeiger {
+		ds.ThisErrorsGeiger = stat.ErrorsGeiger
+	}
+    if stat.ErrorsMax01 > ds.ThisErrorsMax01 {
+		ds.ThisErrorsMax01 = stat.ErrorsMax01
+	}
+    if stat.ErrorsUgps > ds.ThisErrorsUgps {
+		ds.ThisErrorsUgps = stat.ErrorsUgps
+	}
+    if stat.ErrorsLis > ds.ThisErrorsLis {
+		ds.ThisErrorsLis = stat.ErrorsLis
+	}
+    if stat.ErrorsSpi > ds.ThisErrorsSpi {
+		ds.ThisErrorsSpi = stat.ErrorsSpi
+	}
+    if stat.ErrorsTwi > ds.ThisErrorsTwi {
+		ds.ThisErrorsTwi = stat.ErrorsTwi
+	}
 
     for _, staterr := range strings.Split(stat.ErrorsTwiInfo, ",") {
         foundError := false
