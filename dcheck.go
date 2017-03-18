@@ -689,8 +689,12 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // Network
     s += fmt.Sprintf("Communications:\n  over  %s\n", ds.Transports)
     if ds.AnyTransport {
-        s += fmt.Sprintf("  using%4.0f%% (%d) %s\n", 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports, ds.LoraModule)
-        s += fmt.Sprintf("  using%4.0f%% (%d) %s\n", 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports, ds.FonaModule)
+		if ds.LoraTransports != 0 {
+	        s += fmt.Sprintf("  using%4.0f%% (%d) %s\n", 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports, ds.LoraModule)
+		}
+		if ds.FonaTransports != 0 {
+	        s += fmt.Sprintf("  using%4.0f%% (%d) %s\n", 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports, ds.FonaModule)
+		}
     }
     s += fmt.Sprintf("\n")
 
