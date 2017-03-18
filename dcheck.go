@@ -872,7 +872,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     s += fmt.Sprintf("Verification contains at least one session of >%d hours.\n", goalHours);
 
-    if ds.AnyErrors {
+    if !ds.AnyErrors {
         s += fmt.Sprintf("  PASS  ")
     } else {
         s += fmt.Sprintf("   --   ");
