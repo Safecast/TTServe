@@ -781,18 +781,18 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
 	geigerConfig := ""
     if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-		geigerConfig = "[no tubes configured]"
+		geigerConfig = "(no tubes configured)"
         s += fmt.Sprintf("  Lnd 0")
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-		geigerConfig = "[SINGLE pancake configuration]"
+		geigerConfig = "(SINGLE pancake configuration)"
         s += fmt.Sprintf("  Lnd %d %s", ds.LndU7318Count, geigerConfig)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
         s += fmt.Sprintf("  Lnd %d|%d", ds.LndU7318Count, ds.LndC7318Count)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
-		geigerConfig = "[dual-tube EC configuration]"
+		geigerConfig = "(dual-tube EC configuration)"
         s += fmt.Sprintf("  Lnd %d|%d %s", ds.LndU7318Count, ds.LndEC7128Count, geigerConfig)
     } else {
-		geigerConfig = "[UNRECOGNIZED configuration]"
+		geigerConfig = "(UNRECOGNIZED configuration)"
         s += fmt.Sprintf("  Lnd %du|%dc|%dec %s", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, geigerConfig)
     }
     if ds.GeigerWarningCount != 0 {
