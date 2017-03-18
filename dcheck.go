@@ -670,7 +670,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         }
     } else {
         s += fmt.Sprintf("Uptime:\n")
-        s += fmt.Sprintf("  %s max across %d sessions\n", AgoMinutes(ds.MaxUptimeMinutes), ds.Boots)
+        s += fmt.Sprintf("  %s maximum found in %d sessions\n", AgoMinutes(ds.MaxUptimeMinutes), ds.Boots)
         s += fmt.Sprintf("\n");
     }
 
