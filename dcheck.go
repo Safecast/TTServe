@@ -880,7 +880,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     diff := math.Abs(float64(ds.LoraTransports) - float64(ds.FonaTransports))
 	pct := diff / float64(ds.Measurements)
-	goal := 0.20
+	goal := 0.25
     if pct <= goal {
         s += fmt.Sprintf("  PASS  ")
     } else {
