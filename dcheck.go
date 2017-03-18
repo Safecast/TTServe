@@ -140,8 +140,8 @@ func NewMeasurementDataset(deviceidstr string) MeasurementDataset {
 
     u64, _ := strconv.ParseUint(deviceidstr, 10, 32)
     ds.DeviceId = uint32(u64)
-    ds.LoraModule = "lora"
-    ds.FonaModule = "fona"
+    ds.LoraModule = "(unidentified lora module)"
+    ds.FonaModule = "(unidentified fona module)"
     ds.Boots++
 
     return ds
@@ -689,8 +689,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // Network
     s += fmt.Sprintf("Communications:\n  over  %s\n", ds.Transports)
     if ds.AnyTransport {
-        s += fmt.Sprintf("  using %s: %.0f%% (%d)\n", ds.LoraModule, 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports)
-        s += fmt.Sprintf("  using %s: %.0f%% (%d)\n", ds.FonaModule, 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports)
+        s += fmt.Sprintf("  using %02.0f%% (%d) %s\n", 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports, ds.LoraModule)
+        s += fmt.Sprintf("  using %02.0f%% (%d) %s\n", 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports, ds.FonaModule)
     }
     s += fmt.Sprintf("\n")
 
