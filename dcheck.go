@@ -830,7 +830,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
         s += fmt.Sprintf("Lnd: %d|%d", ds.LndU7318Count, ds.LndC7318Count)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
-        s += fmt.Sprintf("Lnd: %d|%d [dual-tube EC]", ds.LndU7318Count, ds.LndC7318Count)
+        s += fmt.Sprintf("Lnd: %d|%d [dual-tube EC]", ds.LndU7318Count, ds.LndEC7128Count)
     } else {
         s += fmt.Sprintf("Lnd: %du|%dc|%dec (UNRECOGNIZED configuration)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count)
     }
