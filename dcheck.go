@@ -656,30 +656,37 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s := ""
 
     // High-level stats
-    s += fmt.Sprintf("** %d Health Check\n", ds.DeviceId)
-    s += fmt.Sprintf("** %s\n", time.Now().Format("2006-01-02 15:04 UTC"))
+    s += fmt.Sprintf("%d Checkup\n", ds.DeviceId)
+    s += fmt.Sprintf("%s\n", time.Now().Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("\n")
 
     if ds.Boots == 1 {
         if ds.MaxUptimeMinutes != 0 {
-            s += fmt.Sprintf("Uptime: %s\n", AgoMinutes(ds.MaxUptimeMinutes))
+		    s += fmt.Sprintf("Uptime:\n")
+            s += fmt.Sprintf("  %s\n", AgoMinutes(ds.MaxUptimeMinutes))
+			s += fmt.Sprintf("\n");
         }
     } else {
-        s += fmt.Sprintf("Max uptime of %s across %d sessions\n", AgoMinutes(ds.MaxUptimeMinutes), ds.Boots)
+	    s += fmt.Sprintf("Uptime:\n")
+        s += fmt.Sprintf("  %s max across %d sessions\n", AgoMinutes(ds.MaxUptimeMinutes), ds.Boots)
+		s += fmt.Sprintf("\n");
     }
 
-    s += fmt.Sprintf("%d uploads in %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)))
+	s += fmt.Sprintf("Uploads:\n");
+    s += fmt.Sprintf("  Oldest %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
+    s += fmt.Sprintf("  Newest %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
+    s += fmt.Sprintf("  Total  %d over the course of %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)))
     if ds.TestMeasurements != 0 {
         if ds.Measurements == ds.TestMeasurements {
-            s += fmt.Sprintf("All of those are TEST measurements\n");
+            s += fmt.Sprintf("       All of those are TEST measurements\n");
         } else {
-            s += fmt.Sprintf("%d of those are TEST measurements\n", ds.TestMeasurements)
+            s += fmt.Sprintf("       %d of those are TEST measurements\n", ds.TestMeasurements)
         }
     }
     s += fmt.Sprintf("\n")
 
     // Network
-    s += fmt.Sprintf("Transports:\n    %s\n", ds.Transports)
+    s += fmt.Sprintf("Transports:\n  %s\n", ds.Transports)
     if ds.AnyTransport {
         s += fmt.Sprintf("%s: %.0f%% (%d)\n", ds.LoraModule, 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports)
         s += fmt.Sprintf("%s: %.0f%% (%d)\n", ds.FonaModule, 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports)
@@ -687,8 +694,6 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("\n")
 
     // Timing
-    s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
-    s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
     if ds.Measurements == 0 {
         return s
     }
@@ -738,8 +743,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         if f != 0 {
             s += fmt.Sprintf("  <=5m %02.0f%% (%d)\n", f, ds.GapsGt0m-ds.GapsGt5m)
         }
-        s += fmt.Sprintf("\n")
     }
+    s += fmt.Sprintf("\n")
 
     // Errors
     if ds.AnyErrors {
@@ -802,41 +807,41 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // Sensors
     s += fmt.Sprintf("Sensors:\n")
     if ds.BatWarningCount == 0 {
-        s += fmt.Sprintf("  Bat: %d\n", ds.BatCount)
+        s += fmt.Sprintf("  Bat %d\n", ds.BatCount)
     } else {
-        s += fmt.Sprintf("  Bat: %d (%d out of range %s)\n", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.Format("2006-01-02 15:04 UTC"))
+        s += fmt.Sprintf("  Bat %d (%d out of range %s)\n", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.Format("2006-01-02 15:04 UTC"))
     }
     if ds.EnvWarningCount == 0 {
-        s += fmt.Sprintf("  Env: %d\n", ds.EnvCount)
+        s += fmt.Sprintf("  Env %d\n", ds.EnvCount)
     } else {
-        s += fmt.Sprintf("  Env: %d (%d out of range %s)\n", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.Format("2006-01-02 15:04 UTC"))
+        s += fmt.Sprintf("  Env %d (%d out of range %s)\n", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.Format("2006-01-02 15:04 UTC"))
     }
     if ds.EncWarningCount == 0 {
-        s += fmt.Sprintf("  Enc: %d\n", ds.EncCount)
+        s += fmt.Sprintf("  Enc %d\n", ds.EncCount)
     } else {
-        s += fmt.Sprintf("  Enc: %d (%d out of range %s)\n", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.Format("2006-01-02 15:04 UTC"))
+        s += fmt.Sprintf("  Enc %d (%d out of range %s)\n", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.Format("2006-01-02 15:04 UTC"))
     }
     if ds.PmsWarningCount == 0 {
-        s += fmt.Sprintf("  Pms: %d\n", ds.PmsCount)
+        s += fmt.Sprintf("  Pms %d\n", ds.PmsCount)
     } else {
-        s += fmt.Sprintf("  Pms: %d (%d out of range %s)\n", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.Format("2006-01-02 15:04 UTC"))
+        s += fmt.Sprintf("  Pms %d (%d out of range %s)\n", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.Format("2006-01-02 15:04 UTC"))
     }
     if ds.OpcWarningCount == 0 {
-        s += fmt.Sprintf("  Opc: %d\n", ds.OpcCount)
+        s += fmt.Sprintf("  Opc %d\n", ds.OpcCount)
     } else {
-        s += fmt.Sprintf("  Opc: %d (%d out of range %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.Format("2006-01-02 15:04 UTC"))
+        s += fmt.Sprintf("  Opc %d (%d out of range %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.Format("2006-01-02 15:04 UTC"))
     }
 
     if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-        s += fmt.Sprintf("  Lnd: 0")
+        s += fmt.Sprintf("  Lnd 0")
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-        s += fmt.Sprintf("  Lnd: %d [SINGLE pancake configuration]", ds.LndU7318Count)
+        s += fmt.Sprintf("  Lnd %d [SINGLE pancake configuration]", ds.LndU7318Count)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
-        s += fmt.Sprintf("  Lnd: %d|%d", ds.LndU7318Count, ds.LndC7318Count)
+        s += fmt.Sprintf("  Lnd %d|%d", ds.LndU7318Count, ds.LndC7318Count)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
-        s += fmt.Sprintf("  Lnd: %d|%d [dual-tube EC configuration]", ds.LndU7318Count, ds.LndEC7128Count)
+        s += fmt.Sprintf("  Lnd %d|%d [dual-tube EC configuration]", ds.LndU7318Count, ds.LndEC7128Count)
     } else {
-        s += fmt.Sprintf("  Lnd: %du|%dc|%dec (UNRECOGNIZED configuration)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count)
+        s += fmt.Sprintf("  Lnd %du|%dc|%dec (UNRECOGNIZED configuration)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count)
     }
     if ds.GeigerWarningCount != 0 {
         s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
