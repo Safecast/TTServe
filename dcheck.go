@@ -821,11 +821,13 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 		s += fmt.Sprintf("Opc: %d (%d OOR %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.Format("2006-01-02 15:04 UTC"))
 	}
 	if ds.GeigerWarningCount == 0 {
-		s += fmt.Sprintf("Geiger: %d\n", ds.GeigerCount)
+		s += fmt.Sprintf("Lnd: %d\n", ds.GeigerCount)
 	} else {
-		s += fmt.Sprintf("Geiger: %d (%d OOR %s)\n", ds.GeigerCount, ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
+		s += fmt.Sprintf("Lnd: %d (%d OOR %s)\n", ds.GeigerCount, ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
 	}
-	s += fmt.Sprintf("Geiger: %d (multi-tube)\n", ds.GeigerCount)
+	if ds.GeigerCount != ds.MultiGeigerCount {
+		s += fmt.Sprintf("Lnd: only one tube reported %d/%d\n", ds.GeigerCount-ds.MultiGeigerCount, ds.GeigerCount)
+	}
 
     // Done
     return s
