@@ -864,12 +864,13 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // Solarcast summary
     s += fmt.Sprintf("Solarcast Checklist:\n")
 
-    if ds.MaxUptimeMinutes > 24 * 60 {
+	goalHours := 24
+    if ds.MaxUptimeMinutes > uint32(goalHours) * 60 {
         s += fmt.Sprintf("  PASS  ")
     } else {
         s += fmt.Sprintf("   --   ");
     }
-    s += fmt.Sprintf("Verification contains at least one session of >24 hours.\n");
+    s += fmt.Sprintf("Verification contains at least one session of >%d hours.\n", goalHours);
 
     if ds.AnyErrors {
         s += fmt.Sprintf("  PASS  ")
