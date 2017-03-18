@@ -19,6 +19,7 @@ import (
 // Stats about a single measurement
 type MeasurementStat struct {
     Valid               bool
+    Test                bool
     Uploaded            time.Time
     LoraModule          string
     FonaModule          string
@@ -61,7 +62,7 @@ type MeasurementDataset struct {
     GapsGt5m            uint32
     GapsGt0m            uint32
     Measurements        uint32
-    TestMeasurements    bool
+    TestMeasurements    uint32
     AnyTransport        bool
     Transports          string
     LoraTransports      uint32
@@ -149,59 +150,63 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 
         }
 
-        if sd.Dev != nil {
+    }
 
-            if sd.Dev.ModuleLora != nil {
-                stat.LoraModule = *sd.Dev.ModuleLora
-            }
-            if sd.Dev.ModuleFona != nil {
-                stat.FonaModule = *sd.Dev.ModuleFona
-            }
+    if sd.Dev != nil {
 
-            if sd.Dev.ErrorsOpc != nil {
-                stat.ErrorsOpc = *sd.Dev.ErrorsOpc
-            }
-            if sd.Dev.ErrorsPms != nil {
-                stat.ErrorsPms = *sd.Dev.ErrorsPms
-            }
-            if sd.Dev.ErrorsBme0 != nil {
-                stat.ErrorsBme0 = *sd.Dev.ErrorsBme0
-            }
-            if sd.Dev.ErrorsBme1 != nil {
-                stat.ErrorsBme1 = *sd.Dev.ErrorsBme1
-            }
-            if sd.Dev.ErrorsLora != nil {
-                stat.ErrorsLora = *sd.Dev.ErrorsLora
-            }
-            if sd.Dev.ErrorsFona != nil {
-                stat.ErrorsFona = *sd.Dev.ErrorsFona
-            }
-            if sd.Dev.ErrorsGeiger != nil {
-                stat.ErrorsGeiger = *sd.Dev.ErrorsGeiger
-            }
-            if sd.Dev.ErrorsMax01 != nil {
-                stat.ErrorsMax01 = *sd.Dev.ErrorsMax01
-            }
-            if sd.Dev.ErrorsUgps != nil {
-                stat.ErrorsUgps = *sd.Dev.ErrorsUgps
-            }
-            if sd.Dev.ErrorsLis != nil {
-                stat.ErrorsLis = *sd.Dev.ErrorsLis
-            }
-            if sd.Dev.ErrorsSpi != nil {
-                stat.ErrorsSpi = *sd.Dev.ErrorsSpi
-            }
-            if sd.Dev.ErrorsTwi != nil {
-                stat.ErrorsTwi = *sd.Dev.ErrorsTwi
-            }
-            if sd.Dev.ErrorsTwiInfo != nil {
-                stat.ErrorsTwiInfo = *sd.Dev.ErrorsTwiInfo
-            }
+		if sd.Dev.Test != nil {
+			stat.Test = *sd.Dev.Test
+		}
+		
+        if sd.Dev.ModuleLora != nil {
+            stat.LoraModule = *sd.Dev.ModuleLora
+        }
+        if sd.Dev.ModuleFona != nil {
+            stat.FonaModule = *sd.Dev.ModuleFona
+        }
 
-            if sd.Dev.UptimeMinutes != nil {
-                stat.UptimeMinutes = *sd.Dev.UptimeMinutes
-            }
+        if sd.Dev.ErrorsOpc != nil {
+            stat.ErrorsOpc = *sd.Dev.ErrorsOpc
+        }
+        if sd.Dev.ErrorsPms != nil {
+            stat.ErrorsPms = *sd.Dev.ErrorsPms
+        }
+        if sd.Dev.ErrorsBme0 != nil {
+            stat.ErrorsBme0 = *sd.Dev.ErrorsBme0
+        }
+        if sd.Dev.ErrorsBme1 != nil {
+            stat.ErrorsBme1 = *sd.Dev.ErrorsBme1
+        }
+        if sd.Dev.ErrorsLora != nil {
+            stat.ErrorsLora = *sd.Dev.ErrorsLora
+        }
+        if sd.Dev.ErrorsFona != nil {
+            stat.ErrorsFona = *sd.Dev.ErrorsFona
+        }
+        if sd.Dev.ErrorsGeiger != nil {
+            stat.ErrorsGeiger = *sd.Dev.ErrorsGeiger
+        }
+        if sd.Dev.ErrorsMax01 != nil {
+            stat.ErrorsMax01 = *sd.Dev.ErrorsMax01
+        }
+        if sd.Dev.ErrorsUgps != nil {
+            stat.ErrorsUgps = *sd.Dev.ErrorsUgps
+        }
+        if sd.Dev.ErrorsLis != nil {
+            stat.ErrorsLis = *sd.Dev.ErrorsLis
+        }
+        if sd.Dev.ErrorsSpi != nil {
+            stat.ErrorsSpi = *sd.Dev.ErrorsSpi
+        }
+        if sd.Dev.ErrorsTwi != nil {
+            stat.ErrorsTwi = *sd.Dev.ErrorsTwi
+        }
+        if sd.Dev.ErrorsTwiInfo != nil {
+            stat.ErrorsTwiInfo = *sd.Dev.ErrorsTwiInfo
+        }
 
+        if sd.Dev.UptimeMinutes != nil {
+            stat.UptimeMinutes = *sd.Dev.UptimeMinutes
         }
 
     }
@@ -219,6 +224,9 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         return
     }
     ds.Measurements++
+	if stat.Test {
+	    ds.TestMeasurements++
+	}
 
     // Timing
     if ds.Measurements == 1 {
@@ -435,6 +443,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
 
     s += fmt.Sprintf("%d uploads in %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)))
+	if ds.TestMeasurements != 0 {
+	    s += fmt.Sprintf("%d of those are TEST measurements\n", ds.TestMeasurements)
+	}
     s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("\n")
@@ -444,50 +455,50 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     // Inter-measurement timing
     s += fmt.Sprintf("Gaps: (%s - %s)\n", AgoMinutes(ds.MinUploadGapSecs/60), AgoMinutes(ds.MaxUploadGapSecs/60))
-	f := 100*float32(ds.GapsGt1week) / float32(ds.GapsGt0m)
-	if f != 0 {
-	    s += fmt.Sprintf("  >1w  %02.0f%% (%d)\n", f, ds.GapsGt1week)
-	}
-	f = 100*float32(ds.GapsGt1day) / float32(ds.GapsGt0m)
-	if f != 0 {
-	    s += fmt.Sprintf("  >1d  %02.0f%% (%d)\n", f, ds.GapsGt1day)
-	}
-	f = 100*float32(ds.GapsGt12hr) / float32(ds.GapsGt0m)
-	if f != 0 {
-	    s += fmt.Sprintf("  >12hr%02.0f%% (%d)\n", f, ds.GapsGt12hr)
-	}
-	f = 100*float32(ds.GapsGt6hr) / float32(ds.GapsGt0m)
-	if f != 0 {
-	    s += fmt.Sprintf("  >6hr %02.0f%% (%d)\n", f, ds.GapsGt6hr)
-	}
-	f = 100*float32(ds.GapsGt2hr) / float32(ds.GapsGt0m)
-	if f != 0 {
-	    s += fmt.Sprintf("  >2hr %02.0f%% (%d)\n", f, ds.GapsGt2hr)
-	}
-	f = 100*float32(ds.GapsGt1hr) / float32(ds.GapsGt0m)
-	if f != 0 {
-	    s += fmt.Sprintf("  >1hr %02.0f%% (%d)\n", f, ds.GapsGt1hr)
-	}
-	f = 100*float32(ds.GapsGt30m) / float32(ds.GapsGt0m)
-	if f != 0 {
-	    s += fmt.Sprintf("  >30m %02.0f%% (%d)\n", f, ds.GapsGt30m)
-	}
-	f = 100*float32(ds.GapsGt15m) / float32(ds.GapsGt0m)
-	if f != 0 {
-	    s += fmt.Sprintf("  >15m %02.0f%% (%d)\n", f, ds.GapsGt15m)
-	}
-	f = 100*float32(ds.GapsGt10m) / float32(ds.GapsGt0m)
-	if f != 0 {
-	    s += fmt.Sprintf("  >10m %02.0f%% (%d)\n", f, ds.GapsGt10m)
-	}
-	f = 100*float32(ds.GapsGt5m) / float32(ds.GapsGt0m)
-	if f != 0 {
-	    s += fmt.Sprintf("  > 5m  %02.0f%% (%d)\n", f, ds.GapsGt5m)
-	}
-	f = 100*float32(ds.GapsGt0m-ds.GapsGt5m) / float32(ds.GapsGt0m)
-	if f != 0 {
-	    s += fmt.Sprintf("  <=5m %02.0f%% (%d)\n", f, ds.GapsGt0m-ds.GapsGt5m)
-	}
+    f := 100*float32(ds.GapsGt1week) / float32(ds.GapsGt0m)
+    if f != 0 {
+        s += fmt.Sprintf("  >1w  %02.0f%% (%d)\n", f, ds.GapsGt1week)
+    }
+    f = 100*float32(ds.GapsGt1day) / float32(ds.GapsGt0m)
+    if f != 0 {
+        s += fmt.Sprintf("  >1d  %02.0f%% (%d)\n", f, ds.GapsGt1day)
+    }
+    f = 100*float32(ds.GapsGt12hr) / float32(ds.GapsGt0m)
+    if f != 0 {
+        s += fmt.Sprintf("  >12hr%02.0f%% (%d)\n", f, ds.GapsGt12hr)
+    }
+    f = 100*float32(ds.GapsGt6hr) / float32(ds.GapsGt0m)
+    if f != 0 {
+        s += fmt.Sprintf("  >6hr %02.0f%% (%d)\n", f, ds.GapsGt6hr)
+    }
+    f = 100*float32(ds.GapsGt2hr) / float32(ds.GapsGt0m)
+    if f != 0 {
+        s += fmt.Sprintf("  >2hr %02.0f%% (%d)\n", f, ds.GapsGt2hr)
+    }
+    f = 100*float32(ds.GapsGt1hr) / float32(ds.GapsGt0m)
+    if f != 0 {
+        s += fmt.Sprintf("  >1hr %02.0f%% (%d)\n", f, ds.GapsGt1hr)
+    }
+    f = 100*float32(ds.GapsGt30m) / float32(ds.GapsGt0m)
+    if f != 0 {
+        s += fmt.Sprintf("  >30m %02.0f%% (%d)\n", f, ds.GapsGt30m)
+    }
+    f = 100*float32(ds.GapsGt15m) / float32(ds.GapsGt0m)
+    if f != 0 {
+        s += fmt.Sprintf("  >15m %02.0f%% (%d)\n", f, ds.GapsGt15m)
+    }
+    f = 100*float32(ds.GapsGt10m) / float32(ds.GapsGt0m)
+    if f != 0 {
+        s += fmt.Sprintf("  >10m %02.0f%% (%d)\n", f, ds.GapsGt10m)
+    }
+    f = 100*float32(ds.GapsGt5m) / float32(ds.GapsGt0m)
+    if f != 0 {
+        s += fmt.Sprintf("  > 5m  %02.0f%% (%d)\n", f, ds.GapsGt5m)
+    }
+    f = 100*float32(ds.GapsGt0m-ds.GapsGt5m) / float32(ds.GapsGt0m)
+    if f != 0 {
+        s += fmt.Sprintf("  <=5m %02.0f%% (%d)\n", f, ds.GapsGt0m-ds.GapsGt5m)
+    }
     s += fmt.Sprintf("\n")
 
     // Network
@@ -505,54 +516,54 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         } else {
             s += fmt.Sprintf("Errors across %d sessions:\n", ds.Boots)
         }
-		i := ds.PrevErrorsOpc + ds.ThisErrorsOpc
-		if i > 0 {
-	        s += fmt.Sprintf("Opc:    %d\n", i)
-		}
-		i = ds.PrevErrorsPms + ds.ThisErrorsPms
-		if i > 0 {
-	        s += fmt.Sprintf("Pms:    %d\n", i)
-		}
-		i = ds.PrevErrorsBme0 + ds.ThisErrorsBme0
-		if i > 0 {
-	        s += fmt.Sprintf("Bme0:   %d\n", i)
-		}
-		i = ds.PrevErrorsBme1 + ds.ThisErrorsBme1
-		if i > 0 {
-	        s += fmt.Sprintf("Bme1:   %d\n", i)
-		}
-		i = ds.PrevErrorsLora + ds.ThisErrorsLora
-		if i > 0 {
-	        s += fmt.Sprintf("Lora:   %d\n", i)
-		}
-		i = ds.PrevErrorsFona + ds.ThisErrorsFona
-		if i > 0 {
-	        s += fmt.Sprintf("Fona:   %d\n", i)
-		}
-		i = ds.PrevErrorsGeiger + ds.ThisErrorsGeiger
-		if i > 0 {
-	        s += fmt.Sprintf("Geiger: %d\n", i)
-		}
-		i = ds.PrevErrorsMax01 + ds.ThisErrorsMax01
-		if i > 0 {
-	        s += fmt.Sprintf("Max01:  %d\n", i)
-		}
-		i = ds.PrevErrorsUgps + ds.ThisErrorsUgps
-		if i > 0 {
-	        s += fmt.Sprintf("Ugps:   %d\n", i)
-		}
-		i = ds.PrevErrorsLis + ds.ThisErrorsLis
-		if i > 0 {
-	        s += fmt.Sprintf("Lis:    %d\n", i)
-		}
-		i = ds.PrevErrorsSpi + ds.ThisErrorsSpi
-		if i > 0 {
-	        s += fmt.Sprintf("Spi:    %d\n", i)
-		}
-		i = ds.PrevErrorsTwi + ds.ThisErrorsTwi
-		if i > 0 || ds.ErrorsTwiInfo != "" {
-	        s += fmt.Sprintf("Twi:    %d %s\n", i, ds.ErrorsTwiInfo)
-		}
+        i := ds.PrevErrorsOpc + ds.ThisErrorsOpc
+        if i > 0 {
+            s += fmt.Sprintf("Opc:    %d\n", i)
+        }
+        i = ds.PrevErrorsPms + ds.ThisErrorsPms
+        if i > 0 {
+            s += fmt.Sprintf("Pms:    %d\n", i)
+        }
+        i = ds.PrevErrorsBme0 + ds.ThisErrorsBme0
+        if i > 0 {
+            s += fmt.Sprintf("Bme0:   %d\n", i)
+        }
+        i = ds.PrevErrorsBme1 + ds.ThisErrorsBme1
+        if i > 0 {
+            s += fmt.Sprintf("Bme1:   %d\n", i)
+        }
+        i = ds.PrevErrorsLora + ds.ThisErrorsLora
+        if i > 0 {
+            s += fmt.Sprintf("Lora:   %d\n", i)
+        }
+        i = ds.PrevErrorsFona + ds.ThisErrorsFona
+        if i > 0 {
+            s += fmt.Sprintf("Fona:   %d\n", i)
+        }
+        i = ds.PrevErrorsGeiger + ds.ThisErrorsGeiger
+        if i > 0 {
+            s += fmt.Sprintf("Geiger: %d\n", i)
+        }
+        i = ds.PrevErrorsMax01 + ds.ThisErrorsMax01
+        if i > 0 {
+            s += fmt.Sprintf("Max01:  %d\n", i)
+        }
+        i = ds.PrevErrorsUgps + ds.ThisErrorsUgps
+        if i > 0 {
+            s += fmt.Sprintf("Ugps:   %d\n", i)
+        }
+        i = ds.PrevErrorsLis + ds.ThisErrorsLis
+        if i > 0 {
+            s += fmt.Sprintf("Lis:    %d\n", i)
+        }
+        i = ds.PrevErrorsSpi + ds.ThisErrorsSpi
+        if i > 0 {
+            s += fmt.Sprintf("Spi:    %d\n", i)
+        }
+        i = ds.PrevErrorsTwi + ds.ThisErrorsTwi
+        if i > 0 || ds.ErrorsTwiInfo != "" {
+            s += fmt.Sprintf("Twi:    %d %s\n", i, ds.ErrorsTwiInfo)
+        }
         s += fmt.Sprintf("\n")
     }
 
