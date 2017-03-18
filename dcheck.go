@@ -505,18 +505,54 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         } else {
             s += fmt.Sprintf("Errors across %d sessions:\n", ds.Boots)
         }
-        s += fmt.Sprintf("Opc:    %d\n", ds.PrevErrorsOpc+ds.ThisErrorsOpc)
-        s += fmt.Sprintf("Pms:    %d\n", ds.PrevErrorsPms+ds.ThisErrorsPms)
-        s += fmt.Sprintf("Bme0:   %d\n", ds.PrevErrorsBme0+ds.ThisErrorsBme0)
-        s += fmt.Sprintf("Bme1:   %d\n", ds.PrevErrorsBme1+ds.ThisErrorsBme1)
-        s += fmt.Sprintf("Lora:   %d\n", ds.PrevErrorsLora+ds.ThisErrorsLora)
-        s += fmt.Sprintf("Fona:   %d\n", ds.PrevErrorsFona+ds.ThisErrorsFona)
-        s += fmt.Sprintf("Geiger: %d\n", ds.PrevErrorsGeiger+ds.ThisErrorsGeiger)
-        s += fmt.Sprintf("Max01:  %d\n", ds.PrevErrorsMax01+ds.ThisErrorsMax01)
-        s += fmt.Sprintf("Ugps:   %d\n", ds.PrevErrorsUgps+ds.ThisErrorsUgps)
-        s += fmt.Sprintf("Lis:    %d\n", ds.PrevErrorsLis+ds.ThisErrorsLis)
-        s += fmt.Sprintf("Spi:    %d\n", ds.PrevErrorsSpi+ds.ThisErrorsSpi)
-        s += fmt.Sprintf("Twi:    %d %s\n", ds.PrevErrorsTwi+ds.ThisErrorsTwi, ds.ErrorsTwiInfo)
+		i := ds.PrevErrorsOpc + ds.ThisErrorsOpc
+		if i > 0 {
+	        s += fmt.Sprintf("Opc:    %d\n", i)
+		}
+		i = ds.PrevErrorsPms + ds.ThisErrorsPms
+		if i > 0 {
+	        s += fmt.Sprintf("Pms:    %d\n", i)
+		}
+		i = ds.PrevErrorsBme0 + ds.ThisErrorsBme0
+		if i > 0 {
+	        s += fmt.Sprintf("Bme0:   %d\n", i)
+		}
+		i = ds.PrevErrorsBme1 + ds.ThisErrorsBme1
+		if i > 0 {
+	        s += fmt.Sprintf("Bme1:   %d\n", i)
+		}
+		i = ds.PrevErrorsLora + ds.ThisErrorsLora
+		if i > 0 {
+	        s += fmt.Sprintf("Lora:   %d\n", i)
+		}
+		i = ds.PrevErrorsFona + ds.ThisErrorsFona
+		if i > 0 {
+	        s += fmt.Sprintf("Fona:   %d\n", i)
+		}
+		i = ds.PrevErrorsGeiger + ds.ThisErrorsGeiger
+		if i > 0 {
+	        s += fmt.Sprintf("Geiger: %d\n", i)
+		}
+		i = ds.PrevErrorsMax01 + ds.ThisErrorsMax01
+		if i > 0 {
+	        s += fmt.Sprintf("Max01:  %d\n", i)
+		}
+		i = ds.PrevErrorsUgps + ds.ThisErrorsUgps
+		if i > 0 {
+	        s += fmt.Sprintf("Ugps:   %d\n", i)
+		}
+		i = ds.PrevErrorsLis + ds.ThisErrorsLis
+		if i > 0 {
+	        s += fmt.Sprintf("Lis:    %d\n", i)
+		}
+		i = ds.PrevErrorsSpi + ds.ThisErrorsSpi
+		if i > 0 {
+	        s += fmt.Sprintf("Spi:    %d\n", i)
+		}
+		i = ds.PrevErrorsTwi + ds.ThisErrorsTwi
+		if i > 0 || ds.ErrorsTwiInfo != "" {
+	        s += fmt.Sprintf("Twi:    %d %s\n", i, ds.ErrorsTwiInfo)
+		}
         s += fmt.Sprintf("\n")
     }
 
