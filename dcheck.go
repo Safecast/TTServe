@@ -657,8 +657,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     // High-level stats
     s += fmt.Sprintf("Checkup:\n")
-    s += fmt.Sprintf("  %d\n", ds.DeviceId)
-    s += fmt.Sprintf("  %s\n", time.Now().Format("2006-01-02 15:04 UTC"))
+    s += fmt.Sprintf("  ID %d\n", ds.DeviceId)
+    s += fmt.Sprintf("  at %s\n", time.Now().Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("\n")
 
     if ds.Boots == 1 {
@@ -674,8 +674,6 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
 
     s += fmt.Sprintf("Uploads:\n");
-    s += fmt.Sprintf("  Oldest %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
-    s += fmt.Sprintf("  Newest %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("  Total  %d over the course of %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)))
     if ds.TestMeasurements != 0 {
         if ds.Measurements == ds.TestMeasurements {
@@ -684,6 +682,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
             s += fmt.Sprintf("       %d of those are TEST measurements\n", ds.TestMeasurements)
         }
     }
+    s += fmt.Sprintf("  Oldest %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
+    s += fmt.Sprintf("  Newest %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("\n")
 
     // Network
