@@ -870,7 +870,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     } else {
         s += fmt.Sprintf("   --   ");
     }
-    s += fmt.Sprintf("Contains at least one session of >%d hours.\n", goalHours);
+    s += fmt.Sprintf("At least one continuous measurable session of >%d hours.\n", goalHours);
 
     if !ds.AnyErrors {
         s += fmt.Sprintf("  PASS  ")
