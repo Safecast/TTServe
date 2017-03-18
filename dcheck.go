@@ -218,7 +218,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         return
     }
     SecondsGap := uint32(stat.Uploaded.Sub(ds.NewestUpload) / time.Second)
-    if SecondsGap != 0 {
+    if SecondsGap >= 1 {
         if ds.MinUploadGapSecs == 0 || SecondsGap < ds.MinUploadGapSecs {
             ds.MinUploadGapSecs = SecondsGap
         }
@@ -384,16 +384,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         return s
     }
 
-    // Uptime
-    s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
-    s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
-    s += fmt.Sprintf("\n")
-    if ds.Measurements == 0 {
-        return s
-    }
-
     // Inter-measurement timing
-    s += fmt.Sprintf("Gaps %s-%s\n", AgoMinutes(ds.MinUploadGapSecs/60), AgoMinutes(ds.MaxUploadGapSecs/60))
+    s += fmt.Sprintf("Gaps %s - %s\n", AgoMinutes(ds.MinUploadGapSecs/60), AgoMinutes(ds.MaxUploadGapSecs/60))
     s += fmt.Sprintf("Gaps >1w:   %.0f%% (%d)\n", 100*float32(ds.GapsGt1week)/float32(ds.Measurements), ds.GapsGt1week)
     s += fmt.Sprintf("Gaps >1d:   %.0f%% (%d)\n", 100*float32(ds.GapsGt1day)/float32(ds.Measurements), ds.GapsGt1day)
     s += fmt.Sprintf("Gaps >12hr: %.0f%% (%d)\n", 100*float32(ds.GapsGt12hr)/float32(ds.Measurements), ds.GapsGt12hr)
