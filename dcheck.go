@@ -225,36 +225,36 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         if SecondsGap > ds.MaxUploadGapSecs {
             ds.MaxUploadGapSecs = SecondsGap
         }
-        if SecondsGap > 60 * 5 {
-            ds.GapsGt5m++
-        }
-        if SecondsGap > 60 * 10 {
-            ds.GapsGt10m++
-        }
-        if SecondsGap > 60 * 15 {
-            ds.GapsGt15m++
-        }
-        if SecondsGap > 60 * 30 {
-            ds.GapsGt30m++
-        }
-        if SecondsGap > 60 * 60 * 1 {
-            ds.GapsGt1hr++
-        }
-        if SecondsGap > 60 * 60 * 2 {
-            ds.GapsGt2hr++
-        }
-        if SecondsGap > 60 * 60 * 6 {
-            ds.GapsGt6hr++
-        }
-        if SecondsGap > 60 * 60 * 12 {
-            ds.GapsGt12hr++
-        }
-        if SecondsGap > 60 * 60 * 24 * 1 {
-            ds.GapsGt1day++
-        }
-        if SecondsGap > 60 * 60 * 24 * 7 {
-            ds.GapsGt1week++
-        }
+    }
+    if SecondsGap > 60 * 5 {
+        ds.GapsGt5m++
+    }
+    if SecondsGap > 60 * 10 {
+        ds.GapsGt10m++
+    }
+    if SecondsGap > 60 * 15 {
+        ds.GapsGt15m++
+    }
+    if SecondsGap > 60 * 30 {
+        ds.GapsGt30m++
+    }
+    if SecondsGap > 60 * 60 * 1 {
+        ds.GapsGt1hr++
+    }
+    if SecondsGap > 60 * 60 * 2 {
+        ds.GapsGt2hr++
+    }
+    if SecondsGap > 60 * 60 * 6 {
+        ds.GapsGt6hr++
+    }
+    if SecondsGap > 60 * 60 * 12 {
+        ds.GapsGt12hr++
+    }
+    if SecondsGap > 60 * 60 * 24 * 1 {
+        ds.GapsGt1day++
+    }
+    if SecondsGap > 60 * 60 * 24 * 7 {
+        ds.GapsGt1week++
     }
     ds.NewestUpload = stat.Uploaded
 
@@ -369,8 +369,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     if ds.Boots > 1 {
         s += fmt.Sprintf("Boots: %d\n", ds.Boots)
-	}
-	if ds.MaxUptimeMinutes != 0 {
+    }
+    if ds.MaxUptimeMinutes != 0 {
         s += fmt.Sprintf("Uptime: %s max\n", AgoMinutes(ds.MaxUptimeMinutes))
         s += fmt.Sprintf("\n")
     }
