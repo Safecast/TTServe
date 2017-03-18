@@ -888,6 +888,13 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     s += fmt.Sprintf("Less than %.0f%% variation between transports. (%.0f%% actual)\n", goal*100, pct*100)
 
+    if ds.GapsGt10m == 0 {
+        s += fmt.Sprintf("  PASS  ")
+    } else {
+        s += fmt.Sprintf("   --   ");
+    }
+    s += fmt.Sprintf("No communications gaps of more than 10m.\n")
+
     if geigerConfig == "" {
         s += fmt.Sprintf("  PASS  ")
     } else {
