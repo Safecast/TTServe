@@ -218,7 +218,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         return
     }
     SecondsGap := uint32(stat.Uploaded.Sub(ds.NewestUpload) / time.Second)
-    if SecondsGap >= 1 {
+    if SecondsGap > 1 {
         if ds.MinUploadGapSecs == 0 || SecondsGap < ds.MinUploadGapSecs {
             ds.MinUploadGapSecs = SecondsGap
         }
