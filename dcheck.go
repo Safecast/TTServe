@@ -738,7 +738,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         }
         f = 100*float32(ds.GapsGt5m) / float32(ds.GapsGt0m)
         if f != 0 {
-            s += fmt.Sprintf("  > 5m  %02.0f%% (%d)\n", f, ds.GapsGt5m)
+            s += fmt.Sprintf("  > 5m %02.0f%% (%d)\n", f, ds.GapsGt5m)
         }
         f = 100*float32(ds.GapsGt0m-ds.GapsGt5m) / float32(ds.GapsGt0m)
         if f != 0 {
