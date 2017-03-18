@@ -379,8 +379,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("\n")
     }
 
-    s += fmt.Sprintf("Measurements: %d\n", ds.Measurements)
-    s += fmt.Sprintf("Period: %s\n", ds.LogRange)
+    s += fmt.Sprintf("%d measurements over %s within %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)), ds.LogRange)
     s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("\n")
