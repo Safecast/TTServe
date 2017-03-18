@@ -888,8 +888,6 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     s += fmt.Sprintf("Less than %.0f%% variation between transports. (%.0f%% actual)\n", goal*100, pct*100)
 
-    s += fmt.Sprintf("\n")
-
     if geigerConfig == "" {
         s += fmt.Sprintf("  PASS  ")
     } else {
@@ -910,6 +908,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("   --   ");
     }
     s += fmt.Sprintf("All measured data was within valid ranges.\n");
+
+    s += fmt.Sprintf("\n")
 
     // Done
     return s
