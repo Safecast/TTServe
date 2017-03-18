@@ -676,68 +676,70 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
             s += fmt.Sprintf("%d of those are TEST measurements\n", ds.TestMeasurements)
         }
     }
-    s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
-    s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
-    s += fmt.Sprintf("\n")
-    if ds.Measurements == 0 {
-        return s
-    }
-
-    // Inter-measurement timing
-    s += fmt.Sprintf("Gaps: (%s - %s)\n", AgoMinutes(ds.MinUploadGapSecs/60), AgoMinutes(ds.MaxUploadGapSecs/60))
-    f := 100*float32(ds.GapsGt1week) / float32(ds.GapsGt0m)
-    if f != 0 {
-        s += fmt.Sprintf("  >1w  %02.0f%% (%d)\n", f, ds.GapsGt1week)
-    }
-    f = 100*float32(ds.GapsGt1day) / float32(ds.GapsGt0m)
-    if f != 0 {
-        s += fmt.Sprintf("  >1d  %02.0f%% (%d)\n", f, ds.GapsGt1day)
-    }
-    f = 100*float32(ds.GapsGt12hr) / float32(ds.GapsGt0m)
-    if f != 0 {
-        s += fmt.Sprintf("  >12hr%02.0f%% (%d)\n", f, ds.GapsGt12hr)
-    }
-    f = 100*float32(ds.GapsGt6hr) / float32(ds.GapsGt0m)
-    if f != 0 {
-        s += fmt.Sprintf("  >6hr %02.0f%% (%d)\n", f, ds.GapsGt6hr)
-    }
-    f = 100*float32(ds.GapsGt2hr) / float32(ds.GapsGt0m)
-    if f != 0 {
-        s += fmt.Sprintf("  >2hr %02.0f%% (%d)\n", f, ds.GapsGt2hr)
-    }
-    f = 100*float32(ds.GapsGt1hr) / float32(ds.GapsGt0m)
-    if f != 0 {
-        s += fmt.Sprintf("  >1hr %02.0f%% (%d)\n", f, ds.GapsGt1hr)
-    }
-    f = 100*float32(ds.GapsGt30m) / float32(ds.GapsGt0m)
-    if f != 0 {
-        s += fmt.Sprintf("  >30m %02.0f%% (%d)\n", f, ds.GapsGt30m)
-    }
-    f = 100*float32(ds.GapsGt15m) / float32(ds.GapsGt0m)
-    if f != 0 {
-        s += fmt.Sprintf("  >15m %02.0f%% (%d)\n", f, ds.GapsGt15m)
-    }
-    f = 100*float32(ds.GapsGt10m) / float32(ds.GapsGt0m)
-    if f != 0 {
-        s += fmt.Sprintf("  >10m %02.0f%% (%d)\n", f, ds.GapsGt10m)
-    }
-    f = 100*float32(ds.GapsGt5m) / float32(ds.GapsGt0m)
-    if f != 0 {
-        s += fmt.Sprintf("  > 5m  %02.0f%% (%d)\n", f, ds.GapsGt5m)
-    }
-    f = 100*float32(ds.GapsGt0m-ds.GapsGt5m) / float32(ds.GapsGt0m)
-    if f != 0 {
-        s += fmt.Sprintf("  <=5m %02.0f%% (%d)\n", f, ds.GapsGt0m-ds.GapsGt5m)
-    }
     s += fmt.Sprintf("\n")
 
     // Network
-    s += fmt.Sprintf("Transports: %s\n", ds.Transports)
+    s += fmt.Sprintf("Transports:\n    %s\n", ds.Transports)
     if ds.AnyTransport {
         s += fmt.Sprintf("%s: %.0f%% (%d)\n", ds.LoraModule, 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports)
         s += fmt.Sprintf("%s: %.0f%% (%d)\n", ds.FonaModule, 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports)
     }
     s += fmt.Sprintf("\n")
+
+    // Timing
+    s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
+    s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
+    if ds.Measurements == 0 {
+        return s
+    }
+    if ds.Measurements > 1 {
+        s += fmt.Sprintf("Gaps: (%s - %s)\n", AgoMinutes(ds.MinUploadGapSecs/60), AgoMinutes(ds.MaxUploadGapSecs/60))
+        f := 100*float32(ds.GapsGt1week) / float32(ds.GapsGt0m)
+        if f != 0 {
+            s += fmt.Sprintf("  >1w  %02.0f%% (%d)\n", f, ds.GapsGt1week)
+        }
+        f = 100*float32(ds.GapsGt1day) / float32(ds.GapsGt0m)
+        if f != 0 {
+            s += fmt.Sprintf("  >1d  %02.0f%% (%d)\n", f, ds.GapsGt1day)
+        }
+        f = 100*float32(ds.GapsGt12hr) / float32(ds.GapsGt0m)
+        if f != 0 {
+            s += fmt.Sprintf("  >12hr%02.0f%% (%d)\n", f, ds.GapsGt12hr)
+        }
+        f = 100*float32(ds.GapsGt6hr) / float32(ds.GapsGt0m)
+        if f != 0 {
+            s += fmt.Sprintf("  >6hr %02.0f%% (%d)\n", f, ds.GapsGt6hr)
+        }
+        f = 100*float32(ds.GapsGt2hr) / float32(ds.GapsGt0m)
+        if f != 0 {
+            s += fmt.Sprintf("  >2hr %02.0f%% (%d)\n", f, ds.GapsGt2hr)
+        }
+        f = 100*float32(ds.GapsGt1hr) / float32(ds.GapsGt0m)
+        if f != 0 {
+            s += fmt.Sprintf("  >1hr %02.0f%% (%d)\n", f, ds.GapsGt1hr)
+        }
+        f = 100*float32(ds.GapsGt30m) / float32(ds.GapsGt0m)
+        if f != 0 {
+            s += fmt.Sprintf("  >30m %02.0f%% (%d)\n", f, ds.GapsGt30m)
+        }
+        f = 100*float32(ds.GapsGt15m) / float32(ds.GapsGt0m)
+        if f != 0 {
+            s += fmt.Sprintf("  >15m %02.0f%% (%d)\n", f, ds.GapsGt15m)
+        }
+        f = 100*float32(ds.GapsGt10m) / float32(ds.GapsGt0m)
+        if f != 0 {
+            s += fmt.Sprintf("  >10m %02.0f%% (%d)\n", f, ds.GapsGt10m)
+        }
+        f = 100*float32(ds.GapsGt5m) / float32(ds.GapsGt0m)
+        if f != 0 {
+            s += fmt.Sprintf("  > 5m  %02.0f%% (%d)\n", f, ds.GapsGt5m)
+        }
+        f = 100*float32(ds.GapsGt0m-ds.GapsGt5m) / float32(ds.GapsGt0m)
+        if f != 0 {
+            s += fmt.Sprintf("  <=5m %02.0f%% (%d)\n", f, ds.GapsGt0m-ds.GapsGt5m)
+        }
+        s += fmt.Sprintf("\n")
+    }
 
     // Errors
     if ds.AnyErrors {
@@ -838,7 +840,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     if ds.GeigerWarningCount != 0 {
         s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
-	}
+    }
     s += fmt.Sprintf("\n")
 
     // Done
