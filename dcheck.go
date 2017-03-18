@@ -447,7 +447,11 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("\n")
 
     // Errors
-    s += fmt.Sprintf("Errors:\n")
+	if ds.Boots == 1 {
+	    s += fmt.Sprintf("Errors:\n")
+	} else {
+	    s += fmt.Sprintf("Errors across %d sessions:\n", ds.Boots)
+	}
     s += fmt.Sprintf("Opc:    %d\n", ds.PrevErrorsOpc+ds.ThisErrorsOpc)
     s += fmt.Sprintf("Pms:    %d\n", ds.PrevErrorsPms+ds.ThisErrorsPms)
     s += fmt.Sprintf("Bme0:   %d\n", ds.PrevErrorsBme0+ds.ThisErrorsBme0)
