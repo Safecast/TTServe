@@ -37,7 +37,7 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
 	// Begin taking stats
-	stats := NewMeasurementDataset(deviceidstr, timeRange)
+	stats := NewMeasurementDataset(deviceidstr)
 
 	// Split the contents into a number of slices based on the commas
 	splitContents := strings.Split(string(contents), "\n,")

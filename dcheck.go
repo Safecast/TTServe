@@ -45,7 +45,6 @@ type MeasurementStat struct {
 // Stats about all measurements
 type MeasurementDataset struct {
     DeviceId            uint32
-    LogRange            string
     OldestUpload        time.Time
     NewestUpload        time.Time
     MinUploadGapSecs    uint32
@@ -86,10 +85,9 @@ type MeasurementDataset struct {
     Boots               uint32
 }
 
-func NewMeasurementDataset(deviceidstr string, logRange string) MeasurementDataset {
+func NewMeasurementDataset(deviceidstr string) MeasurementDataset {
     ds := MeasurementDataset{}
 
-    ds.LogRange = logRange
     u64, _ := strconv.ParseUint(deviceidstr, 10, 32)
     ds.DeviceId = uint32(u64)
     ds.LoraModule = "LoRa"
@@ -379,7 +377,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("\n")
     }
 
-    s += fmt.Sprintf("%d measurements over %s within %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)), ds.LogRange)
+    s += fmt.Sprintf("%d measurements in %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)))
     s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("\n")
