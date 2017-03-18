@@ -859,19 +859,21 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // Solarcast summary
     s += fmt.Sprintf("Solarcast Checklist:\n")
 
-    s += fmt.Sprintf("  Verification is done in a single session of >24 hours?  ");
     if ds.Boots == 1 && uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Hour) > 24 {
-        s += fmt.Sprintf("PASS\n")
+        s += fmt.Sprintf("  PASS  ")
     } else {
-        s += fmt.Sprintf(" -- \n");
+        s += fmt.Sprintf("   --   ");
     }
-    s += fmt.Sprintf("  Roughly half of the transports are done using Lora vs Fona?  ")
+    s += fmt.Sprintf("Verification is done in a single session of >24 hours.\n");
+
     diff := math.Abs(float64(ds.LoraTransports) - float64(ds.FonaTransports))
-    if (diff / float64(ds.Measurements)) <= 0.15 {
-        s += fmt.Sprintf("PASS\n")
+	pct := diff / float64(ds.Measurements)
+    if pct <= 0.15 {
+        s += fmt.Sprintf("  PASS  ")
     } else {
-        s += fmt.Sprintf(" -- \n");
+        s += fmt.Sprintf("   --   ");
     }
+    s += fmt.Sprintf("Roughly half of the transports are done using Lora vs Fona. %d %d\n", diff, pct)
 
     s += fmt.Sprintf("\n")
 
