@@ -41,6 +41,20 @@ type MeasurementStat struct {
     ErrorsTwi           uint32
     ErrorsTwiInfo       string
     UptimeMinutes       uint32
+	hasBat				bool
+	BatWarning			bool
+	hasEnv				bool
+	EnvWarning			bool
+	hasEnc				bool
+	EncWarning			bool
+	hasGeiger			bool
+	hasMultiGeiger		bool
+	GeigerWarning		bool
+	hasPms				bool
+	PmsWarning			bool
+	hasOpc				bool
+	OpcWarning			bool
+
 }
 
 // Stats about all measurements
@@ -98,6 +112,25 @@ type MeasurementDataset struct {
     PrevUptimeMinutes   uint32
     MaxUptimeMinutes    uint32
     Boots               uint32
+	BatCount			uint32
+	BatWarningCount		uint32
+	BatWarningFirst		time.Time
+	EnvCount			uint32
+	EnvWarningCount		uint32
+	EnvWarningFirst		time.Time
+	EncCount			uint32
+	EncWarningCount		uint32
+	EncWarningFirst		time.Time
+	GeigerCount			uint32
+	MultiGeigerCount	uint32
+	GeigerWarningCount	int32
+	GeigerWarningFirst	time.Time
+	PmsCount			uint32
+	PmsWarningCount		uint32
+	PmsWarningFirst		time.Time
+	OpcCount			uint32
+	OpcWarningCount		uint32
+	OpcWarningFirst		time.Time
 }
 
 func NewMeasurementDataset(deviceidstr string) MeasurementDataset {
@@ -211,6 +244,136 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 
     }
 
+    if sd.Bat != nil {
+		stat.hasBat = true
+		if sd.Bat.Voltage != nil {
+			val := *sd.Bat.Voltage
+			if val < 3.0 || val > 4.5 {
+				stat.BatWarning = true
+			}
+		}
+		if sd.Bat.Current != nil {
+			val := *sd.Bat.Current
+			if val < -2000.0 || val > 10 {
+				stat.BatWarning = true
+			}
+		}
+		if sd.Bat.Charge != nil {
+			val := *sd.Bat.Charge
+			if val < 25.0 || val > 200 {
+				stat.BatWarning = true
+			}
+		}
+	}
+
+    if sd.Env != nil {
+		stat.hasEnv = true
+		if sd.Env.Temp != nil {
+			val := *sd.Env.Temp
+			if val < -25.0 || val > 38.0 {
+				stat.EnvWarning = true
+			}
+		}
+		if sd.Env.Humid != nil {
+			val := *sd.Env.Humid
+			if val < 0 || val > 100 {
+				stat.EnvWarning = true
+			}
+		}
+	}
+
+    if sd.Dev != nil {
+		stat.hasEnc = true
+		if sd.Dev.Temp != nil {
+			val := *sd.Dev.Temp
+			if val < -25.0 || val > 38.0 {
+				stat.EncWarning = true
+			}
+		}
+		if sd.Dev.Humid != nil {
+			val := *sd.Dev.Humid
+			if val < 0 || val > 100 {
+				stat.EncWarning = true
+			}
+		}
+	}
+
+    if sd.Lnd != nil {
+		stat.hasGeiger = true
+		tubeCount := 0
+		if sd.Lnd.U7318 != nil {
+			val := *sd.Lnd.U7318
+			if val < 0 || val > 500 {
+				stat.GeigerWarning = true
+			} else {
+				tubeCount++
+			}
+		}
+		if sd.Lnd.C7318 != nil {
+			val := *sd.Lnd.C7318
+			if val < 0 || val > 500 {
+				stat.GeigerWarning = true
+			} else {
+				tubeCount++
+			}
+		}
+		if sd.Lnd.EC7128 != nil {
+			val := *sd.Lnd.EC7128
+			if val < 0 || val > 500 {
+				stat.GeigerWarning = true
+			} else {
+				tubeCount++
+			}
+		}
+		if tubeCount > 1 {
+			stat.hasMultiGeiger = true
+		}
+	}
+
+    if sd.Pms != nil {
+		stat.hasPms = true
+		if sd.Pms.Pm01_0 != nil {
+			val := *sd.Pms.Pm01_0
+			if val < -0 || val > 500 {
+				stat.PmsWarning = true
+			}
+		}
+		if sd.Pms.Pm02_5 != nil {
+			val := *sd.Pms.Pm02_5
+			if val < -0 || val > 500 {
+				stat.PmsWarning = true
+			}
+		}
+		if sd.Pms.Pm10_0 != nil {
+			val := *sd.Pms.Pm10_0
+			if val < -0 || val > 500 {
+				stat.PmsWarning = true
+			}
+		}
+	}
+
+    if sd.Opc != nil {
+		stat.hasOpc = true
+		if sd.Opc.Pm01_0 != nil {
+			val := *sd.Opc.Pm01_0
+			if val < -0 || val > 500 {
+				stat.OpcWarning = true
+			}
+		}
+		if sd.Opc.Pm02_5 != nil {
+			val := *sd.Opc.Pm02_5
+			if val < -0 || val > 500 {
+				stat.OpcWarning = true
+			}
+		}
+		if sd.Opc.Pm10_0 != nil {
+			val := *sd.Opc.Pm10_0
+			if val < -0 || val > 500 {
+				stat.OpcWarning = true
+			}
+		}
+	}
+	
     // Done
     return stat
 
@@ -421,6 +584,65 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.PrevUptimeMinutes = stat.UptimeMinutes
     }
 
+	// Sensors
+	if stat.hasBat {
+		ds.BatCount++
+	}
+	if stat.hasEnv {
+		ds.EnvCount++
+	}
+	if stat.hasEnc {
+		ds.EncCount++
+	}
+	if stat.hasGeiger {
+		ds.GeigerCount++
+	}
+	if stat.hasMultiGeiger {
+		ds.MultiGeigerCount++
+	}
+	if stat.hasPms {
+		ds.PmsCount++
+	}
+	if stat.hasOpc {
+		ds.OpcCount++
+	}
+	if stat.BatWarning {
+		if ds.BatWarningCount == 0 {
+			ds.BatWarningFirst = stat.Uploaded
+		}
+		ds.BatWarningCount++
+	}
+	if stat.EnvWarning {
+		if ds.EnvWarningCount == 0 {
+			ds.EnvWarningFirst = stat.Uploaded
+		}
+		ds.EnvWarningCount++
+	}
+	if stat.EncWarning {
+		if ds.EncWarningCount == 0 {
+			ds.EncWarningFirst = stat.Uploaded
+		}
+		ds.EncWarningCount++
+	}
+	if stat.GeigerWarning {
+		if ds.GeigerWarningCount == 0 {
+			ds.GeigerWarningFirst = stat.Uploaded
+		}
+		ds.GeigerWarningCount++
+	}
+	if stat.PmsWarning {
+		if ds.PmsWarningCount == 0 {
+			ds.PmsWarningFirst = stat.Uploaded
+		}
+		ds.PmsWarningCount++
+	}
+	if stat.OpcWarning {
+		if ds.OpcWarningCount == 0 {
+			ds.OpcWarningFirst = stat.Uploaded
+		}
+		ds.OpcWarningCount++
+	}
+
     // Done
 
 }
@@ -431,7 +653,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     // High-level stats
     s += fmt.Sprintf("** %d Health Check\n", ds.DeviceId)
-    s += fmt.Sprintf("** %s UTC\n", time.Now().Format(logDateFormat))
+    s += fmt.Sprintf("** %s\n", time.Now().Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("\n")
 
     if ds.Boots == 1 {
@@ -570,6 +792,40 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         }
         s += fmt.Sprintf("\n")
     }
+
+    // Sensors
+    s += fmt.Sprintf("Sensor Uploads:\n")
+	if ds.BatWarningCount == 0 {
+		s += fmt.Sprintf("Bat: %d\n", ds.BatCount)
+	} else {
+		s += fmt.Sprintf("Bat: %d (%d OOR %s)\n", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.Format("2006-01-02 15:04 UTC"))
+	}
+	if ds.EnvWarningCount == 0 {
+		s += fmt.Sprintf("Env: %d\n", ds.EnvCount)
+	} else {
+		s += fmt.Sprintf("Env: %d (%d OOR %s)\n", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.Format("2006-01-02 15:04 UTC"))
+	}
+	if ds.EncWarningCount == 0 {
+		s += fmt.Sprintf("Enc: %d\n", ds.EncCount)
+	} else {
+		s += fmt.Sprintf("Enc: %d (%d OOR %s)\n", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.Format("2006-01-02 15:04 UTC"))
+	}
+	if ds.PmsWarningCount == 0 {
+		s += fmt.Sprintf("Pms: %d\n", ds.PmsCount)
+	} else {
+		s += fmt.Sprintf("Pms: %d (%d OOR %s)\n", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.Format("2006-01-02 15:04 UTC"))
+	}
+	if ds.OpcWarningCount == 0 {
+		s += fmt.Sprintf("Opc: %d\n", ds.OpcCount)
+	} else {
+		s += fmt.Sprintf("Opc: %d (%d OOR %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.Format("2006-01-02 15:04 UTC"))
+	}
+	if ds.GeigerWarningCount == 0 {
+		s += fmt.Sprintf("Geiger: %d\n", ds.GeigerCount)
+	} else {
+		s += fmt.Sprintf("Geiger: %d (%d OOR %s)\n", ds.GeigerCount, ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
+	}
+	s += fmt.Sprintf("Geiger: %d (multi-tube)\n", ds.GeigerCount)
 
     // Done
     return s
