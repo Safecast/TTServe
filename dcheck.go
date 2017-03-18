@@ -781,19 +781,19 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
 	geigerConfig := ""
     if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-		geigerConfig = "No tubes configured"
+		geigerConfig = "[no tubes configured]"
         s += fmt.Sprintf("  Lnd 0")
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-		geigerConfig = "SINGLE pancake configuration"
-        s += fmt.Sprintf("  Lnd %d [%s]", ds.LndU7318Count, geigerConfig)
+		geigerConfig = "[SINGLE pancake configuration]"
+        s += fmt.Sprintf("  Lnd %d %s", ds.LndU7318Count, geigerConfig)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
         s += fmt.Sprintf("  Lnd %d|%d", ds.LndU7318Count, ds.LndC7318Count)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
-		geigerConfig = "dual-tube EC configuration"
-        s += fmt.Sprintf("  Lnd %d|%d [%s]", ds.LndU7318Count, ds.LndEC7128Count, geigerConfig)
+		geigerConfig = "[dual-tube EC configuration]"
+        s += fmt.Sprintf("  Lnd %d|%d %s", ds.LndU7318Count, ds.LndEC7128Count, geigerConfig)
     } else {
-		geigerConfig = "UNRECOGNIZED configuration"
-        s += fmt.Sprintf("  Lnd %du|%dc|%dec [%s]", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, geigerConfig)
+		geigerConfig = "[UNRECOGNIZED configuration]"
+        s += fmt.Sprintf("  Lnd %du|%dc|%dec %s", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, geigerConfig)
     }
     if ds.GeigerWarningCount != 0 {
         s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
@@ -901,7 +901,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     } else {
         s += fmt.Sprintf("   --   ");
     }
-    s += fmt.Sprintf("Both pancake tubes measured data.\n");
+    s += fmt.Sprintf("Both pancake tubes measured data. %s\n", geigerConfig);
 
     if ds.BatCount != 0 && ds.EnvCount != 0 && ds.EncCount != 0 && ds.PmsCount != 0 && ds.OpcCount != 0 && geigerConfig == "" {
         s += fmt.Sprintf("  PASS  ")
