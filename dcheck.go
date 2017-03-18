@@ -693,7 +693,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         return s
     }
     if ds.Measurements > 1 {
-        s += fmt.Sprintf("Frequency: (%s - %s)\n", AgoMinutes(ds.MinUploadGapSecs/60), AgoMinutes(ds.MaxUploadGapSecs/60))
+        s += fmt.Sprintf("Frequency: (%s to %s)\n", AgoMinutes(ds.MinUploadGapSecs/60), AgoMinutes(ds.MaxUploadGapSecs/60))
         f := 100*float32(ds.GapsGt1week) / float32(ds.GapsGt0m)
         if f != 0 {
             s += fmt.Sprintf("  >1w  %02.0f%% (%d)\n", f, ds.GapsGt1week)
