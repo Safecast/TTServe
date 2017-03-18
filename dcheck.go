@@ -409,13 +409,13 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("** %s UTC\n", time.Now().Format(logDateFormat))
     s += fmt.Sprintf("\n")
 
-    if ds.Boots > 1 {
-        s += fmt.Sprintf("Boots: %d\n", ds.Boots)
-    }
-    if ds.MaxUptimeMinutes != 0 {
-        s += fmt.Sprintf("Uptime: %s max\n", AgoMinutes(ds.MaxUptimeMinutes))
-        s += fmt.Sprintf("\n")
-    }
+	if ds.Boots == 1 {
+	    if ds.MaxUptimeMinutes != 0 {
+	        s += fmt.Sprintf("Uptime: %s\n", AgoMinutes(ds.MaxUptimeMinutes))
+	    }
+	} else {
+        s += fmt.Sprintf("Max uptime of %s across %d sessions\n", AgoMinutes(ds.MaxUptimeMinutes), ds.Boots)
+	}
 
     s += fmt.Sprintf("%d measurements in %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)))
     s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
