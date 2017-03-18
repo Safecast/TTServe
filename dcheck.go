@@ -283,14 +283,15 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 	}
 
     if sd.Dev != nil {
-		stat.hasEnc = true
 		if sd.Dev.Temp != nil {
+			stat.hasEnc = true
 			val := *sd.Dev.Temp
 			if val < -25.0 || val > 38.0 {
 				stat.EncWarning = true
 			}
 		}
 		if sd.Dev.Humid != nil {
+			stat.hasEnc = true
 			val := *sd.Dev.Humid
 			if val < 0 || val > 100 {
 				stat.EncWarning = true
@@ -826,7 +827,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 		s += fmt.Sprintf("Lnd: %d (%d OOR %s)\n", ds.GeigerCount, ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
 	}
 	if ds.GeigerCount != ds.MultiGeigerCount {
-		s += fmt.Sprintf("Lnd: only one tube reported %d/%d\n", ds.GeigerCount-ds.MultiGeigerCount, ds.GeigerCount)
+		s += fmt.Sprintf("Lnd: %d occurrences of only a single tube reporting\n", ds.GeigerCount-ds.MultiGeigerCount)
 	}
 
     // Done
