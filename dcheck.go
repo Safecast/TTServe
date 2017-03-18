@@ -677,9 +677,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("  Total  %d over the course of %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)))
     if ds.TestMeasurements != 0 {
         if ds.Measurements == ds.TestMeasurements {
-            s += fmt.Sprintf("       All of those are TEST measurements\n");
+            s += fmt.Sprintf("         (All of those are TEST measurements)\n");
         } else {
-            s += fmt.Sprintf("       %d of those are TEST measurements\n", ds.TestMeasurements)
+            s += fmt.Sprintf("         (%d of those are TEST measurements)\n", ds.TestMeasurements)
         }
     }
     s += fmt.Sprintf("  Oldest %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
@@ -689,8 +689,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // Network
     s += fmt.Sprintf("Communications:\n  over  %s\n", ds.Transports)
     if ds.AnyTransport {
-        s += fmt.Sprintf("  using %02.0f%% (%d) %s\n", 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports, ds.LoraModule)
-        s += fmt.Sprintf("  using %02.0f%% (%d) %s\n", 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports, ds.FonaModule)
+        s += fmt.Sprintf("  using%4.0f%% (%d) %s\n", 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports, ds.LoraModule)
+        s += fmt.Sprintf("  using%4.0f%% (%d) %s\n", 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports, ds.FonaModule)
     }
     s += fmt.Sprintf("\n")
 
