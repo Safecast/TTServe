@@ -689,12 +689,12 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // Network
     s += fmt.Sprintf("Communications:\n  over  %s\n", ds.Transports)
     if ds.AnyTransport {
-		if ds.LoraTransports != 0 {
-	        s += fmt.Sprintf("  using%4.0f%% (%d) %s\n", 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports, ds.LoraModule)
-		}
-		if ds.FonaTransports != 0 {
-	        s += fmt.Sprintf("  using%4.0f%% (%d) %s\n", 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports, ds.FonaModule)
-		}
+        if ds.LoraTransports != 0 {
+            s += fmt.Sprintf("  using%4.0f%% (%d) %s\n", 100*float32(ds.LoraTransports)/float32(ds.Measurements), ds.LoraTransports, ds.LoraModule)
+        }
+        if ds.FonaTransports != 0 {
+            s += fmt.Sprintf("  using%4.0f%% (%d) %s\n", 100*float32(ds.FonaTransports)/float32(ds.Measurements), ds.FonaTransports, ds.FonaModule)
+        }
     }
     s += fmt.Sprintf("\n")
 
@@ -751,64 +751,6 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("\n")
     }
 
-    // Errors
-    if ds.AnyErrors {
-        if ds.Boots == 1 {
-            s += fmt.Sprintf("Errors:\n")
-        } else {
-            s += fmt.Sprintf("Errors across %d sessions:\n", ds.Boots)
-        }
-        i := ds.PrevErrorsOpc + ds.ThisErrorsOpc
-        if i > 0 {
-            s += fmt.Sprintf("Opc:    %d\n", i)
-        }
-        i = ds.PrevErrorsPms + ds.ThisErrorsPms
-        if i > 0 {
-            s += fmt.Sprintf("Pms:    %d\n", i)
-        }
-        i = ds.PrevErrorsBme0 + ds.ThisErrorsBme0
-        if i > 0 {
-            s += fmt.Sprintf("Bme0:   %d\n", i)
-        }
-        i = ds.PrevErrorsBme1 + ds.ThisErrorsBme1
-        if i > 0 {
-            s += fmt.Sprintf("Bme1:   %d\n", i)
-        }
-        i = ds.PrevErrorsLora + ds.ThisErrorsLora
-        if i > 0 {
-            s += fmt.Sprintf("Lora:   %d\n", i)
-        }
-        i = ds.PrevErrorsFona + ds.ThisErrorsFona
-        if i > 0 {
-            s += fmt.Sprintf("Fona:   %d\n", i)
-        }
-        i = ds.PrevErrorsGeiger + ds.ThisErrorsGeiger
-        if i > 0 {
-            s += fmt.Sprintf("Geiger: %d\n", i)
-        }
-        i = ds.PrevErrorsMax01 + ds.ThisErrorsMax01
-        if i > 0 {
-            s += fmt.Sprintf("Max01:  %d\n", i)
-        }
-        i = ds.PrevErrorsUgps + ds.ThisErrorsUgps
-        if i > 0 {
-            s += fmt.Sprintf("Ugps:   %d\n", i)
-        }
-        i = ds.PrevErrorsLis + ds.ThisErrorsLis
-        if i > 0 {
-            s += fmt.Sprintf("Lis:    %d\n", i)
-        }
-        i = ds.PrevErrorsSpi + ds.ThisErrorsSpi
-        if i > 0 {
-            s += fmt.Sprintf("Spi:    %d\n", i)
-        }
-        i = ds.PrevErrorsTwi + ds.ThisErrorsTwi
-        if i > 0 || ds.ErrorsTwiInfo != "" {
-            s += fmt.Sprintf("Twi:    %d %s\n", i, ds.ErrorsTwiInfo)
-        }
-        s += fmt.Sprintf("\n")
-    }
-
     // Sensors
     s += fmt.Sprintf("Sensors:\n")
     if ds.BatWarningCount == 0 {
@@ -850,6 +792,66 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     if ds.GeigerWarningCount != 0 {
         s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
+    }
+    s += fmt.Sprintf("\n")
+
+    // Errors
+    if ds.Boots == 1 {
+        s += fmt.Sprintf("Errors:\n")
+    } else {
+        s += fmt.Sprintf("Errors across %d sessions:\n", ds.Boots)
+    }
+    if !ds.AnyErrors {
+        s += fmt.Sprintf("  None\n")
+    } else {
+        i := ds.PrevErrorsOpc + ds.ThisErrorsOpc
+        if i > 0 {
+            s += fmt.Sprintf("  Opc    %d\n", i)
+        }
+        i = ds.PrevErrorsPms + ds.ThisErrorsPms
+        if i > 0 {
+            s += fmt.Sprintf("  Pms    %d\n", i)
+        }
+        i = ds.PrevErrorsBme0 + ds.ThisErrorsBme0
+        if i > 0 {
+            s += fmt.Sprintf("  Bme0   %d\n", i)
+        }
+        i = ds.PrevErrorsBme1 + ds.ThisErrorsBme1
+        if i > 0 {
+            s += fmt.Sprintf("  Bme1   %d\n", i)
+        }
+        i = ds.PrevErrorsLora + ds.ThisErrorsLora
+        if i > 0 {
+            s += fmt.Sprintf("  Lora   %d\n", i)
+        }
+        i = ds.PrevErrorsFona + ds.ThisErrorsFona
+        if i > 0 {
+            s += fmt.Sprintf("  Fona   %d\n", i)
+        }
+        i = ds.PrevErrorsGeiger + ds.ThisErrorsGeiger
+        if i > 0 {
+            s += fmt.Sprintf("  Geiger %d\n", i)
+        }
+        i = ds.PrevErrorsMax01 + ds.ThisErrorsMax01
+        if i > 0 {
+            s += fmt.Sprintf("  Max01  %d\n", i)
+        }
+        i = ds.PrevErrorsUgps + ds.ThisErrorsUgps
+        if i > 0 {
+            s += fmt.Sprintf("  Ugps   %d\n", i)
+        }
+        i = ds.PrevErrorsLis + ds.ThisErrorsLis
+        if i > 0 {
+            s += fmt.Sprintf("  Lis    %d\n", i)
+        }
+        i = ds.PrevErrorsSpi + ds.ThisErrorsSpi
+        if i > 0 {
+            s += fmt.Sprintf("  Spi    %d\n", i)
+        }
+        i = ds.PrevErrorsTwi + ds.ThisErrorsTwi
+        if i > 0 || ds.ErrorsTwiInfo != "" {
+            s += fmt.Sprintf("  Twi    %d %s\n", i, ds.ErrorsTwiInfo)
+        }
     }
     s += fmt.Sprintf("\n")
 
