@@ -800,43 +800,43 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
 
     // Sensors
-    s += fmt.Sprintf("Sensor Uploads:\n")
+    s += fmt.Sprintf("Sensors:\n")
     if ds.BatWarningCount == 0 {
-        s += fmt.Sprintf("Bat: %d\n", ds.BatCount)
+        s += fmt.Sprintf("  Bat: %d\n", ds.BatCount)
     } else {
-        s += fmt.Sprintf("Bat: %d (%d out of range %s)\n", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.Format("2006-01-02 15:04 UTC"))
+        s += fmt.Sprintf("  Bat: %d (%d out of range %s)\n", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.Format("2006-01-02 15:04 UTC"))
     }
     if ds.EnvWarningCount == 0 {
-        s += fmt.Sprintf("Env: %d\n", ds.EnvCount)
+        s += fmt.Sprintf("  Env: %d\n", ds.EnvCount)
     } else {
-        s += fmt.Sprintf("Env: %d (%d out of range %s)\n", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.Format("2006-01-02 15:04 UTC"))
+        s += fmt.Sprintf("  Env: %d (%d out of range %s)\n", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.Format("2006-01-02 15:04 UTC"))
     }
     if ds.EncWarningCount == 0 {
-        s += fmt.Sprintf("Enc: %d\n", ds.EncCount)
+        s += fmt.Sprintf("  Enc: %d\n", ds.EncCount)
     } else {
-        s += fmt.Sprintf("Enc: %d (%d out of range %s)\n", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.Format("2006-01-02 15:04 UTC"))
+        s += fmt.Sprintf("  Enc: %d (%d out of range %s)\n", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.Format("2006-01-02 15:04 UTC"))
     }
     if ds.PmsWarningCount == 0 {
-        s += fmt.Sprintf("Pms: %d\n", ds.PmsCount)
+        s += fmt.Sprintf("  Pms: %d\n", ds.PmsCount)
     } else {
-        s += fmt.Sprintf("Pms: %d (%d out of range %s)\n", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.Format("2006-01-02 15:04 UTC"))
+        s += fmt.Sprintf("  Pms: %d (%d out of range %s)\n", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.Format("2006-01-02 15:04 UTC"))
     }
     if ds.OpcWarningCount == 0 {
-        s += fmt.Sprintf("Opc: %d\n", ds.OpcCount)
+        s += fmt.Sprintf("  Opc: %d\n", ds.OpcCount)
     } else {
-        s += fmt.Sprintf("Opc: %d (%d out of range %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.Format("2006-01-02 15:04 UTC"))
+        s += fmt.Sprintf("  Opc: %d (%d out of range %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.Format("2006-01-02 15:04 UTC"))
     }
 
     if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-        s += fmt.Sprintf("Lnd: 0")
+        s += fmt.Sprintf("  Lnd: 0")
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-        s += fmt.Sprintf("Lnd: %d [SINGLE pancake configuration]", ds.LndU7318Count)
+        s += fmt.Sprintf("  Lnd: %d [SINGLE pancake configuration]", ds.LndU7318Count)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
-        s += fmt.Sprintf("Lnd: %d|%d", ds.LndU7318Count, ds.LndC7318Count)
+        s += fmt.Sprintf("  Lnd: %d|%d", ds.LndU7318Count, ds.LndC7318Count)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
-        s += fmt.Sprintf("Lnd: %d|%d [dual-tube EC configuration]", ds.LndU7318Count, ds.LndEC7128Count)
+        s += fmt.Sprintf("  Lnd: %d|%d [dual-tube EC configuration]", ds.LndU7318Count, ds.LndEC7128Count)
     } else {
-        s += fmt.Sprintf("Lnd: %du|%dc|%dec (UNRECOGNIZED configuration)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count)
+        s += fmt.Sprintf("  Lnd: %du|%dc|%dec (UNRECOGNIZED configuration)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count)
     }
     if ds.GeigerWarningCount != 0 {
         s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
