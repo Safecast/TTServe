@@ -41,20 +41,20 @@ type MeasurementStat struct {
     ErrorsTwi           uint32
     ErrorsTwiInfo       string
     UptimeMinutes       uint32
-	hasBat				bool
-	BatWarning			bool
-	hasEnv				bool
-	EnvWarning			bool
-	hasEnc				bool
-	EncWarning			bool
-	hasLndU7318			bool
-	hasLndC7318			bool
-	hasLndEC7128		bool
-	GeigerWarning		bool
-	hasPms				bool
-	PmsWarning			bool
-	hasOpc				bool
-	OpcWarning			bool
+    hasBat              bool
+    BatWarning          bool
+    hasEnv              bool
+    EnvWarning          bool
+    hasEnc              bool
+    EncWarning          bool
+    hasLndU7318         bool
+    hasLndC7318         bool
+    hasLndEC7128        bool
+    GeigerWarning       bool
+    hasPms              bool
+    PmsWarning          bool
+    hasOpc              bool
+    OpcWarning          bool
 
 }
 
@@ -113,26 +113,26 @@ type MeasurementDataset struct {
     PrevUptimeMinutes   uint32
     MaxUptimeMinutes    uint32
     Boots               uint32
-	BatCount			uint32
-	BatWarningCount		uint32
-	BatWarningFirst		time.Time
-	EnvCount			uint32
-	EnvWarningCount		uint32
-	EnvWarningFirst		time.Time
-	EncCount			uint32
-	EncWarningCount		uint32
-	EncWarningFirst		time.Time
-	LndU7318Count		uint32
-	LndC7318Count		uint32
-	LndEC7128Count		uint32
-	GeigerWarningCount	int32
-	GeigerWarningFirst	time.Time
-	PmsCount			uint32
-	PmsWarningCount		uint32
-	PmsWarningFirst		time.Time
-	OpcCount			uint32
-	OpcWarningCount		uint32
-	OpcWarningFirst		time.Time
+    BatCount            uint32
+    BatWarningCount     uint32
+    BatWarningFirst     time.Time
+    EnvCount            uint32
+    EnvWarningCount     uint32
+    EnvWarningFirst     time.Time
+    EncCount            uint32
+    EncWarningCount     uint32
+    EncWarningFirst     time.Time
+    LndU7318Count       uint32
+    LndC7318Count       uint32
+    LndEC7128Count      uint32
+    GeigerWarningCount  int32
+    GeigerWarningFirst  time.Time
+    PmsCount            uint32
+    PmsWarningCount     uint32
+    PmsWarningFirst     time.Time
+    OpcCount            uint32
+    OpcWarningCount     uint32
+    OpcWarningFirst     time.Time
 }
 
 func NewMeasurementDataset(deviceidstr string) MeasurementDataset {
@@ -189,10 +189,10 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 
     if sd.Dev != nil {
 
-		if sd.Dev.Test != nil {
-			stat.Test = *sd.Dev.Test
-		}
-		
+        if sd.Dev.Test != nil {
+            stat.Test = *sd.Dev.Test
+        }
+
         if sd.Dev.ModuleLora != nil {
             stat.LoraModule = *sd.Dev.ModuleLora
         }
@@ -247,128 +247,134 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
     }
 
     if sd.Bat != nil {
-		stat.hasBat = true
-		if sd.Bat.Voltage != nil {
-			val := *sd.Bat.Voltage
-			if val < 3.0 || val > 4.5 {
-				stat.BatWarning = true
-			}
-		}
-		if sd.Bat.Current != nil {
-			val := *sd.Bat.Current
-			if val < -2000.0 || val > 10 {
-				stat.BatWarning = true
-			}
-		}
-		if sd.Bat.Charge != nil {
-			val := *sd.Bat.Charge
-			if val < 25.0 || val > 200 {
-				stat.BatWarning = true
-			}
-		}
-	}
+        stat.hasBat = true
+        if sd.Bat.Voltage != nil {
+            val := *sd.Bat.Voltage
+            if stat.Transport == "pointcast" || stat.Transport == "safecast-air" {
+                if val < 3.0 || val > 12.0 {
+                    stat.BatWarning = true
+                }
+            } else {
+                if val < 3.0 || val > 4.5 {
+                    stat.BatWarning = true
+                }
+            }
+        }
+        if sd.Bat.Current != nil {
+            val := *sd.Bat.Current
+            if val < -2000.0 || val > 10 {
+                stat.BatWarning = true
+            }
+        }
+        if sd.Bat.Charge != nil {
+            val := *sd.Bat.Charge
+            if val < 25.0 || val > 200 {
+                stat.BatWarning = true
+            }
+        }
+    }
 
     if sd.Env != nil {
-		stat.hasEnv = true
-		if sd.Env.Temp != nil {
-			val := *sd.Env.Temp
-			if val < -25.0 || val > 38.0 {
-				stat.EnvWarning = true
-			}
-		}
-		if sd.Env.Humid != nil {
-			val := *sd.Env.Humid
-			if val < 0 || val > 100 {
-				stat.EnvWarning = true
-			}
-		}
-	}
+        stat.hasEnv = true
+        if sd.Env.Temp != nil {
+            val := *sd.Env.Temp
+            if val < -25.0 || val > 38.0 {
+                stat.EnvWarning = true
+            }
+        }
+        if sd.Env.Humid != nil {
+            val := *sd.Env.Humid
+            if val < 0 || val > 100 {
+                stat.EnvWarning = true
+            }
+        }
+    }
 
     if sd.Dev != nil {
-		if sd.Dev.Temp != nil {
-			stat.hasEnc = true
-			val := *sd.Dev.Temp
-			if val < -25.0 || val > 38.0 {
-				stat.EncWarning = true
-			}
-		}
-		if sd.Dev.Humid != nil {
-			stat.hasEnc = true
-			val := *sd.Dev.Humid
-			if val < 0 || val > 100 {
-				stat.EncWarning = true
-			}
-		}
-	}
+        if sd.Dev.Temp != nil {
+            stat.hasEnc = true
+            val := *sd.Dev.Temp
+            if val < -25.0 || val > 38.0 {
+                stat.EncWarning = true
+            }
+        }
+        if sd.Dev.Humid != nil {
+            stat.hasEnc = true
+            val := *sd.Dev.Humid
+            if val < 0 || val > 100 {
+                stat.EncWarning = true
+            }
+        }
+    }
 
     if sd.Lnd != nil {
-		if sd.Lnd.U7318 != nil {
-			stat.hasLndU7318 = true
-			val := *sd.Lnd.U7318
-			if val < 0 || val > 500 {
-				stat.GeigerWarning = true
-			}
-		}
-		if sd.Lnd.C7318 != nil {
-			stat.hasLndC7318 = true
-			val := *sd.Lnd.C7318
-			if val < 0 || val > 500 {
-				stat.GeigerWarning = true
-			}
-		}
-		if sd.Lnd.EC7128 != nil {
-			stat.hasLndEC7128 = true
-			val := *sd.Lnd.EC7128
-			if val < 0 || val > 500 {
-				stat.GeigerWarning = true
-			}
-		}
-	}
+        if sd.Lnd.U7318 != nil {
+            stat.hasLndU7318 = true
+            val := *sd.Lnd.U7318
+            if val < 0 || val > 500 {
+                stat.GeigerWarning = true
+            }
+        }
+        if sd.Lnd.C7318 != nil {
+            stat.hasLndC7318 = true
+            val := *sd.Lnd.C7318
+            if val < 0 || val > 500 {
+                stat.GeigerWarning = true
+            }
+        }
+        if sd.Lnd.EC7128 != nil {
+            stat.hasLndEC7128 = true
+            val := *sd.Lnd.EC7128
+            if val < 0 || val > 500 {
+                stat.GeigerWarning = true
+            }
+        }
+    }
 
     if sd.Pms != nil {
-		stat.hasPms = true
-		if sd.Pms.Pm01_0 != nil {
-			val := *sd.Pms.Pm01_0
-			if val < -0 || val > 500 {
-				stat.PmsWarning = true
-			}
-		}
-		if sd.Pms.Pm02_5 != nil {
-			val := *sd.Pms.Pm02_5
-			if val < -0 || val > 500 {
-				stat.PmsWarning = true
-			}
-		}
-		if sd.Pms.Pm10_0 != nil {
-			val := *sd.Pms.Pm10_0
-			if val < -0 || val > 500 {
-				stat.PmsWarning = true
-			}
-		}
-	}
+        stat.hasPms = true
+        if sd.Pms.Pm01_0 != nil {
+            val := *sd.Pms.Pm01_0
+            if val < -0 || val > 500 {
+                stat.PmsWarning = true
+            }
+        }
+        if sd.Pms.Pm02_5 != nil {
+            val := *sd.Pms.Pm02_5
+            if val < -0 || val > 500 {
+                stat.PmsWarning = true
+            }
+        }
+        if sd.Pms.Pm10_0 != nil {
+            val := *sd.Pms.Pm10_0
+            if val < -0 || val > 500 {
+                stat.PmsWarning = true
+            }
+        }
+    }
 
     if sd.Opc != nil {
-		stat.hasOpc = true
-		if sd.Opc.Pm01_0 != nil {
-			val := *sd.Opc.Pm01_0
-			if val < -0 || val > 500 {
-				stat.OpcWarning = true
-			}
-		}
-		if sd.Opc.Pm02_5 != nil {
-			val := *sd.Opc.Pm02_5
-			if val < -0 || val > 500 {
-				stat.OpcWarning = true
-			}
-		}
-		if sd.Opc.Pm10_0 != nil {
-			val := *sd.Opc.Pm10_0
-			if val < -0 || val > 500 {
-				stat.OpcWarning = true
-			}
-		}
-	}
-	
+        stat.hasOpc = true
+        if sd.Opc.Pm01_0 != nil {
+            val := *sd.Opc.Pm01_0
+            if val < -0 || val > 500 {
+                stat.OpcWarning = true
+            }
+        }
+        if sd.Opc.Pm02_5 != nil {
+            val := *sd.Opc.Pm02_5
+            if val < -0 || val > 500 {
+                stat.OpcWarning = true
+            }
+        }
+        if sd.Opc.Pm10_0 != nil {
+            val := *sd.Opc.Pm10_0
+            if val < -0 || val > 500 {
+                stat.OpcWarning = true
+            }
+        }
+    }
+
     // Done
     return stat
 
@@ -382,9 +388,9 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         return
     }
     ds.Measurements++
-	if stat.Test {
-	    ds.TestMeasurements++
-	}
+    if stat.Test {
+        ds.TestMeasurements++
+    }
 
     // Timing
     if ds.Measurements == 1 {
@@ -579,67 +585,67 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.PrevUptimeMinutes = stat.UptimeMinutes
     }
 
-	// Sensors
-	if stat.hasBat {
-		ds.BatCount++
-	}
-	if stat.hasEnv {
-		ds.EnvCount++
-	}
-	if stat.hasEnc {
-		ds.EncCount++
-	}
-	if stat.hasLndU7318 {
-		ds.LndU7318Count++
-	}
-	if stat.hasLndC7318 {
-		ds.LndC7318Count++
-	}
-	if stat.hasLndEC7128 {
-		ds.LndEC7128Count++
-	}
-	if stat.hasPms {
-		ds.PmsCount++
-	}
-	if stat.hasOpc {
-		ds.OpcCount++
-	}
-	if stat.BatWarning {
-		if ds.BatWarningCount == 0 {
-			ds.BatWarningFirst = stat.Uploaded
-		}
-		ds.BatWarningCount++
-	}
-	if stat.EnvWarning {
-		if ds.EnvWarningCount == 0 {
-			ds.EnvWarningFirst = stat.Uploaded
-		}
-		ds.EnvWarningCount++
-	}
-	if stat.EncWarning {
-		if ds.EncWarningCount == 0 {
-			ds.EncWarningFirst = stat.Uploaded
-		}
-		ds.EncWarningCount++
-	}
-	if stat.GeigerWarning {
-		if ds.GeigerWarningCount == 0 {
-			ds.GeigerWarningFirst = stat.Uploaded
-		}
-		ds.GeigerWarningCount++
-	}
-	if stat.PmsWarning {
-		if ds.PmsWarningCount == 0 {
-			ds.PmsWarningFirst = stat.Uploaded
-		}
-		ds.PmsWarningCount++
-	}
-	if stat.OpcWarning {
-		if ds.OpcWarningCount == 0 {
-			ds.OpcWarningFirst = stat.Uploaded
-		}
-		ds.OpcWarningCount++
-	}
+    // Sensors
+    if stat.hasBat {
+        ds.BatCount++
+    }
+    if stat.hasEnv {
+        ds.EnvCount++
+    }
+    if stat.hasEnc {
+        ds.EncCount++
+    }
+    if stat.hasLndU7318 {
+        ds.LndU7318Count++
+    }
+    if stat.hasLndC7318 {
+        ds.LndC7318Count++
+    }
+    if stat.hasLndEC7128 {
+        ds.LndEC7128Count++
+    }
+    if stat.hasPms {
+        ds.PmsCount++
+    }
+    if stat.hasOpc {
+        ds.OpcCount++
+    }
+    if stat.BatWarning {
+        if ds.BatWarningCount == 0 {
+            ds.BatWarningFirst = stat.Uploaded
+        }
+        ds.BatWarningCount++
+    }
+    if stat.EnvWarning {
+        if ds.EnvWarningCount == 0 {
+            ds.EnvWarningFirst = stat.Uploaded
+        }
+        ds.EnvWarningCount++
+    }
+    if stat.EncWarning {
+        if ds.EncWarningCount == 0 {
+            ds.EncWarningFirst = stat.Uploaded
+        }
+        ds.EncWarningCount++
+    }
+    if stat.GeigerWarning {
+        if ds.GeigerWarningCount == 0 {
+            ds.GeigerWarningFirst = stat.Uploaded
+        }
+        ds.GeigerWarningCount++
+    }
+    if stat.PmsWarning {
+        if ds.PmsWarningCount == 0 {
+            ds.PmsWarningFirst = stat.Uploaded
+        }
+        ds.PmsWarningCount++
+    }
+    if stat.OpcWarning {
+        if ds.OpcWarningCount == 0 {
+            ds.OpcWarningFirst = stat.Uploaded
+        }
+        ds.OpcWarningCount++
+    }
 
     // Done
 
@@ -663,13 +669,13 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
 
     s += fmt.Sprintf("%d uploads in %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)))
-	if ds.TestMeasurements != 0 {
-		if ds.Measurements == ds.TestMeasurements {
-		    s += fmt.Sprintf("All of those are TEST measurements\n");
-		} else {
-		    s += fmt.Sprintf("%d of those are TEST measurements\n", ds.TestMeasurements)
-		}
-	}
+    if ds.TestMeasurements != 0 {
+        if ds.Measurements == ds.TestMeasurements {
+            s += fmt.Sprintf("All of those are TEST measurements\n");
+        } else {
+            s += fmt.Sprintf("%d of those are TEST measurements\n", ds.TestMeasurements)
+        }
+    }
     s += fmt.Sprintf("Oldest: %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("Newest: %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
     s += fmt.Sprintf("\n")
@@ -793,44 +799,44 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     // Sensors
     s += fmt.Sprintf("Sensor Uploads:\n")
-	if ds.BatWarningCount == 0 {
-		s += fmt.Sprintf("Bat: %d\n", ds.BatCount)
-	} else {
-		s += fmt.Sprintf("Bat: %d (%d out of range %s)\n", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.Format("2006-01-02 15:04 UTC"))
-	}
-	if ds.EnvWarningCount == 0 {
-		s += fmt.Sprintf("Env: %d\n", ds.EnvCount)
-	} else {
-		s += fmt.Sprintf("Env: %d (%d out of range %s)\n", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.Format("2006-01-02 15:04 UTC"))
-	}
-	if ds.EncWarningCount == 0 {
-		s += fmt.Sprintf("Enc: %d\n", ds.EncCount)
-	} else {
-		s += fmt.Sprintf("Enc: %d (%d out of range %s)\n", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.Format("2006-01-02 15:04 UTC"))
-	}
-	if ds.PmsWarningCount == 0 {
-		s += fmt.Sprintf("Pms: %d\n", ds.PmsCount)
-	} else {
-		s += fmt.Sprintf("Pms: %d (%d out of range %s)\n", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.Format("2006-01-02 15:04 UTC"))
-	}
-	if ds.OpcWarningCount == 0 {
-		s += fmt.Sprintf("Opc: %d\n", ds.OpcCount)
-	} else {
-		s += fmt.Sprintf("Opc: %d (%d out of range %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.Format("2006-01-02 15:04 UTC"))
-	}
+    if ds.BatWarningCount == 0 {
+        s += fmt.Sprintf("Bat: %d\n", ds.BatCount)
+    } else {
+        s += fmt.Sprintf("Bat: %d (%d out of range %s)\n", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.Format("2006-01-02 15:04 UTC"))
+    }
+    if ds.EnvWarningCount == 0 {
+        s += fmt.Sprintf("Env: %d\n", ds.EnvCount)
+    } else {
+        s += fmt.Sprintf("Env: %d (%d out of range %s)\n", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.Format("2006-01-02 15:04 UTC"))
+    }
+    if ds.EncWarningCount == 0 {
+        s += fmt.Sprintf("Enc: %d\n", ds.EncCount)
+    } else {
+        s += fmt.Sprintf("Enc: %d (%d out of range %s)\n", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.Format("2006-01-02 15:04 UTC"))
+    }
+    if ds.PmsWarningCount == 0 {
+        s += fmt.Sprintf("Pms: %d\n", ds.PmsCount)
+    } else {
+        s += fmt.Sprintf("Pms: %d (%d out of range %s)\n", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.Format("2006-01-02 15:04 UTC"))
+    }
+    if ds.OpcWarningCount == 0 {
+        s += fmt.Sprintf("Opc: %d\n", ds.OpcCount)
+    } else {
+        s += fmt.Sprintf("Opc: %d (%d out of range %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.Format("2006-01-02 15:04 UTC"))
+    }
 
-	if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-		s += fmt.Sprintf("Lnd: %d [SINGLE pancake]", ds.LndU7318Count)
-	} else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
-		s += fmt.Sprintf("Lnd: %d|%d", ds.LndU7318Count, ds.LndC7318Count)
-	} else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
-		s += fmt.Sprintf("Lnd: %d|%d [dual-tube EC]", ds.LndU7318Count, ds.LndC7318Count)
-	} else {
-		s += fmt.Sprintf("Lnd: %du|%dc|%dec (UNRECOGNIZED configuration)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count)
-	}
-	if ds.GeigerWarningCount != 0 {
-		s += fmt.Sprintf(" (%d out of range %s)\n", ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
-	}
+    if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
+        s += fmt.Sprintf("Lnd: %d [SINGLE pancake]", ds.LndU7318Count)
+    } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
+        s += fmt.Sprintf("Lnd: %d|%d", ds.LndU7318Count, ds.LndC7318Count)
+    } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
+        s += fmt.Sprintf("Lnd: %d|%d [dual-tube EC]", ds.LndU7318Count, ds.LndC7318Count)
+    } else {
+        s += fmt.Sprintf("Lnd: %du|%dc|%dec (UNRECOGNIZED configuration)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count)
+    }
+    if ds.GeigerWarningCount != 0 {
+        s += fmt.Sprintf(" (%d out of range %s)\n", ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
+    }
 
     // Done
     return s
