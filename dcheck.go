@@ -47,8 +47,9 @@ type MeasurementStat struct {
 	EnvWarning			bool
 	hasEnc				bool
 	EncWarning			bool
-	hasGeiger			bool
-	hasMultiGeiger		bool
+	hasLndU7318			bool
+	hasLndC7318			bool
+	hasLndEC7128		bool
 	GeigerWarning		bool
 	hasPms				bool
 	PmsWarning			bool
@@ -121,8 +122,9 @@ type MeasurementDataset struct {
 	EncCount			uint32
 	EncWarningCount		uint32
 	EncWarningFirst		time.Time
-	GeigerCount			uint32
-	MultiGeigerCount	uint32
+	LndU7318Count		uint32
+	LndC7318Count		uint32
+	LndEC7128Count		uint32
 	GeigerWarningCount	int32
 	GeigerWarningFirst	time.Time
 	PmsCount			uint32
@@ -300,34 +302,26 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 	}
 
     if sd.Lnd != nil {
-		stat.hasGeiger = true
-		tubeCount := 0
 		if sd.Lnd.U7318 != nil {
+			stat.hasLndU7318 = true
 			val := *sd.Lnd.U7318
 			if val < 0 || val > 500 {
 				stat.GeigerWarning = true
-			} else {
-				tubeCount++
 			}
 		}
 		if sd.Lnd.C7318 != nil {
+			stat.hasLndC7318 = true
 			val := *sd.Lnd.C7318
 			if val < 0 || val > 500 {
 				stat.GeigerWarning = true
-			} else {
-				tubeCount++
 			}
 		}
 		if sd.Lnd.EC7128 != nil {
+			stat.hasLndEC7128 = true
 			val := *sd.Lnd.EC7128
 			if val < 0 || val > 500 {
 				stat.GeigerWarning = true
-			} else {
-				tubeCount++
 			}
-		}
-		if tubeCount > 1 {
-			stat.hasMultiGeiger = true
 		}
 	}
 
@@ -595,11 +589,14 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
 	if stat.hasEnc {
 		ds.EncCount++
 	}
-	if stat.hasGeiger {
-		ds.GeigerCount++
+	if stat.hasLndU7318 {
+		ds.LndU7318Count++
 	}
-	if stat.hasMultiGeiger {
-		ds.MultiGeigerCount++
+	if stat.hasLndC7318 {
+		ds.LndC7318Count++
+	}
+	if stat.hasLndEC7128 {
+		ds.LndEC7128Count++
 	}
 	if stat.hasPms {
 		ds.PmsCount++
@@ -821,13 +818,18 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	} else {
 		s += fmt.Sprintf("Opc: %d (%d OOR %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.Format("2006-01-02 15:04 UTC"))
 	}
-	if ds.GeigerWarningCount == 0 {
-		s += fmt.Sprintf("Lnd: %d\n", ds.GeigerCount)
+
+	if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
+		s += fmt.Sprintf("Lnd: %d [SINGLE pancake]", ds.LndU7318Count)
+	} else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
+		s += fmt.Sprintf("Lnd: %d|%d", ds.LndU7318Count, ds.LndC7318Count)
+	} else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
+		s += fmt.Sprintf("Lnd: %d|%d [dual-tube EC]", ds.LndU7318Count, ds.LndC7318Count)
 	} else {
-		s += fmt.Sprintf("Lnd: %d (%d OOR %s)\n", ds.GeigerCount, ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
+		s += fmt.Sprintf("Lnd: %du|%dc|%dec (UNRECOGNIZED configuration)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count)
 	}
-	if ds.GeigerCount != ds.MultiGeigerCount {
-		s += fmt.Sprintf("Lnd: %d occurrences of only a single tube reporting\n", ds.GeigerCount-ds.MultiGeigerCount)
+	if ds.GeigerWarningCount == 0 {
+		s += fmt.Sprintf(" (%d out of range %s)\n", ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
 	}
 
     // Done
