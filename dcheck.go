@@ -825,7 +825,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("Opc: %d (%d out of range %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.Format("2006-01-02 15:04 UTC"))
     }
 
-    if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
+    if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
+        s += fmt.Sprintf("Lnd: 0")
+    } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
         s += fmt.Sprintf("Lnd: %d [SINGLE pancake configuration]", ds.LndU7318Count)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
         s += fmt.Sprintf("Lnd: %d|%d", ds.LndU7318Count, ds.LndC7318Count)
@@ -835,8 +837,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("Lnd: %du|%dc|%dec (UNRECOGNIZED configuration)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count)
     }
     if ds.GeigerWarningCount != 0 {
-        s += fmt.Sprintf(" (%d out of range %s)\n", ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
-    }
+        s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.Format("2006-01-02 15:04 UTC"))
+	}
+    s += fmt.Sprintf("\n")
 
     // Done
     return s
