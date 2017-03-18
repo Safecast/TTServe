@@ -874,7 +874,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     } else {
         s += fmt.Sprintf("   --   ");
     }
-    s += fmt.Sprintf("Roughly half of the transports are done using Lora vs Fona. (%.0f diff of %.0f allowed)\n", pct*100, goal*100)
+    s += fmt.Sprintf("Less than %.0f variation between comms on either transport. (%.0f%% actual)\n", goal*100, pct*100)
 
     s += fmt.Sprintf("\n")
 
