@@ -21,6 +21,7 @@ import (
 type MeasurementStat struct {
     Valid               bool
     Test                bool
+	Firmware			string
     Uploaded            time.Time
     LoraModule          string
     FonaModule          string
@@ -67,6 +68,7 @@ type MeasurementStat struct {
 // Stats about all measurements
 type MeasurementDataset struct {
     DeviceId            uint32
+	Firmware			string
     OldestUpload        time.Time
     NewestUpload        time.Time
     MinUploadGapSecs    uint32
@@ -210,6 +212,10 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             stat.Test = *sd.Dev.Test
         }
 
+		if sd.Dev.AppVersion != nil {
+			stat.Firmware = *sd.Dev.AppVersion
+		}
+		
         if sd.Dev.ModuleLora != nil {
             stat.LoraModule = *sd.Dev.ModuleLora
         }
@@ -424,6 +430,11 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.TestMeasurements++
     }
 
+	// Only show the earliest firmware, forcing the user to clear stats if they have a later version
+	if stat.Firmware != "" && ds.Firmware != "" {
+		ds.Firmware = stat.Firmware
+	}
+	
     // Timing
     if ds.Measurements == 1 {
         ds.OldestUpload = stat.Uploaded
@@ -721,6 +732,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("Checkup:\n")
     s += fmt.Sprintf("  ID %d\n", ds.DeviceId)
     s += fmt.Sprintf("  at %s\n", time.Now().Format("2006-01-02 15:04 UTC"))
+	if ds.Firmware != "" {
+	    s += fmt.Sprintf("  on %s\n", ds.Firmware)
+	}
     s += fmt.Sprintf("\n")
 
     if ds.Boots == 1 {
