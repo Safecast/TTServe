@@ -846,6 +846,32 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("\n")
     }
 
+    // Connect errors
+    if ds.AnyConnectErrors {
+        s += fmt.Sprintf("Connection issues:\n")
+        i := ds.PrevErrorsConnectLora + ds.ThisErrorsConnectLora
+        if i > 0 {
+            s += fmt.Sprintf("  Lora     %d\n", i)
+        }
+        i = ds.PrevErrorsConnectFona + ds.ThisErrorsConnectFona
+        if i > 0 {
+            s += fmt.Sprintf("  Fona     %d\n", i)
+        }
+        i = ds.PrevErrorsConnectWireless + ds.ThisErrorsConnectWireless
+        if i > 0 {
+            s += fmt.Sprintf("  Wireless %d\n", i)
+        }
+        i = ds.PrevErrorsConnectData + ds.ThisErrorsConnectData
+        if i > 0 {
+            s += fmt.Sprintf("  Data     %d\n", i)
+        }
+        i = ds.PrevErrorsConnectService + ds.ThisErrorsConnectService
+        if i > 0 {
+            s += fmt.Sprintf("  Service  %d\n", i)
+        }
+    }
+    s += fmt.Sprintf("\n")
+
     // Sensors
     s += fmt.Sprintf("Sensor Measurements:\n")
     if ds.BatWarningCount == 0 {
@@ -893,32 +919,6 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
     s += fmt.Sprintf("\n")
-    s += fmt.Sprintf("\n")
-
-    // Connect errors
-    if ds.AnyConnectErrors {
-        s += fmt.Sprintf("Connect errors:\n")
-        i := ds.PrevErrorsConnectLora + ds.ThisErrorsConnectLora
-        if i > 0 {
-            s += fmt.Sprintf("  Lora     %d\n", i)
-        }
-        i = ds.PrevErrorsConnectFona + ds.ThisErrorsConnectFona
-        if i > 0 {
-            s += fmt.Sprintf("  Fona     %d\n", i)
-        }
-        i = ds.PrevErrorsConnectWireless + ds.ThisErrorsConnectWireless
-        if i > 0 {
-            s += fmt.Sprintf("  Wireless %d\n", i)
-        }
-        i = ds.PrevErrorsConnectData + ds.ThisErrorsConnectData
-        if i > 0 {
-            s += fmt.Sprintf("  Data     %d\n", i)
-        }
-        i = ds.PrevErrorsConnectService + ds.ThisErrorsConnectService
-        if i > 0 {
-            s += fmt.Sprintf("  Service  %d\n", i)
-        }
-    }
     s += fmt.Sprintf("\n")
 
     // Errors
