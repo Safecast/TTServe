@@ -112,9 +112,9 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     case "devices":
         fallthrough
     case "ttnode":
-        go sendSafecastDeviceSummaryToSlack("== Devices Offline ==", true, fMobile, fDetails)
+        go sendSafecastDeviceSummaryToSlack("== Offline ==", true, fMobile, fDetails)
         time.Sleep(1 * time.Second)
-        go sendSafecastDeviceSummaryToSlack("== Devices Online ==", false, fMobile, fDetails)
+        go sendSafecastDeviceSummaryToSlack("== Online ==", false, fMobile, fDetails)
 
     case "gateway":
         fallthrough
