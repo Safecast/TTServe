@@ -7,7 +7,7 @@ package main
 
 import (
     "fmt"
-	"math"
+    "math"
     "strconv"
     "strings"
     "time"
@@ -21,7 +21,7 @@ import (
 type MeasurementStat struct {
     Valid               bool
     Test                bool
-	Firmware			string
+    Firmware            string
     Uploaded            time.Time
     LoraModule          string
     FonaModule          string
@@ -42,11 +42,11 @@ type MeasurementStat struct {
     ErrorsSpi           uint32
     ErrorsTwi           uint32
     ErrorsTwiInfo       string
-	ErrorsConnectLora	uint32
-	ErrorsConnectFona	uint32
-	ErrorsConnectWireless uint32
-	ErrorsConnectData	uint32
-	ErrorsConnectService uint32
+    ErrorsConnectLora   uint32
+    ErrorsConnectFona   uint32
+    ErrorsConnectWireless uint32
+    ErrorsConnectData   uint32
+    ErrorsConnectService uint32
     UptimeMinutes       uint32
     hasBat              bool
     BatWarning          bool
@@ -68,7 +68,7 @@ type MeasurementStat struct {
 // Stats about all measurements
 type MeasurementDataset struct {
     DeviceId            uint32
-	Firmware			string
+    Firmware            string
     OldestUpload        time.Time
     NewestUpload        time.Time
     MinUploadGapSecs    uint32
@@ -119,16 +119,16 @@ type MeasurementDataset struct {
     PrevErrorsTwi       uint32
     ThisErrorsTwi       uint32
     ErrorsTwiInfo       string
-	ThisErrorsConnectLora uint32
-	PrevErrorsConnectLora uint32
-	ThisErrorsConnectFona uint32
-	PrevErrorsConnectFona uint32
-	ThisErrorsConnectWireless uint32
-	PrevErrorsConnectWireless uint32
-	ThisErrorsConnectData uint32
-	PrevErrorsConnectData uint32
-	ThisErrorsConnectService uint32
-	PrevErrorsConnectService uint32
+    ThisErrorsConnectLora uint32
+    PrevErrorsConnectLora uint32
+    ThisErrorsConnectFona uint32
+    PrevErrorsConnectFona uint32
+    ThisErrorsConnectWireless uint32
+    PrevErrorsConnectWireless uint32
+    ThisErrorsConnectData uint32
+    PrevErrorsConnectData uint32
+    ThisErrorsConnectService uint32
+    PrevErrorsConnectService uint32
     PrevUptimeMinutes   uint32
     MaxUptimeMinutes    uint32
     Boots               uint32
@@ -212,10 +212,10 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             stat.Test = *sd.Dev.Test
         }
 
-		if sd.Dev.AppVersion != nil {
-			stat.Firmware = *sd.Dev.AppVersion
-		}
-		
+        if sd.Dev.AppVersion != nil {
+            stat.Firmware = *sd.Dev.AppVersion
+        }
+
         if sd.Dev.ModuleLora != nil {
             stat.LoraModule = *sd.Dev.ModuleLora
         }
@@ -430,11 +430,24 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.TestMeasurements++
     }
 
-	// Only show the earliest firmware, forcing the user to clear stats if they have a later version
-	if stat.Firmware != "" && ds.Firmware == "" {
-		ds.Firmware = stat.Firmware
-	}
-	
+    // Firmware
+    if stat.Firmware != "" {
+        foundFirmware := false
+        for _, c := range strings.Split(ds.Firmware, ",") {
+            if c == stat.Firmware {
+                foundFirmware = true
+                break
+            }
+        }
+        if !foundFirmware {
+            if ds.Firmware == "" {
+                ds.Firmware = stat.Firmware
+            } else {
+                ds.Firmware = ds.Firmware + "," + stat.Firmware
+            }
+        }
+    }
+
     // Timing
     if ds.Measurements == 1 {
         ds.OldestUpload = stat.Uploaded
@@ -730,11 +743,11 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     // High-level stats
     s += fmt.Sprintf("Checkup:\n")
-    s += fmt.Sprintf("  ID %d\n", ds.DeviceId)
+    s += fmt.Sprintf("  id %d\n", ds.DeviceId)
     s += fmt.Sprintf("  at %s\n", time.Now().Format("2006-01-02 15:04 UTC"))
-	if ds.Firmware != "" {
-	    s += fmt.Sprintf("  on %s\n", ds.Firmware)
-	}
+    if ds.Firmware != "" {
+        s += fmt.Sprintf("  on %s\n", ds.Firmware)
+    }
     s += fmt.Sprintf("\n")
 
     if ds.Boots == 1 {
@@ -854,20 +867,20 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     } else {
         s += fmt.Sprintf("  Opc %d (%d out of range %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
-	geigerConfig := ""
+    geigerConfig := ""
     if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-		geigerConfig = "(no tubes configured)"
+        geigerConfig = "(no tubes configured)"
         s += fmt.Sprintf("  Lnd 0")
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-		geigerConfig = "(SINGLE pancake configuration)"
+        geigerConfig = "(SINGLE pancake configuration)"
         s += fmt.Sprintf("  Lnd %d %s", ds.LndU7318Count, geigerConfig)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
         s += fmt.Sprintf("  Lnd %d|%d", ds.LndU7318Count, ds.LndC7318Count)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
-		geigerConfig = "(dual-tube EC configuration)"
+        geigerConfig = "(dual-tube EC configuration)"
         s += fmt.Sprintf("  Lnd %d|%d %s", ds.LndU7318Count, ds.LndEC7128Count, geigerConfig)
     } else {
-		geigerConfig = "(UNRECOGNIZED configuration)"
+        geigerConfig = "(UNRECOGNIZED configuration)"
         s += fmt.Sprintf("  Lnd %du|%dc|%dec %s", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, geigerConfig)
     }
     if ds.GeigerWarningCount != 0 {
@@ -968,15 +981,15 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     s += fmt.Sprintf("\n")
 
-	// That's all if we're not solarcast
+    // That's all if we're not solarcast
     if ds.Transports == "pointcast" || ds.Transports == "safecast-air" {
-		return s
-	}
+        return s
+    }
 
     // Solarcast summary
     s += fmt.Sprintf("Solarcast Checklist:\n")
 
-	goalHours := 72
+    goalHours := 72
     if ds.MaxUptimeMinutes > uint32(goalHours) * 60 {
         s += fmt.Sprintf("  PASS  ")
     } else {
@@ -992,8 +1005,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("No errors.\n");
 
     diff := math.Abs(float64(ds.LoraTransports) - float64(ds.FonaTransports))
-	pct := diff / float64(ds.Measurements)
-	goal := 0.25
+    pct := diff / float64(ds.Measurements)
+    goal := 0.25
     if pct <= goal {
         s += fmt.Sprintf("  PASS  ")
     } else {
