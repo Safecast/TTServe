@@ -609,7 +609,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         }
     }
 
-	// Connect errors
+    // Connect errors
     if stat.ErrorsConnectLora > ds.ThisErrorsConnectLora {
         ds.ThisErrorsConnectLora = stat.ErrorsConnectLora
         ds.AnyConnectErrors = true
@@ -871,8 +871,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         if i > 0 {
             s += fmt.Sprintf("  Service  %d\n", i)
         }
+        s += fmt.Sprintf("\n")
     }
-    s += fmt.Sprintf("\n")
 
     // Sensors
     s += fmt.Sprintf("Sensor Measurements:\n")
