@@ -896,14 +896,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("\n")
 
     // Connect errors
-    if ds.Boots == 1 {
+    if ds.AnyConnectErrors {
         s += fmt.Sprintf("Connect errors:\n")
-    } else {
-        s += fmt.Sprintf("Connect errors across %d sessions:\n", ds.Boots)
-    }
-    if !ds.AnyConnectErrors {
-        s += fmt.Sprintf("  None\n")
-    } else {
         i := ds.PrevErrorsConnectLora + ds.ThisErrorsConnectLora
         if i > 0 {
             s += fmt.Sprintf("  Lora     %d\n", i)
