@@ -498,6 +498,36 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 				value.Dev.ErrorsSpi = sc.Dev.ErrorsSpi
 			}
         }
+        if sc.Dev.ErrorsConnectLora != nil {
+			if value.Dev.ErrorsConnectLora == nil ||
+				(value.Dev.ErrorsConnectLora != nil && *sc.Dev.ErrorsConnectLora > *value.Dev.ErrorsConnectLora) {
+				value.Dev.ErrorsConnectLora = sc.Dev.ErrorsConnectLora
+			}
+        }
+        if sc.Dev.ErrorsConnectFona != nil {
+			if value.Dev.ErrorsConnectFona == nil ||
+				(value.Dev.ErrorsConnectFona != nil && *sc.Dev.ErrorsConnectFona > *value.Dev.ErrorsConnectFona) {
+				value.Dev.ErrorsConnectFona = sc.Dev.ErrorsConnectFona
+			}
+        }
+        if sc.Dev.ErrorsConnectWireless != nil {
+			if value.Dev.ErrorsConnectWireless == nil ||
+				(value.Dev.ErrorsConnectWireless != nil && *sc.Dev.ErrorsConnectWireless > *value.Dev.ErrorsConnectWireless) {
+				value.Dev.ErrorsConnectWireless = sc.Dev.ErrorsConnectWireless
+			}
+        }
+        if sc.Dev.ErrorsConnectData != nil {
+			if value.Dev.ErrorsConnectData == nil ||
+				(value.Dev.ErrorsConnectData != nil && *sc.Dev.ErrorsConnectData > *value.Dev.ErrorsConnectData) {
+				value.Dev.ErrorsConnectData = sc.Dev.ErrorsConnectData
+			}
+        }
+        if sc.Dev.ErrorsConnectService != nil {
+			if value.Dev.ErrorsConnectService == nil ||
+				(value.Dev.ErrorsConnectService != nil && *sc.Dev.ErrorsConnectService > *value.Dev.ErrorsConnectService) {
+				value.Dev.ErrorsConnectService = sc.Dev.ErrorsConnectService
+			}
+        }
 
     }
 

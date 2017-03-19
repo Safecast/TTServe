@@ -128,6 +128,11 @@ type Dev struct {
     ErrorsTwiInfo *string	`json:"dev_err_twi_info,omitempty"`
     ErrorsLis *uint32		`json:"dev_err_lis,omitempty"`
     ErrorsSpi *uint32		`json:"dev_err_spi,omitempty"`
+    ErrorsConnectLora *uint32 `json:"dev_err_con_lora,omitempty"`
+    ErrorsConnectFona *uint32 `json:"dev_err_con_fona,omitempty"`
+    ErrorsConnectWireless *uint32 `json:"dev_err_con_wireless,omitempty"`
+    ErrorsConnectData *uint32 `json:"dev_err_con_data,omitempty"`
+    ErrorsConnectService *uint32 `json:"dev_err_con_service,omitempty"`
 }
 
 // Note that this structure has been designed so that we could convert, at a later date,

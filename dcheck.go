@@ -41,6 +41,11 @@ type MeasurementStat struct {
     ErrorsSpi           uint32
     ErrorsTwi           uint32
     ErrorsTwiInfo       string
+	ErrorsConnectLora	uint32
+	ErrorsConnectFona	uint32
+	ErrorsConnectWireless uint32
+	ErrorsConnectData	uint32
+	ErrorsConnectService uint32
     UptimeMinutes       uint32
     hasBat              bool
     BatWarning          bool
@@ -86,6 +91,7 @@ type MeasurementDataset struct {
     LoraModule          string
     FonaModule          string
     AnyErrors           bool
+    AnyConnectErrors    bool
     PrevErrorsOpc       uint32
     ThisErrorsOpc       uint32
     PrevErrorsPms       uint32
@@ -111,6 +117,16 @@ type MeasurementDataset struct {
     PrevErrorsTwi       uint32
     ThisErrorsTwi       uint32
     ErrorsTwiInfo       string
+	ThisErrorsConnectLora uint32
+	PrevErrorsConnectLora uint32
+	ThisErrorsConnectFona uint32
+	PrevErrorsConnectFona uint32
+	ThisErrorsConnectWireless uint32
+	PrevErrorsConnectWireless uint32
+	ThisErrorsConnectData uint32
+	PrevErrorsConnectData uint32
+	ThisErrorsConnectService uint32
+	PrevErrorsConnectService uint32
     PrevUptimeMinutes   uint32
     MaxUptimeMinutes    uint32
     Boots               uint32
@@ -239,6 +255,21 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
         if sd.Dev.ErrorsTwiInfo != nil {
             stat.ErrorsTwiInfo = *sd.Dev.ErrorsTwiInfo
+        }
+        if sd.Dev.ErrorsConnectLora != nil {
+            stat.ErrorsConnectLora = *sd.Dev.ErrorsConnectLora
+        }
+        if sd.Dev.ErrorsConnectFona != nil {
+            stat.ErrorsConnectFona = *sd.Dev.ErrorsConnectFona
+        }
+        if sd.Dev.ErrorsConnectWireless != nil {
+            stat.ErrorsConnectWireless = *sd.Dev.ErrorsConnectWireless
+        }
+        if sd.Dev.ErrorsConnectData != nil {
+            stat.ErrorsConnectData = *sd.Dev.ErrorsConnectData
+        }
+        if sd.Dev.ErrorsConnectService != nil {
+            stat.ErrorsConnectService = *sd.Dev.ErrorsConnectService
         }
 
         if sd.Dev.UptimeMinutes != nil {
@@ -523,9 +554,29 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.ThisErrorsSpi = stat.ErrorsSpi
         ds.AnyErrors = true
     }
+    if stat.ErrorsConnectLora > ds.ThisErrorsConnectLora {
+        ds.ThisErrorsConnectLora = stat.ErrorsConnectLora
+        ds.AnyConnectErrors = true
+    }
+    if stat.ErrorsConnectFona > ds.ThisErrorsConnectFona {
+        ds.ThisErrorsConnectFona = stat.ErrorsConnectFona
+        ds.AnyConnectErrors = true
+    }
+    if stat.ErrorsConnectWireless > ds.ThisErrorsConnectWireless {
+        ds.ThisErrorsConnectWireless = stat.ErrorsConnectWireless
+        ds.AnyConnectErrors = true
+    }
+    if stat.ErrorsConnectData > ds.ThisErrorsConnectData {
+        ds.ThisErrorsConnectData = stat.ErrorsConnectData
+        ds.AnyConnectErrors = true
+    }
+    if stat.ErrorsConnectService > ds.ThisErrorsConnectService {
+        ds.ThisErrorsConnectService = stat.ErrorsConnectService
+        ds.AnyConnectErrors = true
+    }
     if stat.ErrorsTwi > ds.ThisErrorsTwi {
         ds.ThisErrorsTwi = stat.ErrorsTwi
-        ds.AnyErrors = true
+        ds.AnyConnectErrors = true
     }
 
     for _, staterr := range strings.Split(stat.ErrorsTwiInfo, ",") {
@@ -581,6 +632,16 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
             ds.ThisErrorsSpi = 0
             ds.PrevErrorsTwi += ds.ThisErrorsTwi
             ds.ThisErrorsTwi = 0
+            ds.PrevErrorsConnectLora += ds.ThisErrorsConnectLora
+            ds.ThisErrorsConnectLora = 0
+            ds.PrevErrorsConnectFona += ds.ThisErrorsConnectFona
+            ds.ThisErrorsConnectFona = 0
+            ds.PrevErrorsConnectWireless += ds.ThisErrorsConnectWireless
+            ds.ThisErrorsConnectWireless = 0
+            ds.PrevErrorsConnectData += ds.ThisErrorsConnectData
+            ds.ThisErrorsConnectData = 0
+            ds.PrevErrorsConnectService += ds.ThisErrorsConnectService
+            ds.ThisErrorsConnectService = 0
 
         }
         ds.PrevUptimeMinutes = stat.UptimeMinutes
@@ -799,6 +860,38 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
     s += fmt.Sprintf("\n")
+    s += fmt.Sprintf("\n")
+
+    // Connect errors
+    if ds.Boots == 1 {
+        s += fmt.Sprintf("Connect errors:\n")
+    } else {
+        s += fmt.Sprintf("Connect errors across %d sessions:\n", ds.Boots)
+    }
+    if !ds.AnyConnectErrors {
+        s += fmt.Sprintf("  None\n")
+    } else {
+        i := ds.PrevErrorsConnectLora + ds.ThisErrorsConnectLora
+        if i > 0 {
+            s += fmt.Sprintf("  Lora     %d\n", i)
+        }
+        i = ds.PrevErrorsConnectFona + ds.ThisErrorsConnectFona
+        if i > 0 {
+            s += fmt.Sprintf("  Fona     %d\n", i)
+        }
+        i = ds.PrevErrorsConnectWireless + ds.ThisErrorsConnectWireless
+        if i > 0 {
+            s += fmt.Sprintf("  Wireless %d\n", i)
+        }
+        i = ds.PrevErrorsConnectData + ds.ThisErrorsConnectData
+        if i > 0 {
+            s += fmt.Sprintf("  Data     %d\n", i)
+        }
+        i = ds.PrevErrorsConnectService + ds.ThisErrorsConnectService
+        if i > 0 {
+            s += fmt.Sprintf("  Service  %d\n", i)
+        }
+    }
     s += fmt.Sprintf("\n")
 
     // Errors

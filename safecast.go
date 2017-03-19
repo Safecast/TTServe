@@ -282,6 +282,26 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         dev.ErrorsSpi = msg.ErrorsSpi
         dodev = true
     }
+    if msg.ErrorsConnectLora != nil {
+        dev.ErrorsConnectLora = msg.ErrorsConnectLora
+        dodev = true
+    }
+    if msg.ErrorsConnectFona != nil {
+        dev.ErrorsConnectFona = msg.ErrorsConnectFona
+        dodev = true
+    }
+    if msg.ErrorsConnectWireless != nil {
+        dev.ErrorsConnectWireless = msg.ErrorsConnectWireless
+        dodev = true
+    }
+    if msg.ErrorsConnectData != nil {
+        dev.ErrorsConnectData = msg.ErrorsConnectData
+        dodev = true
+    }
+    if msg.ErrorsConnectService != nil {
+        dev.ErrorsConnectService = msg.ErrorsConnectService
+        dodev = true
+    }
 
     if dodev {
         sd.Dev = &dev
