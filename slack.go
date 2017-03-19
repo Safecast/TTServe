@@ -107,6 +107,12 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     // Process queries
     switch argsLC[0] {
 
+    case "online":
+        go sendSafecastDeviceSummaryToSlack("", false, fMobile, fDetails)
+
+    case "offline":
+        go sendSafecastDeviceSummaryToSlack("", true, fMobile, fDetails)
+
     case "device":
         fallthrough
     case "devices":
