@@ -584,29 +584,9 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.ThisErrorsSpi = stat.ErrorsSpi
         ds.AnyErrors = true
     }
-    if stat.ErrorsConnectLora > ds.ThisErrorsConnectLora {
-        ds.ThisErrorsConnectLora = stat.ErrorsConnectLora
-        ds.AnyConnectErrors = true
-    }
-    if stat.ErrorsConnectFona > ds.ThisErrorsConnectFona {
-        ds.ThisErrorsConnectFona = stat.ErrorsConnectFona
-        ds.AnyConnectErrors = true
-    }
-    if stat.ErrorsConnectWireless > ds.ThisErrorsConnectWireless {
-        ds.ThisErrorsConnectWireless = stat.ErrorsConnectWireless
-        ds.AnyConnectErrors = true
-    }
-    if stat.ErrorsConnectData > ds.ThisErrorsConnectData {
-        ds.ThisErrorsConnectData = stat.ErrorsConnectData
-        ds.AnyConnectErrors = true
-    }
-    if stat.ErrorsConnectService > ds.ThisErrorsConnectService {
-        ds.ThisErrorsConnectService = stat.ErrorsConnectService
-        ds.AnyConnectErrors = true
-    }
     if stat.ErrorsTwi > ds.ThisErrorsTwi {
         ds.ThisErrorsTwi = stat.ErrorsTwi
-        ds.AnyConnectErrors = true
+        ds.AnyErrors = true
     }
 
     for _, staterr := range strings.Split(stat.ErrorsTwiInfo, ",") {
@@ -627,6 +607,28 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
                 }
             }
         }
+    }
+
+	// Connect errors
+    if stat.ErrorsConnectLora > ds.ThisErrorsConnectLora {
+        ds.ThisErrorsConnectLora = stat.ErrorsConnectLora
+        ds.AnyConnectErrors = true
+    }
+    if stat.ErrorsConnectFona > ds.ThisErrorsConnectFona {
+        ds.ThisErrorsConnectFona = stat.ErrorsConnectFona
+        ds.AnyConnectErrors = true
+    }
+    if stat.ErrorsConnectWireless > ds.ThisErrorsConnectWireless {
+        ds.ThisErrorsConnectWireless = stat.ErrorsConnectWireless
+        ds.AnyConnectErrors = true
+    }
+    if stat.ErrorsConnectData > ds.ThisErrorsConnectData {
+        ds.ThisErrorsConnectData = stat.ErrorsConnectData
+        ds.AnyConnectErrors = true
+    }
+    if stat.ErrorsConnectService > ds.ThisErrorsConnectService {
+        ds.ThisErrorsConnectService = stat.ErrorsConnectService
+        ds.AnyConnectErrors = true
     }
 
     // Uptime
