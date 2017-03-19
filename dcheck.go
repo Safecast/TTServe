@@ -431,7 +431,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
     }
 
 	// Only show the earliest firmware, forcing the user to clear stats if they have a later version
-	if stat.Firmware != "" && ds.Firmware != "" {
+	if stat.Firmware != "" && ds.Firmware == "" {
 		ds.Firmware = stat.Firmware
 	}
 	
