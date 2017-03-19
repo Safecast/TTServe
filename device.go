@@ -207,7 +207,7 @@ func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, 
     s := header
     for i := 0; i < len(sortedDevices); i++ {
 
-		isOffline := sortedDevices[i].minutesAgo > (4 * 60)
+		isOffline := sortedDevices[i].minutesAgo > (2 * 60)
 		if isOffline != fOffline {
 			continue
 		}
