@@ -69,7 +69,7 @@ type MeasurementStat struct {
 type MeasurementDataset struct {
     DeviceId            uint32
     Firmware            string
-	MultiFirmware		bool
+    MultiFirmware       bool
     OldestUpload        time.Time
     NewestUpload        time.Time
     MinUploadGapSecs    uint32
@@ -214,7 +214,11 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
 
         if sd.Dev.AppVersion != nil {
-            stat.Firmware = *sd.Dev.AppVersion
+            firmware := *sd.Dev.AppVersion
+            pieces := strings.Split(firmware, ".")
+            if len(pieces) >= 3 {
+                stat.Firmware = pieces[2]
+            }
         }
 
         if sd.Dev.ModuleLora != nil {
@@ -445,7 +449,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
                 ds.Firmware = stat.Firmware
             } else {
                 ds.Firmware = ds.Firmware + "," + stat.Firmware
-				ds.MultiFirmware = true
+                ds.MultiFirmware = true
             }
         }
     }
