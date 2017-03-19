@@ -69,6 +69,7 @@ type MeasurementStat struct {
 type MeasurementDataset struct {
     DeviceId            uint32
     Firmware            string
+	MultiFirmware		bool
     OldestUpload        time.Time
     NewestUpload        time.Time
     MinUploadGapSecs    uint32
@@ -444,6 +445,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
                 ds.Firmware = stat.Firmware
             } else {
                 ds.Firmware = ds.Firmware + "," + stat.Firmware
+				ds.MultiFirmware = true
             }
         }
     }
@@ -996,6 +998,13 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("   --   ");
     }
     s += fmt.Sprintf("At least one continuous measurable session of >%d hours.\n", goalHours);
+
+    if !ds.MultiFirmware {
+        s += fmt.Sprintf("  PASS  ")
+    } else {
+        s += fmt.Sprintf("   --   ");
+    }
+    s += fmt.Sprintf("One version of firmware used for the entire run.\n");
 
     if !ds.AnyErrors {
         s += fmt.Sprintf("  PASS  ")
