@@ -102,7 +102,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// Process common argument
     fMobile := firstArgLC == "mobile" || secondArgLC == "mobile"
-    fDetails := fMobile || firstArgLC == "detail" || firstArgLC == "details" || secondArgLC == "detail" || secondArgLC == "details"
+    fDetails := fMobile || firstArgLC == "detail" || firstArgLC == "details" || secondArgLC == "detail" || secondArgLC == "-d" || secondArgLC == "details"
 
     // Process queries
     switch argsLC[0] {
@@ -112,7 +112,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     case "devices":
         fallthrough
     case "ttnode":
-        sendSafecastDeviceSummaryToSlack("", fMobile, fDetails)
+        sendSafecastDeviceSummaryToSlack("", false, fMobile, fDetails)
 
     case "gateway":
         fallthrough
@@ -132,10 +132,11 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         fallthrough
     case "status":
         go sendSafecastServerSummaryToSlack("== Servers ==", fMobile, fDetails)
-        time.Sleep(2 * time.Second)
         go sendSafecastGatewaySummaryToSlack("== Gateways ==", fMobile, fDetails)
-        time.Sleep(2 * time.Second)
-        go sendSafecastDeviceSummaryToSlack("== Devices ==", fMobile, fDetails)
+        time.Sleep(1 * time.Second)
+        go sendSafecastDeviceSummaryToSlack("== Devices Offline ==", true, fMobile, fDetails)
+        time.Sleep(1 * time.Second)
+        go sendSafecastDeviceSummaryToSlack("== Devices Online ==", false, fMobile, fDetails)
 
     case "deveui":
 		generateTTNCTLDeviceRegistrationScript()
