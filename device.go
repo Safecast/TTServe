@@ -232,8 +232,9 @@ func sendSafecastDeviceSummaryToSlack(header string, fWrap bool, fDetails bool) 
 
         s += fmt.Sprintf("<http://%s%s%d|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, id)
         s += fmt.Sprintf("<http://%s%s%s%d.json|log> ", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), id)
-        s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), id)
-
+		if (false) {	// Removed 2017-03-19 to discourage people from using csv, which does not have full data
+	        s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), id)
+		}
         if fDetails {
             if gps != "" {
                 s += " " + gps

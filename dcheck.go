@@ -861,6 +861,11 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     s += fmt.Sprintf("\n")
 
+	// That's all if we're not solarcast
+    if ds.Transports == "pointcast" || ds.Transports == "safecast-air" {
+		return s
+	}
+
     // Solarcast summary
     s += fmt.Sprintf("Solarcast Checklist:\n")
 
