@@ -70,18 +70,27 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
             if jerr != nil {
                 fmt.Printf("dl j marshaling error: ", jerr)
             } else {
-
+				var err error
+				var resp *http.Response
+				
                 url := fmt.Sprintf(ttnDownlinkURL, ttnAppId, ttnProcessId, ttnAppAccessKey)
 
-                fmt.Printf("\nHTTP POST to %s\n%s\n\n", url, jdata)
+				// Retry several times in case of failure
+				for i:=0; i<3; i++ {
 
-                req, err := http.NewRequest("POST", url, bytes.NewBuffer(jdata))
-                req.Header.Set("User-Agent", "TTSERVE")
-                req.Header.Set("Content-Type", "text/plain")
-                httpclient := &http.Client{
-                    Timeout: time.Second * 15,
-                }
-                resp, err := httpclient.Do(req)
+	                fmt.Printf("\nHTTP POST to %s\n%s\n\n", url, jdata)
+	                req, err := http.NewRequest("POST", url, bytes.NewBuffer(jdata))
+	                req.Header.Set("User-Agent", "TTSERVE")
+	                req.Header.Set("Content-Type", "text/plain")
+	                httpclient := &http.Client{
+	                    Timeout: time.Second * 15,
+	                }
+	                resp, err = httpclient.Do(req)
+					if err == nil {
+						break;
+					}
+				}
+
                 if err != nil {
                     fmt.Printf("\n*** HTTPS POST error: %v\n\n", err);
                     sendToSafecastOps(fmt.Sprintf("Error transmitting command to device %d: %s\n", ReplyToDeviceId, errorString(err)), SLACK_MSG_UNSOLICITED)
