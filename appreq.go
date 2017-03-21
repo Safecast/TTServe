@@ -63,9 +63,6 @@ func AppReqProcess(AppReq IncomingAppReq) {
         fmt.Printf("\n");
         return
     }
-    if (msg.GetDeviceId() == 217634580) {   // ozzie
-        fmt.Printf("\n\n%v\n\n", msg);
-    }
 
     // Display the actual unmarshaled value received in the payload
     fmt.Printf("%v\n", msg);
