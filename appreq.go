@@ -173,7 +173,7 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
     }
 
     default: {
-        fmt.Printf("\n%s Received INVALID %d-byte buffered payload from DEVICE\n", time.Now().Format(logDateFormat), buf_length)
+        fmt.Printf("\n%s Received INVALID %d-byte buffered payload from DEVICE: %v\n", time.Now().Format(logDateFormat), buf_length, buf)
     }
     }
 
