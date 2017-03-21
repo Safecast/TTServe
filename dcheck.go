@@ -305,7 +305,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
         if sd.Bat.Current != nil {
             val := *sd.Bat.Current
-            if val < -2000.0 || val > 10 {
+            if val < -2000.0 || val > 100 {
                 stat.BatWarning = true
             }
         }
