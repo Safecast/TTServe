@@ -70,7 +70,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq := newAppReqFromGateway(&ttg, ttg.Transport)
 
         // Process it.  Note there is no possibility of a reply.
-        AppReqPushPayload(AppReq, ttg.Payload, "device directly")
+        go AppReqPushPayload(AppReq, ttg.Payload, "device directly")
         stats.Count.HTTPRelay++;
 
     }
@@ -94,8 +94,11 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         // Use the TTGateReq to initialize a new AppReq
         AppReq := newAppReqFromGateway(&ttg, Transport)
 
+        // Extract the device ID from the message, which we will need later
+        ReplyToDeviceId = getReplyDeviceIdFromPayload(ttg.Payload)
+
         // Process it
-        ReplyToDeviceId = AppReqPushPayload(AppReq, ttg.Payload, "Lora gateway")
+        go AppReqPushPayload(AppReq, ttg.Payload, "Lora gateway")
         stats.Count.HTTPGateway++;
 
     }
@@ -115,8 +118,11 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         requestor, _ := getRequestorIPv4(req)
         AppReq.SvTransport = "device-http:" + requestor
 
+        // Extract the device ID from the message, which we will need later
+        ReplyToDeviceId = getReplyDeviceIdFromPayload(buf)
+
 		// Push it
-        ReplyToDeviceId = AppReqPushPayload(AppReq, buf, "device directly")
+        go AppReqPushPayload(AppReq, buf, "device directly")
         stats.Count.HTTPDevice++;
 
     }

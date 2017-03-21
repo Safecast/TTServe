@@ -33,7 +33,7 @@ func UdpInboundHandler() {
     defer ServerConn.Close()
 
     for {
-        buf := make([]byte, 4096)
+        buf := make([]byte, 8192)
 
         n, addr, err := ServerConn.ReadFromUDP(buf)
         if (err != nil) {

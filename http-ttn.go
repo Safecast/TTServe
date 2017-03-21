@@ -52,7 +52,11 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
     }
 	AppReq.SvTransport = "ttn-http:" + ttn.DevID
 
-    ReplyToDeviceId = AppReqPushPayload(AppReq, ttn.PayloadRaw, "TTN")
+	// Get the reply device ID
+    ReplyToDeviceId = getReplyDeviceIdFromPayload(ttn.PayloadRaw)
+		
+    // Push it to be processed
+    go AppReqPushPayload(AppReq, ttn.PayloadRaw, "TTN")
     stats.Count.HTTPTTN++
 
     // Outbound message processing

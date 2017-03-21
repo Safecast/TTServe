@@ -29,7 +29,7 @@ func TcpInboundHandler() {
     defer ServerConn.Close()
 
     for {
-        buf := make([]byte, 4096)
+        buf := make([]byte, 8192)
 
         conn, err := ServerConn.AcceptTCP()
         if err != nil {
@@ -50,8 +50,11 @@ func TcpInboundHandler() {
         AppReq := IncomingAppReq{}
         AppReq.SvTransport = "device-tcp:" + remoteaddr
 
-        // Push it
-        ReplyToDeviceId := AppReqPushPayload(AppReq, buf[0:n], "device directly")
+		// Get the reply device ID
+        ReplyToDeviceId := getReplyDeviceIdFromPayload(buf[0:n])
+		
+        // Push it to be processed
+        go AppReqPushPayload(AppReq, buf[0:n], "device directly")
         stats.Count.TCP++;
 
         // Is there a device ID to reply to?

@@ -213,31 +213,91 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
 // the payload is of a type where we know that the client is listening for a reply.  If
 // this is not a replyable payload or if the device ID is not found, we guarantee that
 // 0 is returned for the device ID.
-func getReplyDeviceIdFromPayload(inboundPayload []byte) (isAvailable bool, deviceID uint32) {
+func getReplyDeviceIdFromPayload(buf []byte) (deviceID uint32) {
 
-    // Extract the telecast message from the AppReq
-    msg := &ttproto.Telecast{}
-    err := proto.Unmarshal(inboundPayload, msg)
-    if err != nil {
-        return false, 0
-    }
+    buf_format := buf[0]
+    buf_length := len(buf)
 
-    // Extract the device ID
-    DeviceId := TelecastDeviceId(msg)
+    switch (buf_format) {
 
-    // Look at reply type
-    if msg.ReplyType != nil {
+    case BUFF_FORMAT_SINGLE_PB: {
+	    msg := &ttproto.Telecast{}
+        err := proto.Unmarshal(buf, msg)
+        if err != nil {
+            return 0
+        }
 
-        switch msg.GetReplyType() {
+        // Extract the device ID
+        DeviceId := TelecastDeviceId(msg)
 
-            // A reply is expected
-        case ttproto.Telecast_REPLY_EXPECTED:
-            return true, DeviceId
+        // Look at reply type
+        if msg.ReplyType != nil {
+
+            switch msg.GetReplyType() {
+
+                // A reply is expected
+            case ttproto.Telecast_REPLY_EXPECTED:
+                return DeviceId
+
+            }
 
         }
+
+        return 0
+
+    }
+
+    case BUFF_FORMAT_PB_ARRAY: {
+
+        // Validate
+        if !validBulkPayload(buf, buf_length) {
+            return 0
+        }
+
+        // Loop over the various things in the buffer
+        count := int(buf[1])
+        lengthArrayOffset := 2
+        payloadOffset := lengthArrayOffset + count
+
+        for i:=0; i<count; i++ {
+
+            // Extract the length
+            length := int(buf[lengthArrayOffset+i])
+
+            // Unmarshal payload
+		    msg := &ttproto.Telecast{}
+            payload := buf[payloadOffset:payloadOffset+length]
+            err := proto.Unmarshal(payload, msg)
+            if err != nil {
+                return 0
+            }
+
+            // Extract the device ID
+            DeviceId := TelecastDeviceId(msg)
+
+            // Look at reply type, and exit if a reply is expected
+            if msg.ReplyType != nil {
+
+                switch msg.GetReplyType() {
+
+                    // A reply is expected
+                case ttproto.Telecast_REPLY_EXPECTED:
+                    return DeviceId
+
+                }
+
+            }
+
+            // Bump the payload offset
+            payloadOffset += length;
+
+        }
+
+    }
+
     }
 
     // No reply
-    return false, 0
+    return 0
 
 }
