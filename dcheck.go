@@ -589,7 +589,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.AnyErrors = true
     }
 
-    for _, staterr := range strings.Split(stat.ErrorsTwiInfo, ",") {
+    for _, staterr := range strings.Split(stat.ErrorsTwiInfo, " ") {
         foundError := false
         if staterr != "" {
             for _, c := range strings.Split(ds.ErrorsTwiInfo, ",") {
