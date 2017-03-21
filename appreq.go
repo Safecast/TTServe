@@ -63,9 +63,9 @@ func AppReqProcess(AppReq IncomingAppReq) {
         fmt.Printf("\n");
         return
     }
-	if (msg.GetDeviceId() == 217634580) {	// ozzie
-		fmt.Printf("\n\n%v\n\n", msg);
-	}
+    if (msg.GetDeviceId() == 217634580) {   // ozzie
+        fmt.Printf("\n\n%v\n\n", msg);
+    }
 
     // Display the actual unmarshaled value received in the payload
     fmt.Printf("%v\n", msg);
@@ -101,19 +101,22 @@ func AppReqProcess(AppReq IncomingAppReq) {
     checksum := crc32.ChecksumIEEE(normalizedPayload)
 
     // Do various things based upon the message type
-    switch msg.GetDeviceType() {
-
-        // Is it something we recognize as being from safecast?
-    case ttproto.Telecast_BGEIGIE_NANO:
-        fallthrough
-    case ttproto.Telecast_SOLARCAST:
+    if msg.DeviceType == nil {
         SendSafecastMessage(AppReq, *msg, checksum)
+    } else {
+        switch msg.GetDeviceType() {
 
-        // Handle messages from non-safecast devices
-    default:
-        SendTelecastMessage(*msg, AppReq.TTNDevID)
+            // Is it something we recognize as being from safecast?
+        case ttproto.Telecast_BGEIGIE_NANO:
+            fallthrough
+        case ttproto.Telecast_SOLARCAST:
+            SendSafecastMessage(AppReq, *msg, checksum)
+
+            // Handle messages from non-safecast devices
+        default:
+            SendTelecastMessage(*msg, AppReq.TTNDevID)
+        }
     }
-
 }
 
 // Process a payload buffer by either placing it onto a queue, or in the case of a PB array
