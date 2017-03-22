@@ -937,7 +937,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("\n")
 
     // Sensors
-    s += fmt.Sprintf("Sensor Measurements:\n")
+    s += fmt.Sprintf("Measurement Counts:\n")
     if ds.BatWarningCount == 0 {
         s += fmt.Sprintf("  Bat %d\n", ds.BatCount)
     } else {
