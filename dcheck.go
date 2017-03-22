@@ -876,55 +876,6 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     s += fmt.Sprintf("\n")
 
-    // Sensors
-    s += fmt.Sprintf("Sensor Measurements:\n")
-    if ds.BatWarningCount == 0 {
-        s += fmt.Sprintf("  Bat %d\n", ds.BatCount)
-    } else {
-        s += fmt.Sprintf("  Bat %d (%d out of range %s)\n", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
-    }
-    if ds.EnvWarningCount == 0 {
-        s += fmt.Sprintf("  Env %d\n", ds.EnvCount)
-    } else {
-        s += fmt.Sprintf("  Env %d (%d out of range %s)\n", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
-    }
-    if ds.EncWarningCount == 0 {
-        s += fmt.Sprintf("  Enc %d\n", ds.EncCount)
-    } else {
-        s += fmt.Sprintf("  Enc %d (%d out of range %s)\n", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
-    }
-    if ds.PmsWarningCount == 0 {
-        s += fmt.Sprintf("  Pms %d\n", ds.PmsCount)
-    } else {
-        s += fmt.Sprintf("  Pms %d (%d out of range %s)\n", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
-    }
-    if ds.OpcWarningCount == 0 {
-        s += fmt.Sprintf("  Opc %d\n", ds.OpcCount)
-    } else {
-        s += fmt.Sprintf("  Opc %d (%d out of range %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
-    }
-    geigerConfig := ""
-    if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-        geigerConfig = "(no tubes configured)"
-        s += fmt.Sprintf("  Lnd 0")
-    } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-        geigerConfig = "(SINGLE pancake configuration)"
-        s += fmt.Sprintf("  Lnd %d %s", ds.LndU7318Count, geigerConfig)
-    } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
-        s += fmt.Sprintf("  Lnd %d|%d", ds.LndU7318Count, ds.LndC7318Count)
-    } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
-        geigerConfig = "(dual-tube EC configuration)"
-        s += fmt.Sprintf("  Lnd %d|%d %s", ds.LndU7318Count, ds.LndEC7128Count, geigerConfig)
-    } else {
-        geigerConfig = "(UNRECOGNIZED configuration)"
-        s += fmt.Sprintf("  Lnd %du|%dc|%dec %s", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, geigerConfig)
-    }
-    if ds.GeigerWarningCount != 0 {
-        s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
-    }
-    s += fmt.Sprintf("\n")
-    s += fmt.Sprintf("\n")
-
     // Errors
     if ds.Boots == 1 {
         s += fmt.Sprintf("Device errors:\n")
@@ -983,6 +934,55 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
             s += fmt.Sprintf("  Twi    %d %s\n", i, ds.ErrorsTwiInfo)
         }
     }
+    s += fmt.Sprintf("\n")
+
+    // Sensors
+    s += fmt.Sprintf("Sensor Measurements:\n")
+    if ds.BatWarningCount == 0 {
+        s += fmt.Sprintf("  Bat %d\n", ds.BatCount)
+    } else {
+        s += fmt.Sprintf("  Bat %d (%d out of range %s)\n", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+    }
+    if ds.EnvWarningCount == 0 {
+        s += fmt.Sprintf("  Env %d\n", ds.EnvCount)
+    } else {
+        s += fmt.Sprintf("  Env %d (%d out of range %s)\n", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+    }
+    if ds.EncWarningCount == 0 {
+        s += fmt.Sprintf("  Enc %d\n", ds.EncCount)
+    } else {
+        s += fmt.Sprintf("  Enc %d (%d out of range %s)\n", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+    }
+    if ds.PmsWarningCount == 0 {
+        s += fmt.Sprintf("  Pms %d\n", ds.PmsCount)
+    } else {
+        s += fmt.Sprintf("  Pms %d (%d out of range %s)\n", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+    }
+    if ds.OpcWarningCount == 0 {
+        s += fmt.Sprintf("  Opc %d\n", ds.OpcCount)
+    } else {
+        s += fmt.Sprintf("  Opc %d (%d out of range %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+    }
+    geigerConfig := ""
+    if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
+        geigerConfig = "(no tubes configured)"
+        s += fmt.Sprintf("  Lnd 0")
+    } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
+        geigerConfig = "(SINGLE pancake configuration)"
+        s += fmt.Sprintf("  Lnd %d %s", ds.LndU7318Count, geigerConfig)
+    } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
+        s += fmt.Sprintf("  Lnd %d|%d", ds.LndU7318Count, ds.LndC7318Count)
+    } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
+        geigerConfig = "(dual-tube EC configuration)"
+        s += fmt.Sprintf("  Lnd %d|%d %s", ds.LndU7318Count, ds.LndEC7128Count, geigerConfig)
+    } else {
+        geigerConfig = "(UNRECOGNIZED configuration)"
+        s += fmt.Sprintf("  Lnd %du|%dc|%dec %s", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, geigerConfig)
+    }
+    if ds.GeigerWarningCount != 0 {
+        s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+    }
+    s += fmt.Sprintf("\n")
     s += fmt.Sprintf("\n")
 
     // That's all if we're not solarcast
