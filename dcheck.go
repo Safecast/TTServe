@@ -849,8 +849,10 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
 
     // Connect errors
-    if ds.AnyConnectErrors {
-        s += fmt.Sprintf("Connection issues:\n")
+    s += fmt.Sprintf("Connection errors:\n")
+    if !ds.AnyConnectErrors {
+        s += fmt.Sprintf("  None\n")
+    } else {
         i := ds.PrevErrorsConnectLora + ds.ThisErrorsConnectLora
         if i > 0 {
             s += fmt.Sprintf("  Lora     %d\n", i)
@@ -871,8 +873,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         if i > 0 {
             s += fmt.Sprintf("  Service  %d\n", i)
         }
-        s += fmt.Sprintf("\n")
     }
+    s += fmt.Sprintf("\n")
 
     // Sensors
     s += fmt.Sprintf("Sensor Measurements:\n")
@@ -925,9 +927,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     // Errors
     if ds.Boots == 1 {
-        s += fmt.Sprintf("Errors:\n")
+        s += fmt.Sprintf("Device errors:\n")
     } else {
-        s += fmt.Sprintf("Errors across %d sessions:\n", ds.Boots)
+        s += fmt.Sprintf("Device errors across %d sessions:\n", ds.Boots)
     }
     if !ds.AnyErrors {
         s += fmt.Sprintf("  None\n")
@@ -1011,7 +1013,14 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     } else {
         s += fmt.Sprintf("   --   ");
     }
-    s += fmt.Sprintf("No errors.\n");
+    s += fmt.Sprintf("No device errors.\n");
+
+    if !ds.AnyConnectErrors {
+        s += fmt.Sprintf("  PASS  ")
+    } else {
+        s += fmt.Sprintf("   --   ");
+    }
+    s += fmt.Sprintf("No connection errors.\n");
 
     diff := math.Abs(float64(ds.LoraTransports) - float64(ds.FonaTransports))
     pct := diff / float64(ds.Measurements)
