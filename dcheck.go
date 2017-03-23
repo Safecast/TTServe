@@ -309,10 +309,17 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
                 stat.BatWarning = true
             }
         }
-        if sd.Bat.Charge != nil {
-            val := *sd.Bat.Charge
-            if val < 25.0 || val > 200 {
-                stat.BatWarning = true
+		// As of 2017-03-23 we no longer verify charge, for two reasons:
+		// 1) most devices require SOC training, and thus fall out of range
+		// 2) we don't actually use SOC for device performance throttling,
+		//    instead using a calculation derived from the voltage.  As such,
+		//    SOC is largely for informational purposes.
+        if (false) {
+            if sd.Bat.Charge != nil {
+                val := *sd.Bat.Charge
+                if val < 25.0 || val > 200 {
+                    stat.BatWarning = true
+                }
             }
         }
     }
