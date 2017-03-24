@@ -204,7 +204,12 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
     // Delete the file
     cancelCommand(deviceID);
 
+	// Use the new wire format
+	header := []byte{BUFF_FORMAT_PB_ARRAY, 1}
+	header = append(header, byte(len(tdata)))
+	command := append(header, tdata...)
+
     // Done
-    return true, tdata
+    return true, command
 
 }
