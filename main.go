@@ -115,12 +115,6 @@ func main() {
     AllServersSlackRestartRequestTime = ControlFileTime(TTServerRestartAllControlFile, "")
     AllServersGithubRestartRequestTime = ControlFileTime(TTServerRestartGithubControlFile, "")
 
-	// Synchronously init the app request queue before anyone tries to service it or push to it
-    AppReqInit()
-
-    // Spawn the app request handler shared by both TTN and direct inbound server
-    go AppReqHandler()
-
     // Init our web request inbound server
 	if ThisServerServesHTTP {
 	    go HttpInboundHandler()

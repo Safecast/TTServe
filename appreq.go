@@ -28,26 +28,6 @@ type IncomingAppReq struct {
     SeqNo         int
 }
 
-var MAX_REQQ_PENDING int = 100
-var AppReqQ chan IncomingAppReq
-
-// Make the queue
-func AppReqInit() {
-    AppReqQ = make(chan IncomingAppReq, MAX_REQQ_PENDING)
-}
-
-// Push a new entry on the request queue
-func AppReqPush(req IncomingAppReq) {
-    AppReqQ <- req
-}
-
-// Common handler for non-array incoming messages
-func AppReqHandler() {
-    for AppReq := range AppReqQ {
-        go AppReqProcess(AppReq)
-    }
-}
-
 // Process an app request synchronously, WITHOUT an inner goroutine.
 // This is important for sequencing of certain incoming requests
 func AppReqProcess(AppReq IncomingAppReq) {
@@ -134,7 +114,7 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
         // Enqueue the app request
         AppReq.Payload = buf
         AppReq.SvUploadedAt = nowInUTC()
-        AppReqPush(AppReq)
+        AppReqProcess(AppReq)
     }
 
     case BUFF_FORMAT_PB_ARRAY: {
@@ -149,12 +129,6 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
         count := int(buf[1])
         lengthArrayOffset := 2
         payloadOffset := lengthArrayOffset + count
-
-		if (count == 1) {
-	        fmt.Printf("\n%s Received %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
-		} else {
-	        fmt.Printf("\n%s Received %d-byte %d-entry buffered payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, count, from, AppReq.SvTransport)
-		}
 
         for i:=0; i<count; i++ {
 
