@@ -138,9 +138,12 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
             // Construct the app request
             AppReq.Payload = buf[payloadOffset:payloadOffset+length]
 
-            fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload),
-                i+1, count, from, AppReq.SvTransport)
-
+			if (count == 1) {
+	            fmt.Printf("\n%s Received %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), i+1, from, AppReq.SvTransport)
+			} else {
+	            fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), i+1, count, from, AppReq.SvTransport)
+			}
+			
             // Process the AppReq synchronously, because they must be done in-order
             AppReq.SvUploadedAt = UploadedAt
             AppReqProcess(AppReq)
