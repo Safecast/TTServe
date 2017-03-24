@@ -152,6 +152,11 @@ func main() {
 		stats.Services += ", WATCHDOG"
 	}
 
+	// One time at startup, refresh our knowledge of devices for the benefit of Slack UI
+	if ThisServerIsMonitor {
+		refreshDeviceSummaryLabels()
+	}
+
     // Spawn timer tasks, assuming the role of one of them
     go timer12h()
     go timer15m()

@@ -192,6 +192,23 @@ func sendExpiredSafecastDevicesToSlack() {
     }
 }
 
+// Refresh the labels on cached devices
+func refreshDeviceSummaryLabels() {
+
+    // First, age out the expired devices and recompute when last seen
+    sendExpiredSafecastDevicesToSlack()
+
+    // Next sort the device list
+    sortedDevices := seenDevices
+    sort.Sort(ByDeviceKey(sortedDevices))
+
+    // Sweep over all these devices in sorted order, refreshing label
+    for i := 0; i < len(sortedDevices); i++ {
+         _, sortedDevices[i].label, _, _ = SafecastGetDeviceStatusSummary(sortedDevices[i].deviceid)
+    }
+
+}
+
 // Get a summary of devices that are older than this many minutes ago
 func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, fDetails bool) {
 
