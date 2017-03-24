@@ -129,7 +129,7 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
 
     case BUFF_FORMAT_SINGLE_PB: {
 
-        fmt.Printf("\n%s Received %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
+        fmt.Printf("\n%s Received ***DEPRECATED*** %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
 
         // Enqueue the app request
         AppReq.Payload = buf
@@ -139,9 +139,8 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
 
     case BUFF_FORMAT_PB_ARRAY: {
 
-        fmt.Printf("\n%s Received %d-byte BUFFERED payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
-
         if !validBulkPayload(buf, buf_length) {
+	        fmt.Printf("\n%s Received INVALID %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
             return
         }
 
@@ -150,6 +149,12 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
         count := int(buf[1])
         lengthArrayOffset := 2
         payloadOffset := lengthArrayOffset + count
+
+		if (count == 1) {
+	        fmt.Printf("\n%s Received %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
+		} else {
+	        fmt.Printf("\n%s Received %d-byte %d-entry buffered payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, count, from, AppReq.SvTransport)
+		}
 
         for i:=0; i<count; i++ {
 
@@ -221,4 +226,97 @@ func validBulkPayload(buf []byte, length int) (bool) {
 
     // Safe
     return true
+}
+
+// Get any outbound payload waiting for the node who sent us a payload, but ONLY if
+// the payload is of a type where we know that the client is listening for a reply.  If
+// this is not a replyable payload or if the device ID is not found, we guarantee that
+// 0 is returned for the device ID.
+func getReplyDeviceIdFromPayload(buf []byte) (deviceID uint32) {
+
+    buf_format := buf[0]
+    buf_length := len(buf)
+
+    switch (buf_format) {
+
+    case BUFF_FORMAT_SINGLE_PB: {
+	    msg := &ttproto.Telecast{}
+        err := proto.Unmarshal(buf, msg)
+        if err != nil {
+            return 0
+        }
+
+        // Extract the device ID
+        DeviceId := TelecastDeviceId(msg)
+
+        // Look at reply type
+        if msg.ReplyType != nil {
+
+            switch msg.GetReplyType() {
+
+                // A reply is expected
+            case ttproto.Telecast_REPLY_EXPECTED:
+                return DeviceId
+
+            }
+
+        }
+
+        return 0
+
+    }
+
+    case BUFF_FORMAT_PB_ARRAY: {
+
+        // Validate
+        if !validBulkPayload(buf, buf_length) {
+            return 0
+        }
+
+        // Loop over the various things in the buffer
+        count := int(buf[1])
+        lengthArrayOffset := 2
+        payloadOffset := lengthArrayOffset + count
+
+        for i:=0; i<count; i++ {
+
+            // Extract the length
+            length := int(buf[lengthArrayOffset+i])
+
+            // Unmarshal payload
+		    msg := &ttproto.Telecast{}
+            payload := buf[payloadOffset:payloadOffset+length]
+            err := proto.Unmarshal(payload, msg)
+            if err != nil {
+                return 0
+            }
+
+            // Extract the device ID
+            DeviceId := TelecastDeviceId(msg)
+
+            // Look at reply type, and exit if a reply is expected
+            if msg.ReplyType != nil {
+
+                switch msg.GetReplyType() {
+
+                    // A reply is expected
+                case ttproto.Telecast_REPLY_EXPECTED:
+                    return DeviceId
+
+                }
+
+            }
+
+            // Bump the payload offset
+            payloadOffset += length;
+
+        }
+
+    }
+
+    }
+
+    // No reply
+    return 0
+
 }
