@@ -43,7 +43,7 @@ func sendTelecastOutboundSummaryToSlack() {
     files, err := ioutil.ReadDir(SafecastDirectory() + TTServerCommandPath)
     if err == nil {
 
-        // Iterate over each of the pending commands
+        // Iterate over each of the pending commands 
         for _, file := range files {
 
             // Extract device ID from filename
