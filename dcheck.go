@@ -759,8 +759,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // High-level stats
     s += fmt.Sprintf("Checkup:\n")
     s += fmt.Sprintf("  id %d", ds.DeviceId)
-	if time.Now().Sub(ds.NewestUpload)/time.Minute < 30 {
-		s += fmt.Sprintf(" ONLINE")
+	if time.Now().Sub(ds.NewestUpload)/time.Minute > 90 {
+		s += fmt.Sprintf(" (OFFLINE)")
 	}
 	s += fmt.Sprintf("\n")
     s += fmt.Sprintf("  at %s\n", time.Now().Format("2006-01-02 15:04 UTC"))
