@@ -86,6 +86,8 @@ func AppReqProcess(AppReq IncomingAppReq) {
             // Is it something we recognize as being from safecast?
         case ttproto.Telecast_BGEIGIE_NANO:
             fallthrough
+        case ttproto.Telecast_UNKNOWN_DEVICE_TYPE:
+			fallthrough
         case ttproto.Telecast_SOLARCAST:
             SendSafecastMessage(AppReq, *msg, checksum)
 
