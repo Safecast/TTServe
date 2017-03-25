@@ -45,7 +45,7 @@ const SLACK_MSG_REPLY =				2
 var SlackInboundTokens = [...]string {
 	// Safecast
 	"JzemotPucrCixAx2JPRZpgn9",
-	// Rozzie
+	// Ray
 	"sfC2GfAnleQ3BFgsq2dGO7Yw",
 	// Musti
 	"XnOxJn2lD7SvECqOs56aSUUb",
@@ -54,7 +54,7 @@ var SlackInboundTokens = [...]string {
 var SlackOutboundURLs = [...]string {
 	// Safecast #ops channel
 	"https://hooks.slack.com/services/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",
-	// Ray Ozzie's private team/channel, for testing
+	// Ray's private team/channel, for testing
 	"https://hooks.slack.com/services/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",
 	// Musti's team
 	"https://hooks.slack.com/services/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",
