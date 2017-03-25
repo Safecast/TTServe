@@ -87,7 +87,7 @@ func AppReqProcess(AppReq IncomingAppReq) {
         case ttproto.Telecast_BGEIGIE_NANO:
             fallthrough
         case ttproto.Telecast_UNKNOWN_DEVICE_TYPE:
-			fallthrough
+            fallthrough
         case ttproto.Telecast_SOLARCAST:
             SendSafecastMessage(AppReq, *msg, checksum)
 
@@ -122,7 +122,7 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
     case BUFF_FORMAT_PB_ARRAY: {
 
         if !validBulkPayload(buf, buf_length) {
-	        fmt.Printf("\n%s Received INVALID %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
+            fmt.Printf("\n%s Received INVALID %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
             return
         }
 
@@ -140,12 +140,12 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
             // Construct the app request
             AppReq.Payload = buf[payloadOffset:payloadOffset+length]
 
-			if (count == 1) {
-	            fmt.Printf("\n%s Received %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), from, AppReq.SvTransport)
-			} else {
-	            fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), i+1, count, from, AppReq.SvTransport)
-			}
-			
+            if (count == 1) {
+                fmt.Printf("\n%s Received %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), from, AppReq.SvTransport)
+            } else {
+                fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), i+1, count, from, AppReq.SvTransport)
+            }
+
             // Process the AppReq synchronously, because they must be done in-order
             AppReq.SvUploadedAt = UploadedAt
             AppReqProcess(AppReq)
@@ -157,7 +157,18 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
     }
 
     default: {
-        fmt.Printf("\n%s Received INVALID %d-byte payload from DEVICE:\n%v\n", time.Now().Format(logDateFormat), buf_length, buf)
+        isAscii := true
+        for i:=0; i<len(buf); i++ {
+            if (buf[i] < ' ' && buf[i] != '\r' && buf[i] != '\n' && buf[i] != '\t') || buf[i] > 0x7f {
+                isAscii = false;
+                break;
+            }
+        }
+        if isAscii {
+            fmt.Printf("\n%s Received INVALID %d-byte payload from DEVICE:\n%s\n", time.Now().Format(logDateFormat), buf_length, buf)
+        } else {
+            fmt.Printf("\n%s Received INVALID %d-byte payload from DEVICE:\n%v\n", time.Now().Format(logDateFormat), buf_length, buf)
+        }
     }
     }
 
@@ -219,7 +230,7 @@ func getReplyDeviceIdFromPayload(buf []byte) (deviceID uint32) {
     switch (buf_format) {
 
     case BUFF_FORMAT_SINGLE_PB: {
-	    msg := &ttproto.Telecast{}
+        msg := &ttproto.Telecast{}
         err := proto.Unmarshal(buf, msg)
         if err != nil {
             return 0
@@ -263,7 +274,7 @@ func getReplyDeviceIdFromPayload(buf []byte) (deviceID uint32) {
             length := int(buf[lengthArrayOffset+i])
 
             // Unmarshal payload
-		    msg := &ttproto.Telecast{}
+            msg := &ttproto.Telecast{}
             payload := buf[payloadOffset:payloadOffset+length]
             err := proto.Unmarshal(payload, msg)
             if err != nil {
