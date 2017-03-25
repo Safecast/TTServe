@@ -27,13 +27,11 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	if !isReal {
 		remoteAddr = "internal address"
 	}
-    if (isReal || req.RequestURI != "/") {
-	    stats.Count.HTTP++
-	}
 
     // Read the body as a byte array
     body, err := ioutil.ReadAll(req.Body)
     if err != nil {
+	    stats.Count.HTTP++
         fmt.Printf("Error reading HTTP request body: \n%v\n", req)
         return
     }
@@ -41,8 +39,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // Decode the request with custom marshaling
     sdV1, err = SafecastV1Decode(bytes.NewReader(body))
     if err != nil {
+	    stats.Count.HTTP++
 		// Eliminate a bit of the noise caused by load balancer health checks
-	    if (isReal || req.RequestURI != "/") {
+	    if (isReal && req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
             if err == io.EOF {
                 fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), req.RequestURI, remoteAddr);
             } else {
@@ -55,6 +54,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         io.WriteString(rw, fmt.Sprintf("Live Free or Die.\n"))
         return
     }
+
+	// A real request
+    stats.Count.HTTP++
 
     // Convert to current data format
     deviceID, deviceType, sd := SafecastReformat(sdV1)
