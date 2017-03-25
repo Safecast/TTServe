@@ -109,16 +109,6 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
 
     switch (buf_format) {
 
-    case BUFF_FORMAT_SINGLE_PB: {
-
-        fmt.Printf("\n%s Received *** DEPRECATED *** %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
-
-        // Enqueue the app request
-        AppReq.Payload = buf
-        AppReq.SvUploadedAt = nowInUTC()
-        AppReqProcess(AppReq)
-    }
-
     case BUFF_FORMAT_PB_ARRAY: {
 
         if !validBulkPayload(buf, buf_length) {
@@ -228,33 +218,6 @@ func getReplyDeviceIdFromPayload(buf []byte) (deviceID uint32) {
     buf_length := len(buf)
 
     switch (buf_format) {
-
-    case BUFF_FORMAT_SINGLE_PB: {
-        msg := &ttproto.Telecast{}
-        err := proto.Unmarshal(buf, msg)
-        if err != nil {
-            return 0
-        }
-
-        // Extract the device ID
-        DeviceId := TelecastDeviceId(msg)
-
-        // Look at reply type
-        if msg.ReplyType != nil {
-
-            switch msg.GetReplyType() {
-
-                // A reply is expected
-            case ttproto.Telecast_REPLY_EXPECTED:
-                return DeviceId
-
-            }
-
-        }
-
-        return 0
-
-    }
 
     case BUFF_FORMAT_PB_ARRAY: {
 

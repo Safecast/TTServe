@@ -100,11 +100,8 @@ var   ThisServerBootTime time.Time
 var   AllServersSlackRestartRequestTime time.Time
 var   AllServersGithubRestartRequestTime time.Time
 
-// Buffered I/O header formats coordinated with TTNODE.  Note that although we are now starting
-// with version number 0, we special-case version number 8 because of the old style "single protocl buffer"
-// message format that always begins with 0x08. (see ttnode/send.c)
+// Payload buffer format
 const BUFF_FORMAT_PB_ARRAY byte  =  0
-const BUFF_FORMAT_SINGLE_PB byte =  8
 
 // Log-related
 const logDateFormat string = "2006-01-02 15:04:05"
