@@ -155,9 +155,9 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
             }
         }
         if isAscii {
-            fmt.Printf("\n%s Received INVALID %d-byte payload from DEVICE:\n%s\n", time.Now().Format(logDateFormat), buf_length, buf)
+            fmt.Printf("\n%s Received unrecognized %d-byte payload from %s:\n%s\n", time.Now().Format(logDateFormat), buf_length, AppReq.SvTransport, buf)
         } else {
-            fmt.Printf("\n%s Received INVALID %d-byte payload from DEVICE:\n%v\n", time.Now().Format(logDateFormat), buf_length, buf)
+            fmt.Printf("\n%s Received unrecognized %d-byte payload from %s:\n%v\n", time.Now().Format(logDateFormat), buf_length, AppReq.SvTransport, buf)
         }
     }
     }

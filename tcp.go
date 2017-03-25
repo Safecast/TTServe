@@ -110,7 +110,7 @@ func TcpInboundHandler() {
             continue
         }
 		if n != payload_entries_len {
-            fmt.Printf("tcp: can't read entriess: %d/%d\n", n, payload_entries_len)
+            fmt.Printf("tcp: can't read entries: %d/%d\n", n, payload_entries_len)
             conn.Close()
             continue
 		}
