@@ -111,7 +111,7 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
 
     case BUFF_FORMAT_SINGLE_PB: {
 
-        fmt.Printf("\n%s Received ***DEPRECATED*** %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
+        fmt.Printf("\n%s Received *** DEPRECATED *** %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
 
         // Enqueue the app request
         AppReq.Payload = buf
@@ -157,7 +157,7 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
     }
 
     default: {
-        fmt.Printf("\n%s Received INVALID %d-byte buffered payload from DEVICE: %v\n", time.Now().Format(logDateFormat), buf_length, buf)
+        fmt.Printf("\n%s Received INVALID %d-byte payload from DEVICE: \n%s\n%v\n", time.Now().Format(logDateFormat), buf_length, buf, buf)
     }
     }
 
