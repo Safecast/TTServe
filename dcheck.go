@@ -328,7 +328,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         stat.hasEnv = true
         if sd.Env.Temp != nil {
             val := *sd.Env.Temp
-            if val < -25.0 || val > 38.0 {
+            if val < -25.0 || val > 80.0 {
                 stat.EnvWarning = true
             }
         }
