@@ -18,7 +18,7 @@ import (
 )
 
 // Debugging
-const debugStamp = false
+const debugStamp = true
 
 // Stamp versions.  Unlike the client, the support
 // for downlevel stamp version must be kept here forever.
@@ -33,6 +33,11 @@ type stampFile struct {
     Altitude        int32   `json:"Altitude,omitempty"`
     CapturedAtDate  uint32  `json:"CapturedAtDate,omitempty"`
     CapturedAtTime  uint32  `json:"CapturedAtTime,omitempty"`
+    HasTestMode     bool    `json:"HasTestMode,omitempty"`
+    HasMotionMode   bool    `json:"HasMotionMode,omitempty"`
+    TestMode        bool    `json:"TestMode,omitempty"`
+    MotionMode      bool    `json:"MotionMode,omitempty"`
+
 }
 
 // Describes every device that has sent us a message
@@ -67,7 +72,7 @@ func stampSetOrApply(message *ttproto.Telecast) (isValidMessage bool) {
     found := false
     for CacheEntry = 0; CacheEntry < len(cachedDevices); CacheEntry++ {
         if DeviceId == cachedDevices[CacheEntry].deviceid {
-			found = true
+            found = true
             break;
         }
     }
@@ -117,20 +122,31 @@ func stampSet(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isVal
 
     case STAMP_VERSION_1: {
 
-        if (message.Stamp == nil || message.Latitude == nil || message.Longitude == nil || message.CapturedAtDate == nil || message.CapturedAtTime == nil) {
+        if (message.Stamp == nil || message.CapturedAtDate == nil || message.CapturedAtTime == nil) {
             fmt.Printf("*** Warning - badly formatted v%d stamp ***\n", sf.Version)
         } else {
 
             sf.Stamp = message.GetStamp()
             sf.CapturedAtDate = message.GetCapturedAtDate()
             sf.CapturedAtTime = message.GetCapturedAtTime()
-            sf.Latitude = message.GetLatitude()
-            sf.Longitude = message.GetLongitude()
-            if message.Altitude != nil {
-                sf.Altitude = message.GetAltitude()
-            } else {
-                sf.Altitude = 0.0
+            if message.Latitude != nil || message.Longitude != nil {
+                sf.Latitude = message.GetLatitude()
+                sf.Longitude = message.GetLongitude()
+                if message.Altitude != nil {
+                    sf.Altitude = message.GetAltitude()
+                } else {
+                    sf.Altitude = 0.0
+                }
             }
+            if message.Motion != nil {
+                sf.HasMotionMode = true;
+                sf.MotionMode = message.GetMotion();
+            }
+            if message.Test != nil {
+                sf.HasTestMode = true;
+                sf.TestMode = message.GetTest();
+            }
+
             sfJSON, _ := json.Marshal(sf)
 
             file := stampFilename(DeviceId)
@@ -219,9 +235,27 @@ func stampApply(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isV
         case STAMP_VERSION_1: {
 
             // Location is best set to last known good rather than nothing at all
-            message.Latitude = &cachedDevices[CacheEntry].cache.Latitude
-            message.Longitude = &cachedDevices[CacheEntry].cache.Longitude
-            message.Altitude = &cachedDevices[CacheEntry].cache.Altitude
+            if message.Latitude == nil || message.Longitude == nil {
+                if cachedDevices[CacheEntry].cache.Latitude != 0.0 || cachedDevices[CacheEntry].cache.Longitude != 0.0 {
+                    message.Latitude = &cachedDevices[CacheEntry].cache.Latitude
+                    message.Longitude = &cachedDevices[CacheEntry].cache.Longitude
+                    if cachedDevices[CacheEntry].cache.Altitude != 0.0 {
+                        message.Altitude = &cachedDevices[CacheEntry].cache.Altitude
+                    }
+                }
+            }
+
+            // Modes are best set to last known good rather than making a mistake
+            if message.Test == nil {
+                if cachedDevices[CacheEntry].cache.HasTestMode {
+                    message.Test = &cachedDevices[CacheEntry].cache.TestMode
+                }
+            }
+            if message.Motion == nil {
+                if cachedDevices[CacheEntry].cache.HasMotionMode {
+                    message.Motion = &cachedDevices[CacheEntry].cache.MotionMode
+                }
+            }
 
             // Time is best set to current time rather than nothing at all
             substituteCapturedAt := nowInUTC()
@@ -255,12 +289,30 @@ func stampApply(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isV
 
     case STAMP_VERSION_1: {
 
-        // Location is best set to last known good rather than nothing at all
-        message.Latitude = &cachedDevices[CacheEntry].cache.Latitude
-        message.Longitude = &cachedDevices[CacheEntry].cache.Longitude
-        message.Altitude = &cachedDevices[CacheEntry].cache.Altitude
+        // Set Location
+        if message.Latitude == nil || message.Longitude == nil {
+            if cachedDevices[CacheEntry].cache.Latitude != 0.0 || cachedDevices[CacheEntry].cache.Longitude != 0.0 {
+                message.Latitude = &cachedDevices[CacheEntry].cache.Latitude
+                message.Longitude = &cachedDevices[CacheEntry].cache.Longitude
+                if cachedDevices[CacheEntry].cache.Altitude != 0.0 {
+                    message.Altitude = &cachedDevices[CacheEntry].cache.Altitude
+                }
+            }
+        }
 
-        // Time is best set to current time rather than nothing at all
+        // Set Modes
+        if message.Test == nil {
+            if cachedDevices[CacheEntry].cache.TestMode {
+                message.Test = &cachedDevices[CacheEntry].cache.TestMode
+            }
+        }
+        if message.Motion == nil {
+            if cachedDevices[CacheEntry].cache.MotionMode {
+                message.Motion = &cachedDevices[CacheEntry].cache.MotionMode
+            }
+        }
+		
+        // Set Time
         if message.CapturedAtOffset != nil {
             message.CapturedAtDate = &cachedDevices[CacheEntry].cache.CapturedAtDate
             message.CapturedAtTime = &cachedDevices[CacheEntry].cache.CapturedAtTime
