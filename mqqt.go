@@ -124,7 +124,7 @@ func MqqtSubscriptionMonitor() {
         mqttOpts := MQTT.NewClientOptions()
         mqttOpts.AddBroker(ttnServer)
         mqttOpts.SetUsername(ttnAppId)
-        mqttOpts.SetPassword(ttnAppAccessKey)
+        mqttOpts.SetPassword(ServiceConfig.TtnAppAccessKey)
 
         // Do NOT automatically reconnect upon failure
         mqttOpts.SetAutoReconnect(false)

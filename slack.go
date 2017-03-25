@@ -90,7 +90,8 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Figure out who is sending this to us
     SlackCommandSource = SLACK_OPS_NONE
-    for source, tok := range SlackInboundTokens {
+    str := strings.Split(ServiceConfig.SlackInboundTokens, ",")
+    for source, tok := range str {
         if tok == token {
             SlackCommandSource = source
         }
@@ -224,14 +225,17 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 // back to the callers.
 func sendToSafecastOps(msg string, destination int) {
     if destination == SLACK_MSG_UNSOLICITED {
-        for _, url := range SlackOutboundURLs {
+	    str := strings.Split(ServiceConfig.SlackOutboundUrls, ",")
+        for _, url := range str {
             go sendToOpsViaSlack(msg, url)
         }
     } else if destination == SLACK_MSG_UNSOLICITED_OPS {
-        go sendToOpsViaSlack(msg, SlackOutboundURLs[SLACK_OPS_SAFECAST])
+	    str := strings.Split(ServiceConfig.SlackOutboundUrls, ",")
+        go sendToOpsViaSlack(msg, str[SLACK_OPS_SAFECAST])
     } else {
         if SlackCommandSource != SLACK_OPS_NONE {
-            go sendToOpsViaSlack(msg, SlackOutboundURLs[SlackCommandSource])
+		    str := strings.Split(ServiceConfig.SlackOutboundUrls, ",")
+            go sendToOpsViaSlack(msg, str[SlackCommandSource])
         }
     }
 }

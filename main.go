@@ -20,6 +20,9 @@ import (
 // Main service entry point
 func main() {
 
+	// Read our service config file
+	ServiceConfig = ServiceReadConfig()
+
 	// Init our utility package
 	UtilInit()
 	

@@ -77,7 +77,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 				var err error
 				var resp *http.Response
 				
-                url := fmt.Sprintf(ttnDownlinkURL, ttnAppId, ttnProcessId, ttnAppAccessKey)
+                url := fmt.Sprintf(ttnDownlinkURL, ttnAppId, ttnProcessId, ServiceConfig.TtnAppAccessKey)
 
 				// Retry several times in case of failure
 				for i:=0; i<3; i++ {
