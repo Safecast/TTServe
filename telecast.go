@@ -204,10 +204,14 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
         return false, nil
     }
 
+	fmt.Printf("Before pb-array: \n%v\n", tdata);
+
 	// Use the new wire format
 	header := []byte{BUFF_FORMAT_PB_ARRAY, 1}
 	header = append(header, byte(len(tdata)))
 	command := append(header, tdata...)
+
+	fmt.Printf("After pb-array: \n%v\n", command);
 
     // Done
     return true, command
