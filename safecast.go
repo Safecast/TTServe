@@ -678,7 +678,8 @@ func SafecastV1Upload(body []byte, url string, unit string, value string) bool {
     // On 2017-02-17 I disabled errors uploading to V1 servers, because it's no longer
     // interesting relative to uploads to the new "Ingest" servers.
     // On 2017-03-13 I re-enabled after "connection refused" errors
-    if true {
+    // On 2017-03-25 I re-disabled after the errors were again too noisy
+    if false {
         endTransaction(transaction, domain, errString)
     } else {
         if (errString != "") {
