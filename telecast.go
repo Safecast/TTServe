@@ -189,6 +189,9 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
         return false, nil
     }
 
+    // Delete the file
+    cancelCommand(deviceID);
+
     // Marshal the command into a telecast message
     deviceType := ttproto.Telecast_TTSERVE
     tmsg := &ttproto.Telecast{}
@@ -200,9 +203,6 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
         fmt.Printf("send msg marshaling error: ", terr)
         return false, nil
     }
-
-    // Delete the file
-    cancelCommand(deviceID);
 
 	// Use the new wire format
 	header := []byte{BUFF_FORMAT_PB_ARRAY, 1}
