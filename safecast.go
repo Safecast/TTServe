@@ -621,10 +621,10 @@ func isDuplicate(checksum uint32) bool {
 func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
     if (httpTransactionErrors != 0) {
         if (httpTransactionErrors == 1) {
-            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to %s:%s)",
+            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to %s:%s",
                 httpTransactionErrorTime, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS);
         } else {
-            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading in %d minutes to %s:%s)",
+            sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading in %d minutes to %s:%s",
                 httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS);
         }
         httpTransactionErrors = 0
