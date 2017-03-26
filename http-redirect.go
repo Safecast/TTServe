@@ -67,7 +67,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
             str10 := strings.Replace(str9, "&", "\",\"", -1)
             body = []byte("{\"" + str10 + "\"}")
         }
-		fmt.Printf("$$$\n%s\n", string(body))
 
     } else {
 
@@ -82,15 +81,16 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Decode the request with custom marshaling
+	fmt.Printf("$$$\n%s\n", string(body))
     sdV1, sdV1Emit, err = SafecastV1Decode(bytes.NewReader(body))
     if err != nil {
         stats.Count.HTTP++
         // Eliminate a bit of the noise caused by load balancer health checks
         if (isReal && req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
             if err == io.EOF {
-                fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), req.RequestURI, remoteAddr);
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), RequestURI, remoteAddr);
             } else {
-                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), req.RequestURI, remoteAddr, err);
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), RequestURI, remoteAddr, err);
             }
             if len(body) != 0 {
                 fmt.Printf("%s\n", string(body));
