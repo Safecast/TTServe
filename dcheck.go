@@ -47,6 +47,8 @@ type MeasurementStat struct {
     ErrorsConnectWireless uint32
     ErrorsConnectData   uint32
     ErrorsConnectService uint32
+    ErrorsCommsFailures uint32
+    ErrorsDeviceRestarts uint32
     UptimeMinutes       uint32
     hasBat              bool
     BatWarning          bool
@@ -95,6 +97,7 @@ type MeasurementDataset struct {
     FonaModule          string
     AnyErrors           bool
     AnyConnectErrors    bool
+    AnyPointcastErrors  bool
     PrevErrorsOpc       uint32
     ThisErrorsOpc       uint32
     PrevErrorsPms       uint32
@@ -130,6 +133,10 @@ type MeasurementDataset struct {
     PrevErrorsConnectData uint32
     ThisErrorsConnectService uint32
     PrevErrorsConnectService uint32
+    ThisErrorsCommsFailures uint32
+    PrevErrorsCommsFailures uint32
+    ThisErrorsDeviceRestarts uint32
+    PrevErrorsDeviceRestarts uint32
     PrevUptimeMinutes   uint32
     MaxUptimeMinutes    uint32
     Boots               uint32
@@ -282,6 +289,12 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         if sd.Dev.ErrorsConnectService != nil {
             stat.ErrorsConnectService = *sd.Dev.ErrorsConnectService
         }
+        if sd.Dev.CommsFails != nil {
+            stat.ErrorsCommsFailures = *sd.Dev.CommsFails
+        }
+        if sd.Dev.DeviceRestarts != nil {
+            stat.ErrorsDeviceRestarts = *sd.Dev.DeviceRestarts
+        }
 
         if sd.Dev.UptimeMinutes != nil {
             stat.UptimeMinutes = *sd.Dev.UptimeMinutes
@@ -309,11 +322,11 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
                 stat.BatWarning = true
             }
         }
-		// As of 2017-03-23 we no longer verify charge, for two reasons:
-		// 1) most devices require SOC training, and thus fall out of range
-		// 2) we don't actually use SOC for device performance throttling,
-		//    instead using a calculation derived from the voltage.  As such,
-		//    SOC is largely for informational purposes.
+        // As of 2017-03-23 we no longer verify charge, for two reasons:
+        // 1) most devices require SOC training, and thus fall out of range
+        // 2) we don't actually use SOC for device performance throttling,
+        //    instead using a calculation derived from the voltage.  As such,
+        //    SOC is largely for informational purposes.
         if (false) {
             if sd.Bat.Charge != nil {
                 val := *sd.Bat.Charge
@@ -637,6 +650,14 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.ThisErrorsConnectService = stat.ErrorsConnectService
         ds.AnyConnectErrors = true
     }
+    if stat.ErrorsCommsFailures > ds.ThisErrorsCommsFailures {
+        ds.ThisErrorsCommsFailures = stat.ErrorsCommsFailures
+        ds.AnyPointcastErrors = true
+    }
+    if stat.ErrorsDeviceRestarts > ds.ThisErrorsDeviceRestarts {
+        ds.ThisErrorsDeviceRestarts = stat.ErrorsDeviceRestarts
+        ds.AnyPointcastErrors = true
+    }
 
     // Uptime
     if stat.UptimeMinutes != 0 {
@@ -681,6 +702,10 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
             ds.ThisErrorsConnectData = 0
             ds.PrevErrorsConnectService += ds.ThisErrorsConnectService
             ds.ThisErrorsConnectService = 0
+            ds.PrevErrorsCommsFailures += ds.ThisErrorsCommsFailures
+            ds.ThisErrorsCommsFailures = 0
+            ds.PrevErrorsDeviceRestarts += ds.ThisErrorsDeviceRestarts
+            ds.ThisErrorsDeviceRestarts = 0
 
         }
         ds.PrevUptimeMinutes = stat.UptimeMinutes
@@ -759,10 +784,10 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // High-level stats
     s += fmt.Sprintf("Checkup:\n")
     s += fmt.Sprintf("  id %d", ds.DeviceId)
-	if time.Now().Sub(ds.NewestUpload)/time.Minute > 90 {
-		s += fmt.Sprintf(" (OFFLINE)")
-	}
-	s += fmt.Sprintf("\n")
+    if time.Now().Sub(ds.NewestUpload)/time.Minute > 90 {
+        s += fmt.Sprintf(" (OFFLINE)")
+    }
+    s += fmt.Sprintf("\n")
     s += fmt.Sprintf("  at %s\n", time.Now().Format("2006-01-02 15:04 UTC"))
     if ds.Firmware != "" {
         s += fmt.Sprintf("  on %s\n", ds.Firmware)
@@ -887,66 +912,6 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     s += fmt.Sprintf("\n")
 
-    // Errors
-    if ds.Boots == 1 {
-        s += fmt.Sprintf("Device errors:\n")
-    } else {
-        s += fmt.Sprintf("Device errors across %d sessions:\n", ds.Boots)
-    }
-    if !ds.AnyErrors {
-        s += fmt.Sprintf("  None\n")
-    } else {
-        i := ds.PrevErrorsOpc + ds.ThisErrorsOpc
-        if i > 0 {
-            s += fmt.Sprintf("  Opc    %d\n", i)
-        }
-        i = ds.PrevErrorsPms + ds.ThisErrorsPms
-        if i > 0 {
-            s += fmt.Sprintf("  Pms    %d\n", i)
-        }
-        i = ds.PrevErrorsBme0 + ds.ThisErrorsBme0
-        if i > 0 {
-            s += fmt.Sprintf("  Bme0   %d\n", i)
-        }
-        i = ds.PrevErrorsBme1 + ds.ThisErrorsBme1
-        if i > 0 {
-            s += fmt.Sprintf("  Bme1   %d\n", i)
-        }
-        i = ds.PrevErrorsLora + ds.ThisErrorsLora
-        if i > 0 {
-            s += fmt.Sprintf("  Lora   %d\n", i)
-        }
-        i = ds.PrevErrorsFona + ds.ThisErrorsFona
-        if i > 0 {
-            s += fmt.Sprintf("  Fona   %d\n", i)
-        }
-        i = ds.PrevErrorsGeiger + ds.ThisErrorsGeiger
-        if i > 0 {
-            s += fmt.Sprintf("  Geiger %d\n", i)
-        }
-        i = ds.PrevErrorsMax01 + ds.ThisErrorsMax01
-        if i > 0 {
-            s += fmt.Sprintf("  Max01  %d\n", i)
-        }
-        i = ds.PrevErrorsUgps + ds.ThisErrorsUgps
-        if i > 0 {
-            s += fmt.Sprintf("  Ugps   %d\n", i)
-        }
-        i = ds.PrevErrorsLis + ds.ThisErrorsLis
-        if i > 0 {
-            s += fmt.Sprintf("  Lis    %d\n", i)
-        }
-        i = ds.PrevErrorsSpi + ds.ThisErrorsSpi
-        if i > 0 {
-            s += fmt.Sprintf("  Spi    %d\n", i)
-        }
-        i = ds.PrevErrorsTwi + ds.ThisErrorsTwi
-        if i > 0 || ds.ErrorsTwiInfo != "" {
-            s += fmt.Sprintf("  Twi    %d %s\n", i, ds.ErrorsTwiInfo)
-        }
-    }
-    s += fmt.Sprintf("\n")
-
     // Sensors
     s += fmt.Sprintf("Measurement Counts:\n")
     if ds.BatWarningCount == 0 {
@@ -999,6 +964,20 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // That's all if we're not solarcast
     if ds.Transports == "pointcast" || ds.Transports == "safecast-air" {
         return s
+    }
+
+    // Pointcast
+    if ds.AnyPointcastErrors {
+        s += fmt.Sprintf("Pointcast errors:\n")
+        i := ds.PrevErrorsCommsFailures + ds.ThisErrorsCommsFailures
+        if i > 0 {
+            s += fmt.Sprintf("  CommsFailures   %d\n", i)
+        }
+        i = ds.PrevErrorsDeviceRestarts + ds.ThisErrorsDeviceRestarts
+        if i > 0 {
+            s += fmt.Sprintf("  DeviceRestarts  %d\n", i)
+        }
+        s += fmt.Sprintf("\n")
     }
 
     // Solarcast summary
