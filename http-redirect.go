@@ -67,6 +67,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
             str10 := strings.Replace(str9, "&", "\",\"", -1)
             body = []byte("{\"" + str10 + "\"}")
         }
+		fmt.Printf("$$$\n%s\n", string(body))
 
     } else {
 
