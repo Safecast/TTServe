@@ -172,10 +172,10 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     case "reboot-all":
     case "restart-all":
         sendToSafecastOps(fmt.Sprintf("Restarting all service instances."), SLACK_MSG_REPLY)
+        time.Sleep(5 * time.Second)
         ServerLog(fmt.Sprintf("*** RESTARTING because of Slack 'restart-all' command\n"))
         ControlFileTime(TTServerRestartAllControlFile, user)
         sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServeInstanceID), SLACK_MSG_UNSOLICITED)
-        time.Sleep(5 * time.Second)
         os.Exit(0)
 
     case "reboot":
