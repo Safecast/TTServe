@@ -22,6 +22,7 @@ const redirectDebug bool = true
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     var sdV1 *SafecastDataV1
+    var sdV1Emit *SafecastDataV1ToEmit
 
 	// Remember when it was uploaded to us
     UploadedAt := nowInUTC()
@@ -42,7 +43,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Decode the request with custom marshaling
-    sdV1, err = SafecastV1Decode(bytes.NewReader(body))
+    sdV1, sdV1Emit, err = SafecastV1Decode(bytes.NewReader(body))
     if err != nil {
 	    stats.Count.HTTP++
 		// Eliminate a bit of the noise caused by load balancer health checks
@@ -67,18 +68,22 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     if sdV1.Unit == nil {
         s := "cpm"
         sdV1.Unit = &s
+		sdV1Emit.Unit = &s
     }
     if sdV1.Value == nil {
-        v := float32(0)
-        sdV1.Value = &v
+        f32 := float32(0)
+        sdV1.Value = &f32
+		str := fmt.Sprintf("%f", f32)
+		sdV1Emit.Value = &str
     }
 	if sdV1.CapturedAt == nil {
 		capturedAt := nowInUTC()
 		sdV1.CapturedAt = &capturedAt
+		sdV1Emit.CapturedAt = &capturedAt
 	}
 
-	// Convert it to text
-    sdV1JSON, _ := json.Marshal(sdV1)
+	// Convert it to text to emit
+    sdV1EmitJSON, _ := json.Marshal(sdV1Emit)
 	
 	// Process the request URI, looking for things that will indicate "dev"
 	method := req.Method
@@ -91,11 +96,11 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	if redirectDebug {
 		fmt.Printf("*** Redirect %s test:%v %s\n", method, isTestMeasurement, req.RequestURI)
 		fmt.Printf("*** Redirect received:\n%s\n", string(body))
-		fmt.Printf("*** Redirect decoded to V1:\n%s\n", sdV1JSON)
+		fmt.Printf("*** Redirect decoded to V1:\n%s\n", sdV1EmitJSON)
 	}
 
     // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
-    _, result := SafecastV1Upload(sdV1JSON, req.RequestURI, isTestMeasurement, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
+    _, result := SafecastV1Upload(sdV1EmitJSON, req.RequestURI, isTestMeasurement, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
 
     // Send a reply to Pointcast saying that the request was processed acceptably.
     // If we fail to do this, Pointcast goes into an infinite reboot loop with comms errors
