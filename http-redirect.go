@@ -13,6 +13,7 @@ import (
     "fmt"
 	"time"
     "io"
+    "encoding/json"
 )
 
 // Debugging
@@ -85,7 +86,8 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// If debugging, display it
 	if redirectDebug {
-		fmt.Printf("*** Redirect reformatted to V2:\n%v\n", sd)
+	    scJSON, _ := json.Marshal(sd)
+		fmt.Printf("*** Redirect reformatted to V2:\n%v\n", scJSON)
 	}
 
 	// Report where we got it from, and when we got it

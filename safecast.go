@@ -636,7 +636,7 @@ func SafecastV1Upload(body []byte, url string, method string, isDev bool, unit s
     if !useV1PrimaryServer {
         domain = SafecastV1UploadURL2
     }
-    req, _ := http.NewRequest("POST", domain + url, bytes.NewBuffer(body))
+    req, _ := http.NewRequest(method, domain + url, bytes.NewBuffer(body))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{
