@@ -973,7 +973,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     // Pointcast
     if ds.AnyPointcastErrors {
-        s += fmt.Sprintf("Pointcast errors since %s:\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
+        s += fmt.Sprintf("Pointcast errors new since %s:\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
         i := ds.PrevErrorsCommsFailures + ds.ThisErrorsCommsFailures
 		j := i - ds.MinErrorsCommsFailures
         s += fmt.Sprintf("  CommsFailures   %d new / %d total\n", j, i)
