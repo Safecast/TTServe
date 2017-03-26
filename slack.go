@@ -168,7 +168,10 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             }
         }
 
+    case "reboot":
+    case "reboot-all":
     case "restart":
+    case "restart-all":
         sendToSafecastOps(fmt.Sprintf("Restarting all instances..."), SLACK_MSG_REPLY)
         ControlFileTime(TTServerRestartAllControlFile, user)
 
