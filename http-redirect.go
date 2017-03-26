@@ -14,6 +14,9 @@ import (
     "io"
 )
 
+// Debugging
+const redirectDebug bool = true
+
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     var sdV1 *SafecastDataV1
@@ -35,6 +38,11 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         fmt.Printf("Error reading HTTP request body: \n%v\n", req)
         return
     }
+
+	// If debugging, display it
+	if redirectDebug {
+		fmt.Printf("*** Redirect received:\n%s\n", string(body))
+	}
 
     // Decode the request with custom marshaling
     sdV1, err = SafecastV1Decode(bytes.NewReader(body))
@@ -58,12 +66,22 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	// A real request
     stats.Count.HTTP++
 
+	// If debugging, display it
+	if redirectDebug {
+		fmt.Printf("*** Redirect decoded to V1:\n%v\n", sdV1)
+	}
+
     // Convert to current data format
     deviceID, deviceType, sd := SafecastReformat(sdV1)
     if (deviceID == 0) {
         fmt.Printf("%s\n%v\n", string(body), sdV1);
         return
     }
+
+	// If debugging, display it
+	if redirectDebug {
+		fmt.Printf("*** Redirect reformatted to V2:\n%v\n", sd)
+	}
 
 	// Report where we got it from, and when we got it
     var svc Service
