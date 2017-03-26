@@ -118,7 +118,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
     // If debugging, display it
     if redirectDebug {
-        fmt.Printf("*** Redirect %s test:%v %s\n", method, isTestMeasurement, req.RequestURI)
+        fmt.Printf("\n\n*** Redirect %s test:%v %s\n", method, isTestMeasurement, req.RequestURI)
         fmt.Printf("*** Redirect received:\n%s\n", string(body))
         fmt.Printf("*** Redirect decoded to V1:\n%s\n", sdV1EmitJSON)
     }
@@ -141,7 +141,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // If debugging, display it
     if redirectDebug {
         scJSON, _ := json.Marshal(sd)
-        fmt.Printf("*** Redirect reformatted to V2:\n%s\n", scJSON)
+        fmt.Printf("*** Redirect reformatted to V2:\n%s\n\n\n", scJSON)
     }
 
     // Report where we got it from, and when we got it
