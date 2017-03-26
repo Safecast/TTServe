@@ -961,11 +961,6 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     s += fmt.Sprintf("\n")
     s += fmt.Sprintf("\n")
 
-    // That's all if we're not solarcast
-    if ds.Transports == "pointcast" || ds.Transports == "safecast-air" {
-        return s
-    }
-
     // Pointcast
     if ds.AnyPointcastErrors {
         s += fmt.Sprintf("Pointcast errors:\n")
@@ -978,6 +973,11 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
             s += fmt.Sprintf("  DeviceRestarts  %d\n", i)
         }
         s += fmt.Sprintf("\n")
+    }
+
+    // That's all if we're not solarcast
+    if ds.Transports == "pointcast" || ds.Transports == "safecast-air" {
+        return s
     }
 
     // Solarcast summary
