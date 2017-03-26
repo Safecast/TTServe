@@ -111,7 +111,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
 
         case "cpm":
             if !isPointcast {
-                fmt.Printf("*** Reformat: Received CPM for non-Pointcast\n", sd.DeviceId)
+                fmt.Printf("*** Reformat: Received CPM for non-Pointcast %d\n", sd.DeviceId)
             } else {
                 if (*v1.DeviceId % 10) == 1 {
                     var lnd Lnd

@@ -15,10 +15,10 @@ import (
 )
 
 type SafecastDataV1ToParse struct {
-    CapturedAt		*string `json:"captured_at,omitempty"`
-    DeviceTypeId	*string `json:"devicetype_id,omitempty"`
-    LocationName	*string `json:"location_name,omitempty"`
-    Unit			*string `json:"unit,omitempty"`
+    CapturedAtRaw	interface{} `json:"captured_at,omitempty"`
+    DeviceTypeIdRaw	interface{} `json:"devicetype_id,omitempty"`
+    LocationNameRaw	interface{} `json:"location_name,omitempty"`
+    UnitRaw			interface{} `json:"unit,omitempty"`
     ChannelIdRaw	interface{} `json:"channel_id,omitempty"`
     DeviceIdRaw		interface{} `json:"device_id,omitempty"`
     OriginalIdRaw	interface{} `json:"original_id,omitempty"`
@@ -44,7 +44,7 @@ type SafecastDataV1 struct {
     StationId		*uint32  `json:"station_id,omitempty"`
     UserId			*uint32  `json:"user_id,omitempty"`
     Id				*uint32  `json:"id,omitempty"`
-    Height			*int32   `json:"height,omitempty"`
+    Height			*float32 `json:"height,omitempty"`
     Value			*float32 `json:"value,omitempty"`
     Latitude		*float32 `json:"latitude,omitempty"`
     Longitude		*float32 `json:"longitude,omitempty"`
@@ -62,6 +62,24 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, err error) {
 		return
 	}
 
+	// Go through things that pass straight through
+	switch t := in.CapturedAtRaw.(type) {
+	case string:
+		out.CapturedAt = &t
+	}
+	switch t := in.DeviceTypeIdRaw.(type) {
+	case string:
+		out.DeviceTypeId = &t
+	}
+	switch t := in.LocationNameRaw.(type) {
+	case string:
+		out.LocationName = &t
+	}
+	switch t := in.UnitRaw.(type) {
+	case string:
+		out.Unit = &t
+	}
+	
 	// Now go through each Raw interface and unpack the value into the corresponding non-Raw field
 	switch t := in.ChannelIdRaw.(type) {
 	case string:
@@ -159,12 +177,12 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, err error) {
 		t = strings.TrimSpace(t)
 	    f64, err := strconv.ParseFloat(t, 32)
 	    if err == nil {
-			i32 := int32(f64)
-	        out.Height = &i32
+			f32 := float32(f64)
+	        out.Height = &f32
 	    }
 	case float64:
-		i32 := int32(t)
-		out.Height = &i32
+		f32 := float32(t)
+		out.Height = &f32
 	}
 
 	switch t := in.ValueRaw.(type) {
