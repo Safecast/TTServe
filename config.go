@@ -26,8 +26,8 @@ const ttnTopic string = "+/devices/+/up"
 const ttnDownlinkURL = "https://integrations.thethingsnetwork.org/ttn-eu/api/v2/down/%s/%s?key=%s"
 
 // Safecast service info
-const SafecastV1UploadURL1 = "http://gw01.safecast.org"
-const SafecastV1UploadURL2 = "http://gw02.safecast.org"
+const SafecastV1UploadURLDev = "http://dev.safecast.org"
+const SafecastV1UploadURL = "http://api.safecast.org"
 var SafecastUploadURLs = [...]string {
     "http://ingest.safecast.org/v1/measurements",
 }

@@ -31,9 +31,6 @@ var httpTransactionErrorString string
 var httpTransactionErrors = 0
 var httpTransactionErrorFirst bool = true
 
-// Which V1 uploadURL to use
-var useV1PrimaryServer = true
-
 // Checksums of recently-processed messages
 type receivedMessage struct {
     checksum            uint32
@@ -632,10 +629,11 @@ func SafecastV1Upload(body []byte, url string, method string, isDev bool, unit s
 
     transaction := beginTransaction("V1", unit, value)
 
-    domain := SafecastV1UploadURL1
-    if !useV1PrimaryServer {
-        domain = SafecastV1UploadURL2
-    }
+	domain := SafecastV1UploadURL
+	if isDev {
+		domain = SafecastV1UploadURLDev
+	}
+		
     req, _ := http.NewRequest(method, domain + url, bytes.NewBuffer(body))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
@@ -643,22 +641,6 @@ func SafecastV1Upload(body []byte, url string, method string, isDev bool, unit s
         Timeout: time.Second * 15,
     }
     resp, err := httpclient.Do(req)
-    if err != nil {
-        fmt.Printf("*** SafecastV1 upload err, switching server: %s\n", err)
-        useV1PrimaryServer = !useV1PrimaryServer
-        domain = SafecastV1UploadURL1
-        if !useV1PrimaryServer {
-            domain = SafecastV1UploadURL2
-        }
-        req, _ = http.NewRequest("POST", domain + url, bytes.NewBuffer(body))
-        req.Header.Set("User-Agent", "TTSERVE")
-        req.Header.Set("Content-Type", "application/json")
-        httpclient := &http.Client{
-            Timeout: time.Second * 15,
-        }
-        resp, err = httpclient.Do(req)
-    }
-
     errString := ""
     if (err == nil) {
         resp.Body.Close()
