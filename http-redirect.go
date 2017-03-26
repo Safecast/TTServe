@@ -72,7 +72,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// If debugging, display it
 	if redirectDebug {
-		fmt.Printf("*** Redirect %s test:%v: %s\n", method, isTestMeasurement, req.RequestURI)
+		fmt.Printf("*** Redirect %s test:%v %s\n", method, isTestMeasurement, req.RequestURI)
 		fmt.Printf("*** Redirect received:\n%s\n", string(body))
 		fmt.Printf("*** Redirect decoded to V1:\n%v\n", sdV1)
 	}
