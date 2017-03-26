@@ -652,17 +652,20 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.ThisErrorsConnectService = stat.ErrorsConnectService
         ds.AnyConnectErrors = true
     }
-	if ds.MinErrorsCommsFailures == 0 || (ds.MinErrorsCommsFailures != 0 && stat.ErrorsCommsFailures < ds.MinErrorsCommsFailures) {
-		fmt.Printf("*** %d %d\n", ds.MinErrorsCommsFailures, stat.ErrorsCommsFailures)
-        ds.MinErrorsCommsFailures = stat.ErrorsCommsFailures
-	}
+    if stat.ErrorsCommsFailures != 0 {
+        if ds.MinErrorsCommsFailures == 0 || (ds.MinErrorsCommsFailures != 0 && stat.ErrorsCommsFailures < ds.MinErrorsCommsFailures) {
+            ds.MinErrorsCommsFailures = stat.ErrorsCommsFailures
+        }
+    }
     if stat.ErrorsCommsFailures > ds.ThisErrorsCommsFailures {
         ds.ThisErrorsCommsFailures = stat.ErrorsCommsFailures
         ds.AnyPointcastErrors = true
     }
-	if ds.MinErrorsDeviceRestarts == 0 || (ds.MinErrorsDeviceRestarts != 0 && stat.ErrorsDeviceRestarts < ds.MinErrorsDeviceRestarts) {
-        ds.MinErrorsDeviceRestarts = stat.ErrorsDeviceRestarts
-	}
+    if stat.ErrorsDeviceRestarts != 0 {
+        if ds.MinErrorsDeviceRestarts == 0 || (ds.MinErrorsDeviceRestarts != 0 && stat.ErrorsDeviceRestarts < ds.MinErrorsDeviceRestarts) {
+            ds.MinErrorsDeviceRestarts = stat.ErrorsDeviceRestarts
+        }
+    }
     if stat.ErrorsDeviceRestarts > ds.ThisErrorsDeviceRestarts {
         ds.ThisErrorsDeviceRestarts = stat.ErrorsDeviceRestarts
         ds.AnyPointcastErrors = true
@@ -974,10 +977,10 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.AnyPointcastErrors {
         s += fmt.Sprintf("Pointcast errors new since %s:\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
         i := ds.PrevErrorsCommsFailures + ds.ThisErrorsCommsFailures
-		j := i - ds.MinErrorsCommsFailures
+        j := i - ds.MinErrorsCommsFailures
         s += fmt.Sprintf("  CommsFailures   %d new / %d total\n", j, i)
         i = ds.PrevErrorsDeviceRestarts + ds.ThisErrorsDeviceRestarts
-		j = i - ds.MinErrorsDeviceRestarts;
+        j = i - ds.MinErrorsDeviceRestarts;
         s += fmt.Sprintf("  DeviceRestarts  %d new / %d total\n", j, i)
         s += fmt.Sprintf("\n")
     }
