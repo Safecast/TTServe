@@ -133,8 +133,10 @@ type MeasurementDataset struct {
     PrevErrorsConnectData uint32
     ThisErrorsConnectService uint32
     PrevErrorsConnectService uint32
+    MinErrorsCommsFailures uint32
     ThisErrorsCommsFailures uint32
     PrevErrorsCommsFailures uint32
+    MinErrorsDeviceRestarts uint32
     ThisErrorsDeviceRestarts uint32
     PrevErrorsDeviceRestarts uint32
     PrevUptimeMinutes   uint32
@@ -650,10 +652,18 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.ThisErrorsConnectService = stat.ErrorsConnectService
         ds.AnyConnectErrors = true
     }
+	if ds.MinErrorsCommsFailures != 0 && stat.ErrorsCommsFailures < ds.MinErrorsCommsFailures {
+        ds.MinErrorsCommsFailures = stat.ErrorsCommsFailures
+        ds.AnyPointcastErrors = true
+	}
     if stat.ErrorsCommsFailures > ds.ThisErrorsCommsFailures {
         ds.ThisErrorsCommsFailures = stat.ErrorsCommsFailures
         ds.AnyPointcastErrors = true
     }
+	if ds.MinErrorsDeviceRestarts != 0 && stat.ErrorsDeviceRestarts < ds.MinErrorsDeviceRestarts {
+        ds.MinErrorsDeviceRestarts = stat.ErrorsDeviceRestarts
+        ds.AnyPointcastErrors = true
+	}
     if stat.ErrorsDeviceRestarts > ds.ThisErrorsDeviceRestarts {
         ds.ThisErrorsDeviceRestarts = stat.ErrorsDeviceRestarts
         ds.AnyPointcastErrors = true
@@ -965,12 +975,14 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.AnyPointcastErrors {
         s += fmt.Sprintf("Pointcast errors:\n")
         i := ds.PrevErrorsCommsFailures + ds.ThisErrorsCommsFailures
-        if i > 0 {
-            s += fmt.Sprintf("  CommsFailures   %d\n", i)
+		j := i - ds.MinErrorsCommsFailures
+        if j > 0 {
+            s += fmt.Sprintf("  CommsFailures   %d/%d\n", j, i)
         }
         i = ds.PrevErrorsDeviceRestarts + ds.ThisErrorsDeviceRestarts
-        if i > 0 {
-            s += fmt.Sprintf("  DeviceRestarts  %d\n", i)
+		j = i - ds.MinErrorsDeviceRestarts;
+        if j > 0 {
+            s += fmt.Sprintf("  DeviceRestarts  %d/%d\n", j, i)
         }
         s += fmt.Sprintf("\n")
     }
