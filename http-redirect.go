@@ -63,17 +63,21 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     stats.Count.HTTP++
 
 	// Process the request URI, looking for things that will indicate "dev"
+	method := req.Method
+	if method == "" {
+		method = "GET"
+	}
 	isTestMeasurement := strings.Contains(req.RequestURI, "test")
 
 	// If debugging, display it
 	if redirectDebug {
-		fmt.Printf("*** Redirect %v: %s\n", isTestMeasurement, req.RequestURI)
+		fmt.Printf("*** Redirect %s test:%v: %s\n", method, isTestMeasurement, req.RequestURI)
 		fmt.Printf("*** Redirect received:\n%s\n", string(body))
 		fmt.Printf("*** Redirect decoded to V1:\n%v\n", sdV1)
 	}
 
     // Convert to current data format
-    deviceID, deviceType, sd := SafecastReformat(sdV1)
+    deviceID, deviceType, sd := SafecastReformat(sdV1, isTestMeasurement)
     if (deviceID == 0) {
         fmt.Printf("%s\n%v\n", string(body), sdV1);
         return
@@ -120,7 +124,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	sd.Service.Handler = &TTServeInstanceID
 
     // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
-    SafecastV1Upload(body, req.RequestURI, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
+    SafecastV1Upload(body, req.RequestURI, method, isTestMeasurement, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
     SafecastUpload(sd)
     SafecastWriteToLogs(UploadedAt, sd)
     stats.Count.HTTPRedirect++

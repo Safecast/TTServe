@@ -628,7 +628,7 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
 }
 
 // Upload a Safecast data structure to the Safecast service
-func SafecastV1Upload(body []byte, url string, unit string, value string) bool {
+func SafecastV1Upload(body []byte, url string, method string, isDev bool, unit string, value string) bool {
 
     transaction := beginTransaction("V1", unit, value)
 

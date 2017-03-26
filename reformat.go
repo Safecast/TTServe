@@ -29,7 +29,7 @@ func SafecastV1DeviceType(deviceid uint32) string {
 }
 
 // Reformat a special V1 payload to Current
-func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data SafecastData) {
+func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint32, devtype string, data SafecastData) {
     var sd SafecastData
 
     // Required field
@@ -217,6 +217,15 @@ func SafecastReformat(v1 *SafecastDataV1) (deviceid uint32, devtype string, data
 
         }
     }
+
+	// Test
+	if isTestMeasurement {
+		if sd.Dev == nil {
+            var dev Dev
+	        sd.Dev = &dev
+		}
+		sd.Dev.Test = &isTestMeasurement
+	}
 
     return uint32(sd.DeviceId), devicetype, sd
 
