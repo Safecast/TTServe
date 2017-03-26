@@ -22,9 +22,6 @@ func main() {
 
 	// Read our service config file
 	ServiceConfig = ServiceReadConfig()
-
-	// Init our utility package
-	UtilInit()
 	
     // Spawn our signal handler
     go signalHandler()
@@ -71,6 +68,9 @@ func main() {
 	TTServeInstanceID = stats.AWSInstance.InstanceId
 	ServerLog(fmt.Sprintf("*** STARTUP\n"))
 	fmt.Printf("%s *** AWS %s %s\n", time.Now().Format(logDateFormat), stats.AWSInstance.Region, stats.AWSInstance.InstanceId)
+
+	// Init our utility package, but only after we've got our server instance ID
+	UtilInit()
 
     // Look up the two IP addresses that we KNOW have only a single A record,
     // and determine if WE are the server for those protocols

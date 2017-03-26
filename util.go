@@ -8,6 +8,7 @@ import (
 	"os"
 	"fmt"
 	"math/rand"
+    "hash/crc32"
 	"time"
 	"strings"
 )
@@ -16,7 +17,7 @@ import (
 func UtilInit() {
 
 	// Initialize the random number generator
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().Unix() + int64(crc32.ChecksumIEEE([]byte(TTServeInstanceID))))
 
 }
 
