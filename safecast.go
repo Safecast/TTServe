@@ -7,7 +7,7 @@ package main
 
 import (
     "io"
-	"io/ioutil"
+    "io/ioutil"
     "net/http"
     "fmt"
     "bytes"
@@ -19,6 +19,9 @@ import (
     "github.com/safecast/ttproto/golang"
     "github.com/google/open-location-code/go"
 )
+
+// Debugging
+const v1UploadDebug bool = true
 
 // For dealing with transaction timeouts
 var httpTransactionsInProgress int = 0
@@ -628,21 +631,26 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
 // Upload a Safecast data structure to the Safecast service
 func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value string) (fSuccess bool, result string)  {
 
-	// Figure out what domain we're posting to
-	domain := SafecastV1UploadDomain
-	v1str := "V1"
-	if isDev {
-		domain = SafecastV1UploadDomainDev
-		v1str = "D1"
-	}
+    // Preset result in case of failure
+    response := "{\"id\":00000001}\r\n"
 
-	// Figure out the correct request URI
-	str := strings.SplitAfter(url, "?")
-	query := str[len(str)-1]
-	requestUri := fmt.Sprintf(SafecastV1UploadPattern, domain, query)
-	fmt.Printf("****** '%s'\n%s\n", requestUri, string(body))
-	
-	// Perform the transaction
+    // Figure out what domain we're posting to
+    domain := SafecastV1UploadDomain
+    v1str := "V1"
+    if isDev {
+        domain = SafecastV1UploadDomainDev
+        v1str = "D1"
+    }
+
+    // Figure out the correct request URI
+    str := strings.SplitAfter(url, "?")
+    query := str[len(str)-1]
+    requestUri := fmt.Sprintf(SafecastV1UploadPattern, domain, query)
+    if v1UploadDebug {
+        fmt.Printf("****** '%s'\n%s\n", requestUri, string(body))
+    }
+
+    // Perform the transaction
     transaction := beginTransaction(v1str, unit, value)
     req, _ := http.NewRequest("POST", requestUri, bytes.NewBuffer(body))
     req.Header.Set("User-Agent", "TTSERVE")
@@ -653,12 +661,13 @@ func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value st
     resp, err := httpclient.Do(req)
     errString := ""
     if (err == nil) {
-	    buf, err := ioutil.ReadAll(resp.Body)
-	    if err == nil {
-			fmt.Printf("*** Response:\n%s\n", string(buf))
-		} else {
-			fmt.Printf("*** Can't read response: %v\n", err)
-		}
+        buf, err := ioutil.ReadAll(resp.Body)
+        if err == nil {
+            if v1UploadDebug {
+                fmt.Printf("*** Response:\n%s\n", string(buf))
+            }
+            response = string(buf)
+        }
         resp.Body.Close()
     } else {
         // Eliminate the URL from the string because exposing the API key is not secure.
@@ -681,9 +690,6 @@ func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value st
         endTransaction(transaction, domain, "")
     }
 
-	// Result
-	response := "{\"id\":00000001}\r\n"
-	
     return errString == "", response
 
 }
