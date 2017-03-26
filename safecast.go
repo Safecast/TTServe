@@ -7,6 +7,7 @@ package main
 
 import (
     "io"
+	"io/ioutil"
     "net/http"
     "fmt"
     "bytes"
@@ -639,7 +640,7 @@ func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value st
 	str := strings.SplitAfter(url, "?")
 	query := str[len(str)-1]
 	requestUri := fmt.Sprintf(SafecastV1UploadPattern, domain, query)
-	fmt.Printf("****** '%s'\n", requestUri)
+	fmt.Printf("****** '%s'\n%s\n", requestUri, string(body))
 	
 	// Perform the transaction
     transaction := beginTransaction(v1str, unit, value)
@@ -652,6 +653,10 @@ func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value st
     resp, err := httpclient.Do(req)
     errString := ""
     if (err == nil) {
+	    buf, _ := ioutil.ReadAll(resp.Body)
+	    if err != nil {
+			fmt.Printf("*** Response: '%s' '%v'\n", string(buf), buf)
+		}
         resp.Body.Close()
     } else {
         // Eliminate the URL from the string because exposing the API key is not secure.

@@ -1,5 +1,8 @@
-*** Redirect POST test:false /scripts/index.php?api_key=AzQLKPwQqkyCTDGZHSdy
 *** Redirect received:
-{"longitude":"-70.783","latitude":"42.565","device_id":"100231","value":"25","unit":"cpm","height":"10","devicetype_id":"Pointcast V1"}
+{"longitude":"-70.783","latitude":"42.565","device_id":"100239","value":"24.5","unit":"status","height":"10","devicetype
+_id":"DeviceID:10023,Temperature:24.5,Battery Voltage:3.95,Fails:1771,Restarts:1203,FreeRam:53476,Last failure:,NTP coun
+t:1"}
 *** Redirect decoded to V1:
-{"captured_at":"2017-03-26T18:02:37Z","devicetype_id":"Pointcast V1","unit":"cpm","device_id":"100231","height":"10.000000","value":"25.000000","latitude":"42.564999","longitude":"-70.782997"}
+{"captured_at":"2017-03-26T18:33:05Z","devicetype_id":"DeviceID:10023,Temperature:24.5,Battery Voltage:3.95,Fails:1771,R
+estarts:1203,FreeRam:53476,Last failure:,NTP count:1","unit":"status","device_id":"100239","height":"10","value":"24.5",
+"latitude":"42.565","longitude":"-70.783"}
