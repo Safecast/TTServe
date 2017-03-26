@@ -640,7 +640,7 @@ func SafecastV1Upload(body []byte, url string, method string, isDev bool, unit s
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{
-        Timeout: time.Second * 15,
+        Timeout: time.Second * 30,
     }
     resp, err := httpclient.Do(req)
     errString := ""
