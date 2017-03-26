@@ -34,6 +34,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     if method == "" {
         method = "GET"
     }
+	fmt.Printf("METHOD == '%s'\n", method)
 
     // See if this is a test measurement
     isTestMeasurement := strings.Contains(req.RequestURI, "test")
