@@ -1,0 +1,6 @@
+*** Redirect received:
+{"longitude":"136.165","latitude":"34.4883","device_id":"100031","value":"2520","unit":"cpm","height":"535"}
+*** Redirect decoded to V1:
+&{<nil> <nil> <nil> 0xc8201f6a80 <nil> <nil> 100031 0xc8201f6a6c <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> <nil> 535 0xc8201f6aa0 2520 0xc8201f6aa4 34.4883 0xc8201f6aa8 136.165 0xc8201f6aac}
+*** Redirect reformatted to V2:
+{10003 0xc8201f6ab0 0xc8201f8960 <nil> <nil> 0xc8201f89c0 <nil> <nil> <nil> <nil> <nil>}

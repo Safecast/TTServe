@@ -7,6 +7,7 @@ package main
 
 import (
 	"bytes"
+	"strings"
     "io/ioutil"
     "net/http"
     "fmt"
@@ -39,11 +40,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-	// If debugging, display it
-	if redirectDebug {
-		fmt.Printf("*** Redirect received:\n%s\n", string(body))
-	}
-
     // Decode the request with custom marshaling
     sdV1, err = SafecastV1Decode(bytes.NewReader(body))
     if err != nil {
@@ -66,8 +62,13 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	// A real request
     stats.Count.HTTP++
 
+	// Process the request URI, looking for things that will indicate "dev"
+	isTestMeasurement := strings.Contains(req.RequestURI, "test")
+
 	// If debugging, display it
 	if redirectDebug {
+		fmt.Printf("*** Redirect %v: %s\n", isTestMeasurement, req.RequestURI)
+		fmt.Printf("*** Redirect received:\n%s\n", string(body))
 		fmt.Printf("*** Redirect decoded to V1:\n%v\n", sdV1)
 	}
 
