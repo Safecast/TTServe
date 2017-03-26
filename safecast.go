@@ -627,12 +627,14 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
 // Upload a Safecast data structure to the Safecast service
 func SafecastV1Upload(body []byte, url string, method string, isDev bool, unit string, value string) bool {
 
-    transaction := beginTransaction("V1", unit, value)
-
 	domain := SafecastV1UploadURL
+	v1str := "V1"
 	if isDev {
 		domain = SafecastV1UploadURLDev
+		v1str = "D1"
 	}
+
+    transaction := beginTransaction(v1str, unit, value)
 		
     req, _ := http.NewRequest(method, domain + url, bytes.NewBuffer(body))
     req.Header.Set("User-Agent", "TTSERVE")
@@ -660,7 +662,7 @@ func SafecastV1Upload(body []byte, url string, method string, isDev bool, unit s
         endTransaction(transaction, domain, errString)
     } else {
         if (errString != "") {
-            fmt.Printf("*** Error uploading to Safecast V1: %v\n", errString)
+            fmt.Printf("*** Error uploading to %s: %v\n", domain, errString)
         }
         endTransaction(transaction, domain, "")
     }
