@@ -116,7 +116,6 @@ func main() {
 
     // Get the date/time of the special files that we monitor
     AllServersSlackRestartRequestTime = ControlFileTime(TTServerRestartAllControlFile, "")
-    AllServersGithubRestartRequestTime = ControlFileTime(TTServerRestartGithubControlFile, "")
 
     // Init our web request inbound server
 	if ThisServerServesHTTP {

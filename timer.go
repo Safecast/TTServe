@@ -5,24 +5,24 @@
 package main
 
 import (
-	"os"
-	"fmt"
-	"time"
+    "os"
+    "fmt"
+    "time"
 )
 
 // General periodic housekeeping
 func timer1m() {
     for {
-		
+
         // Restart this instance if instructed to do so
         ControlFileCheck()
 
-		// Write out current status to the file system
-		SafecastWriteServerStatus()
+        // Write out current status to the file system
+        SafecastWriteServerStatus()
 
-		// Sleep
+        // Sleep
         time.Sleep(1 * time.Minute)
-		
+
     }
 }
 
@@ -57,11 +57,11 @@ func timer15m() {
 func timer12h() {
     for {
 
-		// Update/output stats, returning "" on first iteration and when nothing has changed)
-		summary := SafecastSummarizeStatsDelta()
-		if summary != "" {
-			ServerLog(fmt.Sprintf("%s\n", summary))
-		}
+        // Update/output stats, returning "" on first iteration and when nothing has changed)
+        summary := SafecastSummarizeStatsDelta()
+        if summary != "" {
+            ServerLog(fmt.Sprintf("%s\n", summary))
+        }
 
         // Send a hello message to devices that have never reported stats
         if ThisServerIsMonitor {
@@ -74,20 +74,36 @@ func timer12h() {
     }
 }
 
+// Do a restart after a random delay
+func RandomRestart() {
+
+	// Stagger the instances so that we don't have a complete outage
+	minutes := time.Duration(random(3, 15))
+
+    // To ensure a best-efforts sequencing in log, impose a delay in proportion to sequencing
+		sendToSafecastOps(fmt.Sprintf("** %s will restart in %d minutes **", TTServeInstanceID, minutes), SLACK_MSG_UNSOLICITED)
+    time.Sleep(minutes * time.Minute)
+
+    // Log
+    ServerLog(fmt.Sprintf("*** RESTARTING because of Slack 'restart' command\n"))
+
+    // Exit
+    os.Exit(0)
+
+}
+
 // Check to see if we should restart
 func ControlFileCheck() {
 
-    // Slack restart
-    if (ControlFileTime(TTServerRestartAllControlFile, "") != AllServersSlackRestartRequestTime) {
-        sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServeInstanceID), SLACK_MSG_UNSOLICITED)
-        ServerLog(fmt.Sprintf("*** RESTARTING because of Slack 'restart' command\n"))
-        os.Exit(0)
+    // Exit if we're the monitor process
+    if ThisServerIsMonitor {
+        return
     }
 
-    // Github restart
-    if (ControlFileTime(TTServerRestartGithubControlFile, "") != AllServersGithubRestartRequestTime) {
-        ServerLog(fmt.Sprintf("*** RESTARTING because of Github push command\n"))
-        os.Exit(0)
+    // Slack restart
+    if (ControlFileTime(TTServerRestartAllControlFile, "") != AllServersSlackRestartRequestTime) {
+        AllServersSlackRestartRequestTime = ControlFileTime(TTServerRestartAllControlFile, "")
+        go RandomRestart()
     }
 
 }

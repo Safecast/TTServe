@@ -41,13 +41,7 @@ func inboundWebGithubHandler(rw http.ResponseWriter, req *http.Request) {
 			p.Pusher.Name, p.HeadCommit.Commit.Committer.Name, p.HeadCommit.Commit.Message))
     }
 
-	// Modify restart-all control file so that all other instances reboot
-	// On 2017-03-25 I changed this so that the new development practice will be to test things
-	// on instance #0, and then do a slack "restart" when we are comfortable that it works
-	if (false) {
-		ControlFileTime(TTServerRestartGithubControlFile, p.Pusher.Name)
-	}
-	
+	// Exit
     os.Exit(0)
 
 }

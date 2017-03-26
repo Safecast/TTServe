@@ -59,7 +59,6 @@ const TTServerControlPath = "/control"
 const TTServerBuildPath = "/build"
 const TTServerFTPCertPath = "/cert/ftp"
 const TTServerSlackCommandControlFile = "slack_command.txt"
-const TTServerRestartGithubControlFile = "restart_github.txt"
 const TTServerRestartAllControlFile = "restart_all.txt"
 var TTServeInstanceID = ""
 

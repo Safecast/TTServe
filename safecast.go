@@ -44,11 +44,6 @@ var recentlyReceived [25]receivedMessage
 // Process an inbound Safecast message, as an asynchronous goroutine
 func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint32) {
 
-    // To ensure a best-efforts sequencing in log, impose a delay in proportion to sequencing
-    if req.SeqNo != 0 {
-        time.Sleep(time.Duration(req.SeqNo) * time.Minute)
-    }
-
     // Discard it if it's a duplicate
     if isDuplicate(checksum) {
         fmt.Printf("%s DISCARDING duplicate message\n", time.Now().Format(logDateFormat));
