@@ -112,8 +112,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	    if err == nil {
 			u32 := uint32(u64)
 	        out.ChannelId = &u32
-			str := fmt.Sprintf("%d", u64)
-			emit.ChannelId = &str
+			emit.ChannelId = &t
 	    }
 	case float64:
 		u32 := uint32(t)
@@ -129,8 +128,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	    if err == nil {
 			u32 := uint32(u64)
 	        out.DeviceId = &u32
-			str := fmt.Sprintf("%d", u64)
-			emit.DeviceId = &str
+			emit.DeviceId = &t
 	    }
 	case float64:
 		u32 := uint32(t)
@@ -146,8 +144,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	    if err == nil {
 			u32 := uint32(u64)
 	        out.OriginalId = &u32
-			str := fmt.Sprintf("%d", u64)
-			emit.OriginalId = &str
+			emit.OriginalId = &t
 	    }
 	case float64:
 		u32 := uint32(t)
@@ -163,8 +160,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	    if err == nil {
 			u32 := uint32(u64)
 	        out.SensorId = &u32
-			str := fmt.Sprintf("%d", u64)
-			emit.SensorId = &str
+			emit.SensorId = &t
 	    }
 	case float64:
 		u32 := uint32(t)
@@ -180,8 +176,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	    if err == nil {
 			u32 := uint32(u64)
 	        out.StationId = &u32
-			str := fmt.Sprintf("%d", u64)
-			emit.StationId = &str
+			emit.StationId = &t
 	    }
 	case float64:
 		u32 := uint32(t)
@@ -197,8 +192,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	    if err == nil {
 			u32 := uint32(u64)
 	        out.UserId = &u32
-			str := fmt.Sprintf("%d", u64)
-			emit.UserId = &str
+			emit.UserId = &t
 	    }
 	case float64:
 		u32 := uint32(t)
@@ -214,8 +208,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	    if err == nil {
 			u32 := uint32(u64)
 	        out.Id = &u32
-			str := fmt.Sprintf("%d", u64)
-			emit.Id = &str
+			emit.Id = &t
 	    }
 	case float64:
 		u32 := uint32(t)
@@ -231,8 +224,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	    if err == nil {
 			f32 := float32(f64)
 	        out.Height = &f32
-			str := fmt.Sprintf("%v", f64)
-			emit.Height = &str
+			emit.Height = &t
 	    }
 	case float64:
 		f32 := float32(t)
@@ -254,8 +246,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 			f32 := float32(f64)
 			if (f32 != 0 || !beginsWithSpace) {
 		        out.Value = &f32
-				str := fmt.Sprintf("%v", f64)
-				emit.Value = &str
+				emit.Value = &t
 			}
 	    }
 	case float64:
@@ -272,8 +263,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	    if err == nil {
 			f32 := float32(f64)
 	        out.Latitude = &f32
-			str := fmt.Sprintf("%v", f64)
-			emit.Latitude = &str
+			emit.Latitude = &t
 	    }
 	case float64:
 		f32 := float32(t)
@@ -289,8 +279,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	    if err == nil {
 			f32 := float32(f64)
 	        out.Longitude = &f32
-			str := fmt.Sprintf("%v", f64)
-			emit.Longitude = &str
+			emit.Longitude = &t
 	    }
 	case float64:
 		f32 := float32(t)
