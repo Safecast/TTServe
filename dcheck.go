@@ -653,6 +653,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.AnyConnectErrors = true
     }
 	if ds.MinErrorsCommsFailures == 0 || (ds.MinErrorsCommsFailures != 0 && stat.ErrorsCommsFailures < ds.MinErrorsCommsFailures) {
+		fmt.Printf("*** %d %d\n", ds.MinErrorsCommsFailures, stat.ErrorsCommsFailures)
         ds.MinErrorsCommsFailures = stat.ErrorsCommsFailures
 	}
     if stat.ErrorsCommsFailures > ds.ThisErrorsCommsFailures {
