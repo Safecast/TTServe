@@ -17,7 +17,7 @@ import (
 )
 
 // Debugging
-const redirectDebug bool = true
+const redirectDebug bool = false
 
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
@@ -34,7 +34,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     if method == "" {
         method = "GET"
     }
-    fmt.Printf("METHOD == '%s'\n", method)
 
     // See if this is a test measurement
     isTestMeasurement := strings.Contains(req.RequestURI, "test")
@@ -50,7 +49,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     RequestURI := req.RequestURI
     if method == "GET" {
         // Before: /scripts/shorttest.php?api_key=q1LKu7RQ8s5pmyxunnDW&lat=34.4883&lon=136.165&cpm=0&id=100031&alt=535
-        //  After: {"unit"="cpm","latitude"="34.4883","longitude"="136.165","value"="0","device_id"="100031","height"="535"}
+        //  After: {"unit":"cpm","latitude":"34.4883","longitude":"136.165","value":"0","device_id":"100031","height":"535"}
         str1 := strings.SplitN(RequestURI, "&", 2)
         RequestURI = str1[0]
         if len(str1) == 1 {
@@ -81,7 +80,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Decode the request with custom marshaling
-	fmt.Printf("$$$\n%s\n", string(body))
     sdV1, sdV1Emit, err = SafecastV1Decode(bytes.NewReader(body))
     if err != nil {
         stats.Count.HTTP++

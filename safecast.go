@@ -21,7 +21,7 @@ import (
 )
 
 // Debugging
-const v1UploadDebug bool = true
+const v1UploadDebug bool = false
 
 // For dealing with transaction timeouts
 var httpTransactionsInProgress int = 0

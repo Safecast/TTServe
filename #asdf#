@@ -1,30 +1,3 @@
-*** Redirect received:
-{"longitude":"-70.783","latitude":"42.565","device_id":"100239","value":"24.5","unit":"status","height":"10","devicetype
-_id":"DeviceID:10023,Temperature:24.5,Battery Voltage:3.95,Fails:1771,Restarts:1203,FreeRam:53476,Last failure:,NTP coun
-t:1"}
-*** Redirect decoded to V1:
-{"captured_at":"2017-03-26T18:33:05Z","devicetype_id":"DeviceID:10023,Temperature:24.5,Battery Voltage:3.95,Fails:1771,R
-estarts:1203,FreeRam:53476,Last failure:,NTP count:1","unit":"status","device_id":"100239","height":"10","value":"24.5",
-"latitude":"42.565","longitude":"-70.783"}
-*** Redirect POST test:false /scripts/index.php?api_key=AzQLKPwQqkyCTDGZHSdy
-*** Redirect received:
-{"longitude":"-70.783","latitude":"42.565","device_id":"100239","value":"24.6","unit":"status","height":"10","devicetype_id":"DeviceID:10023,Temperature:24.6,Battery Voltage:3.95,Fails:1771,Restarts:1203,FreeRam:53476,Last failure:,NTP count:1"}
-*** Redirect decoded to V1:
-{"captured_at":"2017-03-26T18:58:26Z","devicetype_id":"DeviceID:10023,Temperature:24.6,Battery Voltage:3.95,Fails:1771,Restarts:1203,FreeRam:53476,Last failure:,NTP count:1","unit":"status","device_id":"100239","height":"10","value":"24.6","latitude":"42.565","longitude":"-70.783"}
-****** 'http://api.safecast.org/measurements.json?api_key=AzQLKPwQqkyCTDGZHSdy'
-{"captured_at":"2017-03-26T18:58:26Z","devicetype_id":"DeviceID:10023,Temperature:24.6,Battery Voltage:3.95,Fails:1771,Restarts:1203,FreeRam:53476,Last failure:,NTP count:1","unit":"status","device_id":"100239","height":"10","value":"24.6","latitude":"42.565","longitude":"-70.783"}
-2017-03-26 18:58:26 >>> V1 [3] status 24.600
-*** Response:
-{"id":82494498,"user_id":759,"value":24.6,"unit":"status","location_name":null,"device_id":100239,"original_id":82494498,"captured_at":"2017-03-26T18:58:26.000Z","height":10,"devicetype_id":"DeviceID:10023,Temperature:24.6,Battery Voltage:3.95,Fails:1771,Restarts:1203,FreeRam:53476,Last failure:,NTP count:1","sensor_id":null,"station_id":null,"channel_id":null,"latitude":42.565,"longitude":-70.783}
-2017-03-26 18:54:21 HTTP request '/scripts/shorttest.php?api_key=q1LKu7RQ8s5pmyxunnDW&lat=34.4883&lon=136.165&cpm=0&id=100031&alt=535' from 54.250.252.97 ignored
-
-
-
-
-
-foo := "/scripts/shorttest.php?api_key=q1LKu7RQ8s5pmyxunnDW&lat=34.4883&lon=136.165&cpm=0&id=100031&alt=535"
-
-
 *** Redirect POST test:false /scripts/index.php?api_key=AzQLKPwQqkyCTDGZHSdy
 *** Redirect received:
 {"longitude":"-70.783","latitude":"42.565","device_id":"100232","value":"10","unit":"cpm","height":"10","devicetype_id":"Pointcast V1"}
@@ -456,18 +429,4 @@ SERVER_PROTOCOL: &quot;HTTP/1.1&quot;</pre></div>
 
 </body>
 </html>
-
-2017-03-26 20:09:27 <<<    [5] completed after 11 seconds
-*** Redirect reformatted to V2:
-{"device":10019,"when_captured":"2017-03-26T20:09:15Z","loc_lat":34.4883,"loc_lon":136.165,"loc_alt":100,"loc_olc":"8Q6RF5Q7+8X","lnd_7318u":0,"dev_test":true}
-
-
-
-
-METHOD == 'GET'
-$$$
-{"unit"="cpm","latitude"="34.4883","longitude"="136.165","value"="0","device_id"="100032","height"="535"}
-
-2017-03-26 20:10:40 HTTP request '/scripts/shorttest.php?api_key=q1LKu7RQ8s5pmyxunnDW' from 54.250.252.97 ignored: invalid character '=' after object key
-{"unit"="cpm","latitude"="34.4883","longitude"="136.165","value"="0","device_id"="100032","height"="535"}
 
