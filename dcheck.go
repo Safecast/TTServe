@@ -976,14 +976,10 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("Pointcast errors since %s:\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
         i := ds.PrevErrorsCommsFailures + ds.ThisErrorsCommsFailures
 		j := i - ds.MinErrorsCommsFailures
-        if j > 0 {
-            s += fmt.Sprintf("  CommsFailures   %d/%d\n", j, i)
-        }
+        s += fmt.Sprintf("  CommsFailures   %d/%d\n", j, i)
         i = ds.PrevErrorsDeviceRestarts + ds.ThisErrorsDeviceRestarts
 		j = i - ds.MinErrorsDeviceRestarts;
-        if j > 0 {
-            s += fmt.Sprintf("  DeviceRestarts  %d/%d\n", j, i)
-        }
+        s += fmt.Sprintf("  DeviceRestarts  %d/%d\n", j, i)
         s += fmt.Sprintf("\n")
     }
 
