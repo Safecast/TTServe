@@ -625,7 +625,7 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
 }
 
 // Upload a Safecast data structure to the Safecast service
-func SafecastV1Upload(body []byte, url string, method string, isDev bool, unit string, value string) bool {
+func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value string) (fSuccess bool, result string)  {
 
 	// Figure out what domain we're posting to
 	domain := SafecastV1UploadDomain
@@ -643,7 +643,7 @@ func SafecastV1Upload(body []byte, url string, method string, isDev bool, unit s
 	
 	// Perform the transaction
     transaction := beginTransaction(v1str, unit, value)
-    req, _ := http.NewRequest(method, requestUri, bytes.NewBuffer(body))
+    req, _ := http.NewRequest("POST", requestUri, bytes.NewBuffer(body))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{
@@ -674,7 +674,11 @@ func SafecastV1Upload(body []byte, url string, method string, isDev bool, unit s
         endTransaction(transaction, domain, "")
     }
 
-    return errString == ""
+	// Result
+	response := "{\"id\":00000001}\r\n"
+	
+    return errString == "", response
+
 }
 
 // Generate a hasn of the data structure elements that came from the device

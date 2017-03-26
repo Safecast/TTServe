@@ -63,6 +63,23 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	// A real request
     stats.Count.HTTP++
 
+    // Fill in the minimum defaults
+    if sdV1.Unit == nil {
+        s := "cpm"
+        sdV1.Unit = &s
+    }
+    if sdV1.Value == nil {
+        v := float32(0)
+        sdV1.Value = &v
+    }
+	if sdV1.CapturedAt == nil {
+		capturedAt := nowInUTC()
+		sdV1.CapturedAt = &capturedAt
+	}
+
+	// Convert it to text
+    sdV1JSON, _ := json.Marshal(sdV1)
+	
 	// Process the request URI, looking for things that will indicate "dev"
 	method := req.Method
 	if method == "" {
@@ -74,8 +91,16 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	if redirectDebug {
 		fmt.Printf("*** Redirect %s test:%v %s\n", method, isTestMeasurement, req.RequestURI)
 		fmt.Printf("*** Redirect received:\n%s\n", string(body))
-		fmt.Printf("*** Redirect decoded to V1:\n%v\n", sdV1)
+		fmt.Printf("*** Redirect decoded to V1:\n%s\n", sdV1JSON)
 	}
+
+    // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
+    _, result := SafecastV1Upload(sdV1JSON, req.RequestURI, isTestMeasurement, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
+
+    // Send a reply to Pointcast saying that the request was processed acceptably.
+    // If we fail to do this, Pointcast goes into an infinite reboot loop with comms errors
+    // due to GetMeasurementReply() returning 0.
+    io.WriteString(rw, result)
 
     // Convert to current data format
     deviceID, deviceType, sd := SafecastReformat(sdV1, isTestMeasurement)
@@ -108,16 +133,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-    // Fill in the minimums so as to prevent faults in V1 processing
-    if sdV1.Unit == nil {
-        s := ""
-        sdV1.Unit = &s
-    }
-    if sdV1.Value == nil {
-        v := float32(0)
-        sdV1.Value = &v
-    }
-
 	// Generate the CRC of the original device data
 	hash := HashSafecastData(sd)
 	sd.Service.HashMd5 = &hash
@@ -125,8 +140,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	// Add info about the server instance that actually did the upload
 	sd.Service.Handler = &TTServeInstanceID
 
-    // For backward compatibility,post it to V1 with an URL that is preserved.  Also do normal post
-    SafecastV1Upload(body, req.RequestURI, method, isTestMeasurement, *sdV1.Unit, fmt.Sprintf("%.3f", *sdV1.Value))
+	// Post to V2
     SafecastUpload(sd)
     SafecastWriteToLogs(UploadedAt, sd)
     stats.Count.HTTPRedirect++
@@ -136,11 +150,5 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     if (isAvailable) {
         sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", deviceID), SLACK_MSG_UNSOLICITED)
     }
-
-    // Send a reply to Pointcast saying that the request was processed acceptably.
-    // If we fail to do this, Pointcast goes into an infinite reboot loop with comms errors
-    // due to GetMeasurementReply() returning 0.
-    io.WriteString(rw, "{\"id\":00000001}\r\n")
-
 
 }
