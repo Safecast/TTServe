@@ -20,6 +20,11 @@ func timer1m() {
         // Write out current status to the file system
         SafecastWriteServerStatus()
 
+		// Stir the random pot
+		for i:=0; i<random(1,10); i++ {
+			random(0, 12345)
+		}
+		
         // Sleep
         time.Sleep(1 * time.Minute)
 
