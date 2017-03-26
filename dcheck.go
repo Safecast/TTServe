@@ -652,7 +652,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.ThisErrorsConnectService = stat.ErrorsConnectService
         ds.AnyConnectErrors = true
     }
-	if ds.MinErrorsCommsFailures != 0 && stat.ErrorsCommsFailures < ds.MinErrorsCommsFailures {
+	if ds.MinErrorsCommsFailures == 0 || (ds.MinErrorsCommsFailures != 0 && stat.ErrorsCommsFailures < ds.MinErrorsCommsFailures) {
         ds.MinErrorsCommsFailures = stat.ErrorsCommsFailures
         ds.AnyPointcastErrors = true
 	}
@@ -660,7 +660,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.ThisErrorsCommsFailures = stat.ErrorsCommsFailures
         ds.AnyPointcastErrors = true
     }
-	if ds.MinErrorsDeviceRestarts != 0 && stat.ErrorsDeviceRestarts < ds.MinErrorsDeviceRestarts {
+	if ds.MinErrorsDeviceRestarts == 0 || (ds.MinErrorsDeviceRestarts != 0 && stat.ErrorsDeviceRestarts < ds.MinErrorsDeviceRestarts) {
         ds.MinErrorsDeviceRestarts = stat.ErrorsDeviceRestarts
         ds.AnyPointcastErrors = true
 	}
