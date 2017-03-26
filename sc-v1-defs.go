@@ -14,152 +14,160 @@ import (
 	"strings"
 )
 
-type SafecastDataV1 struct {
+type SafecastDataV1ToParse struct {
     CapturedAt		*string `json:"captured_at,omitempty"`
     DeviceTypeId	*string `json:"devicetype_id,omitempty"`
     LocationName	*string `json:"location_name,omitempty"`
     Unit			*string `json:"unit,omitempty"`
     ChannelIdRaw	interface{} `json:"channel_id,omitempty"`
-    ChannelId		*uint32
     DeviceIdRaw		interface{} `json:"device_id,omitempty"`
-    DeviceId		*uint32
     OriginalIdRaw	interface{} `json:"original_id,omitempty"`
-    OriginalId		*uint32
     SensorIdRaw		interface{} `json:"sensor_id,omitempty"`
-    SensorId		*uint32
     StationIdRaw	interface{} `json:"station_id,omitempty"`
-    StationId		*uint32
     UserIdRaw		interface{} `json:"user_id,omitempty"`
-    UserId			*uint32
     IdRaw			interface{} `json:"id,omitempty"`
-    Id				*uint32
     HeightRaw		interface{} `json:"height,omitempty"`
-    Height			*int32
     ValueRaw		interface{} `json:"value,omitempty"`
-    Value			*float32
     LatitudeRaw		interface{} `json:"latitude,omitempty"`
-    Latitude		*float32
     LongitudeRaw	interface{} `json:"longitude,omitempty"`
-    Longitude		*float32
 }
 
-func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
+type SafecastDataV1 struct {
+    CapturedAt		*string  `json:"captured_at,omitempty"`
+    DeviceTypeId	*string  `json:"devicetype_id,omitempty"`
+    LocationName	*string  `json:"location_name,omitempty"`
+    Unit			*string  `json:"unit,omitempty"`
+    ChannelId		*uint32  `json:"channel_id,omitempty"`
+    DeviceId		*uint32  `json:"device_id,omitempty"`
+    OriginalId		*uint32  `json:"original_id,omitempty"`
+    SensorId		*uint32  `json:"sensor_id,omitempty"`
+    StationId		*uint32  `json:"station_id,omitempty"`
+    UserId			*uint32  `json:"user_id,omitempty"`
+    Id				*uint32  `json:"id,omitempty"`
+    Height			*int32   `json:"height,omitempty"`
+    Value			*float32 `json:"value,omitempty"`
+    Latitude		*float32 `json:"latitude,omitempty"`
+    Longitude		*float32 `json:"longitude,omitempty"`
+}
+
+func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, err error) {
 
 	// Create a new instance, and decode the I/O stream into the fields as well
 	// as the interfaces{}, which, when queried, can supply us not only with values
 	// but also with type information.
-	x = new(SafecastDataV1)
-	err = json.NewDecoder(r).Decode(x)
+	in := new(SafecastDataV1ToParse)
+	out = new(SafecastDataV1)
+	err = json.NewDecoder(r).Decode(in)
 	if err != nil {
 		return
 	}
 
 	// Now go through each Raw interface and unpack the value into the corresponding non-Raw field
-	switch t := x.ChannelIdRaw.(type) {
+	switch t := in.ChannelIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.ChannelId = &u32
+	        out.ChannelId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.ChannelId = &u32
+		out.ChannelId = &u32
 	}
 
-	switch t := x.DeviceIdRaw.(type) {
+	switch t := in.DeviceIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.DeviceId = &u32
+	        out.DeviceId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.DeviceId = &u32
+		out.DeviceId = &u32
 	}
 
-	switch t := x.OriginalIdRaw.(type) {
+	switch t := in.OriginalIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.OriginalId = &u32
+	        out.OriginalId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.OriginalId = &u32
+		out.OriginalId = &u32
 	}
 
-	switch t := x.SensorIdRaw.(type) {
+	switch t := in.SensorIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.SensorId = &u32
+	        out.SensorId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.SensorId = &u32
+		out.SensorId = &u32
 	}
 
-	switch t := x.StationIdRaw.(type) {
+	switch t := in.StationIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.StationId = &u32
+	        out.StationId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.StationId = &u32
+		out.StationId = &u32
 	}
 
-	switch t := x.UserIdRaw.(type) {
+	switch t := in.UserIdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.UserId = &u32
+	        out.UserId = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.UserId = &u32
+		out.UserId = &u32
 	}
 
-	switch t := x.IdRaw.(type) {
+	switch t := in.IdRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        x.Id = &u32
+	        out.Id = &u32
 	    }
 	case float64:
 		u32 := uint32(t)
-		x.Id = &u32
+		out.Id = &u32
 	}
 
-	switch t := x.HeightRaw.(type) {
+	switch t := in.HeightRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    f64, err := strconv.ParseFloat(t, 32)
 	    if err == nil {
 			i32 := int32(f64)
-	        x.Height = &i32
+	        out.Height = &i32
 	    }
 	case float64:
 		i32 := int32(t)
-		x.Height = &i32
+		out.Height = &i32
 	}
 
-	switch t := x.ValueRaw.(type) {
+	switch t := in.ValueRaw.(type) {
 	case string:
 		// This is to correct for a safecast-air bug
 		// observed on 2017-02-15 wherein if the first char
@@ -171,38 +179,38 @@ func SafecastV1Decode(r io.Reader) (x *SafecastDataV1, err error) {
 	    if err == nil {
 			f32 := float32(f64)
 			if (f32 != 0 || !beginsWithSpace) {
-		        x.Value = &f32
+		        out.Value = &f32
 			}
 	    }
 	case float64:
 		f32 := float32(t)
-		x.Value = &f32
+		out.Value = &f32
 	}
 
-	switch t := x.LatitudeRaw.(type) {
+	switch t := in.LatitudeRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    f64, err := strconv.ParseFloat(t, 32)
 	    if err == nil {
 			f32 := float32(f64)
-	        x.Latitude = &f32
+	        out.Latitude = &f32
 	    }
 	case float64:
 		f32 := float32(t)
-		x.Latitude = &f32
+		out.Latitude = &f32
 	}
 
-	switch t := x.LongitudeRaw.(type) {
+	switch t := in.LongitudeRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    f64, err := strconv.ParseFloat(t, 32)
 	    if err == nil {
 			f32 := float32(f64)
-	        x.Longitude = &f32
+	        out.Longitude = &f32
 	    }
 	case float64:
 		f32 := float32(t)
-		x.Longitude = &f32
+		out.Longitude = &f32
 	}
 
 	// Done

@@ -60,12 +60,6 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
         sd.CapturedAt = v1.CapturedAt
     }
 
-	// As of 2017-03-05 discussion with @rob, I am now supplying CapturedAt if the device didn't.
-	if sd.CapturedAt == nil {
-		capturedAt := nowInUTC()
-		sd.CapturedAt = &capturedAt
-	}
-
     // Loc
     if v1.Latitude != nil && v1.Longitude != nil {
         var loc Loc
