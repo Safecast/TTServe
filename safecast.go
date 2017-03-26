@@ -653,9 +653,11 @@ func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value st
     resp, err := httpclient.Do(req)
     errString := ""
     if (err == nil) {
-	    buf, _ := ioutil.ReadAll(resp.Body)
+	    buf, err := ioutil.ReadAll(resp.Body)
 	    if err != nil {
 			fmt.Printf("*** Response: '%s' '%v'\n", string(buf), buf)
+		} else {
+			fmt.Printf("*** Can't read response: %v\n", err)
 		}
         resp.Body.Close()
     } else {
