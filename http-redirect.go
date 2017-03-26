@@ -53,7 +53,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         //  After: {"unit"="cpm","latitude"="34.4883","longitude"="136.165","value"="0","device_id"="100031","height"="535"}
         str1 := strings.SplitN(RequestURI, "&", 2)
         RequestURI = str1[0]
-        if len(str1) == 0 {
+        if len(str1) == 1 {
             body = []byte("")
         } else {
 	        str2 := str1[len(str1)-1]
