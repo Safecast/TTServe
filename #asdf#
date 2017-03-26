@@ -1,0 +1,5 @@
+*** Redirect POST test:false /scripts/index.php?api_key=AzQLKPwQqkyCTDGZHSdy
+*** Redirect received:
+{"longitude":"-70.783","latitude":"42.565","device_id":"100231","value":"25","unit":"cpm","height":"10","devicetype_id":"Pointcast V1"}
+*** Redirect decoded to V1:
+{"captured_at":"2017-03-26T18:02:37Z","devicetype_id":"Pointcast V1","unit":"cpm","device_id":"100231","height":"10.000000","value":"25.000000","latitude":"42.564999","longitude":"-70.782997"}
