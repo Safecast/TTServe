@@ -359,7 +359,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         if sd.Dev.Temp != nil {
             stat.hasEnc = true
             val := *sd.Dev.Temp
-            if val < -25.0 || val > 38.0 {
+            if val < -25.0 || val > 80.0 {
                 stat.EncWarning = true
             }
         }
