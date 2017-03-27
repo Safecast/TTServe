@@ -22,6 +22,7 @@ import (
 
 // Debugging
 const v1UploadDebug bool = false
+const verboseTransactions bool = false
 
 // Synchronous vs asynchronous V1 API requests
 const v1UploadAsyncFakeResults bool = false
@@ -524,7 +525,9 @@ func beginTransaction(version string,  message1 string, message2 string) int {
     httpTransactions += 1
     transaction := httpTransactions % httpTransactionsRecorded
     httpTransactionTimes[transaction] = time.Now()
-    fmt.Printf("%s >>> %s [%d] %s %s\n", time.Now().Format(logDateFormat), version, transaction, message1, message2)
+    if verboseTransactions {
+        fmt.Printf("%s >>> %s [%d] %s %s\n", time.Now().Format(logDateFormat), version, transaction, message1, message2)
+    }
     return transaction
 }
 
@@ -542,13 +545,17 @@ func endTransaction(transaction int, url string, errstr string) {
             httpTransactionErrorString = errstr
             httpTransactionErrorFirst = false
         }
-        fmt.Printf("%s <<<    [%d] *** ERROR\n", time.Now().Format(logDateFormat), transaction)
+        if verboseTransactions {
+            fmt.Printf("%s <<<    [%d] *** ERROR\n", time.Now().Format(logDateFormat), transaction)
+        }
         ServerLog(fmt.Sprintf("After %d seconds, error uploading to %s %s\n", duration, url, errstr))
     } else {
-        if (duration < 5) {
-            fmt.Printf("%s <<<    [%d]\n", time.Now().Format(logDateFormat), transaction);
-        } else {
-            fmt.Printf("%s <<<    [%d] completed after %d seconds\n", time.Now().Format(logDateFormat), transaction, duration);
+        if verboseTransactions {
+            if (duration < 5) {
+                fmt.Printf("%s <<<    [%d]\n", time.Now().Format(logDateFormat), transaction);
+            } else {
+                fmt.Printf("%s <<<    [%d] completed after %d seconds\n", time.Now().Format(logDateFormat), transaction, duration);
+            }
         }
     }
 
@@ -635,12 +642,12 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
 // Upload a Safecast data structure to the Safecast service
 func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value string) (fSuccess bool, result string) {
 
-	if v1UploadAsyncFakeResults {
-		go doSafecastV1Upload(body, url, isDev, unit, value)
-		return true, v1UploadFakeResult
-	}
+    if v1UploadAsyncFakeResults {
+        go doSafecastV1Upload(body, url, isDev, unit, value)
+        return true, v1UploadFakeResult
+    }
 
-	return doSafecastV1Upload(body, url, isDev, unit, value)
+    return doSafecastV1Upload(body, url, isDev, unit, value)
 
 }
 
@@ -674,6 +681,11 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
     httpclient := &http.Client{
         Timeout: time.Second * 15,
     }
+    if isDev {
+        httpclient = &http.Client{
+            Timeout: time.Second * 45,
+        }
+    }
     resp, err := httpclient.Do(req)
     errString := ""
     if (err == nil) {
@@ -682,13 +694,13 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
             if v1UploadDebug {
                 fmt.Printf("*** Response:\n%s\n", string(buf))
             }
-			// We'd like to return the response
-			respstr := string(buf)
-			if strings.Contains(respstr, "<head>") {
-				fmt.Printf("******** Safecast V1 server response is HTML rather than JSON ********\n")
-			} else {
-	            response = respstr
-			}
+            // We'd like to return the response
+            respstr := string(buf)
+            if strings.Contains(respstr, "<head>") {
+                fmt.Printf("******** Safecast V1 server response is HTML rather than JSON ********\n")
+            } else {
+                response = respstr
+            }
         }
         resp.Body.Close()
     } else {
@@ -703,7 +715,7 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
     // interesting relative to uploads to the new "Ingest" servers.
     // On 2017-03-13 I re-enabled after "connection refused" errors
     // On 2017-03-25 I re-disabled after the errors were again too noisy
-	// On 2017-03-26 I re-enabled it but only for production, not dev
+    // On 2017-03-26 I re-enabled it but only for production, not dev
     if isDev {
         endTransaction(transaction, domain, errString)
     } else {
