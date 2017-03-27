@@ -697,7 +697,7 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
             // We'd like to return the response
             respstr := string(buf)
             if strings.Contains(respstr, "<head>") {
-                fmt.Printf("******** Safecast V1 server response is HTML rather than JSON ********\n")
+                fmt.Printf("******** %s response is HTML rather than JSON ********\n", domain)
             } else {
                 response = respstr
             }
