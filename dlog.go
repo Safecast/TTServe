@@ -23,8 +23,8 @@ func SafecastDeviceLogFilename(DeviceId string, Extension string) string {
 // Write to both logs
 func SafecastWriteToLogs(UploadedAt string, sd SafecastData) {
     go SafecastWriteDeviceStatus(UploadedAt, sd)
-    SafecastJSONDeviceLog(UploadedAt, sd)
-    SafecastCSVDeviceLog(UploadedAt, sd)
+    go SafecastJSONDeviceLog(UploadedAt, sd)
+    go SafecastCSVDeviceLog(UploadedAt, sd)
 }
 
 // Write the value to the log

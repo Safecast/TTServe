@@ -23,6 +23,10 @@ import (
 // Debugging
 const v1UploadDebug bool = false
 
+// Synchronous vs asynchronous V1 API requests
+const v1UploadAsyncFakeResults bool = false
+const v1UploadFakeResult string ="{\"id\":00000001}"
+
 // For dealing with transaction timeouts
 var httpTransactionsInProgress int = 0
 var httpTransactions = 0
@@ -629,10 +633,22 @@ func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
 }
 
 // Upload a Safecast data structure to the Safecast service
-func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value string) (fSuccess bool, result string)  {
+func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value string) (fSuccess bool, result string) {
+
+	if v1UploadAsyncFakeResults {
+		go doSafecastV1Upload(body, url, isDev, unit, value)
+		return true, v1UploadFakeResult
+	}
+
+	return doSafecastV1Upload(body, url, isDev, unit, value)
+
+}
+
+
+func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value string) (fSuccess bool, result string) {
 
     // Preset result in case of failure
-    response := "{\"id\":00000001}\r\n"
+    response := v1UploadFakeResult
 
     // Figure out what domain we're posting to
     domain := SafecastV1UploadDomain
