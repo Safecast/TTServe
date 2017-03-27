@@ -476,59 +476,61 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         }
     }
 
-    // Timing
+	// Init oldest and newest
     if ds.Measurements == 1 {
         ds.OldestUpload = stat.Uploaded
         ds.NewestUpload = stat.Uploaded
     }
-    if stat.Uploaded.Sub(ds.NewestUpload) < 0 {
-        ds.Measurements--
-        fmt.Printf("** Out-of-order %d stat %v < %v\n", ds.DeviceId, stat.Uploaded, ds.NewestUpload)
-        return
-    }
-    SecondsGap := uint32(stat.Uploaded.Sub(ds.NewestUpload) / time.Second)
-    if SecondsGap > 0 {
-        if ds.MinUploadGapSecs == 0 || SecondsGap < ds.MinUploadGapSecs {
-            ds.MinUploadGapSecs = SecondsGap
+
+    // Timing.  Note that it is possible to have uploads that are out-of-order because of
+	// multi-instance server concurrency.  For those measurements we will still check the
+	// sensor readings, but we won't factor the measurement into our "gap" calculations.
+    if stat.Uploaded.Sub(ds.NewestUpload) >= 0 {
+
+        SecondsGap := uint32(stat.Uploaded.Sub(ds.NewestUpload) / time.Second)
+        if SecondsGap > 0 {
+            if ds.MinUploadGapSecs == 0 || SecondsGap < ds.MinUploadGapSecs {
+                ds.MinUploadGapSecs = SecondsGap
+            }
+            if SecondsGap > ds.MaxUploadGapSecs {
+                ds.MaxUploadGapSecs = SecondsGap
+            }
         }
-        if SecondsGap > ds.MaxUploadGapSecs {
-            ds.MaxUploadGapSecs = SecondsGap
+        if SecondsGap > 0 {
+            ds.GapsGt0m++
         }
+        if SecondsGap > 60 * 5 {
+            ds.GapsGt5m++
+        }
+        if SecondsGap > 60 * 10 {
+            ds.GapsGt10m++
+        }
+        if SecondsGap > 60 * 15 {
+            ds.GapsGt15m++
+        }
+        if SecondsGap > 60 * 30 {
+            ds.GapsGt30m++
+        }
+        if SecondsGap > 60 * 60 * 1 {
+            ds.GapsGt1hr++
+        }
+        if SecondsGap > 60 * 60 * 2 {
+            ds.GapsGt2hr++
+        }
+        if SecondsGap > 60 * 60 * 6 {
+            ds.GapsGt6hr++
+        }
+        if SecondsGap > 60 * 60 * 12 {
+            ds.GapsGt12hr++
+        }
+        if SecondsGap > 60 * 60 * 24 * 1 {
+            ds.GapsGt1day++
+        }
+        if SecondsGap > 60 * 60 * 24 * 7 {
+            ds.GapsGt1week++
+        }
+        ds.NewestUpload = stat.Uploaded
     }
-    if SecondsGap > 0 {
-        ds.GapsGt0m++
-    }
-    if SecondsGap > 60 * 5 {
-        ds.GapsGt5m++
-    }
-    if SecondsGap > 60 * 10 {
-        ds.GapsGt10m++
-    }
-    if SecondsGap > 60 * 15 {
-        ds.GapsGt15m++
-    }
-    if SecondsGap > 60 * 30 {
-        ds.GapsGt30m++
-    }
-    if SecondsGap > 60 * 60 * 1 {
-        ds.GapsGt1hr++
-    }
-    if SecondsGap > 60 * 60 * 2 {
-        ds.GapsGt2hr++
-    }
-    if SecondsGap > 60 * 60 * 6 {
-        ds.GapsGt6hr++
-    }
-    if SecondsGap > 60 * 60 * 12 {
-        ds.GapsGt12hr++
-    }
-    if SecondsGap > 60 * 60 * 24 * 1 {
-        ds.GapsGt1day++
-    }
-    if SecondsGap > 60 * 60 * 24 * 7 {
-        ds.GapsGt1week++
-    }
-    ds.NewestUpload = stat.Uploaded
 
     // Transport
     if stat.LoraTransport {
