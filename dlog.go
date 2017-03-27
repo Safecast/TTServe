@@ -20,9 +20,12 @@ func SafecastDeviceLogFilename(DeviceId string, Extension string) string {
     return file
 }
 
-// Write to both logs
+// Write to logs.
+// Note that we don't do this with a goroutine because the serialization is helpful
+// in log-ordering for buffered I/O messages where there are a huge batch of readings
+// that are updated in sequence very quickly.
 func SafecastWriteToLogs(UploadedAt string, sd SafecastData) {
-    go SafecastWriteDeviceStatus(UploadedAt, sd)
+    SafecastWriteDeviceStatus(UploadedAt, sd)
     SafecastJSONDeviceLog(UploadedAt, sd)
     SafecastCSVDeviceLog(UploadedAt, sd)
 }
