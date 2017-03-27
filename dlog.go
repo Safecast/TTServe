@@ -109,7 +109,7 @@ func SafecastCSVDeviceLog(UploadedAt string, sd SafecastData) {
     }
 
     // Turn stats into a safe string for CSV
-    stats := ""
+    stats := "\""
     if sd.Dev != nil {
         if sd.Dev.UptimeMinutes != nil {
             stats += fmt.Sprintf("Uptime:%d ", *sd.Dev.UptimeMinutes)
@@ -190,6 +190,7 @@ func SafecastCSVDeviceLog(UploadedAt string, sd SafecastData) {
             stats += fmt.Sprintf("Status:%s ", *sd.Dev.Status)
         }
     }
+    stats = stats + "\""
 
     // Write the stuff
     s := ""
