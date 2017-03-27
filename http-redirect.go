@@ -62,9 +62,10 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
             str6 := strings.Replace(str5, "alt=", "height=", 1)
             str7 := strings.Replace(str6, "cpm=", "value=", 1)
             str8 := strings.Replace(str7, "id=", "device_id=", 1)
-            str9 := strings.Replace(str8, "=", "\":\"", -1)
-            str10 := strings.Replace(str9, "&", "\",\"", -1)
-            body = []byte("{\"" + str10 + "\"}")
+            str9 := strings.Replace(str8, "typ=", "devicetype_id=", 1)
+            str10 := strings.Replace(str9, "=", "\":\"", -1)
+            str11 := strings.Replace(str10, "&", "\",\"", -1)
+            body = []byte("{\"" + str11 + "\"}")
         }
 
     } else {
@@ -117,6 +118,11 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         capturedAt := nowInUTC()
         sdV1.CapturedAt = &capturedAt
         sdV1Emit.CapturedAt = &capturedAt
+    }
+    if sdV1.UpdatedAt == nil {
+        updatedAt := nowInUTC()
+        sdV1.UpdatedAt = &updatedAt
+        sdV1Emit.UpdatedAt = &updatedAt
     }
 
     // Convert it to text to emit
