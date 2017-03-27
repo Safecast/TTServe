@@ -716,7 +716,7 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
     // On 2017-03-13 I re-enabled after "connection refused" errors
     // On 2017-03-25 I re-disabled after the errors were again too noisy
     // On 2017-03-26 I re-enabled it but only for production, not dev
-    if isDev {
+    if !isDev {
         endTransaction(transaction, domain, errString)
     } else {
         if (errString != "") {
