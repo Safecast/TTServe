@@ -119,11 +119,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         sdV1.CapturedAt = &capturedAt
         sdV1Emit.CapturedAt = &capturedAt
     }
-    if sdV1.UpdatedAt == nil {
-        updatedAt := nowInUTC()
-        sdV1.UpdatedAt = &updatedAt
-        sdV1Emit.UpdatedAt = &updatedAt
-    }
 
     // Convert it to text to emit
     sdV1EmitJSON, _ := json.Marshal(sdV1Emit)

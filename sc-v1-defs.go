@@ -35,7 +35,6 @@ type SafecastDataV1ToParse struct {
 
 type SafecastDataV1ToEmit struct {
     CapturedAt		*string  `json:"captured_at,omitempty"`
-    UpdatedAt		*string  `json:"updated_at,omitempty"`
     DeviceTypeId	*string  `json:"devicetype_id,omitempty"`
     LocationName	*string  `json:"location_name,omitempty"`
     Unit			*string  `json:"unit,omitempty"`
@@ -54,7 +53,6 @@ type SafecastDataV1ToEmit struct {
 
 type SafecastDataV1 struct {
     CapturedAt		*string  `json:"captured_at,omitempty"`
-    UpdatedAt		*string  `json:"updated_at,omitempty"`
     DeviceTypeId	*string  `json:"devicetype_id,omitempty"`
     LocationName	*string  `json:"location_name,omitempty"`
     Unit			*string  `json:"unit,omitempty"`
