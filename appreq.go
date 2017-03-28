@@ -253,7 +253,7 @@ func getReplyDeviceIdFromPayload(buf []byte) (deviceID uint32) {
                 switch msg.GetReplyType() {
 
                     // A reply is expected
-                case ttproto.Telecast_REPLY_ALLOWED:
+                case ttproto.Telecast_ALLOWED:
                     return DeviceId
 
                 }
