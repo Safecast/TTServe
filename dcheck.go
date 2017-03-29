@@ -35,6 +35,7 @@ type MeasurementStat struct {
     ErrorsBme1          uint32
     ErrorsLora          uint32
     ErrorsFona          uint32
+    ErrorsCommsPowerFails uint32
     ErrorsGeiger        uint32
     ErrorsMax01         uint32
     ErrorsUgps          uint32
@@ -110,6 +111,8 @@ type MeasurementDataset struct {
     ThisErrorsLora      uint32
     PrevErrorsFona      uint32
     ThisErrorsFona      uint32
+    PrevErrorsCommsPowerFails uint32
+    ThisErrorsCommsPowerFails uint32
     PrevErrorsGeiger    uint32
     ThisErrorsGeiger    uint32
     PrevErrorsMax01     uint32
@@ -254,6 +257,9 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
         if sd.Dev.ErrorsFona != nil {
             stat.ErrorsFona = *sd.Dev.ErrorsFona
+        }
+        if sd.Dev.CommsPowerFails != nil {
+            stat.ErrorsCommsPowerFails = *sd.Dev.CommsPowerFails
         }
         if sd.Dev.ErrorsGeiger != nil {
             stat.ErrorsGeiger = *sd.Dev.ErrorsGeiger
@@ -476,15 +482,15 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         }
     }
 
-	// Init oldest and newest
+    // Init oldest and newest
     if ds.Measurements == 1 {
         ds.OldestUpload = stat.Uploaded
         ds.NewestUpload = stat.Uploaded
     }
 
     // Timing.  Note that it is possible to have uploads that are out-of-order because of
-	// multi-instance server concurrency.  For those measurements we will still check the
-	// sensor readings, but we won't factor the measurement into our "gap" calculations.
+    // multi-instance server concurrency.  For those measurements we will still check the
+    // sensor readings, but we won't factor the measurement into our "gap" calculations.
     if stat.Uploaded.Sub(ds.NewestUpload) >= 0 {
 
         SecondsGap := uint32(stat.Uploaded.Sub(ds.NewestUpload) / time.Second)
@@ -586,6 +592,10 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
     }
     if stat.ErrorsFona > ds.ThisErrorsFona {
         ds.ThisErrorsFona = stat.ErrorsFona
+        ds.AnyErrors = true
+    }
+    if stat.ErrorsCommsPowerFails > ds.ThisErrorsCommsPowerFails {
+        ds.ThisErrorsCommsPowerFails = stat.ErrorsCommsPowerFails
         ds.AnyErrors = true
     }
     if stat.ErrorsGeiger > ds.ThisErrorsGeiger {
@@ -694,6 +704,8 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
             ds.ThisErrorsLora = 0
             ds.PrevErrorsFona += ds.ThisErrorsFona
             ds.ThisErrorsFona = 0
+            ds.PrevErrorsCommsPowerFails += ds.ThisErrorsCommsPowerFails
+            ds.ThisErrorsCommsPowerFails = 0
             ds.PrevErrorsGeiger += ds.ThisErrorsGeiger
             ds.ThisErrorsGeiger = 0
             ds.PrevErrorsMax01 += ds.ThisErrorsMax01
@@ -973,6 +985,70 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
     s += fmt.Sprintf("\n")
+    s += fmt.Sprintf("\n")
+
+    // Errors
+    if ds.Boots == 1 {
+        s += fmt.Sprintf("Device errors:\n")
+    } else {
+        s += fmt.Sprintf("Device errors across %d sessions:\n", ds.Boots)
+    }
+    if !ds.AnyErrors {
+        s += fmt.Sprintf("  None\n")
+    } else {
+        i := ds.PrevErrorsOpc + ds.ThisErrorsOpc
+        if i > 0 {
+            s += fmt.Sprintf("  Opc        %d\n", i)
+        }
+        i = ds.PrevErrorsPms + ds.ThisErrorsPms
+        if i > 0 {
+            s += fmt.Sprintf("  Pms        %d\n", i)
+        }
+        i = ds.PrevErrorsBme0 + ds.ThisErrorsBme0
+        if i > 0 {
+            s += fmt.Sprintf("  Bme0       %d\n", i)
+        }
+        i = ds.PrevErrorsBme1 + ds.ThisErrorsBme1
+        if i > 0 {
+            s += fmt.Sprintf("  Bme1       %d\n", i)
+        }
+        i = ds.PrevErrorsLora + ds.ThisErrorsLora
+        if i > 0 {
+            s += fmt.Sprintf("  Lora       %d\n", i)
+        }
+        i = ds.PrevErrorsFona + ds.ThisErrorsFona
+        if i > 0 {
+            s += fmt.Sprintf("  Fona       %d\n", i)
+        }
+        i = ds.PrevErrorsCommsPowerFails + ds.ThisErrorsCommsPowerFails
+        if i > 0 {
+            s += fmt.Sprintf("  Fona Power %d\n", i)
+        }
+        i = ds.PrevErrorsGeiger + ds.ThisErrorsGeiger
+        if i > 0 {
+            s += fmt.Sprintf("  Geiger     %d\n", i)
+        }
+        i = ds.PrevErrorsMax01 + ds.ThisErrorsMax01
+        if i > 0 {
+            s += fmt.Sprintf("  Max01      %d\n", i)
+        }
+        i = ds.PrevErrorsUgps + ds.ThisErrorsUgps
+        if i > 0 {
+            s += fmt.Sprintf("  Ugps       %d\n", i)
+        }
+        i = ds.PrevErrorsLis + ds.ThisErrorsLis
+        if i > 0 {
+            s += fmt.Sprintf("  Lis        %d\n", i)
+        }
+        i = ds.PrevErrorsSpi + ds.ThisErrorsSpi
+        if i > 0 {
+            s += fmt.Sprintf("  Spi        %d\n", i)
+        }
+        i = ds.PrevErrorsTwi + ds.ThisErrorsTwi
+        if i > 0 || ds.ErrorsTwiInfo != "" {
+            s += fmt.Sprintf("  Twi        %d %s\n", i, ds.ErrorsTwiInfo)
+        }
+    }
     s += fmt.Sprintf("\n")
 
     // Pointcast
