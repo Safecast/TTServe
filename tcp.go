@@ -7,6 +7,7 @@ package main
 
 import (
     "io"
+	"io/ioutil"
     "net"
     "fmt"
     "bufio"
@@ -58,8 +59,8 @@ func TcpInboundHandler() {
         }
         if (payload_format[0] != BUFF_FORMAT_PB_ARRAY) {
             fmt.Printf("\ntcp: unsupported request\n")
-            buf1 := make([]byte, 512)
-            n, err := io.ReadAtLeast(rdconn, buf1, 0)
+            buf1, err := ioutil.ReadAll(rdconn)
+			n := len(buf1)
 			fmt.Printf("n=%d err=%v\n", n, err)
             if err == nil || err == io.EOF || err == io.ErrUnexpectedEOF {
                 buf2 := append(payload_format, buf1[:n]...)
