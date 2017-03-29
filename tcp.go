@@ -60,6 +60,7 @@ func TcpInboundHandler() {
             fmt.Printf("\ntcp: unsupported request\n")
             buf1 := make([]byte, 512)
             n, err := io.ReadFull(rdconn, buf1)
+			fmt.Printf("n=%d err=%v\n", n, err)
             if err == nil || err == io.EOF {
                 buf2 := append(payload_format, buf1[:n]...)
                 b := make([]byte, len(buf2))
