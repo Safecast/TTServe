@@ -59,9 +59,9 @@ func TcpInboundHandler() {
         if (payload_format[0] != BUFF_FORMAT_PB_ARRAY) {
             fmt.Printf("\ntcp: unsupported request\n")
             buf1 := make([]byte, 512)
-            n, err := io.ReadFull(rdconn, buf1)
+            n, err := io.ReadAtLeast(rdconn, buf1, 0)
 			fmt.Printf("n=%d err=%v\n", n, err)
-            if err == nil || err == io.EOF {
+            if err == nil || err == io.EOF || err == io.ErrUnexpectedEOF {
                 buf2 := append(payload_format, buf1[:n]...)
                 b := make([]byte, len(buf2))
                 var bl int
