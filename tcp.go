@@ -59,7 +59,7 @@ func TcpInboundHandler() {
         if (payload_format[0] != BUFF_FORMAT_PB_ARRAY) {
             fmt.Printf("\ntcp: unsupported buffer format: %d\n", payload_format[0])
             buf1 := make([]byte, 256)
-            n, err := conn.Read(buf1)
+            n, err := io.ReadFull(rdconn, buf1)
 			fmt.Printf("n=%d err=%v\n", n, err)
             if err == nil || err == io.EOF {
                 buf2 := append(payload_format, buf1[:n]...)
