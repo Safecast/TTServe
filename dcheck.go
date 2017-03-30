@@ -865,52 +865,52 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("Inter-upload Gaps: (%s to %s)\n", AgoMinutes(ds.MinUploadGapSecs/60), AgoMinutes(ds.MaxUploadGapSecs/60))
         f := 100*float32(ds.GapsGt1week) / float32(ds.GapsGt0m)
         if f != 0 {
-            s += fmt.Sprintf("  >1w  %3.0f%% (%d)\n", f, ds.GapsGt1week)
+            s += fmt.Sprintf("  >1w     %3.0f%% (%d)\n", f, ds.GapsGt1week)
         }
 		prev := f
         f = 100*float32(ds.GapsGt1day) / float32(ds.GapsGt0m) 
         if f != 0 && f != prev {
-            s += fmt.Sprintf("  >1d  %3.0f%% (%d)\n", f, ds.GapsGt1day)
+            s += fmt.Sprintf("  1d-1w   %3.0f%% (%d)\n", f-prev, ds.GapsGt1day)
         }
 		prev = f
         f = 100*float32(ds.GapsGt12hr) / float32(ds.GapsGt0m)
         if f != 0 && f != prev {
-            s += fmt.Sprintf("  >12hr%3.0f%% (%d)\n", f, ds.GapsGt12hr)
+            s += fmt.Sprintf("  12-24hr %3.0f%% (%d)\n", f-prev, ds.GapsGt12hr)
         }
 		prev = f
         f = 100*float32(ds.GapsGt6hr) / float32(ds.GapsGt0m) 
         if f != 0 && f != prev {
-            s += fmt.Sprintf("  >6hr %3.0f%% (%d)\n", f, ds.GapsGt6hr)
+            s += fmt.Sprintf("  6-12hr  %3.0f%% (%d)\n", f-prev, ds.GapsGt6hr)
         }
 		prev = f
         f = 100*float32(ds.GapsGt2hr) / float32(ds.GapsGt0m) 
         if f != 0 && f != prev {
-            s += fmt.Sprintf("  >2hr %3.0f%% (%d)\n", f, ds.GapsGt2hr)
+            s += fmt.Sprintf("  2-6hr   %3.0f%% (%d)\n", f-prev, ds.GapsGt2hr)
         }
 		prev = f
         f = 100*float32(ds.GapsGt1hr) / float32(ds.GapsGt0m) 
         if f != 0 && f != prev {
-            s += fmt.Sprintf("  >1hr %3.0f%% (%d)\n", f, ds.GapsGt1hr)
+            s += fmt.Sprintf("  1-2hr   %3.0f%% (%d)\n", f-prev, ds.GapsGt1hr)
         }
 		prev = f
         f = 100*float32(ds.GapsGt30m) / float32(ds.GapsGt0m) 
         if f != 0 && f != prev {
-            s += fmt.Sprintf("  >30m %3.0f%% (%d)\n", f, ds.GapsGt30m)
+            s += fmt.Sprintf("  30-60m  %3.0f%% (%d)\n", f-prev, ds.GapsGt30m)
         }
 		prev = f
         f = 100*float32(ds.GapsGt15m) / float32(ds.GapsGt0m) 
         if f != 0 && f != prev {
-            s += fmt.Sprintf("  >15m %3.0f%% (%d)\n", f, ds.GapsGt15m)
+            s += fmt.Sprintf("  15-30m  %3.0f%% (%d)\n", f-prev, ds.GapsGt15m)
         }
 		prev = f
         f = 100*float32(ds.GapsGt10m) / float32(ds.GapsGt0m) 
         if f != 0 && f != prev {
-            s += fmt.Sprintf("  >10m %3.0f%% (%d)\n", f, ds.GapsGt10m)
+            s += fmt.Sprintf("  10-15m  %3.0f%% (%d)\n", f-prev, ds.GapsGt10m)
         }
 		prev = f
         f = 100*float32(ds.GapsGt5m) / float32(ds.GapsGt0m) 
         if f != 0 && f != prev {
-            s += fmt.Sprintf("  > 5m %3.0f%% (%d)\n", f, ds.GapsGt5m)
+            s += fmt.Sprintf("  5-10m   %3.0f%% (%d)\n", f-prev, ds.GapsGt5m)
         }
 		prev = f
         f = 100*float32(ds.GapsGt0m-ds.GapsGt5m) / float32(ds.GapsGt0m)
