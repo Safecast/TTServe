@@ -867,54 +867,44 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         if f != 0 {
             s += fmt.Sprintf("  >1w     %3.0f%% (%d)\n", f, ds.GapsGt1week)
         }
-		prev := f
         f = 100*float32(ds.GapsGt1day) / float32(ds.GapsGt0m) 
-        if f != 0 && f != prev {
-            s += fmt.Sprintf("  1d-1w   %3.0f%% (%d)\n", f-prev, ds.GapsGt1day)
+        if f != 0 && ds.GapsGt1day != ds.GapsGt1week {
+            s += fmt.Sprintf("  1d-1w   %3.0f%% (%d)\n", f, ds.GapsGt1day - ds.GapsGt1week)
         }
-		prev = f
         f = 100*float32(ds.GapsGt12hr) / float32(ds.GapsGt0m)
-        if f != 0 && f != prev {
-            s += fmt.Sprintf("  12-24hr %3.0f%% (%d)\n", f-prev, ds.GapsGt12hr)
+        if f != 0 && ds.GapsGt12hr != ds.GapsGt1day {
+            s += fmt.Sprintf("  12-24hr %3.0f%% (%d)\n", f, ds.GapsGt12hr - ds.GapsGt1day)
         }
-		prev = f
         f = 100*float32(ds.GapsGt6hr) / float32(ds.GapsGt0m) 
-        if f != 0 && f != prev {
-            s += fmt.Sprintf("  6-12hr  %3.0f%% (%d)\n", f-prev, ds.GapsGt6hr)
+        if f != 0 && ds.GapsGt6hr != ds.GapsGt12hr {
+            s += fmt.Sprintf("  6-12hr  %3.0f%% (%d)\n", f, ds.GapsGt6hr - ds.GapsGt12hr)
         }
-		prev = f
         f = 100*float32(ds.GapsGt2hr) / float32(ds.GapsGt0m) 
-        if f != 0 && f != prev {
-            s += fmt.Sprintf("  2-6hr   %3.0f%% (%d)\n", f-prev, ds.GapsGt2hr)
+        if f != 0 && ds.GapsGt2hr != ds.GapsGt6hr {
+            s += fmt.Sprintf("  2-6hr   %3.0f%% (%d)\n", f, ds.GapsGt2hr - ds.GapsGt6hr)
         }
-		prev = f
         f = 100*float32(ds.GapsGt1hr) / float32(ds.GapsGt0m) 
-        if f != 0 && f != prev {
-            s += fmt.Sprintf("  1-2hr   %3.0f%% (%d)\n", f-prev, ds.GapsGt1hr)
+        if f != 0 && ds.GapsGt1hr != ds.GapsGt2hr {
+            s += fmt.Sprintf("  1-2hr   %3.0f%% (%d)\n", f, ds.GapsGt1hr - ds.GapsGt2hr)
         }
-		prev = f
         f = 100*float32(ds.GapsGt30m) / float32(ds.GapsGt0m) 
-        if f != 0 && f != prev {
-            s += fmt.Sprintf("  30-60m  %3.0f%% (%d)\n", f-prev, ds.GapsGt30m)
+        if f != 0 && ds.GapsGt30m != ds.GapsGt1hr {
+            s += fmt.Sprintf("  30-60m  %3.0f%% (%d)\n", f, ds.GapsGt30m - ds.GapsGt1hr)
         }
-		prev = f
         f = 100*float32(ds.GapsGt15m) / float32(ds.GapsGt0m) 
-        if f != 0 && f != prev {
-            s += fmt.Sprintf("  15-30m  %3.0f%% (%d)\n", f-prev, ds.GapsGt15m)
+        if f != 0 && ds.GapsGt15m != ds.GapsGt30m {
+            s += fmt.Sprintf("  15-30m  %3.0f%% (%d)\n", f, ds.GapsGt15m - ds.GapsGt30m)
         }
-		prev = f
         f = 100*float32(ds.GapsGt10m) / float32(ds.GapsGt0m) 
-        if f != 0 && f != prev {
-            s += fmt.Sprintf("  10-15m  %3.0f%% (%d)\n", f-prev, ds.GapsGt10m)
+        if f != 0 && ds.GapsGt10m != ds.GapsGt15m {
+            s += fmt.Sprintf("  10-15m  %3.0f%% (%d)\n", f, ds.GapsGt10m - ds.GapsGt15m)
         }
-		prev = f
         f = 100*float32(ds.GapsGt5m) / float32(ds.GapsGt0m) 
-        if f != 0 && f != prev {
-            s += fmt.Sprintf("  5-10m   %3.0f%% (%d)\n", f-prev, ds.GapsGt5m)
+        if f != 0 && ds.GapsGt5m != ds.GapsGt10m {
+            s += fmt.Sprintf("  5-10m   %3.0f%% (%d)\n", f, ds.GapsGt5m - ds.GapsGt10m)
         }
-		prev = f
         f = 100*float32(ds.GapsGt0m-ds.GapsGt5m) / float32(ds.GapsGt0m)
-        if f != 0 && f != prev {
+        if f != 0 {
             s += fmt.Sprintf("  <=5m %3.0f%% (%d)\n", f, ds.GapsGt0m-ds.GapsGt5m)
         }
         s += fmt.Sprintf("\n")
