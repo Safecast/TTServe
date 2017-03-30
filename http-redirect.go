@@ -11,7 +11,6 @@ import (
     "io/ioutil"
     "net/http"
     "fmt"
-    "time"
     "io"
     "encoding/json"
 )
@@ -87,9 +86,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         // Eliminate a bit of the noise caused by load balancer health checks
         if (isReal && req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
             if err == io.EOF {
-                fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", time.Now().Format(logDateFormat), RequestURI, remoteAddr);
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", logTime(), RequestURI, remoteAddr);
             } else {
-                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", time.Now().Format(logDateFormat), RequestURI, remoteAddr, err);
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", logTime(), RequestURI, remoteAddr, err);
             }
             if len(body) != 0 {
                 fmt.Printf("%s\n", string(body));
@@ -159,13 +158,13 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     svc.Transport = &transportStr
     sd.Service = &svc
 
-    fmt.Printf("\n%s Received payload for %d from %s\n", time.Now().Format(logDateFormat), sd.DeviceId, transportStr)
+    fmt.Printf("\n%s Received payload for %d from %s\n", logTime(), sd.DeviceId, transportStr)
     fmt.Printf("%s\n", body)
 
     // If the data doesn't have anything useful in it, optimize it completely away.  This is
     // observed to happen for Safecast Air from time to time
     if sd.Opc == nil && sd.Pms == nil && sd.Env == nil && sd.Lnd == nil && sd.Bat == nil && sd.Dev == nil {
-        fmt.Printf("%s *** Ignoring because message contains no data\n", time.Now().Format(logDateFormat))
+        fmt.Printf("%s *** Ignoring because message contains no data\n", logTime())
         return
     }
 

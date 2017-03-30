@@ -61,7 +61,7 @@ func MqqtInboundHandler() {
             }
 
             AppReq.SvTransport = "ttn-mqqt:" + AppReq.TTNDevID
-            fmt.Printf("\n%s Received %d-byte payload from %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), AppReq.SvTransport)
+            fmt.Printf("\n%s Received %d-byte payload from %s\n", logTime(), len(AppReq.Payload), AppReq.SvTransport)
             AppReq.SvUploadedAt = nowInUTC()
 			go AppReqPushPayload(AppReq, AppReq.Payload, "device via ttn")
             stats.Count.MQQTTTN++
@@ -134,9 +134,9 @@ func MqqtSubscriptionMonitor() {
         onMqConnectionLost := func (client MQTT.Client, err error) {
             ttnFullyConnected = false
             ttnLastDisconnectedTime = time.Now()
-            ttnLastDisconnected = time.Now().Format(logDateFormat)
+            ttnLastDisconnected = logTime()
             ttnOutages = ttnOutages+1
-            fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", time.Now().Format(logDateFormat), err)
+            fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", logTime(), err)
             sendToTTNOps(fmt.Sprintf("Connection lost from this server to %s: %v\n", ttnServer, err))
         }
         mqttOpts.SetConnectionLostHandler(onMqConnectionLost)
@@ -155,11 +155,11 @@ func MqqtSubscriptionMonitor() {
                 fmt.Printf("Error subscribing to topic %s\n", ttnTopic, token.Error())
                 ttnFullyConnected = false
                 ttnLastDisconnectedTime = time.Now()
-                ttnLastDisconnected = time.Now().Format(logDateFormat)
+                ttnLastDisconnected = logTime()
             } else {
                 // Successful subscription
                 ttnFullyConnected = true
-                ttnLastConnected = time.Now().Format(logDateFormat)
+                ttnLastConnected = logTime()
                 if (ttnEverConnected) {
                     minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
                     // Don't bother reporting quick outages, generally caused by server restarts
@@ -167,7 +167,7 @@ func MqqtSubscriptionMonitor() {
                         sendToSafecastOps(fmt.Sprintf("TTN returned (%d-minute outage began at %s UTC)", minutesOffline, ttnLastDisconnected), SLACK_MSG_UNSOLICITED)
                     }
                     sendToTTNOps(fmt.Sprintf("Connection restored from this server to %s\n", ttnServer))
-                    fmt.Printf("\n%s *** TTN Connection Restored\n\n", time.Now().Format(logDateFormat))
+                    fmt.Printf("\n%s *** TTN Connection Restored\n\n", logTime())
                 } else {
                     ttnEverConnected = true
                     fmt.Printf("TTN Connection Established\n")
@@ -192,11 +192,11 @@ func MqqtSubscriptionMonitor() {
                 time.Sleep(60 * time.Second);
                 if ttnFullyConnected {
                     if false {
-                        fmt.Printf("\n%s TTN Alive\n", time.Now().Format(logDateFormat))
+                        fmt.Printf("\n%s TTN Alive\n", logTime())
                     }
                     consecutiveFailures = 0
                 } else {
-                    fmt.Printf("\n%s TTN *** UNREACHABLE ***\n", time.Now().Format(logDateFormat))
+                    fmt.Printf("\n%s TTN *** UNREACHABLE ***\n", logTime())
                     consecutiveFailures += 1
                 }
             }
@@ -210,7 +210,7 @@ func MqqtSubscriptionMonitor() {
         fmt.Printf("\n***\n")
         fmt.Printf("*** Last time connection was successfully made: %s\n", ttnLastConnected)
         fmt.Printf("*** Last time connection was lost: %s\n", ttnLastDisconnected)
-        fmt.Printf("*** Now attempting to reconnect: %s\n", time.Now().Format(logDateFormat))
+        fmt.Printf("*** Now attempting to reconnect: %s\n", logTime())
         fmt.Printf("***\n\n")
 
     }

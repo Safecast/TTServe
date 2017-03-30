@@ -7,7 +7,6 @@ package main
 
 import (
     "fmt"
-    "time"
     "hash/crc32"
     "github.com/golang/protobuf/proto"
     "github.com/safecast/ttproto/golang"
@@ -49,19 +48,19 @@ func AppReqProcess(AppReq IncomingAppReq) {
 
     // Display info about the received message
     if (msg.RelayDevice1 != nil) {
-        fmt.Printf("%s RELAYED thru hop #1 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice1())
+        fmt.Printf("%s RELAYED thru hop #1 %d\n", logTime(), msg.GetRelayDevice1())
     }
     if (msg.RelayDevice2 != nil) {
-        fmt.Printf("%s RELAYED thru hop #2 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice2())
+        fmt.Printf("%s RELAYED thru hop #2 %d\n", logTime(), msg.GetRelayDevice2())
     }
     if (msg.RelayDevice3 != nil) {
-        fmt.Printf("%s RELAYED thru hop #3 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice3())
+        fmt.Printf("%s RELAYED thru hop #3 %d\n", logTime(), msg.GetRelayDevice3())
     }
     if (msg.RelayDevice4 != nil) {
-        fmt.Printf("%s RELAYED thru hop #4 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice4())
+        fmt.Printf("%s RELAYED thru hop #4 %d\n", logTime(), msg.GetRelayDevice4())
     }
     if (msg.RelayDevice5 != nil) {
-        fmt.Printf("%s RELAYED thru hop #5 %d\n", time.Now().Format(logDateFormat), msg.GetRelayDevice5())
+        fmt.Printf("%s RELAYED thru hop #5 %d\n", logTime(), msg.GetRelayDevice5())
     }
 
     // Compute the checksum on a payload normalized by removing all the relay information
@@ -112,7 +111,7 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
     case BUFF_FORMAT_PB_ARRAY: {
 
         if !validBulkPayload(buf, buf_length) {
-            fmt.Printf("\n%s Received INVALID %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), buf_length, from, AppReq.SvTransport)
+            fmt.Printf("\n%s Received INVALID %d-byte payload from %s %s\n", logTime(), buf_length, from, AppReq.SvTransport)
             return
         }
 
@@ -131,9 +130,9 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
             AppReq.Payload = buf[payloadOffset:payloadOffset+length]
 
             if (count == 1) {
-                fmt.Printf("\n%s Received %d-byte payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), from, AppReq.SvTransport)
+                fmt.Printf("\n%s Received %d-byte payload from %s %s\n", logTime(), len(AppReq.Payload), from, AppReq.SvTransport)
             } else {
-                fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", time.Now().Format(logDateFormat), len(AppReq.Payload), i+1, count, from, AppReq.SvTransport)
+                fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", logTime(), len(AppReq.Payload), i+1, count, from, AppReq.SvTransport)
             }
 
             // Process the AppReq synchronously, because they must be done in-order
@@ -155,9 +154,9 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
             }
         }
         if isAscii {
-            fmt.Printf("\n%s Received unrecognized %d-byte payload from %s:\n%s\n", time.Now().Format(logDateFormat), buf_length, AppReq.SvTransport, buf)
+            fmt.Printf("\n%s Received unrecognized %d-byte payload from %s:\n%s\n", logTime(), buf_length, AppReq.SvTransport, buf)
         } else {
-            fmt.Printf("\n%s Received unrecognized %d-byte payload from %s:\n%v\n", time.Now().Format(logDateFormat), buf_length, AppReq.SvTransport, buf)
+            fmt.Printf("\n%s Received unrecognized %d-byte payload from %s:\n%v\n", logTime(), buf_length, AppReq.SvTransport, buf)
         }
     }
     }
@@ -175,21 +174,21 @@ func validBulkPayload(buf []byte, length int) (bool) {
     // Enough room for the count field in header?
     header_length := 2
     if length < header_length {
-        fmt.Printf("%s *** Invalid header ***\n", time.Now().Format(logDateFormat))
+        fmt.Printf("%s *** Invalid header ***\n", logTime())
         return false
     }
 
     // A count of at least 1?
     count := int(buf[1])
     if count == 0 {
-        fmt.Printf("%s *** Invalid count ***\n", time.Now().Format(logDateFormat))
+        fmt.Printf("%s *** Invalid count ***\n", logTime())
         return false
     }
 
     // Enough room for the length array?
     header_length += count
     if length < header_length {
-        fmt.Printf("%s *** Invalid header ***\n", time.Now().Format(logDateFormat))
+        fmt.Printf("%s *** Invalid header ***\n", logTime())
         return false
     }
 
@@ -200,7 +199,7 @@ func validBulkPayload(buf []byte, length int) (bool) {
         total_length += int(buf[lengthArrayOffset+i])
     }
     if length < total_length {
-        fmt.Printf("%s *** Invalid payload ***\n", time.Now().Format(logDateFormat))
+        fmt.Printf("%s *** Invalid payload ***\n", logTime())
         return false
     }
 

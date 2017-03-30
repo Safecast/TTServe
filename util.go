@@ -36,6 +36,11 @@ func SafecastDirectory() string {
     return(directory)
 }
 
+// Get the current time in log format
+func logTime() string {
+	return time.Now().Format(logDateFormat)
+}
+
 // Get the current time in UTC as a string
 func nowInUTC() string {
     return time.Now().UTC().Format("2006-01-02T15:04:05Z")

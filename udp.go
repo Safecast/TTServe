@@ -59,7 +59,7 @@ func UdpInboundHandler() {
 func UploadToWebLoadBalancer(data []byte, datalen int, transport string) {
 
     if true {
-        fmt.Printf("\n%s Received %d-byte payload from %s, routing to HTTP load balancer\n", time.Now().Format(logDateFormat), datalen, transport)
+        fmt.Printf("\n%s Received %d-byte payload from %s, routing to HTTP load balancer\n", logTime(), datalen, transport)
     }
 
     url := "http://" + TTServerHTTPAddress + TTServerHTTPPort + TTServerTopicSend

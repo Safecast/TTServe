@@ -27,7 +27,7 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 	timeRange := time.Now().UTC().Format("2006-01")
     filename := fmt.Sprintf("%s/%s-%s.json", TTDeviceLogPath, timeRange, deviceidstr)
 
-    fmt.Printf("%s LOG ANALYSIS request for %s\n", time.Now().Format(logDateFormat), filename)
+    fmt.Printf("%s LOG ANALYSIS request for %s\n", logTime(), filename)
 
 	// Read the log
     contents, err := ioutil.ReadFile(SafecastDirectory() + filename)

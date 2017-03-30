@@ -9,7 +9,6 @@ import (
 	"os"
     "net/http"
     "fmt"
-	"time"
     "io"
 )
 
@@ -22,7 +21,7 @@ func inboundWebDeviceLogHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Log it
     filename := req.RequestURI[len(TTServerTopicDeviceLog):]
-    fmt.Printf("%s LOG request for %s\n", time.Now().Format(logDateFormat), filename)
+    fmt.Printf("%s LOG request for %s\n", logTime(), filename)
 
     // Open the file
     file := SafecastDirectory() + TTDeviceLogPath + "/" + filename

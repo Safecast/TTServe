@@ -101,7 +101,7 @@ func SendTelecastMessage(msg ttproto.Telecast, devEui string) {
     case "/hello":
         fallthrough
     case "/hi":
-        fmt.Printf("%s Telecast \"Hello\" message\n", time.Now().Format(logDateFormat))
+        fmt.Printf("%s Telecast \"Hello\" message\n", logTime())
         if argRest == "" {
             sendCommand("", deviceID, "@server: Hello.")
         } else {
@@ -110,7 +110,7 @@ func SendTelecastMessage(msg ttproto.Telecast, devEui string) {
 
         // Handle an inbound upstream-only ping (blank message) by just ignoring it
     case "":
-        fmt.Printf("%s Telecast \"Ping\" message\n", time.Now().Format(logDateFormat))
+        fmt.Printf("%s Telecast \"Ping\" message\n", logTime())
 
 
     }

@@ -9,7 +9,6 @@ import (
 	"os"
     "net/http"
     "fmt"
-	"time"
 	"strings"
     "io"
 )
@@ -23,18 +22,18 @@ func inboundWebServerLogHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Log it
     fn := req.RequestURI[len(TTServerTopicServerLog):]
-    fmt.Printf("%s instance information request for %s\n", time.Now().Format(logDateFormat), fn)
+    fmt.Printf("%s instance information request for %s\n", logTime(), fn)
 
 	// Crack the secret
     Str := strings.Split(fn, "$")
 	if len(Str) != 2 {
-	    fmt.Printf("%s Badly formatted instance request\n", time.Now().Format(logDateFormat))
+	    fmt.Printf("%s Badly formatted instance request\n", logTime())
 		return
 	}		
     secret := Str[0]
     filename := Str[1]
 	if secret != ServerLogSecret() {
-	    fmt.Printf("%s Ssecret %s != %s\n", time.Now().Format(logDateFormat), secret, ServerLogSecret())
+	    fmt.Printf("%s Ssecret %s != %s\n", logTime(), secret, ServerLogSecret())
 		return
 	}		
 

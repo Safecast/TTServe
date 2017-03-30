@@ -53,19 +53,19 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
 
     // Discard it if it's a duplicate
     if isDuplicate(checksum) {
-        fmt.Printf("%s DISCARDING duplicate message\n", time.Now().Format(logDateFormat));
+        fmt.Printf("%s DISCARDING duplicate message\n", logTime());
         return
     }
 
     // Process stamps by adding or removing fields from the message
     if (!stampSetOrApply(&msg)) {
-        fmt.Printf("%s DISCARDING un-stampable message\n", time.Now().Format(logDateFormat));
+        fmt.Printf("%s DISCARDING un-stampable message\n", logTime());
         return
     }
 
     // This is the ONLY required field
     if msg.DeviceId == nil {
-        fmt.Printf("%s DISCARDING message with no DeviceId\n", time.Now().Format(logDateFormat));
+        fmt.Printf("%s DISCARDING message with no DeviceId\n", logTime());
         return
     }
 
@@ -527,7 +527,7 @@ func beginTransaction(version string,  message1 string, message2 string) int {
     transaction := httpTransactions % httpTransactionsRecorded
     httpTransactionTimes[transaction] = time.Now()
     if verboseTransactions {
-        fmt.Printf("%s >>> %s [%d] %s %s\n", time.Now().Format(logDateFormat), version, transaction, message1, message2)
+        fmt.Printf("%s >>> %s [%d] %s %s\n", logTime(), version, transaction, message1, message2)
     }
     return transaction
 }
@@ -541,21 +541,21 @@ func endTransaction(transaction int, url string, errstr string) {
     if errstr != "" {
         httpTransactionErrors = httpTransactionErrors + 1
         if (httpTransactionErrorFirst) {
-            httpTransactionErrorTime = time.Now().Format(logDateFormat)
+            httpTransactionErrorTime = logTime()
             httpTransactionErrorUrl = url
             httpTransactionErrorString = errstr
             httpTransactionErrorFirst = false
         }
         if verboseTransactions {
-            fmt.Printf("%s <<<    [%d] *** ERROR\n", time.Now().Format(logDateFormat), transaction)
+            fmt.Printf("%s <<<    [%d] *** ERROR\n", logTime(), transaction)
         }
         ServerLog(fmt.Sprintf("After %d seconds, error uploading to %s %s\n", duration, url, errstr))
     } else {
         if verboseTransactions {
             if (duration < 5) {
-                fmt.Printf("%s <<<    [%d]\n", time.Now().Format(logDateFormat), transaction);
+                fmt.Printf("%s <<<    [%d]\n", logTime(), transaction);
             } else {
-                fmt.Printf("%s <<<    [%d] completed after %d seconds\n", time.Now().Format(logDateFormat), transaction, duration);
+                fmt.Printf("%s <<<    [%d] completed after %d seconds\n", logTime(), transaction, duration);
             }
         }
     }
@@ -578,12 +578,12 @@ func endTransaction(transaction int, url string, errstr string) {
 
     // Output to console every time we are in a "slow mode"
     if (theMin > 5) {
-        fmt.Printf("%s Safecast Upload Statistics\n", time.Now().Format(logDateFormat))
-        fmt.Printf("%s *** %d total uploads since restart\n", time.Now().Format(logDateFormat), httpTransactions)
+        fmt.Printf("%s Safecast Upload Statistics\n", logTime())
+        fmt.Printf("%s *** %d total uploads since restart\n", logTime(), httpTransactions)
         if (httpTransactionsInProgress > 0) {
-            fmt.Printf("%s *** %d uploads still in progress\n", time.Now().Format(logDateFormat), httpTransactionsInProgress)
+            fmt.Printf("%s *** %d uploads still in progress\n", logTime(), httpTransactionsInProgress)
         }
-        fmt.Printf("%s *** Last %d: min=%ds, max=%ds, avg=%ds\n", time.Now().Format(logDateFormat), theCount, theMin, theMax, theMean)
+        fmt.Printf("%s *** Last %d: min=%ds, max=%ds, avg=%ds\n", logTime(), theCount, theMin, theMax, theMean)
 
     }
 

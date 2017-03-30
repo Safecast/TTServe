@@ -34,7 +34,7 @@ func ServerLog(sWithoutDate string) {
     // Add a standard header unless it begins with a newline
     s := sWithoutDate
     if !strings.HasPrefix(sWithoutDate, "\n") {
-        s = fmt.Sprintf("%s %s", time.Now().Format(logDateFormat), sWithoutDate)
+        s = fmt.Sprintf("%s %s", logTime(), sWithoutDate)
     }
 
     // Print it to the console

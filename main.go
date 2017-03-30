@@ -67,7 +67,7 @@ func main() {
 
 	TTServeInstanceID = stats.AWSInstance.InstanceId
 	ServerLog(fmt.Sprintf("*** STARTUP\n"))
-	fmt.Printf("%s *** AWS %s %s\n", time.Now().Format(logDateFormat), stats.AWSInstance.Region, stats.AWSInstance.InstanceId)
+	fmt.Printf("%s *** AWS %s %s\n", logTime(), stats.AWSInstance.Region, stats.AWSInstance.InstanceId)
 
 	// Init our utility package, but only after we've got our server instance ID
 	UtilInit()
@@ -175,7 +175,7 @@ func signalHandler() {
     for {
         switch <-ch {
         case syscall.SIGINT:
-            fmt.Printf("*** Exiting %s because of SIGNAL \n", time.Now().Format(logDateFormat))
+            fmt.Printf("*** Exiting %s because of SIGNAL \n", logTime())
             os.Exit(0)
         case syscall.SIGTERM:
 			FtpStop()
