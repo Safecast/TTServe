@@ -83,7 +83,14 @@ type MeasurementDataset struct {
     GapsGt6hr           uint32
     GapsGt2hr           uint32
     GapsGt1hr           uint32
+    GapsGt55m           uint32
+    GapsGt50m           uint32
+    GapsGt45m           uint32
+    GapsGt40m           uint32
+    GapsGt35m           uint32
     GapsGt30m           uint32
+    GapsGt25m           uint32
+    GapsGt20m           uint32
     GapsGt15m           uint32
     GapsGt10m           uint32
     GapsGt5m            uint32
@@ -520,8 +527,29 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         if SecondsGap > 60 * 15 {
             ds.GapsGt15m++
         }
+        if SecondsGap > 60 * 20 {
+            ds.GapsGt20m++
+        }
+        if SecondsGap > 60 * 25 {
+            ds.GapsGt25m++
+        }
         if SecondsGap > 60 * 30 {
             ds.GapsGt30m++
+        }
+        if SecondsGap > 60 * 35 {
+            ds.GapsGt35m++
+        }
+        if SecondsGap > 60 * 40 {
+            ds.GapsGt40m++
+        }
+        if SecondsGap > 60 * 45 {
+            ds.GapsGt45m++
+        }
+        if SecondsGap > 60 * 50 {
+            ds.GapsGt50m++
+        }
+        if SecondsGap > 60 * 55 {
+            ds.GapsGt55m++
         }
         if SecondsGap > 60 * 60 * 1 {
             ds.GapsGt1hr++
@@ -898,15 +926,50 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         if f != 0 && ds.GapsGt1hr != ds.GapsGt2hr {
             s += fmt.Sprintf("  1-2hr   %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt30m - ds.GapsGt1hr
+		g = ds.GapsGt55m - ds.GapsGt1hr
         f = 100*float32(g) / float32(ds.GapsGt0m) 
-        if f != 0 && ds.GapsGt30m != ds.GapsGt1hr {
+        if f != 0 && ds.GapsGt55m != ds.GapsGt1hr {
             s += fmt.Sprintf("  31-60m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt15m - ds.GapsGt30m
+		g = ds.GapsGt50m - ds.GapsGt55m
         f = 100*float32(g) / float32(ds.GapsGt0m) 
-        if f != 0 && ds.GapsGt15m != ds.GapsGt30m {
-            s += fmt.Sprintf("  16-30m  %3.0f%% (%d)\n", f, g)
+        if f != 0 && ds.GapsGt50m != ds.GapsGt55m {
+            s += fmt.Sprintf("  11-15m  %3.0f%% (%d)\n", f, g)
+        }
+		g = ds.GapsGt45m - ds.GapsGt50m
+        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        if f != 0 && ds.GapsGt45m != ds.GapsGt50m {
+            s += fmt.Sprintf("  5-10m   %3.0f%% (%d)\n", f, g)
+        }
+		g = ds.GapsGt40m - ds.GapsGt45m
+        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        if f != 0 && ds.GapsGt40m != ds.GapsGt45m {
+            s += fmt.Sprintf("  11-15m  %3.0f%% (%d)\n", f, g)
+        }
+		g = ds.GapsGt35m - ds.GapsGt40m
+        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        if f != 0 && ds.GapsGt35m != ds.GapsGt40m {
+            s += fmt.Sprintf("  5-10m   %3.0f%% (%d)\n", f, g)
+        }
+		g = ds.GapsGt30m - ds.GapsGt35m
+        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        if f != 0 && ds.GapsGt30m != ds.GapsGt35m {
+            s += fmt.Sprintf("  11-15m  %3.0f%% (%d)\n", f, g)
+        }
+		g = ds.GapsGt25m - ds.GapsGt30m
+        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        if f != 0 && ds.GapsGt25m != ds.GapsGt30m {
+            s += fmt.Sprintf("  5-10m   %3.0f%% (%d)\n", f, g)
+        }
+		g = ds.GapsGt20m - ds.GapsGt25m
+        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        if f != 0 && ds.GapsGt20m != ds.GapsGt25m {
+            s += fmt.Sprintf("  11-15m  %3.0f%% (%d)\n", f, g)
+        }
+		g = ds.GapsGt15m - ds.GapsGt20m
+        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        if f != 0 && ds.GapsGt15m != ds.GapsGt20m {
+            s += fmt.Sprintf("  5-10m   %3.0f%% (%d)\n", f, g)
         }
 		g = ds.GapsGt10m - ds.GapsGt15m
         f = 100*float32(g) / float32(ds.GapsGt0m) 
