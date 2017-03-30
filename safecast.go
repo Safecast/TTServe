@@ -757,7 +757,7 @@ func doUploadToSafecast(sd SafecastData, url string) bool {
 
     // Marshal it to json text
     scJSON, _ := json.Marshal(sd)
-    if (true) {
+    if (false) {
         fmt.Printf("%s\n", scJSON)
     }
 
