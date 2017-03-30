@@ -35,7 +35,7 @@ func TcpInboundHandler() {
         // Accept the TCP connection
         conn, err := ServerConn.AcceptTCP()
         if err != nil {
-            fmt.Printf("\ntcp: rror accepting TCP session: \n%v\n", err)
+            fmt.Printf("\nTCP: rror accepting TCP session: \n%v\n", err)
             continue
         }
 
@@ -47,20 +47,19 @@ func TcpInboundHandler() {
         payload_format := make([]byte, payload_format_len)
         n, err := io.ReadFull(rdconn, payload_format)
         if err != nil {
-            fmt.Printf("\ntcp: can't read format: \n%v\n", err)
+            fmt.Printf("\nTCP: can't read format: \n%v\n", err)
             conn.Close()
             continue
         }
         if n != payload_format_len {
-            fmt.Printf("\ntcp: can't read format: %d/%d\n", n, payload_format_len)
+            fmt.Printf("\nTCP: can't read format: %d/%d\n", n, payload_format_len)
             conn.Close()
             continue
         }
         if (payload_format[0] != BUFF_FORMAT_PB_ARRAY) {
-            fmt.Printf("\ntcp: unsupported request\n")
+            fmt.Printf("\nTCP: unsupported request\n")
 			buf1 := make([]byte, 1024)
 			n, err := rdconn.Read(buf1)
-			fmt.Printf("n=%d err=%v\n", n, err)
             if err == nil || err == io.EOF || err == io.ErrUnexpectedEOF {
                 buf2 := append(payload_format, buf1[:n]...)
                 b := make([]byte, len(buf2))
@@ -94,17 +93,17 @@ func TcpInboundHandler() {
         payload_count := make([]byte, payload_count_len)
         n, err = io.ReadFull(rdconn, payload_count)
         if err != nil {
-            fmt.Printf("\ntcp: can't read count: \n%v\n", err)
+            fmt.Printf("\nTCP: can't read count: \n%v\n", err)
             conn.Close()
             continue
         }
         if n != payload_count_len {
-            fmt.Printf("\ntcp: can't read count: %d/%d\n", n, payload_count_len)
+            fmt.Printf("\nTCP: can't read count: %d/%d\n", n, payload_count_len)
             conn.Close()
             continue
         }
         if (payload_count[0] == 0) {
-            fmt.Printf("\ntcp: unsupported count: %d\n", payload_count[0])
+            fmt.Printf("\nTCP: unsupported count: %d\n", payload_count[0])
             conn.Close()
             continue
         }
@@ -114,12 +113,12 @@ func TcpInboundHandler() {
         payload_entry_lengths := make([]byte, payload_entry_lengths_len)
         n, err = io.ReadFull(rdconn, payload_entry_lengths)
         if err != nil {
-            fmt.Printf("\ntcp: can't read entry_lengths: \n%v\n", err)
+            fmt.Printf("\nTCP: can't read entry_lengths: \n%v\n", err)
             conn.Close()
             continue
         }
         if n != int(payload_entry_lengths_len) {
-            fmt.Printf("\ntcp: can't read entry_lengths: %d/%d\n", n, payload_entry_lengths_len)
+            fmt.Printf("\nTCP: can't read entry_lengths: %d/%d\n", n, payload_entry_lengths_len)
             conn.Close()
             continue
         }
@@ -132,12 +131,12 @@ func TcpInboundHandler() {
         payload_entries := make([]byte, payload_entries_len)
         n, err = io.ReadFull(rdconn, payload_entries)
         if err != nil {
-            fmt.Printf("\ntcp: can't read entries: \n%v\n", err)
+            fmt.Printf("\nTCP: can't read entries: \n%v\n", err)
             conn.Close()
             continue
         }
         if n != payload_entries_len {
-            fmt.Printf("\ntcp: can't read entries: %d/%d\n", n, payload_entries_len)
+            fmt.Printf("\nTCP: can't read entries: %d/%d\n", n, payload_entries_len)
             conn.Close()
             continue
         }
