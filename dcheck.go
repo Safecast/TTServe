@@ -868,7 +868,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
             s += fmt.Sprintf("  >1w  %3.0f%% (%d)\n", f, ds.GapsGt1week)
         }
         f = 100*float32(ds.GapsGt1day) / float32(ds.GapsGt0m) - f
-        if f != 0 && f != g {
+        if f != 0 {
             s += fmt.Sprintf("  >1d  %3.0f%% (%d)\n", f, ds.GapsGt1day)
         }
         f = 100*float32(ds.GapsGt12hr) / float32(ds.GapsGt0m) - f
