@@ -29,6 +29,7 @@ type MeasurementStat struct {
     LoraTransport       bool
     FonaTransport       bool
     TestMeasurement     bool
+	MotionBegan			string
     ErrorsOpc           uint32
     ErrorsPms           uint32
     ErrorsBme0          uint32
@@ -106,6 +107,8 @@ type MeasurementDataset struct {
     AnyErrors           bool
     AnyConnectErrors    bool
     AnyPointcastErrors  bool
+	PrevMotionBegan		string
+	UniqueMotionBegans	uint32
     PrevErrorsOpc       uint32
     ThisErrorsOpc       uint32
     PrevErrorsPms       uint32
@@ -368,6 +371,12 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
     }
 
+    if sd.Loc != nil {
+        if sd.Loc.MotionBegan != nil {
+            stat.MotionBegan = *sd.Loc.MotionBegan
+        }
+    }
+
     if sd.Dev != nil {
         if sd.Dev.Temp != nil {
             stat.hasEnc = true
@@ -572,6 +581,14 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.NewestUpload = stat.Uploaded
     }
 
+	// Motion
+	if stat.MotionBegan != "" {
+		if stat.MotionBegan != ds.PrevMotionBegan {
+			ds.PrevMotionBegan = stat.MotionBegan
+			ds.UniqueMotionBegans++
+		}
+	}
+	
     // Transport
     if stat.LoraTransport {
         ds.LoraTransports++
@@ -852,6 +869,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.Firmware != "" {
         s += fmt.Sprintf("  on %s\n", ds.Firmware)
     }
+	if ds.UniqueMotionBegans != 0 {
+		s += fmt.Sprintf("  in %d unique runs of in-motion measurements\n", ds.UniqueMotionBegans)
+	}
     s += fmt.Sprintf("\n")
 
     if ds.Boots == 1 {
