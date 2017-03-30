@@ -27,7 +27,7 @@ type Loc struct {
 	Lat float32				`json:"loc_lat"`
 	Lon float32				`json:"loc_lon"`
 	Alt *float32			`json:"loc_alt,omitempty"`
-	Motion *bool			`json:"loc_motion,omitempty"`
+	MotionBegan *string		`json:"loc_when_motion_began,omitempty"`
 	Olc *string				`json:"loc_olc,omitempty"`
 }
 

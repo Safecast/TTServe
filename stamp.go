@@ -34,9 +34,9 @@ type stampFile struct {
     CapturedAtDate  uint32  `json:"CapturedAtDate,omitempty"`
     CapturedAtTime  uint32  `json:"CapturedAtTime,omitempty"`
     HasTestMode     bool    `json:"HasTestMode,omitempty"`
-    HasMotionMode   bool    `json:"HasMotionMode,omitempty"`
+    HasMotionOffset bool    `json:"HasMotionOffset,omitempty"`
     TestMode        bool    `json:"TestMode,omitempty"`
-    MotionMode      bool    `json:"MotionMode,omitempty"`
+    MotionOffset    uint32  `json:"MotionOffset,omitempty"`
 
 }
 
@@ -138,9 +138,9 @@ func stampSet(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isVal
                     sf.Altitude = 0.0
                 }
             }
-            if message.Motion != nil {
-                sf.HasMotionMode = true;
-                sf.MotionMode = message.GetMotion();
+            if message.MotionBeganOffset != nil {
+                sf.HasMotionOffset = true;
+                sf.MotionOffset = message.GetMotionBeganOffset();
             }
             if message.Test != nil {
                 sf.HasTestMode = true;
@@ -251,9 +251,11 @@ func stampApply(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isV
                     message.Test = &cachedDevices[CacheEntry].cache.TestMode
                 }
             }
-            if message.Motion == nil {
-                if cachedDevices[CacheEntry].cache.HasMotionMode {
-                    message.Motion = &cachedDevices[CacheEntry].cache.MotionMode
+
+			// Motion is best set to last known good rather than faking it
+            if message.MotionBeganOffset == nil {
+                if cachedDevices[CacheEntry].cache.HasMotionOffset {
+                    message.MotionBeganOffset = &cachedDevices[CacheEntry].cache.MotionOffset
                 }
             }
 
@@ -306,9 +308,11 @@ func stampApply(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isV
                 message.Test = &cachedDevices[CacheEntry].cache.TestMode
             }
         }
-        if message.Motion == nil {
-            if cachedDevices[CacheEntry].cache.MotionMode {
-                message.Motion = &cachedDevices[CacheEntry].cache.MotionMode
+
+		// Set Motion
+        if message.MotionBeganOffset == nil {
+            if cachedDevices[CacheEntry].cache.HasMotionOffset {
+                message.MotionBeganOffset = &cachedDevices[CacheEntry].cache.MotionOffset
             }
         }
 		

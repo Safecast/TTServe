@@ -14,7 +14,6 @@ import (
     "bytes"
     "time"
     "strings"
-    "strconv"
     "encoding/json"
     "crypto/md5"
     "github.com/safecast/ttproto/golang"
@@ -77,33 +76,13 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     // CapturedAt
     if msg.CapturedAt != nil {
         sd.CapturedAt = msg.CapturedAt
-    } else if msg.CapturedAtDate != nil && msg.CapturedAtTime != nil {
-        var i64 uint64
-        var offset uint32 = 0
-        if (msg.CapturedAtOffset != nil) {
-            offset = msg.GetCapturedAtOffset()
-        }
-        s := fmt.Sprintf("%06d%06d", msg.GetCapturedAtDate(), msg.GetCapturedAtTime())
-        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[0], s[1]), 10, 32)
-        day := uint32(i64)
-        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[2], s[3]), 10, 32)
-        month := uint32(i64)
-        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[4], s[5]), 10, 32)
-        year := uint32(i64) + 2000
-        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[6], s[7]), 10, 32)
-        hour := uint32(i64)
-        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[8], s[9]), 10, 32)
-        minute := uint32(i64)
-        i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[10], s[11]), 10, 32)
-        second := uint32(i64)
-        tbefore := time.Date(int(year), time.Month(month), int(day), int(hour), int(minute), int(second), 0, time.UTC)
-        tafter := tbefore.Add(time.Duration(offset) * time.Second)
-        tstr := tafter.UTC().Format("2006-01-02T15:04:05Z")
-        sd.CapturedAt = &tstr
+    } else if msg.CapturedAtDate != nil && msg.CapturedAtTime != nil && msg.CapturedAtOffset != nil {
+		when := getWhenFromOffset(msg.GetCapturedAtDate(), msg.GetCapturedAtTime(), msg.GetCapturedAtOffset())
+        sd.CapturedAt = &when
     }
 
     // Loc
-    if msg.Latitude != nil || msg.Longitude != nil || msg.Motion != nil {
+    if msg.Latitude != nil || msg.Longitude != nil || msg.MotionBeganOffset != nil {
         var loc Loc
         if msg.Latitude != nil && msg.Longitude != nil {
             Olc := olc.Encode(float64(msg.GetLatitude()), float64(msg.GetLongitude()), 0)
@@ -120,9 +99,9 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
             alt = float32(msg.GetAltitude())
             loc.Alt = &alt
         }
-        if msg.Motion != nil {
-            mode := msg.GetMotion()
-            loc.Motion = &mode
+        if msg.MotionBeganOffset != nil && msg.CapturedAtDate != nil && msg.CapturedAtTime != nil {
+			when := getWhenFromOffset(msg.GetCapturedAtDate(), msg.GetCapturedAtTime(), msg.GetMotionBeganOffset())
+	        loc.MotionBegan = &when
         }
         sd.Loc = &loc
     }
