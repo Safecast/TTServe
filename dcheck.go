@@ -901,17 +901,17 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 		g = ds.GapsGt30m - ds.GapsGt1hr
         f = 100*float32(g) / float32(ds.GapsGt0m) 
         if f != 0 && ds.GapsGt30m != ds.GapsGt1hr {
-            s += fmt.Sprintf("  30-60m  %3.0f%% (%d)\n", f, g)
+            s += fmt.Sprintf("  31-60m  %3.0f%% (%d)\n", f, g)
         }
 		g = ds.GapsGt15m - ds.GapsGt30m
         f = 100*float32(g) / float32(ds.GapsGt0m) 
         if f != 0 && ds.GapsGt15m != ds.GapsGt30m {
-            s += fmt.Sprintf("  15-30m  %3.0f%% (%d)\n", f, g)
+            s += fmt.Sprintf("  16-30m  %3.0f%% (%d)\n", f, g)
         }
 		g = ds.GapsGt10m - ds.GapsGt15m
         f = 100*float32(g) / float32(ds.GapsGt0m) 
         if f != 0 && ds.GapsGt10m != ds.GapsGt15m {
-            s += fmt.Sprintf("  10-15m  %3.0f%% (%d)\n", f, g)
+            s += fmt.Sprintf("  11-15m  %3.0f%% (%d)\n", f, g)
         }
 		g = ds.GapsGt5m - ds.GapsGt10m
         f = 100*float32(g) / float32(ds.GapsGt0m) 
@@ -921,7 +921,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 		g = ds.GapsGt0m - ds.GapsGt5m
         f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 {
-            s += fmt.Sprintf("  0-5m    %3.0f%% (%d)\n", f, g)
+            s += fmt.Sprintf("  1-4m    %3.0f%% (%d)\n", f, g)
         }
         s += fmt.Sprintf("\n")
     }
