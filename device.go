@@ -61,7 +61,7 @@ func trackDevice(DeviceId uint32, whenSeen time.Time) {
         if dev.deviceid == seenDevices[i].deviceid {
             // Only pay attention to things that have truly recently come or gone
             minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
-            if (minutesAgo < deviceWarningAfterMinutes) {
+            if minutesAgo < deviceWarningAfterMinutes {
                 seenDevices[i].everRecentlySeen = true
                 // Notify when the device comes back
                 if seenDevices[i].notifiedAsUnseen {
@@ -81,7 +81,7 @@ func trackDevice(DeviceId uint32, whenSeen time.Time) {
                 seenDevices[i].notifiedAsUnseen = false;
             }
             // Always track the most recent seen date
-            if (seenDevices[i].seen.Before(whenSeen)) {
+            if seenDevices[i].seen.Before(whenSeen) {
                 seenDevices[i].seen = whenSeen
             }
             found = true
@@ -120,7 +120,7 @@ func trackAllDevices() {
                 deviceID := uint32(i64)
 
                 // Track the device
-                if (deviceID != 0) {
+                if deviceID != 0 {
                     trackDevice(deviceID, file.ModTime())
                 }
 
@@ -277,7 +277,7 @@ func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, 
         }
 
         if summary != "" {
-            if (fWrap) {
+            if fWrap {
                 s += "\n        "
             } else {
                 s += " ( "
@@ -285,7 +285,7 @@ func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, 
             if summary != "" {
                 s += summary
             }
-            if (!fWrap) {
+            if !fWrap {
                 s += ")"
             }
         }

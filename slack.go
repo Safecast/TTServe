@@ -20,7 +20,7 @@ import (
 
 // Slack webhook
 func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
-    stats.Count.HTTP++;
+    stats.Count.HTTP++
     stats.Count.HTTPSlack++
 
     // Unpack the request
@@ -38,21 +38,21 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     // Extract useful information
     t, present := urlParams["token"]
     if !present {
-        fmt.Printf("Slack token not present\n");
+        fmt.Printf("Slack token not present\n")
         return
     }
     token := t[0]
 
     u, present := urlParams["user_name"]
     if !present {
-        fmt.Printf("Slack user_name not present\n");
+        fmt.Printf("Slack user_name not present\n")
         return
     }
     user := u[0]
 
     m, present := urlParams["text"]
     if !present {
-        fmt.Printf("Slack message not present\n");
+        fmt.Printf("Slack message not present\n")
         return
     }
     message := m[0]
@@ -163,7 +163,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         } else {
             i64, _ := strconv.ParseUint(args[1], 10, 32)
             deviceID := uint32(i64)
-            if (cancelCommand(deviceID)) {
+            if cancelCommand(deviceID) {
                 sendToSafecastOps("Cancelled.", SLACK_MSG_REPLY)
             } else {
                 sendToSafecastOps("Not found.", SLACK_MSG_REPLY)
@@ -281,7 +281,7 @@ func sendToOpsViaSlack(msg string, SlackOpsPostURL string) {
         resp.Body.Close()
     }
 
-    // Wait for it to complete, because we seem to lose it on os.Exit();
+    // Wait for it to complete, because we seem to lose it on os.Exit()
     time.Sleep(5 * time.Second)
 
 }

@@ -30,7 +30,7 @@ func random(min, max int) int {
 // Get path of the safecast directory
 func SafecastDirectory() string {
     directory := os.Args[1]
-    if (directory == "") {
+    if directory == "" {
         fmt.Printf("TTSERVE: first argument must be folder containing safecast data!\n")
         os.Exit(0)
     }
@@ -55,7 +55,7 @@ func AgoMinutes(minutesAgo uint32) string {
     hoursAgo -= daysAgo * 24
     s := ""
     if daysAgo >= 14 {
-        if ((daysAgo%7) == 0) {
+        if 0 == (daysAgo%7) {
             s = fmt.Sprintf("%d weeks", daysAgo/7)
         } else {
             s = fmt.Sprintf("%d+ weeks", daysAgo/7)

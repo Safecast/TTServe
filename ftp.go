@@ -116,9 +116,9 @@ func (driver *FtpDriver) OpenFile(cc ftp.ClientContext, path string, flag int) (
     flag = os.O_RDONLY
 
     // If we are writing and we are not in append mode, we should remove the file
-    if (flag & os.O_WRONLY) != 0 {
+    if 0 != (flag & os.O_WRONLY) {
         flag |= os.O_CREATE
-        if (flag & os.O_APPEND) == 0 {
+        if 0 == (flag & os.O_APPEND) {
             os.Remove(path)
         }
     }

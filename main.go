@@ -33,13 +33,13 @@ func main() {
     // Get our external IP address
     rsp, err := http.Get("http://checkip.amazonaws.com")
     if err != nil {
-        fmt.Printf("Can't get our own IP address: %v\n", err);
+        fmt.Printf("Can't get our own IP address: %v\n", err)
         os.Exit(0)
     }
     defer rsp.Body.Close()
     buf, err := ioutil.ReadAll(rsp.Body)
     if err != nil {
-        fmt.Printf("Error fetching IP addr: %v\n", err);
+        fmt.Printf("Error fetching IP addr: %v\n", err)
         os.Exit(0)
     }
     ThisServerAddressIPv4 = string(bytes.TrimSpace(buf))
@@ -49,19 +49,19 @@ func main() {
 	// https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-identity-documents.html
     rsp, erraws := http.Get("http://169.254.169.254/latest/dynamic/instance-identity/document")
     if erraws != nil {
-        fmt.Printf("Can't get our own instance info: %v\n", erraws);
+        fmt.Printf("Can't get our own instance info: %v\n", erraws)
         os.Exit(0)
     }
     defer rsp.Body.Close()
     buf, errread := ioutil.ReadAll(rsp.Body)
     if errread != nil {
-        fmt.Printf("Error fetching instance info: %v\n", errread);
+        fmt.Printf("Error fetching instance info: %v\n", errread)
         os.Exit(0)
     }
 	
     err = json.Unmarshal(buf, &stats.AWSInstance)
     if err != nil {
-        fmt.Printf("*** Badly formatted AWS Info ***\n");
+        fmt.Printf("*** Badly formatted AWS Info ***\n")
 		os.Exit(0)
     }
 
@@ -76,11 +76,11 @@ func main() {
     // and determine if WE are the server for those protocols
     addrs, err := net.LookupHost(TTServerUDPAddress)
     if err != nil {
-        fmt.Printf("Can't resolve %s: %v\n", TTServerUDPAddress, err);
+        fmt.Printf("Can't resolve %s: %v\n", TTServerUDPAddress, err)
         os.Exit(0)
     }
     if len(addrs) < 1 {
-        fmt.Printf("Can't resolve %s: %v\n", TTServerUDPAddress, err);
+        fmt.Printf("Can't resolve %s: %v\n", TTServerUDPAddress, err)
         os.Exit(0)
     }
     TTServerUDPAddressIPv4 = addrs[0]
@@ -95,11 +95,11 @@ func main() {
 	// Configure FTP, which only runs on the primary server because it's not load-balanced.
     addrs, err = net.LookupHost(TTServerFTPAddress)
     if err != nil {
-        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err);
+        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err)
         os.Exit(0)
     }
     if len(addrs) < 1 {
-        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err);
+        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err)
         os.Exit(0)
     }
     TTServerFTPAddressIPv4 = addrs[0]

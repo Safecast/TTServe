@@ -43,33 +43,33 @@ func ServerLog(sWithoutDate string) {
     // Open it
     file := SafecastDirectory() + TTServerLogPath + "/" + ServerLogFilename(".log")
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
-    if (err != nil) {
+    if err != nil {
 
         // Don't attempt to create it if it already exists
         _, err2 := os.Stat(file)
         if err2 == nil {
-            fmt.Printf("ServerLogging: Can't log to %s: %s\n", file, err);
+            fmt.Printf("ServerLogging: Can't log to %s: %s\n", file, err)
             return
         }
         if err2 == nil {
             if !os.IsNotExist(err2) {
-                fmt.Printf("ServerLogging: Ignoring attempt to create %s: %s\n", file, err2);
+                fmt.Printf("ServerLogging: Ignoring attempt to create %s: %s\n", file, err2)
                 return
             }
         }
 
         // Attempt to create the file because it doesn't already exist
         fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
-        if (err != nil) {
-            fmt.Printf("ServerLogging: error creating file %s: %s\n", file, err);
-            return;
+        if err != nil {
+            fmt.Printf("ServerLogging: error creating file %s: %s\n", file, err)
+            return
         }
     }
 
     // Append it
-    fd.WriteString(s);
+    fd.WriteString(s)
 
     // Close and exit
-    fd.Close();
+    fd.Close()
 
 }

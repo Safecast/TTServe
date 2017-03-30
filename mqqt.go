@@ -55,7 +55,7 @@ func MqqtInboundHandler() {
                 alt := float32(ttn.Metadata.Altitude)
                 AppReq.GwAltitude = &alt
             }
-            if (len(ttn.Metadata.Gateways) >= 1) {
+            if len(ttn.Metadata.Gateways) >= 1 {
                 AppReq.GwSnr = &ttn.Metadata.Gateways[0].SNR
                 AppReq.GwLocation = &ttn.Metadata.Gateways[0].GtwID
             }
@@ -71,7 +71,7 @@ func MqqtInboundHandler() {
             deviceID := getReplyDeviceIdFromPayload(AppReq.Payload)
             if deviceID != 0 {
                 isAvailable, payload := TelecastOutboundPayload(deviceID)
-                if (isAvailable) {
+                if isAvailable {
                     ttnOutboundPublish(AppReq.TTNDevID, payload)
                     sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", deviceID), SLACK_MSG_UNSOLICITED)
                 }
@@ -100,16 +100,16 @@ func ttnOutboundPublish(devEui string, payload []byte) {
 
 // Notify Slack if there is an outage
 func MqqtSubscriptionNotifier() {
-    if (ttnEverConnected) {
-        if (!ttnFullyConnected) {
+    if ttnEverConnected {
+        if !ttnFullyConnected {
             minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
-            if (minutesOffline > 15) {
+            if minutesOffline > 15 {
                 sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected), SLACK_MSG_UNSOLICITED)
             }
         } else {
-            if (ttnOutages > 1) {
+            if ttnOutages > 1 {
                 sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m", ttnOutages), SLACK_MSG_UNSOLICITED)
-                ttnOutages = 0;
+                ttnOutages = 0
             }
         }
     }
@@ -160,10 +160,10 @@ func MqqtSubscriptionMonitor() {
                 // Successful subscription
                 ttnFullyConnected = true
                 ttnLastConnected = logTime()
-                if (ttnEverConnected) {
+                if ttnEverConnected {
                     minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
                     // Don't bother reporting quick outages, generally caused by server restarts
-                    if (minutesOffline >= 5) {
+                    if minutesOffline >= 5 {
                         sendToSafecastOps(fmt.Sprintf("TTN returned (%d-minute outage began at %s UTC)", minutesOffline, ttnLastDisconnected), SLACK_MSG_UNSOLICITED)
                     }
                     sendToTTNOps(fmt.Sprintf("Connection restored from this server to %s\n", ttnServer))
@@ -184,12 +184,12 @@ func MqqtSubscriptionMonitor() {
         // Connect to the service
         if token := ttnMqttClient.Connect(); token.Wait() && token.Error() != nil {
             fmt.Printf("Error connecting to TTN service: %s\n", token.Error())
-            time.Sleep(60 * time.Second);
+            time.Sleep(60 * time.Second)
         } else {
 
             fmt.Printf("Now handling inbound MQTT on: %s mqtt:%s\n", ttnServer, ttnTopic)
             for consecutiveFailures := 0; consecutiveFailures < 3; {
-                time.Sleep(60 * time.Second);
+                time.Sleep(60 * time.Second)
                 if ttnFullyConnected {
                     if false {
                         fmt.Printf("\n%s TTN Alive\n", logTime())

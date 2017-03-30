@@ -64,7 +64,7 @@ func stampSetOrApply(message *ttproto.Telecast) (isValidMessage bool) {
 
     // Device ID is required here, but that doesn't mean it's not a valid message
     if message.DeviceId == nil {
-        return true;
+        return true
     }
     DeviceId := message.GetDeviceId()
 
@@ -73,10 +73,10 @@ func stampSetOrApply(message *ttproto.Telecast) (isValidMessage bool) {
     for CacheEntry = 0; CacheEntry < len(cachedDevices); CacheEntry++ {
         if DeviceId == cachedDevices[CacheEntry].deviceid {
             found = true
-            break;
+            break
         }
     }
-    if (!found) {
+    if !found {
         var entry cachedDevice
         entry.deviceid = DeviceId
         entry.valid = false
@@ -122,7 +122,7 @@ func stampSet(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isVal
 
     case STAMP_VERSION_1: {
 
-        if (message.Stamp == nil || message.CapturedAtDate == nil || message.CapturedAtTime == nil) {
+        if message.Stamp == nil || message.CapturedAtDate == nil || message.CapturedAtTime == nil {
             fmt.Printf("*** Warning - badly formatted v%d stamp ***\n", sf.Version)
         } else {
 
@@ -139,25 +139,25 @@ func stampSet(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isVal
                 }
             }
             if message.MotionBeganOffset != nil {
-                sf.HasMotionOffset = true;
-                sf.MotionOffset = message.GetMotionBeganOffset();
+                sf.HasMotionOffset = true
+                sf.MotionOffset = message.GetMotionBeganOffset()
             }
             if message.Test != nil {
-                sf.HasTestMode = true;
-                sf.TestMode = message.GetTest();
+                sf.HasTestMode = true
+                sf.TestMode = message.GetTest()
             }
 
             sfJSON, _ := json.Marshal(sf)
 
             file := stampFilename(DeviceId)
             fd, err := os.OpenFile(file, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
-            if (err != nil) {
-                fmt.Printf("error creating file %s: %s\n", file, err);
+            if err != nil {
+                fmt.Printf("error creating file %s: %s\n", file, err)
             } else {
 
                 // Write and close the file
-                fd.WriteString(string(sfJSON));
-                fd.Close();
+                fd.WriteString(string(sfJSON))
+                fd.Close()
 
                 // Write the cache entry
                 cachedDevices[CacheEntry].cache = *sf
@@ -223,7 +223,7 @@ func stampApply(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isV
     }
 
     // If there's a valid cache but it is incorrect, do the best we can by using cache as Last Known Good
-    if (cachedDevices[CacheEntry].cache.Stamp != message.GetStamp()) {
+    if cachedDevices[CacheEntry].cache.Stamp != message.GetStamp() {
 
         switch cachedDevices[CacheEntry].cache.Version {
 

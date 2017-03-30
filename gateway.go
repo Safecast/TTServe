@@ -59,7 +59,7 @@ func trackGateway(GatewayId string, whenSeen time.Time) {
         if dev.gatewayid == seenGateways[i].gatewayid {
             // Only pay attention to things that have truly recently come or gone
             minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
-            if (minutesAgo < deviceWarningAfterMinutes) {
+            if minutesAgo < deviceWarningAfterMinutes {
                 seenGateways[i].everRecentlySeen = true
                 // Notify when the device comes back
                 if seenGateways[i].notifiedAsUnseen {
@@ -76,10 +76,10 @@ func trackGateway(GatewayId string, whenSeen time.Time) {
                     sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s has returned after %s away", seenGateways[i].gatewayid, message), SLACK_MSG_UNSOLICITED)
                 }
                 // Mark as having been seen on the latest date of any file having that time
-                seenGateways[i].notifiedAsUnseen = false;
+                seenGateways[i].notifiedAsUnseen = false
             }
             // Always track the most recent seen date
-            if (seenGateways[i].seen.Before(whenSeen)) {
+            if seenGateways[i].seen.Before(whenSeen) {
                 seenGateways[i].seen = whenSeen
             }
             found = true
@@ -173,7 +173,7 @@ func sendSafecastGatewaySummaryToSlack(header string, fWrap bool, fDetails bool)
         summary := SafecastGetGatewaySummary(gatewayID, "    ", fWrap, fDetails)
         if summary != "" {
             if s != "" {
-                s += fmt.Sprintf("\n");
+                s += fmt.Sprintf("\n")
             }
             s += fmt.Sprintf("<http://%s%s%s|%s>", TTServerHTTPAddress, TTServerTopicGatewayStatus, gatewayID, gatewayID)
             if summary != "" {

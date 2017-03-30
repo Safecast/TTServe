@@ -45,7 +45,7 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 
 		// Generate a clean json entry
 		clean := strings.Replace(c, "\n", "", -1)
-		if (len(clean) == 0) {
+		if len(clean) == 0 {
 			continue
 		}
 

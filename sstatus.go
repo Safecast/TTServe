@@ -32,7 +32,7 @@ func SafecastReadServerStatus(serverId string) (isAvail bool, isReset bool, sv S
     _, err := os.Stat(filename)
     if err != nil {
         if os.IsNotExist(err) {
-            // We did not reinitialize it; it's truly empty.
+            // We did not reinitialize it - it's truly empty.
             return true, false, valueEmpty
         }
         return false, true, valueEmpty
@@ -49,7 +49,7 @@ func SafecastReadServerStatus(serverId string) (isAvail bool, isReset bool, sv S
     err = json.Unmarshal(contents, &valueToRead)
     if err != nil {
         // Malformed JSON
-        fmt.Printf("*** %s appears to be corrupt - erasing ***\n", filename);
+        fmt.Printf("*** %s appears to be corrupt - erasing ***\n", filename)
         return true, true, valueEmpty
     }
 
@@ -114,8 +114,8 @@ func SafecastWriteServerStatus() {
         fmt.Printf("*** Unable to write %s: %v\n", filename, err)
 		return
     }
-    fd.WriteString(string(valueJSON));
-    fd.Close();
+    fd.WriteString(string(valueJSON))
+    fd.Close()
 
 }
 
@@ -185,7 +185,7 @@ func SafecastGetServerSummary(ServerId string, bol string) string {
     s += fmt.Sprintf("alive for %s", Ago(value.Tts.Started))
 
 	// If this is the current server, point that out
-	if (ServerId == TTServeInstanceID) {
+	if ServerId == TTServeInstanceID {
 		s += " *"
 	}
 

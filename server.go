@@ -59,7 +59,7 @@ func trackServer(ServerId string, whenSeen time.Time) {
         if dev.serverid == seenServers[i].serverid {
             // Only pay attention to things that have truly recently come or gone
             minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
-            if (minutesAgo < deviceWarningAfterMinutes) {
+            if minutesAgo < deviceWarningAfterMinutes {
                 seenServers[i].everRecentlySeen = true
                 // Notify when the device comes back
                 if seenServers[i].notifiedAsUnseen {
@@ -76,10 +76,10 @@ func trackServer(ServerId string, whenSeen time.Time) {
                     sendToSafecastOps(fmt.Sprintf("** NOTE ** Server %s has returned after %s away", seenServers[i].serverid, message), SLACK_MSG_UNSOLICITED)
                 }
                 // Mark as having been seen on the latest date of any file having that time
-                seenServers[i].notifiedAsUnseen = false;
+                seenServers[i].notifiedAsUnseen = false
             }
             // Always track the most recent seen date
-            if (seenServers[i].seen.Before(whenSeen)) {
+            if seenServers[i].seen.Before(whenSeen) {
                 seenServers[i].seen = whenSeen
             }
             found = true
@@ -173,7 +173,7 @@ func sendSafecastServerSummaryToSlack(header string, fWrap bool, fDetails bool) 
         summary := SafecastGetServerSummary(serverID, "    ")
         if summary != "" {
             if s != "" {
-                s += fmt.Sprintf("\n");
+                s += fmt.Sprintf("\n")
             }
             s += fmt.Sprintf("<http://%s%s%s|%s>", TTServerHTTPAddress, TTServerTopicServerStatus, serverID, serverID)
 			s += " "

@@ -53,9 +53,9 @@ func sendTelecastOutboundSummaryToSlack() {
 
             // Get the command info
             isValid, cmd := getCommand(deviceID)
-            if (isValid) {
+            if isValid {
 
-                if (first) {
+                if first {
                     first = false
                     s = ""
                 } else {
@@ -137,14 +137,14 @@ func sendCommand(sender string, deviceID uint32, message string) {
     // Write it to a file, overwriting if it already exists
     file := SafecastCommandFilename(deviceID)
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
-    if (err != nil) {
-        fmt.Printf("SendCommand: error creating file %s: %s\n", file, err);
-        return;
+    if err != nil {
+        fmt.Printf("SendCommand: error creating file %s: %s\n", file, err)
+        return
     }
-    fd.WriteString(string(cmdJSON));
+    fd.WriteString(string(cmdJSON))
 
     // Done
-    fd.Close();
+    fd.Close()
 
 }
 
@@ -190,12 +190,12 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
     }
 
     // Delete the file
-    cancelCommand(deviceID);
+    cancelCommand(deviceID)
 
     // Marshal the command into a telecast message
     deviceType := ttproto.Telecast_TTSERVE
     tmsg := &ttproto.Telecast{}
-    tmsg.DeviceId = &deviceID;
+    tmsg.DeviceId = &deviceID
     tmsg.DeviceType = &deviceType
     tmsg.Message = proto.String(cmd.Command)
     tdata, terr := proto.Marshal(tmsg)

@@ -244,7 +244,7 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	    f64, err := strconv.ParseFloat(t, 32)
 	    if err == nil {
 			f32 := float32(f64)
-			if (f32 != 0 || !beginsWithSpace) {
+			if f32 != 0 || !beginsWithSpace {
 		        out.Value = &f32
 				emit.Value = &t
 			}

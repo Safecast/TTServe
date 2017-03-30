@@ -56,7 +56,7 @@ func TcpInboundHandler() {
             conn.Close()
             continue
         }
-        if (payload_format[0] != BUFF_FORMAT_PB_ARRAY) {
+        if payload_format[0] != BUFF_FORMAT_PB_ARRAY {
             fmt.Printf("\n%s TCP request from %s ignored\n", logTime(), ipv4(conn.RemoteAddr().String()))
 			buf1 := make([]byte, 1024)
 			n, err := rdconn.Read(buf1)
@@ -102,7 +102,7 @@ func TcpInboundHandler() {
             conn.Close()
             continue
         }
-        if (payload_count[0] == 0) {
+        if payload_count[0] == 0 {
             fmt.Printf("\nTCP: unsupported count: %d\n", payload_count[0])
             conn.Close()
             continue
@@ -155,14 +155,14 @@ func TcpInboundHandler() {
 
         // Push it to be processed
         go AppReqPushPayload(AppReq, payload, "device directly")
-        stats.Count.TCP++;
+        stats.Count.TCP++
 
         // Is there a device ID to reply to?
-        if (ReplyToDeviceId != 0) {
+        if ReplyToDeviceId != 0 {
 
             // See if there's an outbound message waiting for this device.
             isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)
-            if (isAvailable) {
+            if isAvailable {
 
                 // Responses are binary on TCP
                 conn.Write(payload)

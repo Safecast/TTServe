@@ -106,7 +106,7 @@ func ControlFileCheck() {
     }
 
     // Slack restart
-    if (ControlFileTime(TTServerRestartAllControlFile, "") != AllServersSlackRestartRequestTime) {
+    if ControlFileTime(TTServerRestartAllControlFile, "") != AllServersSlackRestartRequestTime {
         AllServersSlackRestartRequestTime = ControlFileTime(TTServerRestartAllControlFile, "")
         go RandomRestart()
     }
@@ -119,11 +119,11 @@ func ControlFileTime(controlfilename string, message string) (restartTime time.T
     filename := SafecastDirectory() + TTServerControlPath + "/" + controlfilename
 
     // Overwrite the file if requested to do so
-    if (message != "") {
+    if message != "" {
         fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
-        if (err == nil) {
-            fd.WriteString(message);
-            fd.Close();
+        if err == nil {
+            fd.WriteString(message)
+            fd.Close()
         }
     }
 

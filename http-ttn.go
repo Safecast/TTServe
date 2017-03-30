@@ -46,7 +46,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 		alt := float32(ttn.Metadata.Altitude)
 	    AppReq.GwAltitude = &alt
 	}
-    if (len(ttn.Metadata.Gateways) >= 1) {
+    if len(ttn.Metadata.Gateways) >= 1 {
         AppReq.GwSnr = &ttn.Metadata.Gateways[0].SNR
         AppReq.GwLocation = &ttn.Metadata.Gateways[0].GtwID
     }
@@ -60,11 +60,11 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
     stats.Count.HTTPTTN++
 
     // Outbound message processing
-    if (ReplyToDeviceId != 0) {
+    if ReplyToDeviceId != 0 {
 
         // See if there's an outbound message waiting for this device.
         isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)
-        if (isAvailable) {
+        if isAvailable {
             jmsg := &DownlinkMessage{}
             jmsg.DevID = ttn.DevID
             jmsg.FPort = 1
@@ -91,12 +91,12 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 	                }
 	                resp, err = httpclient.Do(req)
 					if err == nil {
-						break;
+						break
 					}
 				}
 
                 if err != nil {
-                    fmt.Printf("\n*** HTTPS POST error: %v\n\n", err);
+                    fmt.Printf("\n*** HTTPS POST error: %v\n\n", err)
                     sendToSafecastOps(fmt.Sprintf("Error transmitting command to device %d: %s\n", ReplyToDeviceId, errorString(err)), SLACK_MSG_UNSOLICITED)
                 } else {
                     resp.Body.Close()

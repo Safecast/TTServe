@@ -15,14 +15,14 @@ import (
 // Get the type of a device
 func SafecastV1DeviceType(deviceid uint32) string {
 	// For true V2 numbering space
-    if (deviceid >= 10000 && deviceid < 19999) {
+    if deviceid >= 10000 && deviceid < 19999 {
 		return "pointcast"
 	}
-    if (deviceid >= 50000 && deviceid < 59999) {
+    if deviceid >= 50000 && deviceid < 59999 {
         return "safecast-air"
 	}
 	// For V1 numbering space
-    if (deviceid >= 100000 && deviceid < 199999) {
+    if deviceid >= 100000 && deviceid < 199999 {
 		return "pointcast"
 	}
 	return ""	
@@ -34,7 +34,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
 
     // Required field
     if v1.DeviceId == nil {
-        fmt.Printf("*** Reformat: Missing Device ID\n");
+        fmt.Printf("*** Reformat: Missing Device ID\n")
         return 0, "", sd
     }
 
@@ -51,7 +51,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
         sd.DeviceId = uint64(*v1.DeviceId)
     }
     if !isPointcast && !isSafecastAir {
-        fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceId);
+        fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceId)
         return 0, "", sd
     }
 
@@ -70,7 +70,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             loc.Alt = &alt
         }
 		Olc := olc.Encode(float64(loc.Lat), float64(loc.Lon), 0)
-		loc.Olc = &Olc;
+		loc.Olc = &Olc
         sd.Loc = &loc
     }
 
@@ -113,19 +113,19 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             if !isPointcast {
                 fmt.Printf("*** Reformat: Received CPM for non-Pointcast %d\n", sd.DeviceId)
             } else {
-                if (*v1.DeviceId % 10) == 1 {
+                if 1 == (*v1.DeviceId % 10) {
                     var lnd Lnd
                     cpm := *v1.Value
                     lnd.U7318 = &cpm
                     sd.Lnd = &lnd
 
-                } else if (*v1.DeviceId % 10) == 2 {
+                } else if 2 == (*v1.DeviceId % 10) {
                     var lnd Lnd
                     cpm := *v1.Value
                     lnd.EC7128 = &cpm
                     sd.Lnd = &lnd
                 } else {
-                    fmt.Printf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceId);
+                    fmt.Printf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceId)
                 }
             }
         case "status":
@@ -180,7 +180,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
                     dev.LastFailure = &LastFailure
                     dodev = true
                 default:
-                    if (unrecognized == "") {
+                    if unrecognized == "" {
                         unrecognized = "{"
                     } else {
                         unrecognized = unrecognized + ","
@@ -192,7 +192,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             }
 
             // If we found unrecognized fields, emit them
-            if (unrecognized != "") {
+            if unrecognized != "" {
                 unrecognized = unrecognized + "}"
                 dev.Status = &unrecognized
                 dodev = true

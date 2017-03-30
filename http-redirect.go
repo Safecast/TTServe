@@ -84,14 +84,14 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     if err != nil {
         stats.Count.HTTP++
         // Eliminate a bit of the noise caused by load balancer health checks
-        if (isReal && req.RequestURI != "/" && req.RequestURI != "/favicon.ico") {
+        if isReal && req.RequestURI != "/" && req.RequestURI != "/favicon.ico" {
             if err == io.EOF {
-                fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", logTime(), RequestURI, remoteAddr);
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", logTime(), RequestURI, remoteAddr)
             } else {
-                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", logTime(), RequestURI, remoteAddr, err);
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", logTime(), RequestURI, remoteAddr, err)
             }
             if len(body) != 0 {
-                fmt.Printf("%s\n", string(body));
+                fmt.Printf("%s\n", string(body))
             }
         }
         io.WriteString(rw, fmt.Sprintf("Live Free or Die.\n"))
@@ -139,8 +139,8 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Convert to current data format
     deviceID, deviceType, sd := SafecastReformat(sdV1, isTestMeasurement)
-    if (deviceID == 0) {
-        fmt.Printf("%s\n%v\n", string(body), sdV1);
+    if deviceID == 0 {
+        fmt.Printf("%s\n%v\n", string(body), sdV1)
         return
     }
 
@@ -182,7 +182,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
     // It is an error if there is a pending outbound payload for this device, so remove it and report it
     isAvailable, _ := TelecastOutboundPayload(deviceID)
-    if (isAvailable) {
+    if isAvailable {
         go sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", deviceID), SLACK_MSG_UNSOLICITED)
     }
 

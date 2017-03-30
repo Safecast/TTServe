@@ -37,7 +37,7 @@ func SafecastReadGatewayStatus(gatewayId string) (isAvail bool, isReset bool, sv
     _, err := os.Stat(filename)
     if err != nil {
         if os.IsNotExist(err) {
-            // We did not reinitialize it; it's truly empty.
+            // We did not reinitialize it - it's truly empty.
             return true, false, valueEmpty
         }
         return false, true, valueEmpty
@@ -63,7 +63,7 @@ func SafecastReadGatewayStatus(gatewayId string) (isAvail bool, isReset bool, sv
             // Malformed JSON can easily occur because of multiple concurrent
             // writers, and so this self-corrects the situation.
             if false {
-                fmt.Printf("*** %s appears to be corrupt - erasing ***\n", filename);
+                fmt.Printf("*** %s appears to be corrupt - erasing ***\n", filename)
             }
             return true, true, valueEmpty
         }
@@ -121,8 +121,8 @@ func SafecastWriteGatewayStatus(ttg TTGateReq) {
             fmt.Printf("*** Unable to write %s: %v\n", filename, err)
             break
         }
-        fd.WriteString(string(valueJSON));
-        fd.Close();
+        fd.WriteString(string(valueJSON))
+        fd.Close()
 
         // Delay, to increase the chance that we will catch a concurrent update/overwrite
         time.Sleep(time.Duration(random(1, 6)) * time.Second)
@@ -146,7 +146,7 @@ func SafecastGetGatewaySummary(GatewayId string, bol string, fMobile bool, fDeta
     }
 
     // Get the label
-    label := value.Ttg.GatewayName;
+    label := value.Ttg.GatewayName
 
     // Get a summary of the location
     loc := fmt.Sprintf("%s, %s", value.Ttg.IPInfo.City, value.Ttg.IPInfo.Country)

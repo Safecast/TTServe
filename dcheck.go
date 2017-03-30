@@ -858,19 +858,19 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         if ds.MaxUptimeMinutes != 0 {
             s += fmt.Sprintf("Uptime:\n")
             s += fmt.Sprintf("  %s\n", AgoMinutes(ds.MaxUptimeMinutes))
-            s += fmt.Sprintf("\n");
+            s += fmt.Sprintf("\n")
         }
     } else {
         s += fmt.Sprintf("Uptime:\n")
         s += fmt.Sprintf("  %s maximum found in %d sessions\n", AgoMinutes(ds.MaxUptimeMinutes), ds.Boots)
-        s += fmt.Sprintf("\n");
+        s += fmt.Sprintf("\n")
     }
 
-    s += fmt.Sprintf("Uploads:\n");
+    s += fmt.Sprintf("Uploads:\n")
     s += fmt.Sprintf("  Total  %d over the course of %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)))
     if ds.TestMeasurements != 0 {
         if ds.Measurements == ds.TestMeasurements {
-            s += fmt.Sprintf("         (All of those are TEST measurements)\n");
+            s += fmt.Sprintf("         (All of those are TEST measurements)\n")
         } else {
             s += fmt.Sprintf("         (%d of those are TEST measurements)\n", ds.TestMeasurements)
         }
@@ -1137,7 +1137,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         j := i - ds.MinErrorsCommsFailures
         s += fmt.Sprintf("  CommsFailures   %d new / %d total\n", j, i)
         i = ds.PrevErrorsDeviceRestarts + ds.ThisErrorsDeviceRestarts
-        j = i - ds.MinErrorsDeviceRestarts;
+        j = i - ds.MinErrorsDeviceRestarts
         s += fmt.Sprintf("  DeviceRestarts  %d new / %d total\n", j, i)
         s += fmt.Sprintf("\n")
     }
@@ -1154,30 +1154,30 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.MaxUptimeMinutes > uint32(goalHours) * 60 {
         s += fmt.Sprintf("  PASS  ")
     } else {
-        s += fmt.Sprintf("   --   ");
+        s += fmt.Sprintf("   --   ")
     }
-    s += fmt.Sprintf("At least one continuous measurable session of >%d hours.\n", goalHours);
+    s += fmt.Sprintf("At least one continuous measurable session of >%d hours.\n", goalHours)
 
     if !ds.MultiFirmware {
         s += fmt.Sprintf("  PASS  ")
     } else {
-        s += fmt.Sprintf("   --   ");
+        s += fmt.Sprintf("   --   ")
     }
-    s += fmt.Sprintf("One version of firmware used for the entire run.\n");
+    s += fmt.Sprintf("One version of firmware used for the entire run.\n")
 
     if !ds.AnyErrors {
         s += fmt.Sprintf("  PASS  ")
     } else {
-        s += fmt.Sprintf("   --   ");
+        s += fmt.Sprintf("   --   ")
     }
-    s += fmt.Sprintf("No device errors.\n");
+    s += fmt.Sprintf("No device errors.\n")
 
     if !ds.AnyConnectErrors {
         s += fmt.Sprintf("  PASS  ")
     } else {
-        s += fmt.Sprintf("   --   ");
+        s += fmt.Sprintf("   --   ")
     }
-    s += fmt.Sprintf("No connection errors.\n");
+    s += fmt.Sprintf("No connection errors.\n")
 
     diff := math.Abs(float64(ds.LoraTransports) - float64(ds.FonaTransports))
     pct := diff / float64(ds.Measurements)
@@ -1185,37 +1185,37 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if pct <= goal {
         s += fmt.Sprintf("  PASS  ")
     } else {
-        s += fmt.Sprintf("   --   ");
+        s += fmt.Sprintf("   --   ")
     }
     s += fmt.Sprintf("Less than %.0f%% variation between transports. (%.0f%% actual)\n", goal*100, pct*100)
 
     if ds.GapsGt10m == 0 {
         s += fmt.Sprintf("  PASS  ")
     } else {
-        s += fmt.Sprintf("   --   ");
+        s += fmt.Sprintf("   --   ")
     }
     s += fmt.Sprintf("No communications gaps of more than 10m.\n")
 
     if geigerConfig == "" {
         s += fmt.Sprintf("  PASS  ")
     } else {
-        s += fmt.Sprintf("   --   ");
+        s += fmt.Sprintf("   --   ")
     }
-    s += fmt.Sprintf("Both pancake tubes measured data. %s\n", geigerConfig);
+    s += fmt.Sprintf("Both pancake tubes measured data. %s\n", geigerConfig)
 
     if ds.BatCount != 0 && ds.EnvCount != 0 && ds.EncCount != 0 && ds.PmsCount != 0 && ds.OpcCount != 0 && geigerConfig == "" {
         s += fmt.Sprintf("  PASS  ")
     } else {
-        s += fmt.Sprintf("   --   ");
+        s += fmt.Sprintf("   --   ")
     }
-    s += fmt.Sprintf("All sensors measured data.\n");
+    s += fmt.Sprintf("All sensors measured data.\n")
 
     if ds.BatWarningCount == 0 && ds.EnvWarningCount == 0 && ds.EncWarningCount == 0 && ds.PmsWarningCount == 0 && ds.OpcWarningCount == 0 && ds.GeigerWarningCount == 0 {
         s += fmt.Sprintf("  PASS  ")
     } else {
-        s += fmt.Sprintf("   --   ");
+        s += fmt.Sprintf("   --   ")
     }
-    s += fmt.Sprintf("All measured data was within valid ranges.\n");
+    s += fmt.Sprintf("All measured data was within valid ranges.\n")
 
     s += fmt.Sprintf("\n")
 

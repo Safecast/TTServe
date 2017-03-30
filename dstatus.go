@@ -29,7 +29,7 @@ type SafecastDeviceStatus struct {
 // Get the current value
 func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv SafecastDeviceStatus) {
     valueEmpty := SafecastDeviceStatus{}
-    valueEmpty.DeviceId = uint64(deviceId);
+    valueEmpty.DeviceId = uint64(deviceId)
 
     // Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTDeviceStatusPath + "/" + fmt.Sprintf("%d", deviceId) + ".json"
@@ -38,7 +38,7 @@ func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv S
     _, err := os.Stat(filename)
     if err != nil {
         if os.IsNotExist(err) {
-            // We did not reinitialize it; it's truly empty.
+            // We did not reinitialize it - it's truly empty.
             return true, false, valueEmpty
         }
         return false, true, valueEmpty
@@ -59,7 +59,7 @@ func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv S
             // Malformed JSON can easily occur because of multiple concurrent
             // writers, and so this self-corrects the situation.
             if false {
-                fmt.Printf("*** %s appears to be corrupt ***\n", filename);
+                fmt.Printf("*** %s appears to be corrupt ***\n", filename)
             }
             return true, true, valueEmpty
         }
@@ -203,7 +203,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
     }
     if sc.Pms != nil {
         var pms Pms
-        if (value.Pms == nil) {
+        if value.Pms == nil {
             value.Pms = &pms
         }
         if sc.Pms.Pm01_0 != nil && (value.Pms.Pm01_0 == nil || *value.Pms.Pm01_0 != *sc.Pms.Pm01_0) {
@@ -249,7 +249,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
     }
     if sc.Opc != nil {
         var opc Opc
-        if (value.Opc == nil) {
+        if value.Opc == nil {
             value.Opc = &opc
         }
         if sc.Opc.Pm01_0 != nil && (value.Opc.Pm01_0 == nil || *value.Opc.Pm01_0 != *sc.Opc.Pm01_0) {
@@ -596,7 +596,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         IP := Str1[len(Str1)-1]
         Str2 := strings.Split(IP, ".")
         isValidIP := len(Str1) > 1 && len(Str2) == 4
-        if (isValidIP) {
+        if isValidIP {
             response, err := http.Get("http://ip-api.com/json/" + IP)
             if err == nil {
                 defer response.Body.Close()
@@ -625,8 +625,8 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             fmt.Printf("*** Unable to write %s: %v\n", filename, err)
             break
         }
-        fd.WriteString(string(valueJSON));
-        fd.Close();
+        fd.WriteString(string(valueJSON))
+        fd.Close()
 
         // Delay, to increase the chance that we will catch a concurrent update/overwrite
         time.Sleep(time.Duration(random(1, 6)) * time.Second)
@@ -698,23 +698,23 @@ func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label strin
         didlnd := false
         if value.Lnd.U7318 != nil {
             s += fmt.Sprintf("%.0f", *value.Lnd.U7318)
-            didlnd = true;
+            didlnd = true
         }
         if value.Lnd.C7318 != nil {
-            if (didlnd) {
+            if didlnd {
                 s += "|"
             }
             s += fmt.Sprintf("%.0f", *value.Lnd.C7318)
-            didlnd = true;
+            didlnd = true
         }
         if value.Lnd.EC7128 != nil {
-            if (didlnd) {
+            if didlnd {
                 s += "|"
             }
             s += fmt.Sprintf("%.0f", *value.Lnd.EC7128)
-            didlnd = true;
+            didlnd = true
         }
-        if (didlnd) {
+        if didlnd {
             s += "cpm "
         }
     }

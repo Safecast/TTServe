@@ -35,31 +35,31 @@ func AppReqProcess(AppReq IncomingAppReq) {
     err := proto.Unmarshal(AppReq.Payload, msg)
     if err != nil {
         fmt.Printf("*** PB unmarshaling error: ", err)
-        fmt.Printf("*** ");
+        fmt.Printf("*** ")
         for i:=0; i<len(AppReq.Payload); i++ {
-            fmt.Printf("%02x", AppReq.Payload[i]);
+            fmt.Printf("%02x", AppReq.Payload[i])
         }
-        fmt.Printf("\n");
+        fmt.Printf("\n")
         return
     }
 
     // Display the actual unmarshaled value received in the payload
-    fmt.Printf("%v\n", msg);
+    fmt.Printf("%v\n", msg)
 
     // Display info about the received message
-    if (msg.RelayDevice1 != nil) {
+    if msg.RelayDevice1 != nil {
         fmt.Printf("%s RELAYED thru hop #1 %d\n", logTime(), msg.GetRelayDevice1())
     }
-    if (msg.RelayDevice2 != nil) {
+    if msg.RelayDevice2 != nil {
         fmt.Printf("%s RELAYED thru hop #2 %d\n", logTime(), msg.GetRelayDevice2())
     }
-    if (msg.RelayDevice3 != nil) {
+    if msg.RelayDevice3 != nil {
         fmt.Printf("%s RELAYED thru hop #3 %d\n", logTime(), msg.GetRelayDevice3())
     }
-    if (msg.RelayDevice4 != nil) {
+    if msg.RelayDevice4 != nil {
         fmt.Printf("%s RELAYED thru hop #4 %d\n", logTime(), msg.GetRelayDevice4())
     }
-    if (msg.RelayDevice5 != nil) {
+    if msg.RelayDevice5 != nil {
         fmt.Printf("%s RELAYED thru hop #5 %d\n", logTime(), msg.GetRelayDevice5())
     }
 
@@ -129,7 +129,7 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
             // Construct the app request
             AppReq.Payload = buf[payloadOffset:payloadOffset+length]
 
-            if (count == 1) {
+            if count == 1 {
                 fmt.Printf("\n%s Received %d-byte payload from %s %s\n", logTime(), len(AppReq.Payload), from, AppReq.SvTransport)
             } else {
                 fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", logTime(), len(AppReq.Payload), i+1, count, from, AppReq.SvTransport)
@@ -140,7 +140,7 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
             AppReqProcess(AppReq)
 
             // Bump the payload offset
-            payloadOffset += length;
+            payloadOffset += length
 
         }
     }
@@ -148,9 +148,9 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
     default: {
         isAscii := true
         for i:=0; i<len(buf); i++ {
-            if (buf[i] < ' ' && buf[i] != '\r' && buf[i] != '\n' && buf[i] != '\t') || buf[i] > 0x7f {
-                isAscii = false;
-                break;
+            if buf[i] > 0x7f || (buf[i] < ' ' && buf[i] != '\r' && buf[i] != '\n' && buf[i] != '\t') {
+                isAscii = false
+                break
             }
         }
         if isAscii {
@@ -260,7 +260,7 @@ func getReplyDeviceIdFromPayload(buf []byte) (deviceID uint32) {
             }
 
             // Bump the payload offset
-            payloadOffset += length;
+            payloadOffset += length
 
         }
 

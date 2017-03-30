@@ -36,7 +36,7 @@ func UdpInboundHandler() {
         buf := make([]byte, 8192)
 
         n, addr, err := ServerConn.ReadFromUDP(buf)
-        if (err != nil) {
+        if err != nil {
             fmt.Printf("UDP read error: \n%v\n", err)
         } else {
 
@@ -46,7 +46,7 @@ func UdpInboundHandler() {
             data, err := json.Marshal(ttg)
             if err == nil {
                 go UploadToWebLoadBalancer(data, n, ttg.Transport)
-                stats.Count.UDP++;
+                stats.Count.UDP++
             }
 
         }
@@ -72,7 +72,7 @@ func UploadToWebLoadBalancer(data []byte, datalen int, transport string) {
     }
     resp, err := httpclient.Do(req)
     if err != nil {
-        fmt.Printf("HTTP POST error: %v\n", err);
+        fmt.Printf("HTTP POST error: %v\n", err)
     } else {
         resp.Body.Close()
     }

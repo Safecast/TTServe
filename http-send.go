@@ -71,7 +71,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Process it.  Note there is no possibility of a reply.
         go AppReqPushPayload(AppReq, ttg.Payload, "device directly")
-        stats.Count.HTTPRelay++;
+        stats.Count.HTTPRelay++
 
     }
 
@@ -99,7 +99,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Process it
         go AppReqPushPayload(AppReq, ttg.Payload, "Lora gateway")
-        stats.Count.HTTPGateway++;
+        stats.Count.HTTPGateway++
 
     }
 
@@ -123,7 +123,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
 		// Push it
         go AppReqPushPayload(AppReq, buf, "device directly")
-        stats.Count.HTTPDevice++;
+        stats.Count.HTTPDevice++
 
     }
 
@@ -137,11 +137,11 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Outbound message processing
-    if (ReplyToDeviceId != 0) {
+    if ReplyToDeviceId != 0 {
 
         // See if there's an outbound message waiting for this device.
         isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)
-        if (isAvailable) {
+        if isAvailable {
 
             // Responses for now are always hex-encoded for easy device processing
             hexPayload := hex.EncodeToString(payload)

@@ -52,19 +52,19 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
 
     // Discard it if it's a duplicate
     if isDuplicate(checksum) {
-        fmt.Printf("%s DISCARDING duplicate message\n", logTime());
+        fmt.Printf("%s DISCARDING duplicate message\n", logTime())
         return
     }
 
     // Process stamps by adding or removing fields from the message
-    if (!stampSetOrApply(&msg)) {
-        fmt.Printf("%s DISCARDING un-stampable message\n", logTime());
+    if !stampSetOrApply(&msg) {
+        fmt.Printf("%s DISCARDING un-stampable message\n", logTime())
         return
     }
 
     // This is the ONLY required field
     if msg.DeviceId == nil {
-        fmt.Printf("%s DISCARDING message with no DeviceId\n", logTime());
+        fmt.Printf("%s DISCARDING message with no DeviceId\n", logTime())
         return
     }
 
@@ -86,7 +86,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         var loc Loc
         if msg.Latitude != nil && msg.Longitude != nil {
             Olc := olc.Encode(float64(msg.GetLatitude()), float64(msg.GetLongitude()), 0)
-            loc.Olc = &Olc;
+            loc.Olc = &Olc
         }
         if msg.Latitude != nil {
             loc.Lat = msg.GetLatitude()
@@ -298,11 +298,11 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     }
     if msg.BatSoc != nil {
         bat.Charge = msg.BatSoc
-        dobat = true;
+        dobat = true
     }
     if msg.BatCurrent != nil {
         bat.Current = msg.BatCurrent
-        dobat = true;
+        dobat = true
     }
 
     if dobat {
@@ -519,7 +519,7 @@ func endTransaction(transaction int, url string, errstr string) {
 
     if errstr != "" {
         httpTransactionErrors = httpTransactionErrors + 1
-        if (httpTransactionErrorFirst) {
+        if httpTransactionErrorFirst {
             httpTransactionErrorTime = logTime()
             httpTransactionErrorUrl = url
             httpTransactionErrorString = errstr
@@ -531,10 +531,10 @@ func endTransaction(transaction int, url string, errstr string) {
         ServerLog(fmt.Sprintf("After %d seconds, error uploading to %s %s\n", duration, url, errstr))
     } else {
         if verboseTransactions {
-            if (duration < 5) {
-                fmt.Printf("%s <<<    [%d]\n", logTime(), transaction);
+            if duration < 5 {
+                fmt.Printf("%s <<<    [%d]\n", logTime(), transaction)
             } else {
-                fmt.Printf("%s <<<    [%d] completed after %d seconds\n", logTime(), transaction, duration);
+                fmt.Printf("%s <<<    [%d] completed after %d seconds\n", logTime(), transaction, duration)
             }
         }
     }
@@ -556,10 +556,10 @@ func endTransaction(transaction int, url string, errstr string) {
     theMean := theTotal / theCount
 
     // Output to console every time we are in a "slow mode"
-    if (theMin > 5) {
+    if theMin > 5 {
         fmt.Printf("%s Safecast Upload Statistics\n", logTime())
         fmt.Printf("%s *** %d total uploads since restart\n", logTime(), httpTransactions)
-        if (httpTransactionsInProgress > 0) {
+        if httpTransactionsInProgress > 0 {
             fmt.Printf("%s *** %d uploads still in progress\n", logTime(), httpTransactionsInProgress)
         }
         fmt.Printf("%s *** Last %d: min=%ds, max=%ds, avg=%ds\n", logTime(), theCount, theMin, theMax, theMean)
@@ -567,15 +567,15 @@ func endTransaction(transaction int, url string, errstr string) {
     }
 
     // If there's a problem, output to Slack once every 25 transactions
-    if (theMin > 5 && transaction == 0) {
+    if theMin > 5 && transaction == 0 {
         // If all of them have the same timeout value, the server must be down.
         s := ""
-        if (theMin == theMax && theMin == theMean) {
+        if theMin == theMax && theMin == theMean {
             s = fmt.Sprintf("HTTP Upload: all of the most recent %d uploads failed. Please check the service.", theCount)
         } else {
             s = fmt.Sprintf("HTTP Upload: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", theCount, theMin, theMax, theMean)
         }
-        sendToSafecastOps(s, SLACK_MSG_UNSOLICITED);
+        sendToSafecastOps(s, SLACK_MSG_UNSOLICITED)
     }
 
 }
@@ -586,7 +586,7 @@ func isDuplicate(checksum uint32) bool {
     // Sweep through all recent messages, looking for a duplicate in the past minute
     for i := 0; i < len(recentlyReceived); i++ {
         if recentlyReceived[i].checksum == checksum {
-            if (int64(time.Now().Sub(recentlyReceived[i].seen) / time.Second) < 60) {
+            if int64(time.Now().Sub(recentlyReceived[i].seen) / time.Second) < 60 {
                 return true
             }
         }
@@ -598,7 +598,7 @@ func isDuplicate(checksum uint32) bool {
     }
 
     // Insert this new one
-    recentlyReceived[0].checksum = checksum;
+    recentlyReceived[0].checksum = checksum
     recentlyReceived[0].seen = time.Now().UTC()
     return false
 
@@ -606,16 +606,16 @@ func isDuplicate(checksum uint32) bool {
 
 // Update message ages and notify
 func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
-    if (httpTransactionErrors != 0) {
-        if (httpTransactionErrors == 1) {
+    if httpTransactionErrors != 0 {
+        if httpTransactionErrors == 1 {
             sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, one error uploading to %s:%s",
-                httpTransactionErrorTime, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS);
+                httpTransactionErrorTime, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS)
         } else {
             sendToSafecastOps(fmt.Sprintf("** Warning **  At %s UTC, %d errors uploading in %d minutes to %s:%s",
-                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS);
+                httpTransactionErrorTime, httpTransactionErrors, PeriodMinutes, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS)
         }
         httpTransactionErrors = 0
-        httpTransactionErrorFirst = true;
+        httpTransactionErrorFirst = true
     }
 }
 
@@ -668,7 +668,7 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
     }
     resp, err := httpclient.Do(req)
     errString := ""
-    if (err == nil) {
+    if err == nil {
         buf, err := ioutil.ReadAll(resp.Body)
         if err == nil {
             if v1UploadDebug {
@@ -705,7 +705,7 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
     if !isDev {
         endTransaction(transaction, domain, errString)
     } else {
-        if (errString != "") {
+        if errString != "" {
             fmt.Printf("*** Error uploading to %s: %v\n", domain, errString)
         }
         endTransaction(transaction, domain, "")
@@ -757,7 +757,7 @@ func doUploadToSafecast(sd SafecastData, url string) bool {
 
     // Marshal it to json text
     scJSON, _ := json.Marshal(sd)
-    if (false) {
+    if (true) {
         fmt.Printf("%s\n", scJSON)
     }
 
@@ -770,7 +770,7 @@ func doUploadToSafecast(sd SafecastData, url string) bool {
     resp, err := httpclient.Do(req)
 
     errString := ""
-    if (err == nil) {
+    if err == nil {
         resp.Body.Close()
     } else {
         // Eliminate the URL from the string because exposing the API key is not secure.
