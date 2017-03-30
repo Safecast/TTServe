@@ -498,7 +498,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
 		if SecondsGap != 0 && MinutesGap == 0 {
 			SecondsGap = 1
 		} else {
-			SecondsGap = SecondsGap * 60
+			SecondsGap = MinutesGap * 60
 		}
         if SecondsGap > 0 {
             if ds.MinUploadGapSecs == 0 || SecondsGap < ds.MinUploadGapSecs {
