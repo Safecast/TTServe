@@ -7,6 +7,7 @@ package main
 
 import (
     "io"
+	"time"
     "net"
     "fmt"
     "bufio"
@@ -57,7 +58,7 @@ func TcpInboundHandler() {
             continue
         }
         if (payload_format[0] != BUFF_FORMAT_PB_ARRAY) {
-            fmt.Printf("\nTCP: unsupported request\n")
+            fmt.Printf("\n%s TCP request from %s ignored\n", time.Now().Format(logDateFormat), ipv4(conn.RemoteAddr().String()))
 			buf1 := make([]byte, 1024)
 			n, err := rdconn.Read(buf1)
             if err == nil || err == io.EOF || err == io.ErrUnexpectedEOF {
