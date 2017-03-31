@@ -71,7 +71,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     // Generate the fields common to all uploads to safecast
     sd := SafecastData{}
     did := uint64(msg.GetDeviceId())
-	sd.DeviceIdx = &did
+	sd.DeviceId = &did
 	
     // CapturedAt
     if msg.CapturedAt != nil {
