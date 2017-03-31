@@ -6,12 +6,17 @@ package main
 
 type TTServeConfig struct {
 
-	// Access key for TTN
+	// TTN
 	TtnAppAccessKey		string		`json:"ttn_app_access_key,omitempty"`
 
-	// Slack integration info
+	// Slack
 	SlackChannels		string		`json:"slack_channels,omitempty"`
 	SlackInboundTokens	string		`json:"slack_inbound_tokens,omitempty"`
 	SlackOutboundUrls	string		`json:"slack_outbound_urls,omitempty"`
+
+	// Influx
+	InfluxHost			string		`json:"influx_host,omitempty"`
+	InfluxUsername		string		`json:"influx_username,omitempty"`
+	InfluxPassword		string		`json:"influx_password,omitempty"`
 
 }
