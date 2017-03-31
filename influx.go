@@ -42,40 +42,35 @@ func SafecastLogToInflux(sd SafecastData) bool {
         fmt.Printf("Influx batch points creation error: %v\n", bperr)
         return false
     }
-
     // Add "idb" values of our date data structures, for influx queries
-    s64 := fmt.Sprintf("%d", *sd.DeviceId)
+    s64 := fmt.Sprintf("%10d", *sd.DeviceId)
     sd.DeviceIdIdb = &s64
     if sd.CapturedAt != nil {
         t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
         if e == nil {
             i64 := t.UnixNano()
-            s64 := fmt.Sprintf("%19di", i64)
-            sd.CapturedAtIdb = &s64
+            sd.CapturedAtIdb = &i64
         }
     }
     if sd.Service != nil && sd.Service.UploadedAt != nil {
         t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Service.UploadedAt)
         if e == nil {
             i64 := t.UnixNano()
-            s64 := fmt.Sprintf("%19di", i64)
-            sd.Service.UploadedAtIdb = &s64
+            sd.Service.UploadedAtIdb = &i64
         }
     }
     if sd.Gateway != nil && sd.Gateway.ReceivedAt != nil {
         t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Gateway.ReceivedAt)
         if e == nil {
             i64 := t.UnixNano()
-            s64 := fmt.Sprintf("%19di", i64)
-            sd.Gateway.ReceivedAtIdb = &s64
+            sd.Gateway.ReceivedAtIdb = &i64
         }
     }
     if sd.Loc != nil && sd.Loc.MotionBegan != nil {
         t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Loc.MotionBegan)
         if e == nil {
             i64 := t.UnixNano()
-            s64 := fmt.Sprintf("%19di", i64)
-            sd.Loc.MotionBeganIdb = &s64
+            sd.Loc.MotionBeganIdb = &i64
         }
     }
 
@@ -84,39 +79,9 @@ func SafecastLogToInflux(sd SafecastData) bool {
     // Fields have arbitrary values that are not indexed, so queries are slower
     sdFields := sd
     sdTags := SafecastData{}
-    if (false) {
-        if sdFields.Service != nil && sdFields.Service.UploadedAtIdb != nil {
-            if sdTags.Service == nil {
-                var svc Service
-                sdTags.Service = &svc
-            }
-            sdTags.Service.UploadedAtIdb = sdFields.Service.UploadedAtIdb
-            sdFields.Service.UploadedAtIdb = nil
-        }
-        if sdFields.Gateway != nil && sdFields.Gateway.ReceivedAtIdb != nil {
-            if sdTags.Gateway == nil {
-                var gw Gateway
-                sdTags.Gateway = &gw
-            }
-            sdTags.Gateway.ReceivedAtIdb = sdFields.Gateway.ReceivedAtIdb
-            sdFields.Gateway.ReceivedAtIdb = nil
-        }
-        if sdFields.Loc != nil && sdFields.Loc.MotionBeganIdb != nil {
-            if sdTags.Loc == nil {
-                var loc Loc
-                sdTags.Loc = &loc
-            }
-            sdTags.Loc.MotionBeganIdb = sdFields.Loc.MotionBeganIdb
-            sdFields.Loc.MotionBeganIdb = nil
-        }
-        if sdFields.DeviceIdIdb != nil {
-            sdTags.DeviceIdIdb = sdFields.DeviceIdIdb
-            sdFields.DeviceIdIdb = nil
-        }
-        if sdFields.CapturedAtIdb != nil {
-            sdTags.CapturedAtIdb = sdFields.CapturedAtIdb
-            sdFields.CapturedAtIdb = nil
-        }
+    if sdFields.DeviceIdIdb != nil {
+        sdTags.DeviceIdIdb = sdFields.DeviceIdIdb
+        sdFields.DeviceIdIdb = nil
     }
     if sdFields.Service != nil && sdFields.Service.Handler != nil {
         if sdTags.Service == nil {

@@ -8,7 +8,7 @@ package main
 // Service metadata
 type Service struct {
 	UploadedAt *string		`json:"service_uploaded,omitempty"`
-	UploadedAtIdb *string	`json:"service_uploaded_idb,omitempty"`
+	UploadedAtIdb *int64	`json:"service_uploaded_idb,omitempty"`
     Transport *string		`json:"service_transport,omitempty"`
 	HashMd5 *string			`json:"service_md5,omitempty"`
 	Handler *string			`json:"service_handler,omitempty"`
@@ -18,7 +18,7 @@ type Service struct {
 type Gateway struct {
 	SNR *float32			`json:"gateway_lora_snr,omitempty"`
 	ReceivedAt *string		`json:"gateway_received,omitempty"`
-	ReceivedAtIdb *string	`json:"gateway_received_idb,omitempty"`
+	ReceivedAtIdb *int64	`json:"gateway_received_idb,omitempty"`
 	Lat *float32			`json:"gateway_loc_lat,omitempty"`
 	Lon *float32			`json:"gateway_loc_lon,omitempty"`
 	Alt *float32			`json:"gateway_loc_alt,omitempty"`
@@ -30,7 +30,7 @@ type Loc struct {
 	Lon float32				`json:"loc_lon,omitempty"`
 	Alt *float32			`json:"loc_alt,omitempty"`
 	MotionBegan *string		`json:"loc_when_motion_began,omitempty"`
-	MotionBeganIdb *string	`json:"loc_when_motion_began_idb,omitempty"`
+	MotionBeganIdb *int64	`json:"loc_when_motion_began_idb,omitempty"`
 	Olc *string				`json:"loc_olc,omitempty"`
 }
 
@@ -151,7 +151,7 @@ type SafecastData struct {
     DeviceId *uint64		`json:"device,omitempty"`
     DeviceIdIdb *string		`json:"device_idb,omitempty"`
     CapturedAt *string		`json:"when_captured,omitempty"`
-    CapturedAtIdb *string	`json:"when_captured_idb,omitempty"`
+    CapturedAtIdb *int64	`json:"when_captured_idb,omitempty"`
 	*Loc					`json:",omitempty"`
 	*Env					`json:",omitempty"`
 	*Bat					`json:",omitempty"`
