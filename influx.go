@@ -44,7 +44,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 	}
 
 	// Add "idb" values of our date data structures, for influx queries
-	s64 := fmt.Sprintf("%d", sd.DeviceId)
+	s64 := fmt.Sprintf("%d", *sd.DeviceId)
 	sd.DeviceIdIdb = &s64
 	if sd.CapturedAt != nil {
 		t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
@@ -198,9 +198,9 @@ func SafecastLogToInflux(sd SafecastData) bool {
 
 	// Debug
 	if (true) {
-		fmt.Printf("***** Influx point:\n%v\n", pt)
 		fmt.Printf("***   Tags:\n%s\n", string(sdTagsJson));
 		fmt.Printf("*** Fields:\n%s\n", string(sdFieldsJson));
+		fmt.Printf("*** Influx:\n%v\n", pt)
 	}
 	
 	// Add the point to the batch
