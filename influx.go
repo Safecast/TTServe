@@ -48,28 +48,32 @@ func SafecastLogToInflux(sd SafecastData) bool {
 		t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
 		if e == nil {
 			i64 := t.UnixNano()
-			sd.CapturedAtNano = &i64
+			s64 := fmt.Sprintf("%19d", i64)
+			sd.CapturedAtNano = &s64
 		}
 	}
 	if sd.Service != nil && sd.Service.UploadedAt != nil {
 		t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Service.UploadedAt)
 		if e == nil {
 			i64 := t.UnixNano()
-			sd.Service.UploadedAtNano = &i64
+			s64 := fmt.Sprintf("%19d", i64)
+			sd.Service.UploadedAtNano = &s64
 		}
 	}
 	if sd.Gateway != nil && sd.Gateway.ReceivedAt != nil {
 		t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Gateway.ReceivedAt)
 		if e == nil {
 			i64 := t.UnixNano()
-			sd.Gateway.ReceivedAtNano = &i64
+			s64 := fmt.Sprintf("%19d", i64)
+			sd.Gateway.ReceivedAtNano = &s64
 		}
 	}
 	if sd.Loc != nil && sd.Loc.MotionBegan != nil {
 		t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Loc.MotionBegan)
 		if e == nil {
 			i64 := t.UnixNano()
-			sd.Loc.MotionBeganNano = &i64
+			s64 := fmt.Sprintf("%19d", i64)
+			sd.Loc.MotionBeganNano = &s64
 		}
 	}
 
