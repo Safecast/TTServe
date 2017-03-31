@@ -20,7 +20,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 	var clcfg influx.HTTPConfig
 
 	// Initialize the client
-	clcfg.Addr = fmt.Sprintf("http://%s:8086", ServiceConfig.InfluxHost)
+	clcfg.Addr = fmt.Sprintf("https://%s:8086", ServiceConfig.InfluxHost)
 	clcfg.Username = ServiceConfig.InfluxUsername
 	clcfg.Password = ServiceConfig.InfluxPassword
 
