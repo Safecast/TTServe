@@ -79,17 +79,78 @@ func SafecastLogToInflux(sd SafecastData) bool {
 		}
 	}
 
+	// Split the safecast data into "tags" and "fields", where
+	// Tags must be strings and are indexed, so queries are very fast
+	// Fields have arbitrary values that are not indexed, so queries are slower
+	sdFields := sd
+	sdTags := SafecastData{}
+	if sdFields.Service != nil && sdFields.Service.UploadedAtIdb != nil {
+		sdTags.Service.UploadedAtIdb = sdFields.Service.UploadedAtIdb
+		sdFields.Service.UploadedAtIdb = nil
+	}
+	if sdFields.Service != nil && sdFields.Service.Handler != nil {
+		sdTags.Service.Handler = sdFields.Service.Handler
+		sdFields.Service.Handler = nil
+	}
+	if sdFields.Service != nil && sdFields.Service.Transport != nil {
+		sdTags.Service.Transport = sdFields.Service.Transport
+		sdFields.Service.Transport = nil
+	}
+	if sdFields.Gateway != nil && sdFields.Gateway.ReceivedAtIdb != nil {
+		sdTags.Gateway.ReceivedAtIdb = sdFields.Gateway.ReceivedAtIdb
+		sdFields.Gateway.ReceivedAtIdb = nil
+	}
+	if sdFields.Loc != nil && sdFields.Loc.MotionBeganIdb != nil {
+		sdTags.Loc.MotionBeganIdb = sdFields.Loc.MotionBeganIdb
+		sdFields.Loc.MotionBeganIdb = nil
+	}
+	if sdFields.Loc != nil && sdFields.Loc.Olc != nil {
+		sdTags.Loc.Olc = sdFields.Loc.Olc
+		sdFields.Loc.Olc = nil
+	}
+	if sdFields.Dev != nil && sdFields.Dev.DeviceLabel != nil {
+		sdTags.Dev.DeviceLabel = sdFields.Dev.DeviceLabel
+		sdFields.Dev.DeviceLabel = nil
+	}
+	if sdFields.Dev != nil && sdFields.Dev.AppVersion != nil {
+		sdTags.Dev.AppVersion = sdFields.Dev.AppVersion
+		sdFields.Dev.AppVersion = nil
+	}
+	if sdFields.Dev != nil && sdFields.Dev.ModuleLora != nil {
+		sdTags.Dev.ModuleLora = sdFields.Dev.ModuleLora
+		sdFields.Dev.ModuleLora = nil
+	}
+	if sdFields.Dev != nil && sdFields.Dev.ModuleFona != nil {
+		sdTags.Dev.ModuleFona = sdFields.Dev.ModuleFona
+		sdFields.Dev.ModuleFona = nil
+	}
+	if sdFields.DeviceIdIdb != nil {
+		sdTags.DeviceIdIdb = sdFields.DeviceIdIdb
+		sdFields.DeviceIdIdb = nil
+	}
+	if sdFields.CapturedAtIdb != nil {
+		sdTags.CapturedAtIdb = sdFields.CapturedAtIdb
+		sdFields.CapturedAtIdb = nil
+	}
+	
     // Marshal the safecast data to json text
-    sdJSON, _ := json.Marshal(sd)
+    sdTagsJson, _ := json.Marshal(sdTags)
+	var tags map[string]string
+	jterr := json.Unmarshal(sdTagsJson, &tags)
+	if jterr != nil {
+		fmt.Printf("JSON tags unmarshaling error: %v\n", jterr)
+		return false
+	}
+    sdFieldsJson, _ := json.Marshal(sdFields)
 	var fields map[string]interface{}
-	jmerr := json.Unmarshal(sdJSON, &fields)
-	if jmerr != nil {
-		fmt.Printf("JSON unmarshaling error: %v\n", jmerr)
+	jferr := json.Unmarshal(sdFieldsJson, &fields)
+	if jferr != nil {
+		fmt.Printf("JSON fields unmarshaling error: %v\n", jferr)
 		return false
 	}
 
 	// Make a new point
-	pt, mperr := influx.NewPoint(SafecastDataPoint, nil, fields)
+	pt, mperr := influx.NewPoint(SafecastDataPoint, tags, fields)
 	if mperr != nil {
 		fmt.Printf("Influx point creation error: %v\n", mperr)
 		return false
