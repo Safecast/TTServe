@@ -60,10 +60,6 @@ func SafecastLogToInflux(sd SafecastData) bool {
 	}
 
 	fmt.Printf("Influx point:\n%v\n", pt)
-
-	f2 := map[string]interface{}{"a": 1, "b": 2, "c": 3, "d": 4}
-	pt, _ = influx.NewPoint("cpu", nil, f2)
-	fmt.Printf("Test point:\n%v\n", pt)
 	
 	// Add the point to the batch
 	bp.AddPoint(pt)
