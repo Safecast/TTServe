@@ -43,13 +43,15 @@ func SafecastLogToInflux(sd SafecastData) bool {
 		return false
 	}
 
-	// Add "nanosecond" values of our date data structures, for influx queries
+	// Add "idb" values of our date data structures, for influx queries
+	s64 := fmt.Sprintf("%d", sd.DeviceId)
+	sd.DeviceIdIdb = &s64
 	if sd.CapturedAt != nil {
 		t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
 		if e == nil {
 			i64 := t.UnixNano()
 			s64 := fmt.Sprintf("%19d", i64)
-			sd.CapturedAtNano = &s64
+			sd.CapturedAtIdb = &s64
 		}
 	}
 	if sd.Service != nil && sd.Service.UploadedAt != nil {
@@ -57,7 +59,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 		if e == nil {
 			i64 := t.UnixNano()
 			s64 := fmt.Sprintf("%19d", i64)
-			sd.Service.UploadedAtNano = &s64
+			sd.Service.UploadedAtIdb = &s64
 		}
 	}
 	if sd.Gateway != nil && sd.Gateway.ReceivedAt != nil {
@@ -65,7 +67,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 		if e == nil {
 			i64 := t.UnixNano()
 			s64 := fmt.Sprintf("%19d", i64)
-			sd.Gateway.ReceivedAtNano = &s64
+			sd.Gateway.ReceivedAtIdb = &s64
 		}
 	}
 	if sd.Loc != nil && sd.Loc.MotionBegan != nil {
@@ -73,7 +75,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 		if e == nil {
 			i64 := t.UnixNano()
 			s64 := fmt.Sprintf("%19d", i64)
-			sd.Loc.MotionBeganNano = &s64
+			sd.Loc.MotionBeganIdb = &s64
 		}
 	}
 
