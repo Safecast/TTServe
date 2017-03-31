@@ -59,13 +59,15 @@ func SafecastLogToInflux(sd SafecastData) bool {
 		return false
 	}
 
+	fmt.Printf("Influx point:\n%v\n", pt)
+
 	// Add the point to the batch
 	bp.AddPoint(pt)
 
 	// Write the batch
 	wrerr := cl.Write(bp)
 	if wrerr != nil {
-		fmt.Printf("Influx write error: %v\n", mperr)
+		fmt.Printf("Influx write error: %v\n", wrerr)
 		return false
 	}
 
