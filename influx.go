@@ -197,7 +197,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 	}
 
 	// Debug
-	if (true) {
+	if (false) {
 		fmt.Printf("***   Tags:\n%s\n", string(sdTagsJson));
 		fmt.Printf("*** Fields:\n%s\n", string(sdFieldsJson));
 		fmt.Printf("*** Influx:\n%v\n", pt)
