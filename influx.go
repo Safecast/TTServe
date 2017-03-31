@@ -198,7 +198,9 @@ func SafecastLogToInflux(sd SafecastData) bool {
 
 	// Debug
 	if (true) {
-		fmt.Printf("Influx point:\n%v\n", pt)
+		fmt.Printf("***** Influx point:\n%v\n", pt)
+		fmt.Printf("***   Tags:\n%s\n", string(sdTagsJson));
+		fmt.Printf("*** Fields:\n%s\n", string(sdFieldsJson));
 	}
 	
 	// Add the point to the batch
