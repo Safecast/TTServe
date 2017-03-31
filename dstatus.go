@@ -29,7 +29,8 @@ type SafecastDeviceStatus struct {
 // Get the current value
 func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv SafecastDeviceStatus) {
     valueEmpty := SafecastDeviceStatus{}
-    valueEmpty.DeviceId = uint64(deviceId)
+	did := uint64(deviceId)
+    valueEmpty.DeviceId = &did
 
     // Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTDeviceStatusPath + "/" + fmt.Sprintf("%d", deviceId) + ".json"
@@ -109,7 +110,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
     // If the value isn't available it's because of a nonrecoverable  error.
     // If it was reset, try waiting around a bit until it is fixed.
     for i:=0; i<5; i++ {
-        isAvail, isReset, rvalue := SafecastReadDeviceStatus(uint32(sc.DeviceId))
+        isAvail, isReset, rvalue := SafecastReadDeviceStatus(uint32(*sc.DeviceId))
         value = rvalue
         if !isAvail {
             return
@@ -632,7 +633,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         time.Sleep(time.Duration(random(1, 6)) * time.Second)
 
         // Do an integrity check, and re-write the value if necessary
-        _, isEmpty, _ := SafecastReadDeviceStatus(uint32(sc.DeviceId))
+        _, isEmpty, _ := SafecastReadDeviceStatus(uint32(*sc.DeviceId))
         if !isEmpty {
             break
         }

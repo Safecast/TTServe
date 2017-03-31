@@ -43,12 +43,14 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
     isPointcast := false
     if devicetype == "pointcast" {
         isPointcast = true
-        sd.DeviceId = uint64(*v1.DeviceId / 10)
+		did := uint64(*v1.DeviceId / 10)
+        sd.DeviceId = &did
     }
     isSafecastAir := false
     if devicetype == "safecast-air" {
         isSafecastAir = true
-        sd.DeviceId = uint64(*v1.DeviceId)
+		did := uint64(*v1.DeviceId)
+        sd.DeviceId = &did
     }
     if !isPointcast && !isSafecastAir {
         fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceId)
@@ -221,6 +223,6 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
 		sd.Dev.Test = &isTestMeasurement
 	}
 
-    return uint32(sd.DeviceId), devicetype, sd
+    return uint32(*sd.DeviceId), devicetype, sd
 
 }
