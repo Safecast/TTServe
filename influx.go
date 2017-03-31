@@ -95,7 +95,10 @@ func SafecastLogToInflux(sd SafecastData) bool {
 		return false
 	}
 
-	fmt.Printf("Influx point:\n%v\n", pt)
+	// Debug
+	if (false) {
+		fmt.Printf("Influx point:\n%v\n", pt)
+	}
 	
 	// Add the point to the batch
 	bp.AddPoint(pt)
