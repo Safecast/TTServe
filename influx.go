@@ -7,6 +7,7 @@ package main
 
 import (
     "fmt"
+	"time"
     "encoding/json"
 	influx "github.com/influxdata/influxdb/client/v2"
 )
@@ -36,11 +37,40 @@ func SafecastLogToInflux(sd SafecastData) bool {
 	// Create a new batch
 	bpcfg := influx.BatchPointsConfig{}
 	bpcfg.Database = SafecastDb
-	bpcfg.Precision = "s"
 	bp, bperr := influx.NewBatchPoints(bpcfg)
 	if bperr != nil {
 		fmt.Printf("Influx batch points creation error: %v\n", bperr)
 		return false
+	}
+
+	// Add "nanosecond" values of our date data structures, for influx queries
+	if sd.CapturedAt != nil {
+		t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
+		if e == nil {
+			i64 := t.UnixNano()
+			sd.CapturedAtNano = &i64
+		}
+	}
+	if sd.Service != nil && sd.Service.UploadedAt != nil {
+		t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Service.UploadedAt)
+		if e == nil {
+			i64 := t.UnixNano()
+			sd.Service.UploadedAtNano = &i64
+		}
+	}
+	if sd.Gateway != nil && sd.Gateway.ReceivedAt != nil {
+		t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Gateway.ReceivedAt)
+		if e == nil {
+			i64 := t.UnixNano()
+			sd.Gateway.ReceivedAtNano = &i64
+		}
+	}
+	if sd.Loc != nil && sd.Loc.MotionBegan != nil {
+		t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Loc.MotionBegan)
+		if e == nil {
+			i64 := t.UnixNano()
+			sd.Loc.MotionBeganNano = &i64
+		}
 	}
 
     // Marshal the safecast data to json text
