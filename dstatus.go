@@ -30,7 +30,7 @@ type SafecastDeviceStatus struct {
 func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv SafecastDeviceStatus) {
     valueEmpty := SafecastDeviceStatus{}
 	did := uint64(deviceId)
-    valueEmpty.DeviceId = &did
+    valueEmpty.DeviceIdx = &did
 
     // Generate the filename, which we'll use twice
     filename := SafecastDirectory() + TTDeviceStatusPath + "/" + fmt.Sprintf("%d", deviceId) + ".json"
@@ -110,7 +110,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
     // If the value isn't available it's because of a nonrecoverable  error.
     // If it was reset, try waiting around a bit until it is fixed.
     for i:=0; i<5; i++ {
-        isAvail, isReset, rvalue := SafecastReadDeviceStatus(uint32(*sc.DeviceId))
+        isAvail, isReset, rvalue := SafecastReadDeviceStatus(uint32(*sc.DeviceIdx))
         value = rvalue
         if !isAvail {
             return
@@ -546,7 +546,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             value.LocationHistory[i] = value.LocationHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceId = value.DeviceId
+        new.DeviceIdx = value.DeviceIdx
         new.CapturedAt = ShuffledAt
         new.Loc = value.Loc
         value.LocationHistory[0] = new
@@ -558,7 +558,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             value.PmsHistory[i] = value.PmsHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceId = value.DeviceId
+        new.DeviceIdx = value.DeviceIdx
         new.CapturedAt = ShuffledAt
         new.Pms = value.Pms
         value.PmsHistory[0] = new
@@ -570,7 +570,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             value.OpcHistory[i] = value.OpcHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceId = value.DeviceId
+        new.DeviceIdx = value.DeviceIdx
         new.CapturedAt = ShuffledAt
         new.Opc = value.Opc
         value.OpcHistory[0] = new
@@ -582,7 +582,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
             value.GeigerHistory[i] = value.GeigerHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceId = value.DeviceId
+        new.DeviceIdx = value.DeviceIdx
         new.CapturedAt = ShuffledAt
         new.Lnd = value.Lnd
         value.GeigerHistory[0] = new
@@ -615,7 +615,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
     }
 
     // Write it to the file until it's written correctly, to allow for concurrency
-    filename := SafecastDirectory() + TTDeviceStatusPath + "/" + fmt.Sprintf("%d", sc.DeviceId) + ".json"
+    filename := SafecastDirectory() + TTDeviceStatusPath + "/" + fmt.Sprintf("%d", *sc.DeviceIdx) + ".json"
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
 
     for {
@@ -633,7 +633,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         time.Sleep(time.Duration(random(1, 6)) * time.Second)
 
         // Do an integrity check, and re-write the value if necessary
-        _, isEmpty, _ := SafecastReadDeviceStatus(uint32(*sc.DeviceId))
+        _, isEmpty, _ := SafecastReadDeviceStatus(uint32(*sc.DeviceIdx))
         if !isEmpty {
             break
         }

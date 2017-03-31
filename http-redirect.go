@@ -158,7 +158,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     svc.Transport = &transportStr
     sd.Service = &svc
 
-    fmt.Printf("\n%s Received payload for %d from %s\n", logTime(), sd.DeviceId, transportStr)
+    fmt.Printf("\n%s Received payload for %d from %s\n", logTime(), *sd.DeviceIdx, transportStr)
     fmt.Printf("%s\n", body)
 
     // If the data doesn't have anything useful in it, optimize it completely away.  This is

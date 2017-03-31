@@ -44,7 +44,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 	}
 
 	// Add "idb" values of our date data structures, for influx queries
-	s64 := fmt.Sprintf("%d", *sd.DeviceId)
+	s64 := fmt.Sprintf("%d", *sd.DeviceIdx)
 	sd.DeviceIdIdb = &s64
 	if sd.CapturedAt != nil {
 		t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)

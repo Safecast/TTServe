@@ -34,7 +34,7 @@ func SafecastWriteToLogs(UploadedAt string, sd SafecastData) {
 // Write the value to the log
 func SafecastJSONDeviceLog(UploadedAt string, sd SafecastData) {
 
-    file := SafecastDeviceLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".json")
+    file := SafecastDeviceLogFilename(fmt.Sprintf("%d", *sd.DeviceIdx), ".json")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
@@ -81,7 +81,7 @@ func SafecastJSONDeviceLog(UploadedAt string, sd SafecastData) {
 func SafecastCSVDeviceLog(UploadedAt string, sd SafecastData) {
 
     // Extract the device number and form a filename
-    file := SafecastDeviceLogFilename(fmt.Sprintf("%d", sd.DeviceId), ".csv")
+    file := SafecastDeviceLogFilename(fmt.Sprintf("%d", *sd.DeviceIdx), ".csv")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
@@ -222,7 +222,7 @@ func SafecastCSVDeviceLog(UploadedAt string, sd SafecastData) {
         }
     }
 
-    s = s + fmt.Sprintf(",%d", sd.DeviceId)
+    s = s + fmt.Sprintf(",%d", *sd.DeviceIdx)
     s = s + fmt.Sprintf(",%s", stats)
     s = s + fmt.Sprintf(",%s", "")          // Value
     if sd.Lnd == nil {

@@ -44,13 +44,13 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
     if devicetype == "pointcast" {
         isPointcast = true
 		did := uint64(*v1.DeviceId / 10)
-        sd.DeviceId = &did
+        sd.DeviceIdx = &did
     }
     isSafecastAir := false
     if devicetype == "safecast-air" {
         isSafecastAir = true
 		did := uint64(*v1.DeviceId)
-        sd.DeviceId = &did
+        sd.DeviceIdx = &did
     }
     if !isPointcast && !isSafecastAir {
         fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceId)
@@ -113,7 +113,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
 
         case "cpm":
             if !isPointcast {
-                fmt.Printf("*** Reformat: Received CPM for non-Pointcast %d\n", sd.DeviceId)
+                fmt.Printf("*** Reformat: Received CPM for non-Pointcast %d\n", *sd.DeviceIdx)
             } else {
                 if 1 == (*v1.DeviceId % 10) {
                     var lnd Lnd
@@ -127,7 +127,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
                     lnd.EC7128 = &cpm
                     sd.Lnd = &lnd
                 } else {
-                    fmt.Printf("*** Reformat: %d cpm not understood for this subtype\n", sd.DeviceId)
+                    fmt.Printf("*** Reformat: %d cpm not understood for this subtype\n", *sd.DeviceIdx)
                 }
             }
         case "status":
@@ -223,6 +223,6 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
 		sd.Dev.Test = &isTestMeasurement
 	}
 
-    return uint32(*sd.DeviceId), devicetype, sd
+    return uint32(*sd.DeviceIdx), devicetype, sd
 
 }
