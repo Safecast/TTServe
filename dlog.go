@@ -25,6 +25,7 @@ func SafecastDeviceLogFilename(DeviceId string, Extension string) string {
 // in log-ordering for buffered I/O messages where there are a huge batch of readings
 // that are updated in sequence very quickly.
 func SafecastWriteToLogs(UploadedAt string, sd SafecastData) {
+	go SafecastLogToInflux(sd)
     go SafecastWriteDeviceStatus(UploadedAt, sd)
     go SafecastJSONDeviceLog(UploadedAt, sd)
     go SafecastCSVDeviceLog(UploadedAt, sd)
