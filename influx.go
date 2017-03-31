@@ -53,7 +53,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 	}
 
 	// Make a new point
-	pt, mperr := influx.NewPoint(SafecastDataPoint, make(map[string]string), fields)
+	pt, mperr := influx.NewPoint(SafecastDataPoint, nil, fields)
 	if mperr != nil {
 		fmt.Printf("Influx point creation error: %v\n", mperr)
 		return false
@@ -61,6 +61,10 @@ func SafecastLogToInflux(sd SafecastData) bool {
 
 	fmt.Printf("Influx point:\n%v\n", pt)
 
+	f2 := map[string]interface{}{"a": 1, "b": 2, "c": 3, "d": 4}
+	pt, _ = influx.NewPoint("cpu", nil, f2)
+	fmt.Printf("Test point:\n%v\n", pt)
+	
 	// Add the point to the batch
 	bp.AddPoint(pt)
 
