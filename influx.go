@@ -85,42 +85,82 @@ func SafecastLogToInflux(sd SafecastData) bool {
 	sdFields := sd
 	sdTags := SafecastData{}
 	if sdFields.Service != nil && sdFields.Service.UploadedAtIdb != nil {
+		if sdTags.Service == nil {
+			var svc Service
+			sdTags.Service = &svc
+		}
 		sdTags.Service.UploadedAtIdb = sdFields.Service.UploadedAtIdb
 		sdFields.Service.UploadedAtIdb = nil
 	}
 	if sdFields.Service != nil && sdFields.Service.Handler != nil {
+		if sdTags.Service == nil {
+			var svc Service
+			sdTags.Service = &svc
+		}
 		sdTags.Service.Handler = sdFields.Service.Handler
 		sdFields.Service.Handler = nil
 	}
 	if sdFields.Service != nil && sdFields.Service.Transport != nil {
+		if sdTags.Service == nil {
+			var svc Service
+			sdTags.Service = &svc
+		}
 		sdTags.Service.Transport = sdFields.Service.Transport
 		sdFields.Service.Transport = nil
 	}
 	if sdFields.Gateway != nil && sdFields.Gateway.ReceivedAtIdb != nil {
+		if sdTags.Gateway == nil {
+			var gw Gateway
+			sdTags.Gateway = &gw
+		}
 		sdTags.Gateway.ReceivedAtIdb = sdFields.Gateway.ReceivedAtIdb
 		sdFields.Gateway.ReceivedAtIdb = nil
 	}
 	if sdFields.Loc != nil && sdFields.Loc.MotionBeganIdb != nil {
+		if sdTags.Loc == nil {
+			var loc Loc
+			sdTags.Loc = &loc
+		}
 		sdTags.Loc.MotionBeganIdb = sdFields.Loc.MotionBeganIdb
 		sdFields.Loc.MotionBeganIdb = nil
 	}
 	if sdFields.Loc != nil && sdFields.Loc.Olc != nil {
+		if sdTags.Loc == nil {
+			var loc Loc
+			sdTags.Loc = &loc
+		}
 		sdTags.Loc.Olc = sdFields.Loc.Olc
 		sdFields.Loc.Olc = nil
 	}
 	if sdFields.Dev != nil && sdFields.Dev.DeviceLabel != nil {
+		if sdTags.Dev == nil {
+			var dev Dev
+			sdTags.Dev = &dev
+		}
 		sdTags.Dev.DeviceLabel = sdFields.Dev.DeviceLabel
 		sdFields.Dev.DeviceLabel = nil
 	}
 	if sdFields.Dev != nil && sdFields.Dev.AppVersion != nil {
+		if sdTags.Dev == nil {
+			var dev Dev
+			sdTags.Dev = &dev
+		}
 		sdTags.Dev.AppVersion = sdFields.Dev.AppVersion
 		sdFields.Dev.AppVersion = nil
 	}
 	if sdFields.Dev != nil && sdFields.Dev.ModuleLora != nil {
+		if sdTags.Dev == nil {
+			var dev Dev
+			sdTags.Dev = &dev
+		}
 		sdTags.Dev.ModuleLora = sdFields.Dev.ModuleLora
 		sdFields.Dev.ModuleLora = nil
 	}
 	if sdFields.Dev != nil && sdFields.Dev.ModuleFona != nil {
+		if sdTags.Dev == nil {
+			var dev Dev
+			sdTags.Dev = &dev
+		}
 		sdTags.Dev.ModuleFona = sdFields.Dev.ModuleFona
 		sdFields.Dev.ModuleFona = nil
 	}
