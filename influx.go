@@ -157,7 +157,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 	}
 
 	// Debug
-	if (false) {
+	if (true) {
 		fmt.Printf("Influx point:\n%v\n", pt)
 	}
 	
