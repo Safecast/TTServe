@@ -547,7 +547,7 @@ func InfluxResultsToCSV(response influx.Response) (string, int) {
             for _, v := range r.Columns {
                 s += fmt.Sprintf(",%s", v)
             }
-            fmt.Sprintf("\n")
+            s += fmt.Sprintf("\n")
 
             // Write out each row of results, with setname in col A
 			numresults = len(r.Values)
