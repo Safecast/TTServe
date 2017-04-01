@@ -483,9 +483,9 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
 							numstr := fmt.Sprintf("%v", cell)
 							if len(numstr) == 19 {
 								// Convert nanoseconds to excel by (V-DATE(1970,1,1))*86400
-								seconds, _ := cell.Int64()
-								seconds = seconds / 1000000
-								exceldate := (float64(seconds) - 25569) * 86400
+								seconds, _ := cell.Float64()
+								seconds = seconds / 1000000000
+								exceldate := (seconds / 86400) + 25569
 								fmt.Printf("%d: '%f' datetime\n", k, exceldate)
 							} else {
 								if strings.Contains(numstr, ".") {
