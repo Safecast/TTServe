@@ -541,10 +541,7 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
         // This outer loop is for sets or groups of results
         for i, r := range result.Series {
 
-            // Partial, or not
-            fmt.Printf("%d: PARTIAL = %t\n", i, r.Partial)
-
-            if i == 0 {
+            if i != 0 {
                 s += fmt.Sprintf("\n")
             }
             setname := r.Name
@@ -691,15 +688,12 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     q := influx.NewQuery("SELECT "+the_query, SafecastDb, "ns")
     q.Chunked = true
     q.ChunkSize = 100
-    fmt.Printf("About to query\n");
     response, qerr := cl.Query(q)
-    fmt.Printf("query: %v\n", qerr);
     if qerr != nil {
         return false, fmt.Sprintf("Influx query error: %v", qerr), 0
     }
 
     // Exit if an err
-    fmt.Printf("resperr=%v\n", response.Error());
     if response.Error() != nil {
         return false, fmt.Sprintf("Influx query response error: %v", response.Error()), 0
     }
@@ -712,7 +706,6 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     // Create the output file
     file := time.Now().UTC().Format("2006-01-02-150405") + "-" + the_user + ".csv"
     filename := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
-    fmt.Printf("About to open file\n")
     fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
     if err != nil {
         return false, fmt.Sprintf("Cannot create file: %v", err), 0
@@ -722,9 +715,7 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     defer fd.Close()
 
     // Convert to CSV
-    fmt.Printf("about to get results\n");
     rows := InfluxResultsToCSV(response, fd)
-    fmt.Printf("results: %d\n", rows);
     if rows == 0 {
         return false, "No results.", 0
     }
