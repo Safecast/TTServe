@@ -618,7 +618,7 @@ func InfluxResultsToCSV(response influx.Response) (string, int) {
                         }
                     }
                 }
-                fmt.Sprintf("\n")
+                s += fmt.Sprintf("\n")
             }
         }
 
