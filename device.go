@@ -272,6 +272,12 @@ func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, 
             s = fmt.Sprintf("%s %s ago", s, AgoMinutes(uint32(sortedDevices[i].minutesAgo)))
         }
 
+        if !fWrap {
+			sn, _ := SafecastDeviceIDToSN(id)
+			if sn != 0 {
+				s += fmt.Sprintf(" s/n%d", sn)
+			}
+        }
         if !fWrap && label != "" {
 			s += fmt.Sprintf(" \"%s\"", label)
         }

@@ -30,19 +30,23 @@ func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
     var fRetrieve bool = false
     var sheetData string = ""
 
+	// Retrieve if never yet retrieved
     if sheet == nil {
         fRetrieve = true
     }
 
-    if everRetrieved && (time.Now().Sub(lastRetrieved) / time.Minute) > 5 {
+	// Cache for some time, for performance
+    if everRetrieved && (time.Now().Sub(lastRetrieved) / time.Minute) > 15 {
         fRetrieve = true
         failedRecently = false
     }
 
+	// If we've got an error, make sure we don't thrash every time we come in here
     if fRetrieve && failedRecently {
         return 0, lastError
     }
 
+	// Fetch and parse the sheet
     if fRetrieve {
         rsp, err := http.Get(sheetsSolarcastTracker)
         if err != nil {
@@ -88,7 +92,7 @@ func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
 
     }
 
-    // Iterate over the rows
+    // Iterate over the rows to find the device
     deviceIdFound := false;
     snFound := uint32(0)
     for _, r := range sheet {
@@ -99,6 +103,7 @@ func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
         }
     }
 
+	// Done
     if !deviceIdFound {
         lastError = "Device ID not found"
         return 0, lastError
