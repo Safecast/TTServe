@@ -149,6 +149,20 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         time.Sleep(1 * time.Second)
         go sendSafecastDeviceSummaryToSlack("== Devices Online ==", false, fMobile, fDetails)
 
+	case "sn":
+        if len(args) != 2 {
+            sendToSafecastOps("Command format: sn <deviceID>", SLACK_MSG_REPLY)
+        } else {
+            i64, _ := strconv.ParseUint(args[1], 10, 32)
+            deviceID := uint32(i64)
+			sn, reason := SafecastDeviceIDToSN(deviceID)
+			if sn == 0 {
+	            sendToSafecastOps(fmt.Sprintf("Unable to find S/N: %s", reason), SLACK_MSG_REPLY)
+			} else {
+	            sendToSafecastOps(fmt.Sprintf("S/N: %d", sn), SLACK_MSG_REPLY)
+			}
+		}
+		
     case "deveui":
 		generateTTNCTLDeviceRegistrationScript()
 
