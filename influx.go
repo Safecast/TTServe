@@ -426,7 +426,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 }
 
 // Just a debug function that traverses a Response, which took me forever to figure out
-func InfluxResultsDebug(response influx.Response) {
+func InfluxResultsDebug(response *influx.Response) {
 
     for _, result := range response.Results {
         // Ignore this
@@ -439,8 +439,8 @@ func InfluxResultsDebug(response influx.Response) {
         for i, r := range result.Series {
             // Set name is 'data', put this in column 0
             fmt.Printf("%d: Name:'%s' Tags:'%d' Cols:'%d' Rows:'%d'\n", i, r.Name, len(r.Tags), len(r.Columns), len(r.Values))
-			// Partial, or not
-			fmt.Printf("%d: PARTIAL = %t\n", i, r.Partial)
+            // Partial, or not
+            fmt.Printf("%d: PARTIAL = %t\n", i, r.Partial)
             // No tags - don't even know what to do with
             fmt.Printf("%d Tags:\n", len(r.Tags))
             for k, v := range r.Tags {
@@ -528,11 +528,12 @@ func InfluxResultsDebug(response influx.Response) {
 }
 
 // Just a debug function that traverses a Response, which took me forever to figure out
-func InfluxResultsToCSV(response influx.Response) (string, int) {
+func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
 
     // Create a blank CSV canvas
     s := ""
     numresults := 0
+    firstRow := true
 
     // Traverse the response
     for _, result := range response.Results {
@@ -540,22 +541,27 @@ func InfluxResultsToCSV(response influx.Response) (string, int) {
         // This outer loop is for sets or groups of results
         for i, r := range result.Series {
 
-			// Partial, or not
-			fmt.Printf("%d: PARTIAL = %t\n", i, r.Partial)
+            // Partial, or not
+            fmt.Printf("%d: PARTIAL = %t\n", i, r.Partial)
 
             if i == 0 {
                 s += fmt.Sprintf("\n")
             }
             setname := r.Name
 
-            // Write out column headers, with setname in col A
-            s += fmt.Sprintf("=\"%s\"", setname)
-            // Set name is 'data', put this in column 0
-            // 86 columns, and each v is the column name
-            for _, v := range r.Columns {
-                s += fmt.Sprintf(",%s", v)
+            if firstRow {
+                firstRow = false;
+
+                // Write out column headers, making room for setname in col A
+                s += fmt.Sprintf("=\"\"")
+                // Set name is 'data', put this in column 0
+                // 86 columns, and each v is the column name
+                for _, v := range r.Columns {
+                    s += fmt.Sprintf(",%s", v)
+                }
+                s += fmt.Sprintf("\n")
+
             }
-            s += fmt.Sprintf("\n")
 
             // Write out each row of results, with setname in col A
             numresults += len(r.Values)
@@ -653,13 +659,20 @@ func InfluxResultsToCSV(response influx.Response) (string, int) {
                     }
                 }
                 s += fmt.Sprintf("\n")
+
+				// Write this line to the file
+			    fd.WriteString(s)
+
+				// Begin again
+				s = ""
+				
             }
         }
 
     }
 
     // Return the spreadsheet
-    return s, numresults
+    return numresults
 
 }
 
@@ -675,52 +688,51 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     }
 
     // Perform the query
-	q := influx.NewQuery("SELECT "+the_query, SafecastDb, "ns")
-	q.Chunked = true
-	q.ChunkSize = 100
-	fmt.Printf("About to query\n");
+    q := influx.NewQuery("SELECT "+the_query, SafecastDb, "ns")
+    q.Chunked = true
+    q.ChunkSize = 100
+    fmt.Printf("About to query\n");
     response, qerr := cl.Query(q)
-	fmt.Printf("query: %v\n", qerr);
+    fmt.Printf("query: %v\n", qerr);
     if qerr != nil {
         return false, fmt.Sprintf("Influx query error: %v", qerr), 0
     }
 
     // Exit if an err
-	fmt.Printf("resperr=%v\n", response.Error());
+    fmt.Printf("resperr=%v\n", response.Error());
     if response.Error() != nil {
         return false, fmt.Sprintf("Influx query response error: %v", response.Error()), 0
     }
 
     // Debug
     if (false) {
-        InfluxResultsDebug(*response)
-    }
-
-    // Convert to CSV
-	fmt.Printf("about to get results\n");
-    csv, numresults := InfluxResultsToCSV(*response)
-	fmt.Printf("results: %d\n", numresults);
-    if numresults == 0 {
-        return false, "No results.", 0
+        InfluxResultsDebug(response)
     }
 
     // Create the output file
     file := time.Now().UTC().Format("2006-01-02-150405") + "-" + the_user + ".csv"
     filename := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
-	fmt.Printf("About to open file\n")
-
-    // Write the value
+    fmt.Printf("About to open file\n")
     fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
     if err != nil {
         return false, fmt.Sprintf("Cannot create file: %v", err), 0
     }
-    fd.WriteString(csv)
-    fd.Close()
+
+	// Make sure we close the file
+    defer fd.Close()
+
+    // Convert to CSV
+    fmt.Printf("about to get results\n");
+    rows := InfluxResultsToCSV(response, fd)
+    fmt.Printf("results: %d\n", rows);
+    if rows == 0 {
+        return false, "No results.", 0
+    }
 
     // Return the URL to the file
     url := fmt.Sprintf("http://%s%s%s", TTServerHTTPAddress, TTServerTopicQueryResults, file)
 
     // const TTInfluxQueryPath = "/influx-query"
-    return true, url, numresults
+    return true, url, rows
 
 }
