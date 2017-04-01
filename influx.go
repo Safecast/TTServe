@@ -334,6 +334,9 @@ func SafecastLogToInflux(sd SafecastData) bool {
 		if sd.Dev.ErrorsConnectService != nil {
 			fields["dev_err_con_service"] = *sd.Dev.ErrorsConnectService
 		}
+		if sd.Dev.ErrorsConnectGateway != nil {
+			fields["dev_err_con_gateway"] = *sd.Dev.ErrorsConnectGateway
+		}
 
     }
 

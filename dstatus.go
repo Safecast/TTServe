@@ -521,6 +521,12 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
 				value.Dev.ErrorsConnectWireless = sc.Dev.ErrorsConnectWireless
 			}
         }
+        if sc.Dev.ErrorsConnectGateway != nil {
+			if value.Dev.ErrorsConnectGateway == nil ||
+				(value.Dev.ErrorsConnectGateway != nil && *sc.Dev.ErrorsConnectGateway > *value.Dev.ErrorsConnectGateway) {
+				value.Dev.ErrorsConnectGateway = sc.Dev.ErrorsConnectGateway
+			}
+        }
         if sc.Dev.ErrorsConnectData != nil {
 			if value.Dev.ErrorsConnectData == nil ||
 				(value.Dev.ErrorsConnectData != nil && *sc.Dev.ErrorsConnectData > *value.Dev.ErrorsConnectData) {

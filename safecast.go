@@ -276,6 +276,10 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         dev.ErrorsConnectWireless = msg.ErrorsConnectWireless
         dodev = true
     }
+    if msg.ErrorsConnectGateway != nil {
+        dev.ErrorsConnectGateway = msg.ErrorsConnectGateway
+        dodev = true
+    }
     if msg.ErrorsConnectData != nil {
         dev.ErrorsConnectData = msg.ErrorsConnectData
         dodev = true

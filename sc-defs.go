@@ -116,6 +116,7 @@ type Dev struct {
     ErrorsConnectWireless *uint32 `json:"dev_err_con_wireless,omitempty"`
     ErrorsConnectData *uint32 `json:"dev_err_con_data,omitempty"`
     ErrorsConnectService *uint32 `json:"dev_err_con_service,omitempty"`
+    ErrorsConnectGateway *uint32 `json:"dev_err_con_gateway,omitempty"`
 }
 
 // Gateway-supplied metadata

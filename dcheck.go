@@ -47,6 +47,7 @@ type MeasurementStat struct {
     ErrorsConnectLora   uint32
     ErrorsConnectFona   uint32
     ErrorsConnectWireless uint32
+    ErrorsConnectGateway uint32
     ErrorsConnectData   uint32
     ErrorsConnectService uint32
     ErrorsCommsFailures uint32
@@ -142,6 +143,8 @@ type MeasurementDataset struct {
     PrevErrorsConnectFona uint32
     ThisErrorsConnectWireless uint32
     PrevErrorsConnectWireless uint32
+    ThisErrorsConnectGateway uint32
+    PrevErrorsConnectGateway uint32
     ThisErrorsConnectData uint32
     PrevErrorsConnectData uint32
     ThisErrorsConnectService uint32
@@ -300,6 +303,9 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
         if sd.Dev.ErrorsConnectWireless != nil {
             stat.ErrorsConnectWireless = *sd.Dev.ErrorsConnectWireless
+        }
+        if sd.Dev.ErrorsConnectGateway != nil {
+            stat.ErrorsConnectGateway = *sd.Dev.ErrorsConnectGateway
         }
         if sd.Dev.ErrorsConnectData != nil {
             stat.ErrorsConnectData = *sd.Dev.ErrorsConnectData
@@ -707,6 +713,10 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.ThisErrorsConnectWireless = stat.ErrorsConnectWireless
         ds.AnyConnectErrors = true
     }
+    if stat.ErrorsConnectGateway > ds.ThisErrorsConnectGateway {
+        ds.ThisErrorsConnectGateway = stat.ErrorsConnectGateway
+        ds.AnyConnectErrors = true
+    }
     if stat.ErrorsConnectData > ds.ThisErrorsConnectData {
         ds.ThisErrorsConnectData = stat.ErrorsConnectData
         ds.AnyConnectErrors = true
@@ -775,6 +785,8 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
             ds.ThisErrorsConnectFona = 0
             ds.PrevErrorsConnectWireless += ds.ThisErrorsConnectWireless
             ds.ThisErrorsConnectWireless = 0
+            ds.PrevErrorsConnectGateway += ds.ThisErrorsConnectGateway
+            ds.ThisErrorsConnectGateway = 0
             ds.PrevErrorsConnectData += ds.ThisErrorsConnectData
             ds.ThisErrorsConnectData = 0
             ds.PrevErrorsConnectService += ds.ThisErrorsConnectService
@@ -1016,23 +1028,27 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     } else {
         i := ds.PrevErrorsConnectLora + ds.ThisErrorsConnectLora
         if i > 0 {
-            s += fmt.Sprintf("  Lora     %d\n", i)
+            s += fmt.Sprintf("  Lora Module  %d\n", i)
         }
         i = ds.PrevErrorsConnectFona + ds.ThisErrorsConnectFona
         if i > 0 {
-            s += fmt.Sprintf("  Fona     %d\n", i)
+            s += fmt.Sprintf("  Fona Module  %d\n", i)
+        }
+        i = ds.PrevErrorsConnectGateway + ds.ThisErrorsConnectGateway
+        if i > 0 {
+            s += fmt.Sprintf("  Lora Gateway %d\n", i)
         }
         i = ds.PrevErrorsConnectWireless + ds.ThisErrorsConnectWireless
         if i > 0 {
-            s += fmt.Sprintf("  Wireless %d\n", i)
+            s += fmt.Sprintf("  Cell Carrier %d\n", i)
         }
         i = ds.PrevErrorsConnectData + ds.ThisErrorsConnectData
         if i > 0 {
-            s += fmt.Sprintf("  Data     %d\n", i)
+            s += fmt.Sprintf("  Cell Data    %d\n", i)
         }
         i = ds.PrevErrorsConnectService + ds.ThisErrorsConnectService
         if i > 0 {
-            s += fmt.Sprintf("  Service  %d\n", i)
+            s += fmt.Sprintf("  Cell Service %d\n", i)
         }
     }
     s += fmt.Sprintf("\n")
