@@ -275,7 +275,7 @@ func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, 
         if !fWrap {
 			sn, _ := SafecastDeviceIDToSN(id)
 			if sn != 0 {
-				s += fmt.Sprintf(" s/n%d", sn)
+				s += fmt.Sprintf(" #%d", sn)
 			}
         }
         if !fWrap && label != "" {
