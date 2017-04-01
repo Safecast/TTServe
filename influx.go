@@ -16,16 +16,20 @@ const (
     SafecastDataPoint = "data"
 )
 
-func SafecastLogToInflux(sd SafecastData) bool {
+// Get client config parameters
+func InfluxConfig() influx.HTTPConfig {
     var clcfg influx.HTTPConfig
-
-    // Initialize the client
     clcfg.Addr = fmt.Sprintf("https://%s:8086", ServiceConfig.InfluxHost)
     clcfg.Username = ServiceConfig.InfluxUsername
     clcfg.Password = ServiceConfig.InfluxPassword
+	return clcfg
+}
+
+// Log the specific safecast data point to influx
+func SafecastLogToInflux(sd SafecastData) bool {
 
     // Open the client
-    cl, clerr := influx.NewHTTPClient(clcfg)
+    cl, clerr := influx.NewHTTPClient(InfluxConfig())
     if clerr == nil {
         defer cl.Close()
     } else {
@@ -416,4 +420,29 @@ func SafecastLogToInflux(sd SafecastData) bool {
     // Done
     return true
 
+}
+
+// Perform a query, returning either an URL to results or an error message
+func InfluxQuery(the_user string, the_query string) (success bool, result string) {
+
+    // Open the client
+    cl, clerr := influx.NewHTTPClient(InfluxConfig())
+    if clerr == nil {
+        defer cl.Close()
+    } else {
+        return false, fmt.Sprintf("Influx connect error: %v", clerr)
+    }
+
+	// Perform the query
+	results, qerr := cl.Query(influx.NewQuery("SELECT "+the_query, SafecastDb, "ns"))
+    if qerr != nil {
+        return false, fmt.Sprintf("Influx query error: %v", qerr)
+    }
+
+	// Reformat the results into CSV
+	fmt.Printf("\n\n%s\n\n", results)
+	
+// const TTInfluxQueryPath = "/influx-query"
+	return true, the_query
+	
 }

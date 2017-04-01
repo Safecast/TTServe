@@ -149,6 +149,18 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         time.Sleep(1 * time.Second)
         go sendSafecastDeviceSummaryToSlack("== Devices Online ==", false, fMobile, fDetails)
 
+	case "select":
+        if len(args) < 2 {
+            sendToSafecastOps("Command format: SELECT <query>", SLACK_MSG_REPLY)
+        } else {
+			success, result := InfluxQuery(user, messageAfterFirstWord)
+			if !success {
+	            sendToSafecastOps(fmt.Sprintf("Query error: %s", result), SLACK_MSG_REPLY)
+			} else {
+	            sendToSafecastOps(fmt.Sprintf("%s", result), SLACK_MSG_REPLY)
+			}
+		}
+		
 	case "sn":
         if len(args) != 2 {
             sendToSafecastOps("Command format: sn <deviceID>", SLACK_MSG_REPLY)
