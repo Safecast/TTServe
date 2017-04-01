@@ -440,7 +440,7 @@ func InfluxResultsDebug(response influx.Response) {
             // Set name is 'data', put this in column 0
             fmt.Printf("%d: Name:'%s' Tags:'%d' Cols:'%d' Rows:'%d'\n", i, r.Name, len(r.Tags), len(r.Columns), len(r.Values))
 			// Partial, or not
-			fmt.Printf("%d: PARTIAL = %t\n", r.Partial)
+			fmt.Printf("%d: PARTIAL = %t\n", i, r.Partial)
             // No tags - don't even know what to do with
             fmt.Printf("%d Tags:\n", len(r.Tags))
             for k, v := range r.Tags {
@@ -541,7 +541,7 @@ func InfluxResultsToCSV(response influx.Response) (string, int) {
         for i, r := range result.Series {
 
 			// Partial, or not
-			fmt.Printf("%d: PARTIAL = %t\n", r.Partial)
+			fmt.Printf("%d: PARTIAL = %t\n", i, r.Partial)
 
             if i == 0 {
                 s += fmt.Sprintf("\n")
@@ -558,7 +558,7 @@ func InfluxResultsToCSV(response influx.Response) (string, int) {
             s += fmt.Sprintf("\n")
 
             // Write out each row of results, with setname in col A
-            numresults = len(r.Values)
+            numresults += len(r.Values)
             for _, v := range r.Values {
                 s += fmt.Sprintf("=\"%s\"", setname)
 
