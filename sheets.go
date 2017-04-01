@@ -6,12 +6,19 @@
 package main
 
 import (
-	"fmt"
+    "fmt"
     "time"
-	"strings"
+    "strings"
+	"strconv"
     "net/http"
     "io/ioutil"
 )
+
+type sheetRow struct {
+    sn                  uint32
+    deviceid            uint32
+}
+var sheet []sheetRow
 
 // Statics
 var everRetrieved bool = false
@@ -22,7 +29,7 @@ var parsedData string
 
 func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
     var fRetrieve bool = false
-	var sheetData string = ""
+    var sheetData string = ""
 
     if parsedData == "" {
         fRetrieve = true
@@ -34,51 +41,65 @@ func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
     }
 
     if fRetrieve && failedRecently {
-		return 0, lastError
-	}
+        return 0, lastError
+    }
 
-	if fRetrieve {
+    if fRetrieve {
         rsp, err := http.Get(sheetsSolarcastTracker)
         if err != nil {
-			lastError = fmt.Sprintf("%v", err)
-			failedRecently = true;
+            lastError = fmt.Sprintf("%v", err)
+            failedRecently = true;
             return 0, lastError
         }
         defer rsp.Body.Close()
         buf, err := ioutil.ReadAll(rsp.Body)
         if err != nil {
-			lastError = fmt.Sprintf("%v", err)
-			failedRecently = true;
+            lastError = fmt.Sprintf("%v", err)
+            failedRecently = true;
             return 0, lastError
         }
 
         // Parse the sheet
         sheetData = string(buf)
-		parsedData = ""
+        parsedData = ""
+        sheet = nil
 
-		splitContents := strings.Split(string(sheetData), "\n")
-		for _, c := range splitContents {
-			splitLine := strings.Split(c, ",")
-			if len(splitLine) < 2 {
-				fmt.Printf("?: '%s'\n", c)
-			} else {
-				fmt.Printf("'%s' '%s'\n", splitLine[0], splitLine[1])
-			}
-		}
+        splitContents := strings.Split(string(sheetData), "\n")
+        for _, c := range splitContents {
+            splitLine := strings.Split(c, ",")
+            if len(splitLine) >= 2 {
+                u64, err := strconv.ParseUint(splitLine[0], 10, 32)
+                if err == nil {
+                    var row sheetRow
+                    row.sn = uint32(u64)
+                    row.deviceid = 0
+                    u64, err := strconv.ParseUint(splitLine[1], 10, 32)
+                    if err == nil {
+                        row.deviceid = uint32(u64)
+                    }
+                    sheet = append(sheet, row)
+                }
+            }
+        }
 
-		// Cache the data for future iterations
+        // Cache the data for future iterations
         everRetrieved = true
         lastRetrieved = time.Now()
-		failedRecently = false;
+        failedRecently = false;
 
     }
 
-if (false) {
-	if parsedData == "" {
-		lastError = "No data found"
-		return 0, lastError
+	// Iterate over the rows
+    for _, r := range sheet {
+		fmt.Printf("%d %d\n", r.sn, r.deviceid)
 	}
-}
-	fmt.Printf("\n\n%s\n\n", sheetData)
-	return 123, ""	
+
+    if (false) {
+        if parsedData == "" {
+            lastError = "No data found"
+            return 0, lastError
+        }
+    }
+
+    return 123, ""
 }
