@@ -476,25 +476,42 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
 					} else {
 						switch cell := cell.(type) {
 						default:
-							fmt.Printf("%d: '%v' unknown\n", k, cell)
+							fmt.Printf("%d: '%v' unknown type %T\n", k, cell, cell)
 						case string:
 							fmt.Printf("%d: '%s' string\n", k, cell)
 						case bool:
 							fmt.Printf("%d: '%t' bool\n", k, cell)
+						case *bool:
+							fmt.Printf("%d: '%t' *bool\n", k, cell)
 						case int:
 						case int8:
 						case int16:
 						case int32:
 						case int64:
 							fmt.Printf("%d: '%d' int\n", k, cell)
+						case *int:
+						case *int8:
+						case *int16:
+						case *int32:
+						case *int64:
+							fmt.Printf("%d: '%d' *int\n", k, cell)
 						case uint:
 						case uint8:
 						case uint16:
 						case uint32:
 						case uint64:
 							fmt.Printf("%d: '%u' uint\n", k, cell)
+						case *uint:
+						case *uint8:
+						case *uint16:
+						case *uint32:
+						case *uint64:
+							fmt.Printf("%d: '%u' *uint\n", k, cell)
 						case float32:
 						case float64:
+							fmt.Printf("%d: '%f' float\n", k, cell)
+						case *float32:
+						case *float64:
 							fmt.Printf("%d: '%f' float\n", k, cell)
 						}
 					}
