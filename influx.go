@@ -670,12 +670,15 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     }
 
     // Perform the query
+	fmt.Printf("About to query\n");
     response, qerr := cl.Query(influx.NewQuery("SELECT "+the_query, SafecastDb, "ns"))
+	fmt.Printf("query: %v\n", qerr);
     if qerr != nil {
         return false, fmt.Sprintf("Influx query error: %v", qerr), 0
     }
 
     // Exit if an err
+	fmt.Printf("resperr=%v\n", response.Error());
     if response.Error() != nil {
         return false, fmt.Sprintf("Influx query response error: %v", response.Error()), 0
     }
@@ -686,7 +689,9 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     }
 
     // Convert to CSV
+	fmt.Printf("about to get results\n");
     csv, numresults := InfluxResultsToCSV(*response)
+	fmt.Printf("results: %d\n", numresults);
     if numresults == 0 {
         return false, "No results.", 0
     }
@@ -694,6 +699,7 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     // Create the output file
     file := time.Now().UTC().Format("2006-01-02-150405") + "-" + the_user + ".csv"
     filename := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
+	fmt.Printf("About to open file\n")
 
     // Write the value
     fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
