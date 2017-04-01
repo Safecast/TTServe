@@ -8,6 +8,7 @@ package main
 import (
 	"fmt"
     "time"
+	"strings"
     "net/http"
     "io/ioutil"
 )
@@ -17,12 +18,13 @@ var everRetrieved bool = false
 var lastRetrieved time.Time
 var failedRecently bool = false
 var lastError string
-var sheetData string
+var parsedData string
 
 func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
     var fRetrieve bool = false
+	var sheetData string = ""
 
-    if sheetData == "" {
+    if parsedData == "" {
         fRetrieve = true
     }
 
@@ -50,19 +52,33 @@ func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
             return 0, lastError
         }
 
-        // Cache the sheet for future iterations
+        // Parse the sheet
         sheetData = string(buf)
+		parsedData = ""
+
+		splitContents := strings.Split(string(sheetData), "\n")
+		for _, c := range splitContents {
+			splitLine := strings.Split(c, ",")
+			if len(splitLine) < 2 {
+				fmt.Printf("?: '%s'\n", c)
+			} else {
+				fmt.Printf("'%s' '%s'\n", c[0], c[1])
+			}
+		}
+
+		// Cache the data for future iterations
         everRetrieved = true
         lastRetrieved = time.Now()
 		failedRecently = false;
 
     }
 
-	if sheetData == "" {
+if (false) {
+	if parsedData == "" {
 		lastError = "No data found"
 		return 0, lastError
 	}
-
+}
 	fmt.Printf("\n\n%s\n\n", sheetData)
 	return 123, ""	
 }
