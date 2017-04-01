@@ -439,6 +439,8 @@ func InfluxResultsDebug(response influx.Response) {
         for i, r := range result.Series {
             // Set name is 'data', put this in column 0
             fmt.Printf("%d: Name:'%s' Tags:'%d' Cols:'%d' Rows:'%d'\n", i, r.Name, len(r.Tags), len(r.Columns), len(r.Values))
+			// Partial, or not
+			fmt.Printf("%d: PARTIAL = %t\n", r.Partial)
             // No tags - don't even know what to do with
             fmt.Printf("%d Tags:\n", len(r.Tags))
             for k, v := range r.Tags {
@@ -537,6 +539,9 @@ func InfluxResultsToCSV(response influx.Response) (string, int) {
 
         // This outer loop is for sets or groups of results
         for i, r := range result.Series {
+
+			// Partial, or not
+			fmt.Printf("%d: PARTIAL = %t\n", r.Partial)
 
             if i == 0 {
                 s += fmt.Sprintf("\n")
@@ -670,8 +675,11 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     }
 
     // Perform the query
+	q := influx.NewQuery("SELECT "+the_query, SafecastDb, "ns")
+	q.Chunked = true
+	q.ChunkSize = 100
 	fmt.Printf("About to query\n");
-    response, qerr := cl.Query(influx.NewQuery("SELECT "+the_query, SafecastDb, "ns"))
+    response, qerr := cl.Query(q)
 	fmt.Printf("query: %v\n", qerr);
     if qerr != nil {
         return false, fmt.Sprintf("Influx query error: %v", qerr), 0
