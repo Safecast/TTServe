@@ -7,6 +7,7 @@ package main
 
 import (
 	"os"
+	"strings"
     "net/http"
     "fmt"
     "io"
@@ -23,6 +24,14 @@ func inboundWebDeviceLogHandler(rw http.ResponseWriter, req *http.Request) {
     filename := req.RequestURI[len(TTServerTopicDeviceLog):]
     fmt.Printf("%s LOG request for %s\n", logTime(), filename)
 
+	// Break down the components of what's requested
+	components := strings.Split(filename, ".")
+	if (len(components) != 2) {
+		io.WriteString(rw, "Unrecognized device ID\n");
+		return
+	}
+	extension := components[1]
+	
     // Open the file
     file := SafecastDirectory() + TTDeviceLogPath + "/" + filename
     fd, err := os.Open(file)
@@ -32,6 +41,12 @@ func inboundWebDeviceLogHandler(rw http.ResponseWriter, req *http.Request) {
     }
     defer fd.Close()
 
+	// If this is CSV, force a download
+	if extension == "csv" {
+		rw.Header().Set("Content-Disposition", "attachment; filename=" + filename)
+		rw.Header().Set("Content-Type", "application/octet-stream")
+	}
+	
     // Copy the file to output
     io.Copy(rw, fd)
 
