@@ -445,26 +445,34 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     }
 
     // Iterate over all results
-    for j, result := range response.Results {
-        fmt.Printf("Result %d:\n%s\n", j, result)
+    for _, result := range response.Results {
+		// Ignore this
         fmt.Printf("%d Messages:\n", len(result.Messages))
         for i, m := range result.Messages {
             fmt.Printf("%d: Level:'%s' Text:'%s'\n", i, m.Level, m.Text)
         }
-        fmt.Printf("%d Rows:\n", len(result.Series))
+		// These are sets of results with a name
+        fmt.Printf("%d Sets:\n", len(result.Series))
         for i, r := range result.Series {
-            fmt.Printf("%d: Name:'%s' Partial:%d Tags:'%d' Cols:'%d'\n", i, r.Name, r.Partial, len(r.Tags), len(r.Columns), len(r.Values))
+			// Set name is 'data', put this in column 0
+            fmt.Printf("%d: Name:'%s' Tags:'%d' Cols:'%d' Rows:'%d'\n", i, r.Name, len(r.Tags), len(r.Columns), len(r.Values))
+			// No tags - don't even know what to do with
             fmt.Printf("%d Tags:\n", len(r.Tags))
             for k, v := range r.Tags {
                 fmt.Printf("'%s':'%s'\n", k, v)
             }
+			// 86 columns, and each v is the column name
             fmt.Printf("%d Columns:\n", len(r.Columns))
             for i, v := range r.Columns {
                 fmt.Printf("%d: '%s'\n", i, v)
             }
-			fmt.Printf("%d Values:\n", len(r.Values))
+			// Rows of results
+			fmt.Printf("%d Rows:\n", len(r.Values))
 			for i, v := range r.Values {
-				fmt.Printf("%d: '%v'\n", i, v)
+				fmt.Printf("%d: %d cols'\n", i, len(v))
+				for k, cell := range v {
+					fmt.Printf("%d: %v'\n", k, cell)
+				}
 			}
         }
 
