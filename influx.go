@@ -471,7 +471,33 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
 			for i, v := range r.Values {
 				fmt.Printf("%d: %d cols'\n", i, len(v))
 				for k, cell := range v {
-					fmt.Printf("%d: %v'\n", k, cell)
+					if cell == nil {
+						fmt.Printf("%d: NIL\n", k)
+					} else {
+						switch cell := cell.(type) {
+						default:
+							fmt.Printf("%d: '%v' unknown\n", k, cell)
+						case string:
+							fmt.Printf("%d: '%s' string\n", k, cell)
+						case bool:
+							fmt.Printf("%d: '%t' bool\n", k, cell)
+						case int:
+						case int8:
+						case int16:
+						case int32:
+						case int64:
+							fmt.Printf("%d: '%d' int\n", k, cell)
+						case uint:
+						case uint8:
+						case uint16:
+						case uint32:
+						case uint64:
+							fmt.Printf("%d: '%u' uint\n", k, cell)
+						case float32:
+						case float64:
+							fmt.Printf("%d: '%f' float\n", k, cell)
+						}
+					}
 				}
 			}
         }
