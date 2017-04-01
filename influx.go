@@ -8,6 +8,7 @@ package main
 import (
     "fmt"
     "time"
+	"strings"
 	"encoding/json"
     influx "github.com/influxdata/influxdb/client/v2"
 )
@@ -470,7 +471,7 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
 			// Rows of results
 			fmt.Printf("%d Rows:\n", len(r.Values))
 			for i, v := range r.Values {
-				fmt.Printf("%d: %d cols'\n", i, len(v))
+				fmt.Printf("%d: %d cols\n", i, len(v))
 				for k, cell := range v {
 					if cell == nil {
 						fmt.Printf("%d: NIL\n", k)
@@ -479,7 +480,22 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
 						default:
 							fmt.Printf("%d: '%v' unknown type %T\n", k, cell, cell)
 						case json.Number:
-							fmt.Printf("%d: '%v' json.Number\n", k, cell)
+							numstr := fmt.Sprintf("%v", cell)
+							if len(numstr) == 19 {
+								// Convert nanoseconds to excel by (V-DATE(1970,1,1))*86400
+								seconds, _ := cell.Int64()
+								seconds = seconds / 1000000
+								exceldate := (float64(seconds) - 25569) * 86400
+								fmt.Printf("%d: '%f' datetime\n", k, exceldate)
+							} else {
+								if strings.Contains(numstr, ".") {
+									cell, _ := cell.Float64()
+									fmt.Printf("%d: '%f' float\n", k, cell)
+								} else {
+									cell, _ := cell.Int64()
+									fmt.Printf("%d: '%d' int\n", k, cell)
+								}
+							}
 						case string:
 							fmt.Printf("%d: '%s' string\n", k, cell)
 						case bool:
