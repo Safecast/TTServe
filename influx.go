@@ -6,6 +6,7 @@
 package main
 
 import (
+	"os"
     "fmt"
     "time"
     "strings"
@@ -522,11 +523,12 @@ func InfluxResultsDebug(response influx.Response) {
 }
 
 // Just a debug function that traverses a Response, which took me forever to figure out
-func InfluxResultsToCSV(response influx.Response) string {
+func InfluxResultsToCSV(response influx.Response) (string, int) {
 
     // Create a blank CSV canvas
     s := ""
-
+	numresults := 0
+	
     // Traverse the response
     for _, result := range response.Results {
 
@@ -548,6 +550,7 @@ func InfluxResultsToCSV(response influx.Response) string {
             fmt.Sprintf("\n")
 
             // Write out each row of results, with setname in col A
+			numresults = len(r.Values)
             for _, v := range r.Values {
                 s += fmt.Sprintf("=\"%s\"", setname)
 
@@ -581,7 +584,7 @@ func InfluxResultsToCSV(response influx.Response) string {
                                 }
                             }
                         case string:
-                            s += fmt.Sprintf("=\"%s\"", cell)
+                            s += fmt.Sprintf(",=\"%s\"", cell)
                         case bool:
                         case *bool:
                             s += fmt.Sprintf(",%t", cell)
@@ -622,40 +625,59 @@ func InfluxResultsToCSV(response influx.Response) string {
     }
 
 	// Return the spreadsheet
-	return s
+	return s, numresults
 	
 }
 
 // Perform a query, returning either an URL to results or an error message
-func InfluxQuery(the_user string, the_query string) (success bool, result string) {
+func InfluxQuery(the_user string, the_query string) (success bool, result string, numresults int) {
 
     // Open the client
     cl, clerr := influx.NewHTTPClient(InfluxConfig())
     if clerr == nil {
         defer cl.Close()
     } else {
-        return false, fmt.Sprintf("Influx connect error: %v", clerr)
+        return false, fmt.Sprintf("Influx connect error: %v", clerr), 0
     }
 
     // Perform the query
     response, qerr := cl.Query(influx.NewQuery("SELECT "+the_query, SafecastDb, "ns"))
     if qerr != nil {
-        return false, fmt.Sprintf("Influx query error: %v", qerr)
+        return false, fmt.Sprintf("Influx query error: %v", qerr), 0
     }
 
     // Exit if an err
     if response.Error() != nil {
-        return false, fmt.Sprintf("Influx query response error: %v", response.Error())
+        return false, fmt.Sprintf("Influx query response error: %v", response.Error()), 0
     }
 
-    // Iterate over all results, producing a spreadsheet
+    // Debug
     if (false) {
         InfluxResultsDebug(*response)
     }
 
-	fmt.Printf(InfluxResultsToCSV(*response))
+	// Convert to CSV
+	csv, numresults := InfluxResultsToCSV(*response)
+	if numresults == 0 {
+        return false, "No results.", 0
+	}
 
+	// Create the output file
+	file := nowInUTC() + "-" + the_user + ".csv"
+	filename := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
+
+    // Write the value
+    fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+    if err != nil {
+		return false, fmt.Sprintf("Cannot create file: %v", err), 0
+    }
+    fd.WriteString(csv)
+    fd.Close()
+
+	// Return the URL to the file
+	url := fmt.Sprintf("http://%s%s%s", TTServerHTTPAddress, TTServerTopicQueryResults, file)
+	
     // const TTInfluxQueryPath = "/influx-query"
-    return true, the_query
+	return true, url, numresults
 
 }

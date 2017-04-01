@@ -17,9 +17,6 @@ import (
 func inboundWebDeviceLogHandler(rw http.ResponseWriter, req *http.Request) {
     stats.Count.HTTP++
 
-    // Set response mime type
-    rw.Header().Set("Content-Type", "application/json")
-
     // Log it
     filename := req.RequestURI[len(TTServerTopicDeviceLog):]
     fmt.Printf("%s LOG request for %s\n", logTime(), filename)
@@ -45,6 +42,8 @@ func inboundWebDeviceLogHandler(rw http.ResponseWriter, req *http.Request) {
 	if extension == "csv" {
 		rw.Header().Set("Content-Disposition", "attachment; filename=" + filename)
 		rw.Header().Set("Content-Type", "application/octet-stream")
+	} else {
+	    rw.Header().Set("Content-Type", "application/json")
 	}
 	
     // Copy the file to output

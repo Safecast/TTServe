@@ -81,6 +81,7 @@ const TTServerFTPPort int = 8083                    // plus 8084 plus the entire
 const TTServerTopicSend string = "/send"
 const TTServerTopicRoot1 string = "/index.html"
 const TTServerTopicRoot2 string = "/index.htm"
+const TTServerTopicQueryResults string = "/query-results/"
 const TTServerTopicDeviceLog string = "/device-log/"
 const TTServerTopicDeviceCheck string = "/check/"
 const TTServerTopicDeviceStatus string = "/device/"
