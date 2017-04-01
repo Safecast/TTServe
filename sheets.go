@@ -9,7 +9,7 @@ import (
     "fmt"
     "time"
     "strings"
-	"strconv"
+    "strconv"
     "net/http"
     "io/ioutil"
 )
@@ -83,23 +83,33 @@ func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
         }
 
         // Cache the data for future iterations
+        fmt.Printf("\n%s *** Refreshed %d entries from Google Sheets\n", logTime(), len(splitContents))
         everRetrieved = true
         lastRetrieved = time.Now()
         failedRecently = false;
 
     }
 
-	// Iterate over the rows
+    // Iterate over the rows
+    deviceIdFound := false;
+    snFound := uint32(0)
     for _, r := range sheet {
-		fmt.Printf("%d %d\n", r.sn, r.deviceid)
-	}
-
-    if (false) {
-        if parsedData == "" {
-            lastError = "No data found"
-            return 0, lastError
+        if r.deviceid == DeviceId {
+            deviceIdFound = true
+            snFound = r.sn
+            break
         }
     }
 
-    return 123, ""
+    if !deviceIdFound {
+        lastError = "Device ID not found"
+        return 0, lastError
+    }
+    if snFound == 0 {
+        lastError = "S/N not found for device"
+        return 0, lastError
+    }
+
+    return snFound, ""
+
 }
