@@ -51,16 +51,14 @@ func SafecastLogToInflux(sd SafecastData) bool {
     if sd.CapturedAt != nil {
         t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
         if e == nil {
-            i64 := t.UnixNano()
-            fields["when_captured_num"] = &i64
+            fields["when_captured_num"] = t.UnixNano()
         }
     }
 	if sd.Loc != nil {
 		if sd.Loc.MotionBegan != nil {
 			t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Loc.MotionBegan)
 			if e == nil {
-				i64 := t.UnixNano()
-				fields["loc_when_motion_began_num"] = &i64
+				fields["loc_when_motion_began_num"] = t.UnixNano()
 	        }
 	    }
 		if sd.Loc.Olc != nil {
@@ -71,8 +69,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 	    if sd.Service.UploadedAt != nil {
 	        t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Service.UploadedAt)
 	        if e == nil {
-	            i64 := t.UnixNano()
-	            fields["service_uploaded_num"] = &i64
+	            fields["service_uploaded_num"] = t.UnixNano()
 			}
 		}
 		if sd.Service.Handler != nil {
@@ -100,8 +97,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 		if sd.Gateway.ReceivedAt != nil {
 	        t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Gateway.ReceivedAt)
 	        if e == nil {
-	            i64 := t.UnixNano()
-	            fields["gateway_received_num"] = &i64
+	            fields["gateway_received_num"] = t.UnixNano()
 	        }
 		}
     }
