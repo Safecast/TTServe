@@ -43,6 +43,8 @@ func SafecastLogToInflux(sd SafecastData) bool {
     }
 
     // Create the tags and fields structures from which a point will be made
+	var setMeasurementTime bool = false
+	var measurementTime time.Time
     tags := map[string]string{}
     fields := map[string]interface{}{}
 
@@ -52,11 +54,14 @@ func SafecastLogToInflux(sd SafecastData) bool {
         fields["device"] = *sd.DeviceId
         tags["device_str"] = fmt.Sprintf("%d", *sd.DeviceId)
     }
+
     if sd.CapturedAt != nil {
         fields["when_captured"] = *sd.CapturedAt
         t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
         if e == nil {
             fields["when_captured_num"] = t.UnixNano()
+			setMeasurementTime = true
+			measurementTime = t
         }
     }
 
@@ -360,6 +365,10 @@ func SafecastLogToInflux(sd SafecastData) bool {
             t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Service.UploadedAt)
             if e == nil {
                 fields["service_uploaded_num"] = t.UnixNano()
+				if !setMeasurementTime {
+					setMeasurementTime = true
+					measurementTime = t
+				}
             }
         }
         if sd.Service.Transport != nil {
@@ -374,7 +383,13 @@ func SafecastLogToInflux(sd SafecastData) bool {
     }
 
     // Make a new point
-    pt, mperr := influx.NewPoint(SafecastDataPoint, tags, fields)
+	var mperr error
+	var pt *influx.Point
+	if setMeasurementTime {
+	    pt, mperr = influx.NewPoint(SafecastDataPoint, tags, fields, measurementTime)
+	} else {
+	    pt, mperr = influx.NewPoint(SafecastDataPoint, tags, fields)
+	}
     if mperr != nil {
         fmt.Printf("Influx point creation error: %v\n", mperr)
         return false
