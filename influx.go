@@ -8,8 +8,8 @@ package main
 import (
     "fmt"
     "time"
-	"strings"
-	"encoding/json"
+    "strings"
+    "encoding/json"
     influx "github.com/influxdata/influxdb/client/v2"
 )
 
@@ -424,6 +424,208 @@ func SafecastLogToInflux(sd SafecastData) bool {
 
 }
 
+// Just a debug function that traverses a Response, which took me forever to figure out
+func InfluxResultsDebug(response influx.Response) {
+
+    for _, result := range response.Results {
+        // Ignore this
+        fmt.Printf("%d Messages:\n", len(result.Messages))
+        for i, m := range result.Messages {
+            fmt.Printf("%d: Level:'%s' Text:'%s'\n", i, m.Level, m.Text)
+        }
+        // These are sets of results with a name
+        fmt.Printf("%d Sets:\n", len(result.Series))
+        for i, r := range result.Series {
+            // Set name is 'data', put this in column 0
+            fmt.Printf("%d: Name:'%s' Tags:'%d' Cols:'%d' Rows:'%d'\n", i, r.Name, len(r.Tags), len(r.Columns), len(r.Values))
+            // No tags - don't even know what to do with
+            fmt.Printf("%d Tags:\n", len(r.Tags))
+            for k, v := range r.Tags {
+                fmt.Printf("'%s':'%s'\n", k, v)
+            }
+            // 86 columns, and each v is the column name
+            fmt.Printf("%d Columns:\n", len(r.Columns))
+            for i, v := range r.Columns {
+                fmt.Printf("%d: '%s'\n", i, v)
+            }
+            // Rows of results
+            fmt.Printf("%d Rows:\n", len(r.Values))
+            for i, v := range r.Values {
+                fmt.Printf("%d: %d cols\n", i, len(v))
+                for k, cell := range v {
+                    if cell == nil {
+                        fmt.Printf("%d: NIL\n", k)
+                    } else {
+                        switch cell := cell.(type) {
+                        default:
+                            fmt.Printf("%d: '%v' unknown type %T\n", k, cell, cell)
+                        case json.Number:
+                            numstr := fmt.Sprintf("%v", cell)
+                            if len(numstr) == 19 {
+                                // Convert nanoseconds to excel by (V-DATE(1970,1,1))*86400
+                                seconds, _ := cell.Float64()
+                                seconds = seconds / 1000000000
+                                exceldate := (seconds / 86400) + 25569
+                                fmt.Printf("%d: '%f' datetime\n", k, exceldate)
+                            } else {
+                                if strings.Contains(numstr, ".") {
+                                    cell, _ := cell.Float64()
+                                    fmt.Printf("%d: '%f' float\n", k, cell)
+                                } else {
+                                    cell, _ := cell.Int64()
+                                    fmt.Printf("%d: '%d' int\n", k, cell)
+                                }
+                            }
+                        case string:
+                            fmt.Printf("%d: '%s' string\n", k, cell)
+                        case bool:
+                            fmt.Printf("%d: '%t' bool\n", k, cell)
+                        case *bool:
+                            fmt.Printf("%d: '%t' *bool\n", k, cell)
+                        case int:
+                        case int8:
+                        case int16:
+                        case int32:
+                        case int64:
+                            fmt.Printf("%d: '%d' int\n", k, cell)
+                        case *int:
+                        case *int8:
+                        case *int16:
+                        case *int32:
+                        case *int64:
+                            fmt.Printf("%d: '%d' *int\n", k, cell)
+                        case uint:
+                        case uint8:
+                        case uint16:
+                        case uint32:
+                        case uint64:
+                            fmt.Printf("%d: '%u' uint\n", k, cell)
+                        case *uint:
+                        case *uint8:
+                        case *uint16:
+                        case *uint32:
+                        case *uint64:
+                            fmt.Printf("%d: '%u' *uint\n", k, cell)
+                        case float32:
+                        case float64:
+                            fmt.Printf("%d: '%f' float\n", k, cell)
+                        case *float32:
+                        case *float64:
+                            fmt.Printf("%d: '%f' float\n", k, cell)
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+// Just a debug function that traverses a Response, which took me forever to figure out
+func InfluxResultsToCSV(response influx.Response) string {
+
+    // Create a blank CSV canvas
+    s := ""
+
+    // Traverse the response
+    for _, result := range response.Results {
+
+        // This outer loop is for sets or groups of results
+        for i, r := range result.Series {
+
+            if i == 0 {
+                s += fmt.Sprintf("\n")
+            }
+            setname := r.Name
+
+            // Write out column headers, with setname in col A
+            s += fmt.Sprintf("=\"%s\"", setname)
+            // Set name is 'data', put this in column 0
+            // 86 columns, and each v is the column name
+            for _, v := range r.Columns {
+                s += fmt.Sprintf(",%s", v)
+            }
+            fmt.Sprintf("\n")
+
+            // Write out each row of results, with setname in col A
+            for _, v := range r.Values {
+                s += fmt.Sprintf("=\"%s\"", setname)
+
+                for _, cell := range v {
+                    if cell == nil {
+                        s += fmt.Sprintf(",")
+                    } else {
+                        switch cell := cell.(type) {
+
+                            // Defensive coding; we've not seen unknown types
+                        default:
+                            s += fmt.Sprintf(",=\"%v\"", cell)
+
+                            // Most numbers in Influx appear as json.Number
+                        case json.Number:
+                            // Special-case datetime's, converting to be useful in Excel
+                            numstr := fmt.Sprintf("%v", cell)
+                            if len(numstr) == 19 {
+                                // Convert nanoseconds to excel by (V-DATE(1970,1,1))*86400
+                                seconds, _ := cell.Float64()
+                                seconds = seconds / 1000000000
+                                exceldate := (seconds / 86400) + 25569
+                                s += fmt.Sprintf(",%f", exceldate)
+                            } else {
+                                if strings.Contains(numstr, ".") {
+                                    cell, _ := cell.Float64()
+                                    s += fmt.Sprintf(",%f", cell)
+                                } else {
+                                    cell, _ := cell.Int64()
+                                    s += fmt.Sprintf(",%d", cell)
+                                }
+                            }
+                        case string:
+                            s += fmt.Sprintf("=\"%s\"", cell)
+                        case bool:
+                        case *bool:
+                            s += fmt.Sprintf(",%t", cell)
+                        case int:
+                        case int8:
+                        case int16:
+                        case int32:
+                        case int64:
+                        case *int:
+                        case *int8:
+                        case *int16:
+                        case *int32:
+                        case *int64:
+                            s += fmt.Sprintf(",%d", cell)
+                        case uint:
+                        case uint8:
+                        case uint16:
+                        case uint32:
+                        case uint64:
+                        case *uint:
+                        case *uint8:
+                        case *uint16:
+                        case *uint32:
+                        case *uint64:
+                            s += fmt.Sprintf(",%u", cell)
+                        case float32:
+                        case float64:
+                        case *float32:
+                        case *float64:
+                            s += fmt.Sprintf(",%f", cell)
+                        }
+                    }
+                }
+                fmt.Sprintf("\n")
+            }
+        }
+
+    }
+
+	// Return the spreadsheet
+	return s
+	
+}
+
 // Perform a query, returning either an URL to results or an error message
 func InfluxQuery(the_user string, the_query string) (success bool, result string) {
 
@@ -446,99 +648,12 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
         return false, fmt.Sprintf("Influx query response error: %v", response.Error())
     }
 
-    // Iterate over all results
-    for _, result := range response.Results {
-		// Ignore this
-        fmt.Printf("%d Messages:\n", len(result.Messages))
-        for i, m := range result.Messages {
-            fmt.Printf("%d: Level:'%s' Text:'%s'\n", i, m.Level, m.Text)
-        }
-		// These are sets of results with a name
-        fmt.Printf("%d Sets:\n", len(result.Series))
-        for i, r := range result.Series {
-			// Set name is 'data', put this in column 0
-            fmt.Printf("%d: Name:'%s' Tags:'%d' Cols:'%d' Rows:'%d'\n", i, r.Name, len(r.Tags), len(r.Columns), len(r.Values))
-			// No tags - don't even know what to do with
-            fmt.Printf("%d Tags:\n", len(r.Tags))
-            for k, v := range r.Tags {
-                fmt.Printf("'%s':'%s'\n", k, v)
-            }
-			// 86 columns, and each v is the column name
-            fmt.Printf("%d Columns:\n", len(r.Columns))
-            for i, v := range r.Columns {
-                fmt.Printf("%d: '%s'\n", i, v)
-            }
-			// Rows of results
-			fmt.Printf("%d Rows:\n", len(r.Values))
-			for i, v := range r.Values {
-				fmt.Printf("%d: %d cols\n", i, len(v))
-				for k, cell := range v {
-					if cell == nil {
-						fmt.Printf("%d: NIL\n", k)
-					} else {
-						switch cell := cell.(type) {
-						default:
-							fmt.Printf("%d: '%v' unknown type %T\n", k, cell, cell)
-						case json.Number:
-							numstr := fmt.Sprintf("%v", cell)
-							if len(numstr) == 19 {
-								// Convert nanoseconds to excel by (V-DATE(1970,1,1))*86400
-								seconds, _ := cell.Float64()
-								seconds = seconds / 1000000000
-								exceldate := (seconds / 86400) + 25569
-								fmt.Printf("%d: '%f' datetime\n", k, exceldate)
-							} else {
-								if strings.Contains(numstr, ".") {
-									cell, _ := cell.Float64()
-									fmt.Printf("%d: '%f' float\n", k, cell)
-								} else {
-									cell, _ := cell.Int64()
-									fmt.Printf("%d: '%d' int\n", k, cell)
-								}
-							}
-						case string:
-							fmt.Printf("%d: '%s' string\n", k, cell)
-						case bool:
-							fmt.Printf("%d: '%t' bool\n", k, cell)
-						case *bool:
-							fmt.Printf("%d: '%t' *bool\n", k, cell)
-						case int:
-						case int8:
-						case int16:
-						case int32:
-						case int64:
-							fmt.Printf("%d: '%d' int\n", k, cell)
-						case *int:
-						case *int8:
-						case *int16:
-						case *int32:
-						case *int64:
-							fmt.Printf("%d: '%d' *int\n", k, cell)
-						case uint:
-						case uint8:
-						case uint16:
-						case uint32:
-						case uint64:
-							fmt.Printf("%d: '%u' uint\n", k, cell)
-						case *uint:
-						case *uint8:
-						case *uint16:
-						case *uint32:
-						case *uint64:
-							fmt.Printf("%d: '%u' *uint\n", k, cell)
-						case float32:
-						case float64:
-							fmt.Printf("%d: '%f' float\n", k, cell)
-						case *float32:
-						case *float64:
-							fmt.Printf("%d: '%f' float\n", k, cell)
-						}
-					}
-				}
-			}
-        }
-
+    // Iterate over all results, producing a spreadsheet
+    if (false) {
+        InfluxResultsDebug(*response)
     }
+
+	fmt.Printf(InfluxResultsToCSV(*response))
 
     // const TTInfluxQueryPath = "/influx-query"
     return true, the_query
