@@ -81,7 +81,7 @@ func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv S
 
 // Save the last value in a file
 func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
-    var ChangedLocation = false
+    var ChangedLoc = false
     var ChangedPms = false
     var ChangedOpc = false
     var ChangedGeiger = false
@@ -197,9 +197,13 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         if value.Loc == nil {
             value.Loc = &loc
         }
-        if value.Loc.Lat != sc.Loc.Lat || value.Loc.Lon != sc.Loc.Lon {
-            value.Loc = sc.Loc
-            ChangedLocation = true
+        if sc.Loc.Lat != nil && (value.Loc.Lat == nil || *value.Loc.Lat != *sc.Loc.Lat) {
+            value.Loc.Lat = sc.Loc.Lat
+            ChangedLoc = true
+        }
+        if sc.Loc.Lon != nil && (value.Loc.Lon == nil || *value.Loc.Lon != *sc.Loc.Lon) {
+            value.Loc.Lon = sc.Loc.Lon
+            ChangedLoc = true
         }
     }
     if sc.Pms != nil {
@@ -541,7 +545,7 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
     }
 
     // Shuffle
-    if ChangedLocation {
+    if ChangedLoc {
         for i:=len(value.LocationHistory)-1; i>0; i-- {
             value.LocationHistory[i] = value.LocationHistory[i-1]
         }
@@ -684,8 +688,8 @@ func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label strin
     }
 
     gps := ""
-    if value.Loc != nil {
-        gps = fmt.Sprintf("<http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps>", value.Loc.Lat, value.Loc.Lon)
+    if value.Loc != nil && value.Loc.Lat != nil && value.Loc.Lon != nil {
+        gps = fmt.Sprintf("<http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps>", *value.Loc.Lat, *value.Loc.Lon)
     }
 
     // Build the summary

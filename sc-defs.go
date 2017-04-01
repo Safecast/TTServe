@@ -5,37 +5,13 @@
 // Safecast API data structures
 package main
 
-// Service metadata
-type Service struct {
-	UploadedAt *string		`json:"service_uploaded,omitempty"`
-    Transport *string		`json:"service_transport,omitempty"`
-	HashMd5 *string			`json:"service_md5,omitempty"`
-	Handler *string			`json:"service_handler,omitempty"`
-}
-
-// Gateway-supplied metadata
-type Gateway struct {
-	SNR *float32			`json:"gateway_lora_snr,omitempty"`
-	ReceivedAt *string		`json:"gateway_received,omitempty"`
-	Lat *float32			`json:"gateway_loc_lat,omitempty"`
-	Lon *float32			`json:"gateway_loc_lon,omitempty"`
-	Alt *float32			`json:"gateway_loc_alt,omitempty"`
-}
-
 // Device Location Data - Lat and Lon required, Alt is optional
 type Loc struct {
-	Lat float32				`json:"loc_lat,omitempty"`
-	Lon float32				`json:"loc_lon,omitempty"`
+	Lat *float32			`json:"loc_lat,omitempty"`
+	Lon *float32			`json:"loc_lon,omitempty"`
 	Alt *float32			`json:"loc_alt,omitempty"`
 	MotionBegan *string		`json:"loc_when_motion_began,omitempty"`
 	Olc *string				`json:"loc_olc,omitempty"`
-}
-
-// Device Battery Performance Data - all are optional
-type Bat struct {
-	Voltage *float32		`json:"bat_voltage,omitempty"`
-    Current *float32		`json:"bat_current,omitempty"`
-	Charge *float32			`json:"bat_charge,omitempty"`
 }
 
 // Device Basic Environmental Data - all are optional
@@ -43,6 +19,13 @@ type Env struct {
     Temp *float32			`json:"env_temp,omitempty"`
     Humid *float32			`json:"env_humid,omitempty"`
     Press *float32			`json:"env_press,omitempty"`
+}
+
+// Device Battery Performance Data - all are optional
+type Bat struct {
+	Voltage *float32		`json:"bat_voltage,omitempty"`
+    Current *float32		`json:"bat_current,omitempty"`
+	Charge *float32			`json:"bat_charge,omitempty"`
 }
 
 // LND Geiger Tubes - both are optional
@@ -133,6 +116,23 @@ type Dev struct {
     ErrorsConnectWireless *uint32 `json:"dev_err_con_wireless,omitempty"`
     ErrorsConnectData *uint32 `json:"dev_err_con_data,omitempty"`
     ErrorsConnectService *uint32 `json:"dev_err_con_service,omitempty"`
+}
+
+// Gateway-supplied metadata
+type Gateway struct {
+	ReceivedAt *string		`json:"gateway_received,omitempty"`
+	SNR *float32			`json:"gateway_lora_snr,omitempty"`
+	Lat *float32			`json:"gateway_loc_lat,omitempty"`
+	Lon *float32			`json:"gateway_loc_lon,omitempty"`
+	Alt *float32			`json:"gateway_loc_alt,omitempty"`
+}
+
+// Service metadata
+type Service struct {
+	UploadedAt *string		`json:"service_uploaded,omitempty"`
+    Transport *string		`json:"service_transport,omitempty"`
+	HashMd5 *string			`json:"service_md5,omitempty"`
+	Handler *string			`json:"service_handler,omitempty"`
 }
 
 // Note that this structure has been designed so that we could convert, at a later date,

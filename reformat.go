@@ -65,13 +65,13 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
     // Loc
     if v1.Latitude != nil && v1.Longitude != nil {
         var loc Loc
-        loc.Lat = *v1.Latitude
-        loc.Lon = *v1.Longitude
+        loc.Lat = v1.Latitude
+        loc.Lon = v1.Longitude
         if v1.Height != nil {
             alt := float32(*v1.Height)
             loc.Alt = &alt
         }
-		Olc := olc.Encode(float64(loc.Lat), float64(loc.Lon), 0)
+		Olc := olc.Encode(float64(*loc.Lat), float64(*loc.Lon), 0)
 		loc.Olc = &Olc
         sd.Loc = &loc
     }

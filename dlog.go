@@ -25,7 +25,7 @@ func SafecastDeviceLogFilename(DeviceId string, Extension string) string {
 // in log-ordering for buffered I/O messages where there are a huge batch of readings
 // that are updated in sequence very quickly.
 func SafecastWriteToLogs(UploadedAt string, sd SafecastData) {
-	go SafecastLogToInflux(sd)
+    go SafecastLogToInflux(sd)
     go SafecastWriteDeviceStatus(UploadedAt, sd)
     go SafecastJSONDeviceLog(UploadedAt, sd)
     go SafecastCSVDeviceLog(UploadedAt, sd)
@@ -40,18 +40,18 @@ func SafecastJSONDeviceLog(UploadedAt string, sd SafecastData) {
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
     if err != nil {
 
-		// Don't attempt to create it if it already exists
-	    _, err2 := os.Stat(file)
-		if err2 == nil {
-            fmt.Printf("Logging: Can't log to %s: %s\n", file, err)
-			return
-	    }
+        // Don't attempt to create it if it already exists
+        _, err2 := os.Stat(file)
         if err2 == nil {
-			if !os.IsNotExist(err2) {
-	            fmt.Printf("Logging: Ignoring attempt to create %s: %s\n", file, err2)
-				return
-			}
-	    }
+            fmt.Printf("Logging: Can't log to %s: %s\n", file, err)
+            return
+        }
+        if err2 == nil {
+            if !os.IsNotExist(err2) {
+                fmt.Printf("Logging: Ignoring attempt to create %s: %s\n", file, err2)
+                return
+            }
+        }
 
         // Attempt to create the file because it doesn't already exist
         fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
@@ -63,10 +63,10 @@ func SafecastJSONDeviceLog(UploadedAt string, sd SafecastData) {
     }
 
     // Turn stats into a safe string writing
-	if sd.Service == nil {
-		var svc Service
-		sd.Service = &svc
-	}
+    if sd.Service == nil {
+        var svc Service
+        sd.Service = &svc
+    }
     sd.Service.UploadedAt = &UploadedAt
     scJSON, _ := json.Marshal(sd)
     fd.WriteString(string(scJSON))
@@ -87,18 +87,18 @@ func SafecastCSVDeviceLog(UploadedAt string, sd SafecastData) {
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
     if err != nil {
 
-		// Don't attempt to create it if it already exists
-	    _, err2 := os.Stat(file)
-		if err2 == nil {
-            fmt.Printf("Logging: Can't log to %s: %s\n", file, err)
-			return
-	    }
+        // Don't attempt to create it if it already exists
+        _, err2 := os.Stat(file)
         if err2 == nil {
-			if !os.IsNotExist(err2) {
-	            fmt.Printf("Logging: Ignoring attempt to create %s: %s\n", file, err2)
-				return
-			}
-	    }
+            fmt.Printf("Logging: Can't log to %s: %s\n", file, err)
+            return
+        }
+        if err2 == nil {
+            if !os.IsNotExist(err2) {
+                fmt.Printf("Logging: Ignoring attempt to create %s: %s\n", file, err2)
+                return
+            }
+        }
 
         // Attempt to create the file because it doesn't already exist
         fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
@@ -247,8 +247,16 @@ func SafecastCSVDeviceLog(UploadedAt string, sd SafecastData) {
     if sd.Loc == nil {
         s += ",,,"
     } else {
-        s = s + fmt.Sprintf(",%f", sd.Loc.Lat)
-        s = s + fmt.Sprintf(",%f", sd.Loc.Lon)
+        if sd.Loc.Lat != nil {
+            s = s + fmt.Sprintf(",%f", *sd.Loc.Lat)
+        } else {
+            s += ","
+        }
+        if sd.Loc.Lon != nil {
+            s = s + fmt.Sprintf(",%f", *sd.Loc.Lon)
+        } else {
+            s += ","
+        }
         if sd.Loc.Alt != nil {
             s = s + fmt.Sprintf(",%f", *sd.Loc.Alt)
         } else {
