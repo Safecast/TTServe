@@ -366,7 +366,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
             tags["service_transport"] = *sd.Service.Transport
         }
         if sd.Service.HashMd5 != nil {
-            tags["service_md5"] = *sd.Service.HashMd5
+            fields["service_md5"] = *sd.Service.HashMd5
         }
         if sd.Service.Handler != nil {
             tags["service_handler"] = *sd.Service.Handler
@@ -381,7 +381,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
     }
 
     // Debug
-    if (true) {
+    if (false) {
         fmt.Printf("*** Influx:\n%v\n", pt)
     }
 
