@@ -8,6 +8,7 @@ package main
 import (
     "fmt"
     "time"
+	"encoding/json"
     influx "github.com/influxdata/influxdb/client/v2"
 )
 
@@ -477,6 +478,8 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
 						switch cell := cell.(type) {
 						default:
 							fmt.Printf("%d: '%v' unknown type %T\n", k, cell, cell)
+						case json.Number:
+							fmt.Printf("%d: '%v' json.Number\n", k, cell)
 						case string:
 							fmt.Printf("%d: '%s' string\n", k, cell)
 						case bool:
