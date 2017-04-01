@@ -663,7 +663,7 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
 	}
 
 	// Create the output file
-	file := nowInUTC() + "-" + the_user + ".csv"
+	file := time.Now().UTC().Format("2006-01-02-150405") + "-" + the_user + ".csv"
 	filename := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
 
     // Write the value
