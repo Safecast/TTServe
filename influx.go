@@ -8,7 +8,6 @@ package main
 import (
     "fmt"
     "time"
-    "encoding/json"
     influx "github.com/influxdata/influxdb/client/v2"
 )
 
@@ -42,118 +41,69 @@ func SafecastLogToInflux(sd SafecastData) bool {
         fmt.Printf("Influx batch points creation error: %v\n", bperr)
         return false
     }
-    // Add "idb" values of our date data structures, for influx queries
-    s64 := fmt.Sprintf("%10d", *sd.DeviceId)
-    sd.DeviceIdIdb = &s64
+
+	// Create the tags and fields structures from which a point will be made
+	tags := map[string]string{}
+	fields := map[string]interface{}{}
+
+	// Extract each safecast field into its influx equivalent
+	tags["device_str"] = fmt.Sprintf("%10d", *sd.DeviceId)
     if sd.CapturedAt != nil {
         t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
         if e == nil {
             i64 := t.UnixNano()
-            sd.CapturedAtIdb = &i64
+            fields["when_captured_num"] = &i64
         }
     }
-    if sd.Service != nil && sd.Service.UploadedAt != nil {
-        t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Service.UploadedAt)
-        if e == nil {
-            i64 := t.UnixNano()
-            sd.Service.UploadedAtIdb = &i64
-        }
-    }
-    if sd.Gateway != nil && sd.Gateway.ReceivedAt != nil {
-        t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Gateway.ReceivedAt)
-        if e == nil {
-            i64 := t.UnixNano()
-            sd.Gateway.ReceivedAtIdb = &i64
-        }
-    }
-    if sd.Loc != nil && sd.Loc.MotionBegan != nil {
-        t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Loc.MotionBegan)
-        if e == nil {
-            i64 := t.UnixNano()
-            sd.Loc.MotionBeganIdb = &i64
-        }
-    }
-
-    // Split the safecast data into "tags" and "fields", where
-    // Tags must be strings and are indexed, so queries are very fast
-    // Fields have arbitrary values that are not indexed, so queries are slower
-    sdFields := sd
-    sdTags := SafecastData{}
-    if sdFields.DeviceIdIdb != nil {
-        sdTags.DeviceIdIdb = sdFields.DeviceIdIdb
-        sdFields.DeviceIdIdb = nil
-    }
-    if sdFields.Service != nil && sdFields.Service.Handler != nil {
-        if sdTags.Service == nil {
-            var svc Service
-            sdTags.Service = &svc
-        }
-        sdTags.Service.Handler = sdFields.Service.Handler
-        sdFields.Service.Handler = nil
-    }
-    if sdFields.Service != nil && sdFields.Service.Transport != nil {
-        if sdTags.Service == nil {
-            var svc Service
-            sdTags.Service = &svc
-        }
-        sdTags.Service.Transport = sdFields.Service.Transport
-        sdFields.Service.Transport = nil
-    }
-    if sdFields.Loc != nil && sdFields.Loc.Olc != nil {
-        if sdTags.Loc == nil {
-            var loc Loc
-            sdTags.Loc = &loc
-        }
-        sdTags.Loc.Olc = sdFields.Loc.Olc
-        sdFields.Loc.Olc = nil
-    }
-    if sdFields.Dev != nil && sdFields.Dev.DeviceLabel != nil {
-        if sdTags.Dev == nil {
-            var dev Dev
-            sdTags.Dev = &dev
-        }
-        sdTags.Dev.DeviceLabel = sdFields.Dev.DeviceLabel
-        sdFields.Dev.DeviceLabel = nil
-    }
-    if sdFields.Dev != nil && sdFields.Dev.AppVersion != nil {
-        if sdTags.Dev == nil {
-            var dev Dev
-            sdTags.Dev = &dev
-        }
-        sdTags.Dev.AppVersion = sdFields.Dev.AppVersion
-        sdFields.Dev.AppVersion = nil
-    }
-    if sdFields.Dev != nil && sdFields.Dev.ModuleLora != nil {
-        if sdTags.Dev == nil {
-            var dev Dev
-            sdTags.Dev = &dev
-        }
-        sdTags.Dev.ModuleLora = sdFields.Dev.ModuleLora
-        sdFields.Dev.ModuleLora = nil
-    }
-    if sdFields.Dev != nil && sdFields.Dev.ModuleFona != nil {
-        if sdTags.Dev == nil {
-            var dev Dev
-            sdTags.Dev = &dev
-        }
-        sdTags.Dev.ModuleFona = sdFields.Dev.ModuleFona
-        sdFields.Dev.ModuleFona = nil
-    }
-
-    // Marshal the safecast data to json text
-    sdTagsJson, _ := json.Marshal(sdTags)
-    var tags map[string]string
-    jterr := json.Unmarshal(sdTagsJson, &tags)
-    if jterr != nil {
-        fmt.Printf("JSON tags unmarshaling error: %v\n", jterr)
-        return false
-    }
-    sdFieldsJson, _ := json.Marshal(sdFields)
-    var fields map[string]interface{}
-    jferr := json.Unmarshal(sdFieldsJson, &fields)
-    if jferr != nil {
-        fmt.Printf("JSON fields unmarshaling error: %v\n", jferr)
-        return false
+	if sd.Loc != nil {
+		if sd.Loc.MotionBegan != nil {
+			t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Loc.MotionBegan)
+			if e == nil {
+				i64 := t.UnixNano()
+				fields["loc_when_motion_began_num"] = &i64
+	        }
+	    }
+		if sd.Loc.Olc != nil {
+			tags["loc_olc"] = *sd.Loc.Olc
+		}
+	}
+	if sd.Service != nil {
+	    if sd.Service.UploadedAt != nil {
+	        t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Service.UploadedAt)
+	        if e == nil {
+	            i64 := t.UnixNano()
+	            fields["service_uploaded_num"] = &i64
+			}
+		}
+		if sd.Service.Handler != nil {
+			tags["service_handler"] = *sd.Service.Handler
+		}
+		if sd.Service.Transport != nil {
+			tags["service_transport"] = *sd.Service.Transport
+		}
+	}
+	if sd.Dev != nil {
+		if sd.Dev.DeviceLabel != nil {
+			tags["dev_label"] = *sd.Dev.DeviceLabel
+		}
+		if sd.Dev.AppVersion != nil {
+			tags["dev_firmware"] = *sd.Dev.AppVersion
+		}
+		if sd.Dev.ModuleLora != nil {
+			tags["dev_module_lora"] = *sd.Dev.ModuleLora
+		}
+		if sd.Dev.ModuleFona != nil {
+			tags["dev_module_fona"] = *sd.Dev.ModuleFona
+		}
+	}
+	if sd.Gateway != nil {
+		if sd.Gateway.ReceivedAt != nil {
+	        t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Gateway.ReceivedAt)
+	        if e == nil {
+	            i64 := t.UnixNano()
+	            fields["gateway_received_num"] = &i64
+	        }
+		}
     }
 
     // Make a new point
@@ -164,9 +114,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
     }
 
     // Debug
-    if (false) {
-        fmt.Printf("***   Tags:\n%s\n", string(sdTagsJson));
-        fmt.Printf("*** Fields:\n%s\n", string(sdFieldsJson));
+    if (true) {
         fmt.Printf("*** Influx:\n%v\n", pt)
     }
 
