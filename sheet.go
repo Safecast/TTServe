@@ -25,13 +25,12 @@ var everRetrieved bool = false
 var lastRetrieved time.Time
 var failedRecently bool = false
 var lastError string
-var parsedData string
 
 func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
     var fRetrieve bool = false
     var sheetData string = ""
 
-    if parsedData == "" {
+    if sheet == nil {
         fRetrieve = true
     }
 
@@ -61,7 +60,6 @@ func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
 
         // Parse the sheet
         sheetData = string(buf)
-        parsedData = ""
         sheet = nil
 
         splitContents := strings.Split(string(sheetData), "\n")
