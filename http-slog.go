@@ -28,12 +28,14 @@ func inboundWebServerLogHandler(rw http.ResponseWriter, req *http.Request) {
     Str := strings.Split(fn, "$")
 	if len(Str) != 2 {
 	    fmt.Printf("%s Badly formatted instance request\n", logTime())
+        io.WriteString(rw, "No such server instance.")
 		return
 	}		
     secret := Str[0]
     filename := Str[1]
 	if secret != ServerLogSecret() {
 	    fmt.Printf("%s Ssecret %s != %s\n", logTime(), secret, ServerLogSecret())
+        io.WriteString(rw, "This link to server log has expired.")
 		return
 	}		
 
