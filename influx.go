@@ -6,7 +6,7 @@
 package main
 
 import (
-	"os"
+    "os"
     "fmt"
     "time"
     "strings"
@@ -461,22 +461,7 @@ func InfluxResultsDebug(response influx.Response) {
                         default:
                             fmt.Printf("%d: '%v' unknown type %T\n", k, cell, cell)
                         case json.Number:
-                            numstr := fmt.Sprintf("%v", cell)
-                            if len(numstr) == 19 {
-                                // Convert nanoseconds to excel by (V-DATE(1970,1,1))*86400
-                                seconds, _ := cell.Float64()
-                                seconds = seconds / 1000000000
-                                exceldate := (seconds / 86400) + 25569
-                                fmt.Printf("%d: '%f' datetime\n", k, exceldate)
-                            } else {
-                                if strings.Contains(numstr, ".") {
-                                    cell, _ := cell.Float64()
-                                    fmt.Printf("%d: '%f' float\n", k, cell)
-                                } else {
-                                    cell, _ := cell.Int64()
-                                    fmt.Printf("%d: '%d' int\n", k, cell)
-                                }
-                            }
+                            fmt.Printf("%d: '%v' json.Number\n", k, cell)
                         case string:
                             fmt.Printf("%d: '%s' string\n", k, cell)
                         case bool:
@@ -484,35 +469,53 @@ func InfluxResultsDebug(response influx.Response) {
                         case *bool:
                             fmt.Printf("%d: '%t' *bool\n", k, cell)
                         case int:
-                        case int8:
-                        case int16:
-                        case int32:
-                        case int64:
                             fmt.Printf("%d: '%d' int\n", k, cell)
+                        case int8:
+                            fmt.Printf("%d: '%d' int8\n", k, cell)
+                        case int16:
+                            fmt.Printf("%d: '%d' int16\n", k, cell)
+                        case int32:
+                            fmt.Printf("%d: '%d' int32\n", k, cell)
+                        case int64:
+                            fmt.Printf("%d: '%d' int64\n", k, cell)
                         case *int:
-                        case *int8:
-                        case *int16:
-                        case *int32:
-                        case *int64:
                             fmt.Printf("%d: '%d' *int\n", k, cell)
+                        case *int8:
+                            fmt.Printf("%d: '%d' *int8\n", k, cell)
+                        case *int16:
+                            fmt.Printf("%d: '%d' *int16\n", k, cell)
+                        case *int32:
+                            fmt.Printf("%d: '%d' *int32\n", k, cell)
+                        case *int64:
+                            fmt.Printf("%d: '%d' *int64\n", k, cell)
                         case uint:
-                        case uint8:
-                        case uint16:
-                        case uint32:
-                        case uint64:
                             fmt.Printf("%d: '%u' uint\n", k, cell)
+                        case uint8:
+                            fmt.Printf("%d: '%u' uint8\n", k, cell)
+                        case uint16:
+                            fmt.Printf("%d: '%u' uint16\n", k, cell)
+                        case uint32:
+                            fmt.Printf("%d: '%u' uint32\n", k, cell)
+                        case uint64:
+                            fmt.Printf("%d: '%u' uint64\n", k, cell)
                         case *uint:
-                        case *uint8:
-                        case *uint16:
-                        case *uint32:
-                        case *uint64:
                             fmt.Printf("%d: '%u' *uint\n", k, cell)
+                        case *uint8:
+                            fmt.Printf("%d: '%u' *uint8\n", k, cell)
+                        case *uint16:
+                            fmt.Printf("%d: '%u' *uint16\n", k, cell)
+                        case *uint32:
+                            fmt.Printf("%d: '%u' *uint32\n", k, cell)
+                        case *uint64:
+                            fmt.Printf("%d: '%u' *uint64\n", k, cell)
                         case float32:
+                            fmt.Printf("%d: '%f' float32\n", k, cell)
                         case float64:
-                            fmt.Printf("%d: '%f' float\n", k, cell)
+                            fmt.Printf("%d: '%f' float64\n", k, cell)
                         case *float32:
+                            fmt.Printf("%d: '%f' *float32\n", k, cell)
                         case *float64:
-                            fmt.Printf("%d: '%f' float\n", k, cell)
+                            fmt.Printf("%d: '%f' *float64\n", k, cell)
                         }
                     }
                 }
@@ -527,8 +530,8 @@ func InfluxResultsToCSV(response influx.Response) (string, int) {
 
     // Create a blank CSV canvas
     s := ""
-	numresults := 0
-	
+    numresults := 0
+
     // Traverse the response
     for _, result := range response.Results {
 
@@ -550,14 +553,16 @@ func InfluxResultsToCSV(response influx.Response) (string, int) {
             s += fmt.Sprintf("\n")
 
             // Write out each row of results, with setname in col A
-			numresults = len(r.Values)
+            numresults = len(r.Values)
             for _, v := range r.Values {
                 s += fmt.Sprintf("=\"%s\"", setname)
 
                 for _, cell := range v {
+
                     if cell == nil {
                         s += fmt.Sprintf(",")
                     } else {
+
                         switch cell := cell.(type) {
 
                             // Defensive coding; we've not seen unknown types
@@ -583,38 +588,62 @@ func InfluxResultsToCSV(response influx.Response) (string, int) {
                                     s += fmt.Sprintf(",%d", cell)
                                 }
                             }
+
                         case string:
                             s += fmt.Sprintf(",=\"%s\"", cell)
                         case bool:
+                            s += fmt.Sprintf(",%t", cell)
                         case *bool:
                             s += fmt.Sprintf(",%t", cell)
                         case int:
+                            s += fmt.Sprintf(",%d", cell)
                         case int8:
+                            s += fmt.Sprintf(",%d", cell)
                         case int16:
+                            s += fmt.Sprintf(",%d", cell)
                         case int32:
+                            s += fmt.Sprintf(",%d", cell)
                         case int64:
+                            s += fmt.Sprintf(",%d", cell)
                         case *int:
+                            s += fmt.Sprintf(",%d", cell)
                         case *int8:
+                            s += fmt.Sprintf(",%d", cell)
                         case *int16:
+                            s += fmt.Sprintf(",%d", cell)
                         case *int32:
+                            s += fmt.Sprintf(",%d", cell)
                         case *int64:
                             s += fmt.Sprintf(",%d", cell)
                         case uint:
+                            s += fmt.Sprintf(",%u", cell)
                         case uint8:
+                            s += fmt.Sprintf(",%u", cell)
                         case uint16:
+                            s += fmt.Sprintf(",%u", cell)
                         case uint32:
+                            s += fmt.Sprintf(",%u", cell)
                         case uint64:
+                            s += fmt.Sprintf(",%u", cell)
                         case *uint:
+                            s += fmt.Sprintf(",%u", cell)
                         case *uint8:
+                            s += fmt.Sprintf(",%u", cell)
                         case *uint16:
+                            s += fmt.Sprintf(",%u", cell)
                         case *uint32:
+                            s += fmt.Sprintf(",%u", cell)
                         case *uint64:
                             s += fmt.Sprintf(",%u", cell)
                         case float32:
+                            s += fmt.Sprintf(",%f", cell)
                         case float64:
+                            s += fmt.Sprintf(",%f", cell)
                         case *float32:
+                            s += fmt.Sprintf(",%f", cell)
                         case *float64:
                             s += fmt.Sprintf(",%f", cell)
+
                         }
                     }
                 }
@@ -624,9 +653,9 @@ func InfluxResultsToCSV(response influx.Response) (string, int) {
 
     }
 
-	// Return the spreadsheet
-	return s, numresults
-	
+    // Return the spreadsheet
+    return s, numresults
+
 }
 
 // Perform a query, returning either an URL to results or an error message
@@ -656,28 +685,28 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
         InfluxResultsDebug(*response)
     }
 
-	// Convert to CSV
-	csv, numresults := InfluxResultsToCSV(*response)
-	if numresults == 0 {
+    // Convert to CSV
+    csv, numresults := InfluxResultsToCSV(*response)
+    if numresults == 0 {
         return false, "No results.", 0
-	}
+    }
 
-	// Create the output file
-	file := time.Now().UTC().Format("2006-01-02-150405") + "-" + the_user + ".csv"
-	filename := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
+    // Create the output file
+    file := time.Now().UTC().Format("2006-01-02-150405") + "-" + the_user + ".csv"
+    filename := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
 
     // Write the value
     fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
     if err != nil {
-		return false, fmt.Sprintf("Cannot create file: %v", err), 0
+        return false, fmt.Sprintf("Cannot create file: %v", err), 0
     }
     fd.WriteString(csv)
     fd.Close()
 
-	// Return the URL to the file
-	url := fmt.Sprintf("http://%s%s%s", TTServerHTTPAddress, TTServerTopicQueryResults, file)
-	
+    // Return the URL to the file
+    url := fmt.Sprintf("http://%s%s%s", TTServerHTTPAddress, TTServerTopicQueryResults, file)
+
     // const TTInfluxQueryPath = "/influx-query"
-	return true, url, numresults
+    return true, url, numresults
 
 }
