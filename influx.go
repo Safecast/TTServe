@@ -47,7 +47,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 	fields := map[string]interface{}{}
 
 	// Extract each safecast field into its influx equivalent
-	tags["device_str"] = fmt.Sprintf("%10d", *sd.DeviceId)
+	tags["device_str"] = fmt.Sprintf("%d", *sd.DeviceId)
     if sd.CapturedAt != nil {
         t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
         if e == nil {
