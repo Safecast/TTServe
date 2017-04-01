@@ -62,7 +62,7 @@ func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
 			if len(splitLine) < 2 {
 				fmt.Printf("?: '%s'\n", c)
 			} else {
-				fmt.Printf("'%s' '%s'\n", c[0], c[1])
+				fmt.Printf("'%s' '%s'\n", splitLine[0], splitLine[1])
 			}
 		}
 
