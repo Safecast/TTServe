@@ -252,6 +252,9 @@ func RemapCommonUnicodeToASCII(str string) string {
 		ascii = strings.Replace(ascii, Conversions[i], Conversions[i+1], -1)
 	}
 
+	// Now, remove the outer quotes that we added
+	ascii, _ = strconv.Unquote(ascii)
+	
 	// Done
 	return ascii
 	
