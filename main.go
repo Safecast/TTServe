@@ -159,6 +159,9 @@ func main() {
 		refreshDeviceSummaryLabels()
 	}
 
+	// Spawn the input handler
+	go inputHandler()
+	
     // Spawn timer tasks, assuming the role of one of them
     go timer12h()
     go timer15m()
