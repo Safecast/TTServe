@@ -110,3 +110,149 @@ func errorString(err error) string {
     s2 := strings.TrimSpace(s1)
     return s2
 }
+
+// Function to convert common UTF-8 strings to ASCII, where ASCII is required
+func RemapCommonUnicodeToASCII(str string) string {
+    Conversions := []string{
+        "\\u2000", " ",  // EN QUAD
+        "\\u2001", " ",  // EM QUAD
+        "\\u2002", " ",  // EN SPACE
+        "\\u2003", " ",  // EM SPACE
+        "\\u2004", " ",  // THREE-PER-EM SPACE
+        "\\u2005", " ",  // FOUR-PER-EM SPACE
+        "\\u2006", " ",  // SIX-PER-EM SPACE
+        "\\u2007", " ",  // FIGURE SPACE
+        "\\u2008", " ",  // PUNCTUATION SPACE
+        "\\u2009", " ",  // THIN SPACE
+        "\\u200A", " ",  // HAIR SPACE
+        "\\u200B", " ",  // ZERO WIDTH SPACE
+        "\\u200C", " ",  // ZERO WIDTH NON-JOINER
+        "\\u200D", " ",  // ZERO WIDTH JOINER
+        "\\u200E", "",   // LEFT-TO-RIGHT MARK
+        "\\u200F", "",   // RIGHT-TO-LEFT MARK
+        "\\u2010", "-",  // HYPHEN
+        "\\u2011", "-",  // NON-BREAKING HYPHEN
+        "\\u2012", "-",  // FIGURE DASH
+        "\\u2013", "-",  // EN DASH
+        "\\u2014", "-",  // EM DASH
+        "\\u2015", "-",  // HORIZONTAL BAR
+        "\\u2016", "|",  // DOUBLE VERTICAL LINE
+        "\\u2017", "_",  // DOUBLE LOW LINE
+        "\\u2018", "'",  // LEFT SINGLE QUOTATION MARK
+        "\\u2019", "'",  // RIGHT SINGLE QUOTATION MARK
+        "\\u201A", "'",  // SINGLE LOW-9 QUOTATION MARK
+        "\\u201B", "'",  // SINGLE HIGH-REVERSED-9 QUOTATION MARK
+        "\\u201C", "\"", // LEFT DOUBLE QUOTATION MARK
+        "\\u201D", "\"", // RIGHT DOUBLE QUOTATION MARK
+        "\\u201E", "\"", // DOUBLE LOW-9 QUOTATION MARK
+        "\\u201F", "\"", // DOUBLE HIGH-REVERSED-9 QUOTATION MARK
+        "\\u2020", "|",  // DAGGER
+        "\\u2021", "|",  // DOUBLE DAGGER
+        "\\u2022", "-",  // BULLET
+        "\\u2023", ">",  // TRIANGULAR BULLET
+        "\\u2024", ".",  // ONE DOT LEADER
+        "\\u2025", "..", // TWO DOT LEADER
+        "\\u2026", "...",// HORIZONTAL ELLIPSIS
+        "\\u2027", "-",  // HYPHENATION POINT
+        "\\u2028", "",   // LINE SEPARATOR
+        "\\u2029", "",   // PARAGRAPH SEPARATOR
+        "\\u202A", "",   // LEFT-TO-RIGHT EMBEDDING
+        "\\u202B", "",   // RIGHT-TO-LEFT EMBEDDING
+        "\\u202C", "",   // POP DIRECTIONAL FORMATTING
+        "\\u202D", "",   // LEFT-TO-RIGHT OVERRIDE
+        "\\u202E", "",   // RIGHT-TO-LEFT OVERRIDE
+        "\\u202F", " ",  // NARROW NO-BREAK SPACE
+        "\\u2030", "%",  // PER MILLE SIGN
+        "\\u2031", "%",  // PER TEN THOUSAND SIGN
+        "\\u2032", "'",  // PRIME
+        "\\u2033", "\"", // DOUBLE PRIME
+        "\\u2034", "\"", // TRIPLE PRIME
+        "\\u2035", "'",  // REVERSED PRIME
+        "\\u2036", "\"", // REVERSED DOUBLE PRIME
+        "\\u2037", "\"", // REVERSED TRIPLE PRIME
+        "\\u2038", "^",  // CARET
+        "\\u2039", "<",  // SINGLE LEFT-POINTING ANGLE QUOTATION MARK
+        "\\u203A", ">",  // SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
+        "\\u203B", "*",  // REFERENCE MARK
+        "\\u203C", "!!", // DOUBLE EXCLAMATION MARK
+        "\\u203D", "?!", // INTERROBANG
+        "\\u203E", "=",  // OVERLINE
+        "\\u203F", "_",  // UNDERTIE
+        "\\u2040", "-",  // TIE
+        "\\u2041", "|",  // CARET INSERTION POINT
+        "\\u2042", "*",  // ASTERISM
+        "\\u2043", "-",  // HYPHEN BULLET
+        "\\u2044", "/",  // FRACTION SLASH
+        "\\u2045", "{",  // LEFT SQUARE BRACKET WITH QUILL
+        "\\u2046", "}",  // RIGHT SQUARE BRACKET WITH QUILL
+        "\\u2047", "??", // DOUBLE QUESTION MARK
+        "\\u2048", "?!", // QUESTION EXCLAMATION MARK
+        "\\u2049", "!?", // EXCLAMATION QUESTION MARK
+        "\\u204A", "-",  // TIRONIAN SIGN ET
+        "\\u204B", "%",  // REVERSED PILCROW SIGN
+        "\\u204C", "<",  // BLACK LEFTWARDS BULLET
+        "\\u204D", ">",  // BLACK RIGHTWARDS BULLET
+        "\\u204E", "*",  // LOW ASTERISK
+        "\\u204F", ";",  // REVERSED SEMICOLON
+        "\\u2050", "_",  // CLOSE UP
+        "\\u2051", "**", // TWO ASTERISKS ALIGNED VERTICALLY
+        "\\u2052", "%",  // COMMERCIAL MINUS SIGN
+        "\\u2053", "~",  // SWUNG DASH
+        "\\u2054", "_",  // INVERTED UNDERTIE
+        "\\u2055", "*",  // FLOWER PUNCTUATION MARK
+        "\\u2056", "...",// THREE DOT PUNCTUATION
+        "\\u2057", "\"\"",// QUADRUPLE PRIME
+        "\\u2058", ":",  // FOUR DOT PUNCTUATION
+        "\\u2059", ":",  // FIVE DOT PUNCTUATION
+        "\\u205A", ":",  // TWO DOT PUNCTUATION
+        "\\u205B", ":",  // FOUR DOT MARK
+        "\\u205C", "#",  // DOTTED CROSS
+        "\\u205D", ":",  // TRICOLON
+        "\\u205E", ":",  // VERTICAL FOUR DOTS
+        "\\u205F", " ",  // MEDIUM MATHEMATICAL SPACE
+        "\\u2060", "",   // WORD JOINER
+        "\\u2061", "",   // FUNCTION APPLICATION
+        "\\u2062", "*",  // INVISIBLE TIMES
+        "\\u2063", " ",  // INVISIBLE SEPARATOR
+        "\\u2064", "+",  // INVISIBLE PLUS
+        "\\u2065", " ",  // INVISIBLE SPACE
+        "\\u2066", "",   // LEFT-TO-RIGHT ISOLATE
+        "\\u2067", "",   // RIGHT-TO-LEFT ISOLATE
+        "\\u2068", "",   // FIRST STRONG ISOLATE
+        "\\u2069", "",   // POP DIRECTIONAL ISOLATE
+        "\\u206A", "",   // INHIBIT SYMMETRIC SWAPPING
+        "\\u206B", "",   // ACTIVATE SYMMETRIC SWAPPING
+        "\\u206C", "",   // INHIBIT ARABIC FORM SHAPING
+        "\\u206D", "",   // ACTIVATE ARABIC FORM SHAPING
+        "\\u206E", "?",  // NATIONAL DIGIT SHAPES
+        "\\u206F", "",   // NOMINAL DIGIT SHAPES
+        "\\u2070", "0",  // SUPERSCRIPT ZERO
+        "\\u2071", "i",  // SUPERSCRIPT LATIN SMALL LETTER I
+        "\\u2072", "",   // ?
+        "\\u2073", "",   // ?
+        "\\u2074", "4",  // SUPERSCRIPT FOUR
+        "\\u2075", "5",  // SUPERSCRIPT FIVE
+        "\\u2076", "6",  // SUPERSCRIPT SIX
+        "\\u2077", "7",  // SUPERSCRIPT SEVEN
+        "\\u2078", "8",  // SUPERSCRIPT EIGHT
+        "\\u2079", "9",  // SUPERSCRIPT NINE
+        "\\u207A", "+",  // SUPERSCRIPT PLUS SIGN
+        "\\u207B", "-",  // SUPERSCRIPT MINUS
+        "\\u207C", "=",  // SUPERSCRIPT EQUALS SIGN
+        "\\u207D", "(",  // SUPERSCRIPT LEFT PARENTHESIS
+        "\\u207E", ")",  // SUPERSCRIPT RIGHT PARENTHESIS
+        "\\u207F", "n",  // SUPERSCRIPT LATIN SMALL LETTER N
+        "", ""}
+
+    // First, convert UTF-8 to ASCII so we can replace it
+    ascii := strconv.QuoteToASCII(str)
+
+	// Now, loop through the conversions
+    for i := 0; Conversions[i] != ""; i += 2 {
+		ascii = strings.Replace(ascii, Conversions[i], Conversions[i+1], -1)
+	}
+
+	// Done
+	return ascii
+	
+}

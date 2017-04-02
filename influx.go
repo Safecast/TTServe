@@ -703,6 +703,9 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
 // Perform a query, returning either an URL to results or an error message
 func InfluxQuery(the_user string, the_query string) (success bool, result string, numresults int) {
 
+	// Remap unicode characters (such as single quotes) to ASCII equivalents
+	the_query = RemapCommonUnicodeToASCII(the_query)
+	
     // Open the client
     cl, clerr := influx.NewHTTPClient(InfluxConfig())
     if clerr == nil {
