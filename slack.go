@@ -153,8 +153,11 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         if len(args) < 2 {
             sendToSafecastOps("Command format: SELECT <query>", SLACK_MSG_REPLY)
         } else {
-			fmt.Printf("*** Influx query: \"%s\"", messageAfterFirstWord)
-			success, result, numrows := InfluxQuery(user, messageAfterFirstWord)
+			// Unquote the string, which substitutes &gt for >
+			rawQuery, _ := strconv.Unquote(messageAfterFirstWord)
+			fmt.Printf("*** Influx query: \"%s\"", rawQuery)
+			// Perform the query
+			success, result, numrows := InfluxQuery(user, rawQuery)
 			if !success {
 	            sendToSafecastOps(fmt.Sprintf("Query error: %s", result), SLACK_MSG_REPLY)
 			} else {
