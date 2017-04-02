@@ -529,6 +529,29 @@ func InfluxResultsDebug(response *influx.Response) {
     }
 }
 
+// Quote a string appropriately
+func QuoteStringForCSV(str string) string {
+
+	// First, get rid of quotes
+	str = strings.Replace(str, "\"", "'", -1)
+	
+	// If we're being crazy about quoting, do it
+    if quoteTextInCSV {
+        return fmt.Sprintf("=\"%s\"", str)
+    }
+
+	// Get rid of commas, because they cause crazy parsing problems
+	str = strings.Replace(str, ",", " ", -1)
+	str = strings.Replace(str, "  ", " ", -1)
+	
+	// Get rid of leading/trailing space
+	str = strings.TrimSpace(str)
+
+	// Done
+	return str
+	
+}
+
 // Just a debug function that traverses a Response, which took me forever to figure out
 func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
 
@@ -552,9 +575,7 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
                 firstRow = false;
 
                 // Write out column headers, making room for setname in col A
-				if quoteTextInCSV {
-	                s += fmt.Sprintf("=\"\"")
-				}
+				s += QuoteStringForCSV("")
 
                 // Set name is 'data', put this in column 0
                 // 86 columns, and each v is the column name
@@ -568,12 +589,8 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
             // Write out each row of results, with setname in col A
             numresults += len(r.Values)
             for _, v := range r.Values {
-				if quoteTextInCSV {
-	                s += fmt.Sprintf("=\"%s\"", setname)
-				} else {
-	                s += fmt.Sprintf("%s", setname)
-				}
-				
+				s += QuoteStringForCSV(setname)
+
                 for _, cell := range v {
 
                     if cell == nil {
@@ -584,11 +601,7 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
 
                             // Defensive coding; we've not seen unknown types
                         default:
-							if quoteTextInCSV {
-	                            s += fmt.Sprintf(",=\"%v\"", cell)
-							} else {
-	                            s += fmt.Sprintf(",%v", cell)
-							}
+							s += QuoteStringForCSV(fmt.Sprintf(",%v", cell))
 
                             // Most numbers in Influx appear as json.Number
                         case json.Number:
@@ -611,12 +624,8 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
                             }
 
                         case string:
-							if quoteTextInCSV {
-	                            s += fmt.Sprintf(",=\"%s\"", cell)
-							} else {
-	                            s += fmt.Sprintf(",%s", cell)
-							}
-							
+							s += QuoteStringForCSV(fmt.Sprintf(",%s", cell))
+
                         case bool:
                             s += fmt.Sprintf(",%t", cell)
                         case *bool:
@@ -675,12 +684,12 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
                 }
                 s += fmt.Sprintf("\n")
 
-				// Write this line to the file
-			    fd.WriteString(s)
+                // Write this line to the file
+                fd.WriteString(s)
 
-				// Begin again
-				s = ""
-				
+                // Begin again
+                s = ""
+
             }
         }
 
@@ -729,7 +738,7 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
         return false, fmt.Sprintf("Cannot create file: %v", err), 0
     }
 
-	// Make sure we close the file
+    // Make sure we close the file
     defer fd.Close()
 
     // Convert to CSV
