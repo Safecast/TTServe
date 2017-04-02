@@ -73,7 +73,7 @@ func trackServer(ServerId string, whenSeen time.Time) {
                     case minutesAgo >= 120:
                         message = fmt.Sprintf("~%d hours", hoursAgo)
                     }
-                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Server %s has returned after %s away", seenServers[i].serverid, message), SLACK_MSG_UNSOLICITED)
+                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Server %s has returned after %s away", seenServers[i].serverid, message), SLACK_MSG_UNSOLICITED_OPS)
                 }
                 // Mark as having been seen on the latest date of any file having that time
                 seenServers[i].notifiedAsUnseen = false
@@ -145,7 +145,7 @@ func sendExpiredSafecastServersToSlack() {
                 seenServers[i].notifiedAsUnseen = true
                 sendToSafecastOps(fmt.Sprintf("** Warning **  Server %s hasn't been seen for %d minutes",
                     seenServers[i].serverid,
-                    seenServers[i].minutesAgo), SLACK_MSG_UNSOLICITED)
+                    seenServers[i].minutesAgo), SLACK_MSG_UNSOLICITED_OPS)
             }
         }
     }

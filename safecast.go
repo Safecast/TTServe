@@ -580,7 +580,7 @@ func endTransaction(transaction int, url string, errstr string) {
         } else {
             s = fmt.Sprintf("HTTP Upload: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", theCount, theMin, theMax, theMean)
         }
-        sendToSafecastOps(s, SLACK_MSG_UNSOLICITED)
+        sendToSafecastOps(s, SLACK_MSG_UNSOLICITED_OPS)
     }
 
 }

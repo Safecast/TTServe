@@ -166,7 +166,7 @@ func TcpInboundHandler() {
 
                 // Responses are binary on TCP
                 conn.Write(payload)
-                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED)
+                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED_OPS)
             }
 
         }

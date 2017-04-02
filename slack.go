@@ -207,7 +207,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         time.Sleep(2 * time.Second)
         ServerLog(fmt.Sprintf("*** RESTARTING because of Slack 'restart-all' command\n"))
         ControlFileTime(TTServerRestartAllControlFile, user)
-        sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServeInstanceID), SLACK_MSG_UNSOLICITED)
+        sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServeInstanceID), SLACK_MSG_UNSOLICITED_OPS)
         time.Sleep(3 * time.Second)
         os.Exit(0)
 
@@ -268,7 +268,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 // within an HTTP request handler that must return so as to flush the response buffer
 // back to the callers.
 func sendToSafecastOps(msg string, destination int) {
-    if destination == SLACK_MSG_UNSOLICITED {
+    if destination == SLACK_MSG_UNSOLICITED_ALL {
 	    str := strings.Split(ServiceConfig.SlackOutboundUrls, ",")
         for _, url := range str {
             go sendToOpsViaSlack(msg, url)

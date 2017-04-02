@@ -146,7 +146,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
             // Responses for now are always hex-encoded for easy device processing
             hexPayload := hex.EncodeToString(payload)
             io.WriteString(rw, hexPayload)
-            sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED)
+            sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED_OPS)
         }
 
     }

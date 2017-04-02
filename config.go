@@ -43,7 +43,7 @@ var SlackCommandSource = SLACK_OPS_NONE
 
 var SlackCommandTime time.Time
 
-const SLACK_MSG_UNSOLICITED =       0
+const SLACK_MSG_UNSOLICITED_ALL =   0
 const SLACK_MSG_UNSOLICITED_OPS =   1
 const SLACK_MSG_REPLY =             2
 

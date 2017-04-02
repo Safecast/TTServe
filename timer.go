@@ -86,7 +86,7 @@ func RandomRestart() {
 	minutes := time.Duration(random(3, 15))
 
     // To ensure a best-efforts sequencing in log, impose a delay in proportion to sequencing
-		sendToSafecastOps(fmt.Sprintf("** %s will restart in %d minutes **", TTServeInstanceID, minutes), SLACK_MSG_UNSOLICITED)
+		sendToSafecastOps(fmt.Sprintf("** %s will restart in %d minutes **", TTServeInstanceID, minutes), SLACK_MSG_UNSOLICITED_OPS)
     time.Sleep(minutes * time.Minute)
 
     // Log

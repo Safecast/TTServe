@@ -73,7 +73,7 @@ func trackGateway(GatewayId string, whenSeen time.Time) {
                     case minutesAgo >= 120:
                         message = fmt.Sprintf("~%d hours", hoursAgo)
                     }
-                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s has returned after %s away", seenGateways[i].gatewayid, message), SLACK_MSG_UNSOLICITED)
+                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s has returned after %s away", seenGateways[i].gatewayid, message), SLACK_MSG_UNSOLICITED_OPS)
                 }
                 // Mark as having been seen on the latest date of any file having that time
                 seenGateways[i].notifiedAsUnseen = false
@@ -145,7 +145,7 @@ func sendExpiredSafecastGatewaysToSlack() {
                 seenGateways[i].notifiedAsUnseen = true
                 sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s hasn't been seen for %d minutes",
                     seenGateways[i].gatewayid,
-                    seenGateways[i].minutesAgo), SLACK_MSG_UNSOLICITED)
+                    seenGateways[i].minutesAgo), SLACK_MSG_UNSOLICITED_OPS)
             }
         }
     }

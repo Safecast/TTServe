@@ -97,10 +97,10 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 
                 if err != nil {
                     fmt.Printf("\n*** HTTPS POST error: %v\n\n", err)
-                    sendToSafecastOps(fmt.Sprintf("Error transmitting command to device %d: %s\n", ReplyToDeviceId, errorString(err)), SLACK_MSG_UNSOLICITED)
+                    sendToSafecastOps(fmt.Sprintf("Error transmitting command to device %d: %s\n", ReplyToDeviceId, errorString(err)), SLACK_MSG_UNSOLICITED_OPS)
                 } else {
                     resp.Body.Close()
-                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED)
+                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED_OPS)
                 }
 
             }
