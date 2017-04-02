@@ -601,7 +601,7 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
 
                             // Defensive coding; we've not seen unknown types
                         default:
-							s += QuoteStringForCSV(fmt.Sprintf(",%v", cell))
+							s += "," + QuoteStringForCSV(fmt.Sprintf("%v", cell))
 
                             // Most numbers in Influx appear as json.Number
                         case json.Number:
@@ -624,7 +624,7 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
                             }
 
                         case string:
-							s += QuoteStringForCSV(fmt.Sprintf(",%s", cell))
+							s += "," + QuoteStringForCSV(fmt.Sprintf("%s", cell))
 
                         case bool:
                             s += fmt.Sprintf(",%t", cell)
