@@ -67,7 +67,7 @@ func main() {
 
 	TTServeInstanceID = stats.AWSInstance.InstanceId
 	ServerLog(fmt.Sprintf("*** STARTUP\n"))
-	fmt.Printf("%s *** AWS %s %s\n", logTime(), stats.AWSInstance.Region, stats.AWSInstance.InstanceId)
+	fmt.Printf("\n%s *** AWS %s %s\n", logTime(), stats.AWSInstance.Region, stats.AWSInstance.InstanceId)
 
 	// Init our utility package, but only after we've got our server instance ID
 	UtilInit()

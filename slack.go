@@ -156,7 +156,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         } else {
 			// Unescape the string, which substitutes &gt for >
 			rawQuery := html.UnescapeString(messageAfterFirstWord)
-			fmt.Printf("*** Influx query: \"%s\"", rawQuery)
+			fmt.Printf("\n%s *** Influx query: \"%s\"\n", logTime(), rawQuery)
 			// Perform the query
 			success, result, numrows := InfluxQuery(user, rawQuery)
 			if !success {
