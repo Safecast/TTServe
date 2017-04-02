@@ -8,6 +8,7 @@ package main
 import (
 	"os"
     "fmt"
+	"html"
     "time"
     "bytes"
     "strings"
@@ -153,8 +154,8 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         if len(args) < 2 {
             sendToSafecastOps("Command format: SELECT <query>", SLACK_MSG_REPLY)
         } else {
-			// Unquote the string, which substitutes &gt for >
-			rawQuery, _ := strconv.Unquote(messageAfterFirstWord)
+			// Unescape the string, which substitutes &gt for >
+			rawQuery := html.UnescapeString(messageAfterFirstWord)
 			fmt.Printf("*** Influx query: \"%s\"", rawQuery)
 			// Perform the query
 			success, result, numrows := InfluxQuery(user, rawQuery)
