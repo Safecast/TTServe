@@ -715,20 +715,16 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     }
 
     // Perform the query
-	completeQuery := "SELECT " + the_query
-	fmt.Printf("%s %v", completeQuery, []byte(completeQuery))
-    q := influx.NewQuery(completeQuery, SafecastDb, "ns")
+    q := influx.NewQuery("SELECT " + the_query, SafecastDb, "ns")
     q.Chunked = true
     q.ChunkSize = 100
     response, qerr := cl.Query(q)
     if qerr != nil {
-		fmt.Printf("err1 %v\n", qerr)
         return false, fmt.Sprintf("%v", qerr), 0
     }
 
     // Exit if an err
     if response.Error() != nil {
-		fmt.Printf("err2 %v\n", response.Error())
         return false, fmt.Sprintf("%v", response.Error()), 0
     }
 
