@@ -157,7 +157,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 			if !success {
 	            sendToSafecastOps(fmt.Sprintf("Query error: %s", result), SLACK_MSG_REPLY)
 			} else {
-	            sendToSafecastOps(fmt.Sprintf("%d results are <%s|here>.", numrows, result), SLACK_MSG_REPLY)
+	            sendToSafecastOps(fmt.Sprintf("%d rows of results are <%s|here>.", numrows, result), SLACK_MSG_REPLY)
 			}
 		}
 		
