@@ -8,6 +8,7 @@ import (
     "os"
     "bufio"
     "fmt"
+	"strings"
 )
 
 func inputHandler() {
@@ -22,10 +23,18 @@ func inputHandler() {
         scanner.Scan()
         text = scanner.Text()
 
-        switch text {
+        switch strings.ToLower(text) {
 
-        case "q":
-            fmt.Printf("Your text was: '%s'\n", text)
+		default:
+			fmt.Printf("Unrecognized: '%s'\n")
+
+		case "q":
+	        ServerLog(fmt.Sprintf("*** RESTARTING at console request\n"))
+			os.Exit(0)
+			
+        case "sh":
+            fmt.Printf("spawn shell!\n")
+
         }
 
     }
