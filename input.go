@@ -19,14 +19,14 @@ func inputHandler() {
 
     for {
 
-        fmt.Print("Enter your text: ")
+        fmt.Print("\n> ")
         scanner.Scan()
         text = scanner.Text()
 
         switch strings.ToLower(text) {
 
 		default:
-			fmt.Printf("Unrecognized: '%s'\n")
+			fmt.Printf("Unrecognized: '%s'\n", text)
 
 		case "q":
 	        ServerLog(fmt.Sprintf("*** RESTARTING at console request\n"))
