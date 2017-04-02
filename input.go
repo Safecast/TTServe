@@ -25,9 +25,11 @@ func inputHandler() {
 
         switch strings.ToLower(text) {
 
+		case "":
+
 		default:
 			fmt.Printf("Unrecognized: '%s'\n", text)
-
+			
 		case "q":
 	        ServerLog(fmt.Sprintf("*** RESTARTING at console request\n"))
 			os.Exit(0)
