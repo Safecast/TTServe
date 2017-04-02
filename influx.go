@@ -14,6 +14,8 @@ import (
     influx "github.com/influxdata/influxdb/client/v2"
 )
 
+const quoteTextInCSV bool = false
+
 const (
     SafecastDb = "safecast"
     SafecastDataPoint = "data"
@@ -550,7 +552,10 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
                 firstRow = false;
 
                 // Write out column headers, making room for setname in col A
-                s += fmt.Sprintf("=\"\"")
+				if quoteTextInCSV {
+	                s += fmt.Sprintf("=\"\"")
+				}
+
                 // Set name is 'data', put this in column 0
                 // 86 columns, and each v is the column name
                 for _, v := range r.Columns {
@@ -563,8 +568,12 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
             // Write out each row of results, with setname in col A
             numresults += len(r.Values)
             for _, v := range r.Values {
-                s += fmt.Sprintf("=\"%s\"", setname)
-
+				if quoteTextInCSV {
+	                s += fmt.Sprintf("=\"%s\"", setname)
+				} else {
+	                s += fmt.Sprintf("%s", setname)
+				}
+				
                 for _, cell := range v {
 
                     if cell == nil {
@@ -575,7 +584,11 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
 
                             // Defensive coding; we've not seen unknown types
                         default:
-                            s += fmt.Sprintf(",=\"%v\"", cell)
+							if quoteTextInCSV {
+	                            s += fmt.Sprintf(",=\"%v\"", cell)
+							} else {
+	                            s += fmt.Sprintf(",%v", cell)
+							}
 
                             // Most numbers in Influx appear as json.Number
                         case json.Number:
@@ -598,7 +611,12 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
                             }
 
                         case string:
-                            s += fmt.Sprintf(",=\"%s\"", cell)
+							if quoteTextInCSV {
+	                            s += fmt.Sprintf(",=\"%s\"", cell)
+							} else {
+	                            s += fmt.Sprintf(",%s", cell)
+							}
+							
                         case bool:
                             s += fmt.Sprintf(",%t", cell)
                         case *bool:
