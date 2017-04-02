@@ -708,7 +708,7 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     if clerr == nil {
         defer cl.Close()
     } else {
-        return false, fmt.Sprintf("Influx connect error: %v", clerr), 0
+        return false, fmt.Sprintf("%v", clerr), 0
     }
 
     // Perform the query
@@ -717,12 +717,12 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     q.ChunkSize = 100
     response, qerr := cl.Query(q)
     if qerr != nil {
-        return false, fmt.Sprintf("Influx query error: %v", qerr), 0
+        return false, fmt.Sprintf("%v", qerr), 0
     }
 
     // Exit if an err
     if response.Error() != nil {
-        return false, fmt.Sprintf("Influx query response error: %v", response.Error()), 0
+        return false, fmt.Sprintf("%v", response.Error()), 0
     }
 
     // Debug
@@ -735,7 +735,7 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     filename := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
     fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
     if err != nil {
-        return false, fmt.Sprintf("Cannot create file: %v", err), 0
+        return false, fmt.Sprintf("cannot create file: %v", err), 0
     }
 
     // Make sure we close the file
