@@ -1085,7 +1085,10 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         geigerConfig = "(no tubes configured)"
         s += fmt.Sprintf("  Lnd 0")
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-        geigerConfig = "(SINGLE pancake configuration)"
+        geigerConfig = "(SINGLE uncovered pancake configuration)"
+        s += fmt.Sprintf("  Lnd %d %s", ds.LndU7318Count, geigerConfig)
+    } else if ds.LndU7318Count == 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
+        geigerConfig = "(SINGLE covered pancake configuration)"
         s += fmt.Sprintf("  Lnd %d %s", ds.LndU7318Count, geigerConfig)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
         s += fmt.Sprintf("  Lnd %d|%d", ds.LndU7318Count, ds.LndC7318Count)
