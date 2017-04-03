@@ -85,7 +85,8 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     if msg.Latitude != nil || msg.Longitude != nil || msg.MotionBeganOffset != nil {
         var loc Loc
         if msg.Latitude != nil && msg.Longitude != nil {
-            Olc := olc.Encode(float64(msg.GetLatitude()), float64(msg.GetLongitude()), 0)
+			// 11 digits is 3m accuracy
+            Olc := olc.Encode(float64(msg.GetLatitude()), float64(msg.GetLongitude()), 11)
             loc.Olc = &Olc
         }
         if msg.Latitude != nil {

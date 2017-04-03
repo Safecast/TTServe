@@ -71,7 +71,8 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             alt := float32(*v1.Height)
             loc.Alt = &alt
         }
-		Olc := olc.Encode(float64(*loc.Lat), float64(*loc.Lon), 0)
+		// 11 digits is 3m accuracy
+		Olc := olc.Encode(float64(*loc.Lat), float64(*loc.Lon), 11)
 		loc.Olc = &Olc
         sd.Loc = &loc
     }
