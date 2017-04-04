@@ -1236,7 +1236,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.BatCount == 0 {
         s += fmt.Sprintf("\n")
     } else {
-        s += fmt.Sprintf("    (%.2f-%.2fV, %.1f-%.1fmA, %.0f-%.0f%%)\n", ds.LoBatV, ds.HiBatV, ds.LoBatI, ds.HiBatI, ds.LoBatS, ds.HiBatS)
+        s += fmt.Sprintf("    (%.2f to %.2fV, %.1f-%.1fmA, %.0f-%.0f%%)\n", ds.LoBatV, ds.HiBatV, ds.LoBatI, ds.HiBatI, ds.LoBatS, ds.HiBatS)
     }
     if ds.EnvWarningCount == 0 {
         s += fmt.Sprintf("  Env %5d", ds.EnvCount)
