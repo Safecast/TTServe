@@ -1283,13 +1283,13 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         geigerWarning = fmt.Sprintf(" [%d OOR %s]", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
 	if ds.LndU7318Count != 0 {
-		s += fmt.Sprintf("  LndU %3d (%.0f-%.0f) %s", ds.LndU7318Count, ds.LoLndU, ds.HiLndU, geigerWarning)
+		s += fmt.Sprintf("  LndU %4d    (%.0f-%.0f) %s", ds.LndU7318Count, ds.LoLndU, ds.HiLndU, geigerWarning)
 	}
 	if ds.LndC7318Count != 0 {
-		s += fmt.Sprintf("  LndC %3d (%.0f-%.0f) %s", ds.LndC7318Count, ds.LoLndC, ds.HiLndC, geigerWarning)
+		s += fmt.Sprintf("  LndC %4d    (%.0f-%.0f) %s", ds.LndC7318Count, ds.LoLndC, ds.HiLndC, geigerWarning)
 	}
 	if ds.LndEC7128Count != 0 {
-		s += fmt.Sprintf("  LndEC %3d (%.0f-%.0f) %s", ds.LndEC7128Count, ds.LoLndEC, ds.HiLndEC, geigerWarning)
+		s += fmt.Sprintf("  LndEC %3d    (%.0f-%.0f) %s", ds.LndEC7128Count, ds.LoLndEC, ds.HiLndEC, geigerWarning)
 	}
 
     s += fmt.Sprintf("\n")
