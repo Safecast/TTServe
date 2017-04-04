@@ -1256,7 +1256,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.EncCount == 0 {
         s += fmt.Sprintf("\n")
     } else {
-        s += fmt.Sprintf("  (%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEncT-ds.HiEncT, ds.LoEncH-ds.HiEncH, ds.LoEncP, ds.HiEncP)
+        s += fmt.Sprintf("  (%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEncT, ds.HiEncT, ds.LoEncH, ds.HiEncH, ds.LoEncP, ds.HiEncP)
     }
     if ds.PmsWarningCount == 0 {
         s += fmt.Sprintf("  Pms %5d", ds.PmsCount)
