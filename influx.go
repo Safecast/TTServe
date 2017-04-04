@@ -92,7 +92,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
             }
         }
         if sd.Loc.Olc != nil {
-            tags["loc_olc"] = *sd.Loc.Olc
+            fields["loc_olc"] = *sd.Loc.Olc
         }
     }
 
@@ -203,13 +203,13 @@ func SafecastLogToInflux(sd SafecastData) bool {
             fields["dev_test"] = *sd.Dev.Test
         }
         if sd.Dev.DeviceLabel != nil {
-            tags["dev_label"] = *sd.Dev.DeviceLabel
+            fields["dev_label"] = *sd.Dev.DeviceLabel
         }
         if sd.Dev.UptimeMinutes != nil {
             fields["dev_uptime"] = *sd.Dev.UptimeMinutes
         }
         if sd.Dev.AppVersion != nil {
-            tags["dev_firmware"] = *sd.Dev.AppVersion
+            fields["dev_firmware"] = *sd.Dev.AppVersion
         }
         if sd.Dev.DeviceParams != nil {
             fields["dev_cfgdev"] = *sd.Dev.DeviceParams
@@ -275,10 +275,10 @@ func SafecastLogToInflux(sd SafecastData) bool {
             fields["dev_status"] = *sd.Dev.Status
         }
         if sd.Dev.ModuleLora != nil {
-            tags["dev_module_lora"] = *sd.Dev.ModuleLora
+            fields["dev_module_lora"] = *sd.Dev.ModuleLora
         }
         if sd.Dev.ModuleFona != nil {
-            tags["dev_module_fona"] = *sd.Dev.ModuleFona
+            fields["dev_module_fona"] = *sd.Dev.ModuleFona
         }
         if sd.Dev.Temp != nil {
             fields["dev_temp"] = *sd.Dev.Temp
@@ -384,13 +384,13 @@ func SafecastLogToInflux(sd SafecastData) bool {
             }
         }
         if sd.Service.Transport != nil {
-            tags["service_transport"] = *sd.Service.Transport
+            fields["service_transport"] = *sd.Service.Transport
         }
         if sd.Service.HashMd5 != nil {
             fields["service_md5"] = *sd.Service.HashMd5
         }
         if sd.Service.Handler != nil {
-            tags["service_handler"] = *sd.Service.Handler
+            fields["service_handler"] = *sd.Service.Handler
         }
     }
 

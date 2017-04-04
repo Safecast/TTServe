@@ -1,10 +1,29 @@
 For Sean's house being our target, ...
-85634P9J.HRJ within 3 meters
-85634P9J.HR* within 14 meters
-85634P9J.H* within 275 meters
-85634P9J* within 275 meters
-85634P* within 5.5 kilometers
-8563* within 110 kilometers
-85* within 2200 kilometers
+
+Within 3 meters...
+`select * from data where loc_olc =~ /85634P9J.HRJ/`
+
+Within 14 meters...
+`select * from data where loc_olc =~ /85634P9J.HR*/`
+
+Within 275 meters...
+`select * from data where loc_olc =~ /85634P9J.H*/`
+
+Within 275 meters...
+`select * from data where loc_olc =~ /85634P9J*/`
+
+Within 5.5 kilometers...
+`select * from data where loc_olc =~ /85634P*/`
+
+Within 110 kilometers...
+`select * from data where loc_olc =~ /8563*/`
+
+Within 2200 kilometers...
+`select * from data where loc_olc =~ /85*/`
+
+Other useful queries...
+`select * from data where ( device = ‘217634580’ or device = '1188192954' ) and time > now() - 12h`
+
+
 
 
