@@ -58,6 +58,10 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     }
     message := m[0]
 
+	// If the message is surrounded in backticks to eliminate formatting, remove them
+	message = strings.Replace(message, "`", "", -1)
+	
+	// Process the command arguments
     args := strings.Split(message, " ")
     argsLC := strings.Split(strings.ToLower(message), " ")
 
