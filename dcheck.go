@@ -1206,7 +1206,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	if ds.PmsCount == 0 {
 		s += fmt.Sprintf("\n")
 	} else {
-		s += fmt.Sprintf("    (%.1f-%.1fpm1, %.1f-%.1f%pm2.5, %.1f-%.1fpm10)\n", ds.LoPms010, ds.HiPms010, ds.LoPms025, ds.HiPms025, ds.LoPms100, ds.HiPms100)
+		s += fmt.Sprintf("    (%.1f-%.1fpm1, %.1f-%.1fpm2.5, %.1f-%.1fpm10)\n", ds.LoPms010, ds.HiPms010, ds.LoPms025, ds.HiPms025, ds.LoPms100, ds.HiPms100)
 	}
     if ds.OpcWarningCount == 0 {
         s += fmt.Sprintf("  Opc %5d", ds.OpcCount)
@@ -1216,7 +1216,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	if ds.OpcCount == 0 {
 		s += fmt.Sprintf("\n")
 	} else {
-		s += fmt.Sprintf("    (%.1f-%.1fpm1, %.1f-%.1f%pm2.5, %.1f-%.1fpm10)\n", ds.LoOpc010, ds.HiOpc010, ds.LoOpc025, ds.HiOpc025, ds.LoOpc100, ds.HiOpc100)
+		s += fmt.Sprintf("    (%.1f-%.1fpm1, %.1f-%.1fpm2.5, %.1f-%.1fpm10)\n", ds.LoOpc010, ds.HiOpc010, ds.LoOpc025, ds.HiOpc025, ds.LoOpc100, ds.HiOpc100)
 	}
     geigerConfig := ""
     if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
