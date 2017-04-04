@@ -1176,7 +1176,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	if ds.BatCount == 0 {
 		s += fmt.Sprintf("\n")
 	} else {
-		s += fmt.Sprintf("(%f-%fV, %f-%fmA, %f-%f%%)\n", ds.LoBatV-ds.HiBatV, ds.LoBatI-ds.HiBatI, ds.LoBatS-ds.HiBatS)
+		s += fmt.Sprintf("(%.2f-%.2fV, %.1f-%.1fmA, %.0f-%.0f%%)\n", ds.LoBatV, ds.HiBatV, ds.LoBatI, ds.HiBatI, ds.LoBatS, ds.HiBatS)
 	}
     if ds.EnvWarningCount == 0 {
         s += fmt.Sprintf("  Env %d", ds.EnvCount)
@@ -1186,7 +1186,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	if ds.EnvCount == 0 {
 		s += fmt.Sprintf("\n")
 	} else {
-		s += fmt.Sprintf("(%f-%fC, %f-%f%%, %f-%fPa)\n", ds.LoEnvT-ds.HiEnvT, ds.LoEnvH-ds.HiEnvH, ds.LoEnvP-ds.HiEnvP)
+		s += fmt.Sprintf("(%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEnvT, ds.HiEnvT, ds.LoEnvH, ds.HiEnvH, ds.LoEnvP, ds.HiEnvP)
 	}
     if ds.EncWarningCount == 0 {
         s += fmt.Sprintf("  Enc %dn", ds.EncCount)
@@ -1196,7 +1196,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	if ds.EncCount == 0 {
 		s += fmt.Sprintf("\n")
 	} else {
-		s += fmt.Sprintf("(%f-%fC, %f-%f%%, %f-%fPa)\n", ds.LoEncT-ds.HiEncT, ds.LoEncH-ds.HiEncH, ds.LoEncP-ds.HiEncP)
+		s += fmt.Sprintf("(%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEncT-ds.HiEncT, ds.LoEncH-ds.HiEncH, ds.LoEncP-ds.HiEncP)
 	}
     if ds.PmsWarningCount == 0 {
         s += fmt.Sprintf("  Pms %d", ds.PmsCount)
@@ -1206,7 +1206,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	if ds.PmsCount == 0 {
 		s += fmt.Sprintf("\n")
 	} else {
-		s += fmt.Sprintf("(%f-%fPM1, %f-%f%PM2.5, %f-%fPM10)\n", ds.LoPms010-ds.HiPms010, ds.LoPms025-ds.HiPms025, ds.LoPms100-ds.HiPms100)
+		s += fmt.Sprintf("(%.1f-%.1fpm1, %.1f-%.1f%pm2.5, %.1f-%.1fpm10)\n", ds.LoPms010, ds.HiPms010, ds.LoPms025, ds.HiPms025, ds.LoPms100, ds.HiPms100)
 	}
     if ds.OpcWarningCount == 0 {
         s += fmt.Sprintf("  Opc %d", ds.OpcCount)
@@ -1216,7 +1216,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	if ds.OpcCount == 0 {
 		s += fmt.Sprintf("\n")
 	} else {
-		s += fmt.Sprintf("(%f-%fPM1, %f-%f%PM2.5, %f-%fPM10)\n", ds.LoOpc010-ds.HiOpc010, ds.LoOpc025-ds.HiOpc025, ds.LoOpc100-ds.HiOpc100)
+		s += fmt.Sprintf("(%.1f-%.1fpm1, %.1f-%.1f%pm2.5, %.1f-%.1fpm10)\n", ds.LoOpc010, ds.HiOpc010, ds.LoOpc025, ds.HiOpc025, ds.LoOpc100, ds.HiOpc100)
 	}
     geigerConfig := ""
     if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
@@ -1224,15 +1224,15 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("  Lnd 0")
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
         geigerConfig = "SINGLE uncovered pancake configuration"
-        s += fmt.Sprintf("  Lnd %d (%d-%d) %s", ds.LndU7318Count, ds.LoLndU, ds.HiLndU, geigerConfig)
+        s += fmt.Sprintf("  Lnd %d (%.0f-%.0f) %s", ds.LndU7318Count, ds.LoLndU, ds.HiLndU, geigerConfig)
     } else if ds.LndU7318Count == 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
         geigerConfig = "SINGLE covered pancake configuration"
-        s += fmt.Sprintf("  Lnd %d (%d-%d) %s", ds.LndC7318Count, ds.LoLndC, ds.HiLndC, geigerConfig)
+        s += fmt.Sprintf("  Lnd %d (%.0f-%.0f) %s", ds.LndC7318Count, ds.LoLndC, ds.HiLndC, geigerConfig)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
-        s += fmt.Sprintf("  Lnd %d|%d (%d-%d|%d-%d)", ds.LndU7318Count, ds.LndC7318Count, ds.LoLndU, ds.HiLndU, ds.LoLndC, ds.HiLndC)
+        s += fmt.Sprintf("  Lnd %d|%d (%.0f-%.0f|%.0f-%.0f)", ds.LndU7318Count, ds.LndC7318Count, ds.LoLndU, ds.HiLndU, ds.LoLndC, ds.HiLndC)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
         geigerConfig = "Dual-tube EC configuration"
-        s += fmt.Sprintf("  Lnd %d|%d (%d-%d|%d-%d) %s", ds.LndU7318Count, ds.LndEC7128Count, ds.LoLndU, ds.HiLndU, ds.LoLndEC, ds.HiLndEC, geigerConfig)
+        s += fmt.Sprintf("  Lnd %d|%d (%.0f-%.0f|%.0f-%.0f) %s", ds.LndU7318Count, ds.LndEC7128Count, ds.LoLndU, ds.HiLndU, ds.LoLndEC, ds.HiLndEC, geigerConfig)
     } else {
         geigerConfig = "UNRECOGNIZED configuration"
         s += fmt.Sprintf("  Lnd %du|%dc|%dec (%d-%d|%d-%d|%d-%d) %s", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, ds.LoLndU, ds.HiLndU, ds.LoLndC, ds.HiLndC, ds.LoLndEC, ds.HiLndEC, geigerConfig)
