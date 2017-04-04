@@ -1221,21 +1221,21 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     geigerConfig := ""
     if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
         geigerConfig = "No tubes configured"
-        s += fmt.Sprintf("  Lnd %5d %s", 0)
+        s += fmt.Sprintf("  Lnd %5d %s", 0, geigerConfig)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
         geigerConfig = "SINGLE uncovered pancake configuration"
-        s += fmt.Sprintf("  Lnd %5d %s (%.0f-%.0f)", ds.LndU7318Count, ds.LoLndU, ds.HiLndU, geigerConfig)
+        s += fmt.Sprintf("  Lnd %5d %s (%.0f-%.0f)", ds.LndU7318Count, geigerConfig, ds.LoLndU, ds.HiLndU)
     } else if ds.LndU7318Count == 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
         geigerConfig = "SINGLE covered pancake configuration"
-        s += fmt.Sprintf("  Lnd %5d %s (%.0f-%.0f)", ds.LndC7318Count, ds.LoLndC, ds.HiLndC, geigerConfig)
+        s += fmt.Sprintf("  Lnd %5d %s (%.0f-%.0f)", ds.LndC7318Count, geigerConfig, ds.LoLndC, ds.HiLndC)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
         s += fmt.Sprintf("  Lnd %5d|%d (%.0f-%.0f|%.0f-%.0f)", ds.LndU7318Count, ds.LndC7318Count, ds.LoLndU, ds.HiLndU, ds.LoLndC, ds.HiLndC)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
         geigerConfig = "Dual-tube EC configuration"
-        s += fmt.Sprintf("  Lnd %5d|%d %s (%.0f-%.0f|%.0f-%.0f)", ds.LndU7318Count, ds.LndEC7128Count, ds.LoLndU, ds.HiLndU, ds.LoLndEC, ds.HiLndEC, geigerConfig)
+        s += fmt.Sprintf("  Lnd %5d|%d %s (%.0f-%.0f|%.0f-%.0f)", ds.LndU7318Count, ds.LndEC7128Count, geigerConfig, ds.LoLndU, ds.HiLndU, ds.LoLndEC, ds.HiLndEC)
     } else {
         geigerConfig = "UNRECOGNIZED configuration"
-        s += fmt.Sprintf("  Lnd %5du|%dc|%dec %s (%d-%d|%d-%d|%d-%d)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, ds.LoLndU, ds.HiLndU, ds.LoLndC, ds.HiLndC, ds.LoLndEC, ds.HiLndEC, geigerConfig)
+        s += fmt.Sprintf("  Lnd %5du|%dc|%dec %s (%d-%d|%d-%d|%d-%d)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, geigerConfig, ds.LoLndU, ds.HiLndU, ds.LoLndC, ds.HiLndC, ds.LoLndEC, ds.HiLndEC)
     }
     if ds.GeigerWarningCount != 0 {
         s += fmt.Sprintf(" [%d OOR %s]", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
