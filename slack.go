@@ -164,7 +164,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 			// Perform the query
 			success, result, numrows := InfluxQuery(user, rawQuery)
 			if !success {
-	            sendToSafecastOps(fmt.Sprintf("Query error: %s: %s", result, rawQuery), SLACK_MSG_REPLY)
+	            sendToSafecastOps(fmt.Sprintf("Query error: %s: %s", result, "SELECT " + rawQuery), SLACK_MSG_REPLY)
 			} else {
 	            sendToSafecastOps(fmt.Sprintf("%d rows of data are <%s|here>, @%s.", numrows, result, user), SLACK_MSG_REPLY)
 			}
