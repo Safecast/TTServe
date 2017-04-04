@@ -1278,29 +1278,20 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     } else {
         s += fmt.Sprintf("    (%.1f-%.1fpm1, %.1f-%.1fpm2.5, %.1f-%.1fpm10)\n", ds.LoOpc010, ds.HiOpc010, ds.LoOpc025, ds.HiOpc025, ds.LoOpc100, ds.HiOpc100)
     }
-    geigerConfig := ""
-    if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-        geigerConfig = "No tubes configured"
-        s += fmt.Sprintf("  Lnd %5d %s", 0, geigerConfig)
-    } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-        geigerConfig = "SINGLE uncovered pancake configuration"
-        s += fmt.Sprintf("  Lnd %5d %s (%.0f-%.0f)", ds.LndU7318Count, geigerConfig, ds.LoLndU, ds.HiLndU)
-    } else if ds.LndU7318Count == 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
-        geigerConfig = "SINGLE covered pancake configuration"
-        s += fmt.Sprintf("  Lnd %5d %s (%.0f-%.0f)", ds.LndC7318Count, geigerConfig, ds.LoLndC, ds.HiLndC)
-    } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
-        s += fmt.Sprintf("  Lnd %5d|%d (%.0f-%.0f|%.0f-%.0f)", ds.LndU7318Count, ds.LndC7318Count, ds.LoLndU, ds.HiLndU, ds.LoLndC, ds.HiLndC)
-    } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
-        geigerConfig = "Dual-tube EC configuration"
-        s += fmt.Sprintf("  Lnd %5d|%d %s (%.0f-%.0f|%.0f-%.0f)", ds.LndU7318Count, ds.LndEC7128Count, geigerConfig, ds.LoLndU, ds.HiLndU, ds.LoLndEC, ds.HiLndEC)
-    } else {
-        geigerConfig = "UNRECOGNIZED configuration"
-        s += fmt.Sprintf("  Lnd %5du|%dc|%dec %s (%d-%d|%d-%d|%d-%d)", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, geigerConfig, ds.LoLndU, ds.HiLndU, ds.LoLndC, ds.HiLndC, ds.LoLndEC, ds.HiLndEC)
-    }
+    geigerWarning := ""
     if ds.GeigerWarningCount != 0 {
-        s += fmt.Sprintf(" [%d OOR %s]", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        geigerWarning = fmt.Sprintf(" [%d OOR %s]", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
-    s += fmt.Sprintf("\n")
+	if ds.LndU7318Count != 0 {
+		s += fmt.Sprintf("  LndU %3d (%.0f-%.0f) %s", ds.LndU7318Count, ds.LoLndU, ds.HiLndU, geigerWarning)
+	}
+	if ds.LndC7318Count != 0 {
+		s += fmt.Sprintf("  LndC %3d (%.0f-%.0f) %s", ds.LndC7318Count, ds.LoLndC, ds.HiLndC, geigerWarning)
+	}
+	if ds.LndEC7128Count != 0 {
+		s += fmt.Sprintf("  LndEC %3d (%.0f-%.0f) %s", ds.LndEC7128Count, ds.LoLndEC, ds.HiLndEC, geigerWarning)
+	}
+
     s += fmt.Sprintf("\n")
 
     // Errors
@@ -1438,14 +1429,14 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     s += fmt.Sprintf("No communications gaps of more than 10m.\n")
 
-    if geigerConfig == "" {
+    if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 {
         s += fmt.Sprintf("  PASS  ")
     } else {
         s += fmt.Sprintf("   --   ")
     }
-    s += fmt.Sprintf("Both pancake tubes measured data. %s\n", geigerConfig)
+    s += fmt.Sprintf("Both pancake tubes measured data.\n")
 
-    if ds.BatCount != 0 && ds.EnvCount != 0 && ds.EncCount != 0 && ds.PmsCount != 0 && ds.OpcCount != 0 && geigerConfig == "" {
+    if ds.BatCount != 0 && ds.EnvCount != 0 && ds.EncCount != 0 && ds.PmsCount != 0 && ds.OpcCount != 0 && ds.LndU7318Count != 0 && ds.LndC7318Count != 0 {
         s += fmt.Sprintf("  PASS  ")
     } else {
         s += fmt.Sprintf("   --   ")
