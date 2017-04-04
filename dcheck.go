@@ -29,7 +29,7 @@ type MeasurementStat struct {
     LoraTransport       bool
     FonaTransport       bool
     TestMeasurement     bool
-	MotionBegan			string
+    MotionBegan         string
     ErrorsOpc           uint32
     ErrorsPms           uint32
     ErrorsBme0          uint32
@@ -67,7 +67,24 @@ type MeasurementStat struct {
     PmsWarning          bool
     hasOpc              bool
     OpcWarning          bool
-
+    BatV                float64
+    BatI                float64
+	BatS				float64
+    EnvT                float64
+    EnvH                float64
+    EnvP                float64
+    EncT                float64
+    EncH                float64
+    EncP                float64
+    LndU                float64
+    LndC                float64
+    LndEC               float64
+    Opc010				float64
+    Opc025			    float64
+    Opc100				float64
+    Pms010			    float64
+    Pms025		        float64
+    Pms100	            float64
 }
 
 // Stats about all measurements
@@ -108,8 +125,8 @@ type MeasurementDataset struct {
     AnyErrors           bool
     AnyConnectErrors    bool
     AnyPointcastErrors  bool
-	PrevMotionBegan		string
-	UniqueMotionBegans	uint32
+    PrevMotionBegan     string
+    UniqueMotionBegans  uint32
     PrevErrorsOpc       uint32
     ThisErrorsOpc       uint32
     PrevErrorsPms       uint32
@@ -178,6 +195,42 @@ type MeasurementDataset struct {
     OpcCount            uint32
     OpcWarningCount     uint32
     OpcWarningFirst     time.Time
+    LoOpc010			float64
+    HiOpc010			float64
+    LoOpc025			float64
+    HiOpc025			float64
+    LoOpc100			float64
+    HiOpc100			float64
+    LoPms010			float64
+    HiPms010			float64
+    LoPms025            float64
+    HiPms025            float64
+    LoPms100            float64
+    HiPms100	        float64
+    LoLndU              float64
+    HiLndU              float64
+    LoLndC              float64
+    HiLndC              float64
+    LoLndEC             float64
+    HiLndEC             float64
+    LoBatV              float64
+    HiBatV              float64
+    LoBatI              float64
+    HiBatI              float64
+    LoBatS              float64
+    HiBatS              float64
+    LoEnvT              float64
+    HiEnvT              float64
+    LoEnvH              float64
+    HiEnvH              float64
+    LoEnvP              float64
+    HiEnvP              float64
+    LoEncT              float64
+    HiEncT              float64
+    LoEncH              float64
+    HiEncH              float64
+    LoEncP              float64
+    HiEncP              float64
 }
 
 func NewMeasurementDataset(deviceidstr string) MeasurementDataset {
@@ -339,25 +392,28 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
                     stat.BatWarning = true
                 }
             }
+            stat.BatV = float64(val)
         }
         if sd.Bat.Current != nil {
             val := *sd.Bat.Current
             if val < -2000.0 || val > 1000 {
                 stat.BatWarning = true
             }
+            stat.BatI = float64(val)
         }
         // As of 2017-03-23 we no longer verify charge, for two reasons:
         // 1) most devices require SOC training, and thus fall out of range
         // 2) we don't actually use SOC for device performance throttling,
         //    instead using a calculation derived from the voltage.  As such,
         //    SOC is largely for informational purposes.
-        if (false) {
-            if sd.Bat.Charge != nil {
-                val := *sd.Bat.Charge
+        if sd.Bat.Charge != nil {
+            val := *sd.Bat.Charge
+            if (false) {
                 if val < 25.0 || val > 200 {
                     stat.BatWarning = true
                 }
             }
+			stat.BatS = float64(val)
         }
     }
 
@@ -368,18 +424,18 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < -25.0 || val > 80.0 {
                 stat.EnvWarning = true
             }
+			stat.EnvT = float64(val)
         }
         if sd.Env.Humid != nil {
             val := *sd.Env.Humid
             if val < 0 || val > 100 {
                 stat.EnvWarning = true
             }
+			stat.EnvH = float64(val)
         }
-    }
-
-    if sd.Loc != nil {
-        if sd.Loc.MotionBegan != nil {
-            stat.MotionBegan = *sd.Loc.MotionBegan
+        if sd.Env.Press != nil {
+            val := *sd.Env.Press
+			stat.EnvP = float64(val)
         }
     }
 
@@ -390,6 +446,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < -25.0 || val > 80.0 {
                 stat.EncWarning = true
             }
+			stat.EncT = float64(val)
         }
         if sd.Dev.Humid != nil {
             stat.hasEnc = true
@@ -397,6 +454,17 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < 0 || val > 100 {
                 stat.EncWarning = true
             }
+			stat.EncH = float64(val)
+        }
+        if sd.Dev.Press != nil {
+            val := *sd.Dev.Press
+			stat.EncP = float64(val)
+        }
+    }
+
+    if sd.Loc != nil {
+        if sd.Loc.MotionBegan != nil {
+            stat.MotionBegan = *sd.Loc.MotionBegan
         }
     }
 
@@ -407,6 +475,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < 0 || val > 500 {
                 stat.GeigerWarning = true
             }
+			stat.LndU = float64(val)
         }
         if sd.Lnd.C7318 != nil {
             stat.hasLndC7318 = true
@@ -414,6 +483,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < 0 || val > 500 {
                 stat.GeigerWarning = true
             }
+			stat.LndC = float64(val)
         }
         if sd.Lnd.EC7128 != nil {
             stat.hasLndEC7128 = true
@@ -421,6 +491,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < 0 || val > 500 {
                 stat.GeigerWarning = true
             }
+			stat.LndEC = float64(val)
         }
     }
 
@@ -431,18 +502,21 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < -0 || val > 600 {
                 stat.PmsWarning = true
             }
+			stat.Pms010 = float64(val)
         }
         if sd.Pms.Pm02_5 != nil {
             val := *sd.Pms.Pm02_5
             if val < -0 || val > 600 {
                 stat.PmsWarning = true
             }
+			stat.Pms025 = float64(val)
         }
         if sd.Pms.Pm10_0 != nil {
             val := *sd.Pms.Pm10_0
             if val < -0 || val > 600 {
                 stat.PmsWarning = true
             }
+			stat.Pms100 = float64(val)
         }
     }
 
@@ -453,18 +527,21 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < -0 || val > 600 {
                 stat.OpcWarning = true
             }
+			stat.Opc010 = float64(val)
         }
         if sd.Opc.Pm02_5 != nil {
             val := *sd.Opc.Pm02_5
             if val < -0 || val > 600 {
                 stat.OpcWarning = true
             }
+			stat.Opc025 = float64(val)
         }
         if sd.Opc.Pm10_0 != nil {
             val := *sd.Opc.Pm10_0
             if val < -0 || val > 600 {
                 stat.OpcWarning = true
             }
+			stat.Opc100 = float64(val)
         }
     }
 
@@ -516,12 +593,12 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
     if stat.Uploaded.Sub(ds.NewestUpload) >= 0 {
 
         SecondsGap := uint32(stat.Uploaded.Sub(ds.NewestUpload) / time.Second)
-		MinutesGap := SecondsGap / 60
-		if SecondsGap != 0 && MinutesGap == 0 {
-			SecondsGap = 1
-		} else {
-			SecondsGap = MinutesGap * 60
-		}
+        MinutesGap := SecondsGap / 60
+        if SecondsGap != 0 && MinutesGap == 0 {
+            SecondsGap = 1
+        } else {
+            SecondsGap = MinutesGap * 60
+        }
         if SecondsGap > 0 {
             if ds.MinUploadGapSecs == 0 || SecondsGap < ds.MinUploadGapSecs {
                 ds.MinUploadGapSecs = SecondsGap
@@ -587,14 +664,14 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.NewestUpload = stat.Uploaded
     }
 
-	// Motion
-	if stat.MotionBegan != "" {
-		if stat.MotionBegan != ds.PrevMotionBegan {
-			ds.PrevMotionBegan = stat.MotionBegan
-			ds.UniqueMotionBegans++
-		}
-	}
-	
+    // Motion
+    if stat.MotionBegan != "" {
+        if stat.MotionBegan != ds.PrevMotionBegan {
+            ds.PrevMotionBegan = stat.MotionBegan
+            ds.UniqueMotionBegans++
+        }
+    }
+
     // Transport
     if stat.LoraTransport {
         ds.LoraTransports++
@@ -803,27 +880,63 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
     // Sensors
     if stat.hasBat {
         ds.BatCount++
+		ds.LoBatV = math.Min(ds.LoBatV, stat.BatV)
+		ds.HiBatV = math.Max(ds.HiBatV, stat.BatV)
+		ds.LoBatI = math.Min(ds.LoBatI, stat.BatI)
+		ds.HiBatI = math.Max(ds.HiBatI, stat.BatI)
+		ds.LoBatS = math.Min(ds.LoBatS, stat.BatS)
+		ds.HiBatS = math.Max(ds.HiBatS, stat.BatS)
     }
     if stat.hasEnv {
         ds.EnvCount++
+		ds.LoEnvT = math.Min(ds.LoEnvT, stat.EnvT)
+		ds.HiEnvT = math.Max(ds.HiEnvT, stat.EnvT)
+		ds.LoEnvH = math.Min(ds.LoEnvH, stat.EnvH)
+		ds.HiEnvH = math.Max(ds.HiEnvH, stat.EnvH)
+		ds.LoEnvP = math.Min(ds.LoEnvP, stat.EnvP)
+		ds.HiEnvP = math.Max(ds.HiEnvP, stat.EnvP)
     }
     if stat.hasEnc {
         ds.EncCount++
+		ds.LoEncT = math.Min(ds.LoEncT, stat.EncT)
+		ds.HiEncT = math.Max(ds.HiEncT, stat.EncT)
+		ds.LoEncH = math.Min(ds.LoEncH, stat.EncH)
+		ds.HiEncH = math.Max(ds.HiEncH, stat.EncH)
+		ds.LoEncP = math.Min(ds.LoEncP, stat.EncP)
+		ds.HiEncP = math.Max(ds.HiEncP, stat.EncP)
     }
     if stat.hasLndU7318 {
         ds.LndU7318Count++
+		ds.LoLndU = math.Min(ds.LoLndU, stat.LndU)
+		ds.HiLndU = math.Max(ds.HiLndU, stat.LndU)
     }
     if stat.hasLndC7318 {
         ds.LndC7318Count++
+		ds.LoLndC = math.Min(ds.LoLndC, stat.LndC)
+		ds.HiLndC = math.Max(ds.HiLndC, stat.LndC)
     }
     if stat.hasLndEC7128 {
         ds.LndEC7128Count++
+		ds.LoLndEC = math.Min(ds.LoLndEC, stat.LndEC)
+		ds.HiLndEC = math.Max(ds.HiLndEC, stat.LndEC)
     }
     if stat.hasPms {
         ds.PmsCount++
+		ds.LoPms010 = math.Min(ds.LoPms010, stat.Pms010)
+		ds.HiPms010 = math.Max(ds.HiPms010, stat.Pms010)
+		ds.LoPms025 = math.Min(ds.LoPms025, stat.Pms025)
+		ds.HiPms025 = math.Max(ds.HiPms025, stat.Pms025)
+		ds.LoPms100 = math.Min(ds.LoPms100, stat.Pms100)
+		ds.HiPms100 = math.Max(ds.HiPms100, stat.Pms100)
     }
     if stat.hasOpc {
         ds.OpcCount++
+		ds.LoOpc010 = math.Min(ds.LoOpc010, stat.Opc010)
+		ds.HiOpc010 = math.Max(ds.HiOpc010, stat.Opc010)
+		ds.LoOpc025 = math.Min(ds.LoOpc025, stat.Opc025)
+		ds.HiOpc025 = math.Max(ds.HiOpc025, stat.Opc025)
+		ds.LoOpc100 = math.Min(ds.LoOpc100, stat.Opc100)
+		ds.HiOpc100 = math.Max(ds.HiOpc100, stat.Opc100)
     }
     if stat.BatWarning {
         if ds.BatWarningCount == 0 {
@@ -881,9 +994,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.Firmware != "" {
         s += fmt.Sprintf("  on %s\n", ds.Firmware)
     }
-	if ds.UniqueMotionBegans != 0 {
-		s += fmt.Sprintf("  in %d unique runs of in-motion measurements\n", ds.UniqueMotionBegans)
-	}
+    if ds.UniqueMotionBegans != 0 {
+        s += fmt.Sprintf("  in %d unique runs of in-motion measurements\n", ds.UniqueMotionBegans)
+    }
     s += fmt.Sprintf("\n")
 
     if ds.Boots == 1 {
@@ -933,87 +1046,87 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         if f != 0 {
             s += fmt.Sprintf("  >1w     %3.0f%% (%d)\n", f, ds.GapsGt1week)
         }
-		g := ds.GapsGt1day - ds.GapsGt1week
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g := ds.GapsGt1day - ds.GapsGt1week
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt1day != ds.GapsGt1week {
             s += fmt.Sprintf("  1d-1w   %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt12hr - ds.GapsGt1day
+        g = ds.GapsGt12hr - ds.GapsGt1day
         f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt12hr != ds.GapsGt1day {
             s += fmt.Sprintf("  12-24hr %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt6hr - ds.GapsGt12hr
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt6hr - ds.GapsGt12hr
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt6hr != ds.GapsGt12hr {
             s += fmt.Sprintf("  6-12hr  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt2hr - ds.GapsGt6hr
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt2hr - ds.GapsGt6hr
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt2hr != ds.GapsGt6hr {
             s += fmt.Sprintf("  2-6hr   %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt1hr - ds.GapsGt2hr
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt1hr - ds.GapsGt2hr
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt1hr != ds.GapsGt2hr {
             s += fmt.Sprintf("  1-2hr   %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt55m - ds.GapsGt1hr
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt55m - ds.GapsGt1hr
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt55m != ds.GapsGt1hr {
             s += fmt.Sprintf("  56-60m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt50m - ds.GapsGt55m
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt50m - ds.GapsGt55m
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt50m != ds.GapsGt55m {
             s += fmt.Sprintf("  51-55m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt45m - ds.GapsGt50m
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt45m - ds.GapsGt50m
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt45m != ds.GapsGt50m {
             s += fmt.Sprintf("  46-50m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt40m - ds.GapsGt45m
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt40m - ds.GapsGt45m
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt40m != ds.GapsGt45m {
             s += fmt.Sprintf("  41-45m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt35m - ds.GapsGt40m
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt35m - ds.GapsGt40m
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt35m != ds.GapsGt40m {
             s += fmt.Sprintf("  36-40m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt30m - ds.GapsGt35m
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt30m - ds.GapsGt35m
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt30m != ds.GapsGt35m {
             s += fmt.Sprintf("  31-35m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt25m - ds.GapsGt30m
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt25m - ds.GapsGt30m
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt25m != ds.GapsGt30m {
             s += fmt.Sprintf("  26-30m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt20m - ds.GapsGt25m
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt20m - ds.GapsGt25m
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt20m != ds.GapsGt25m {
             s += fmt.Sprintf("  21-25m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt15m - ds.GapsGt20m
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt15m - ds.GapsGt20m
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt15m != ds.GapsGt20m {
             s += fmt.Sprintf("  16-20m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt10m - ds.GapsGt15m
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt10m - ds.GapsGt15m
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt10m != ds.GapsGt15m {
             s += fmt.Sprintf("  11-15m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt5m - ds.GapsGt10m
-        f = 100*float32(g) / float32(ds.GapsGt0m) 
+        g = ds.GapsGt5m - ds.GapsGt10m
+        f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 && ds.GapsGt5m != ds.GapsGt10m {
             s += fmt.Sprintf("   5-10m  %3.0f%% (%d)\n", f, g)
         }
-		g = ds.GapsGt0m - ds.GapsGt5m
+        g = ds.GapsGt0m - ds.GapsGt5m
         f = 100*float32(g) / float32(ds.GapsGt0m)
         if f != 0 {
             s += fmt.Sprintf("    1-4m  %3.0f%% (%d)\n", f, g)
@@ -1056,48 +1169,73 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // Sensors
     s += fmt.Sprintf("Measurement Counts:\n")
     if ds.BatWarningCount == 0 {
-        s += fmt.Sprintf("  Bat %d\n", ds.BatCount)
+        s += fmt.Sprintf("  Bat %d", ds.BatCount)
     } else {
-        s += fmt.Sprintf("  Bat %d (%d out of range %s)\n", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Bat %d [%d OOR %s]", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
+	if ds.BatCount == 0 {
+		s += fmt.Sprintf("\n")
+	} else {
+		s += fmt.Sprintf("(%f-%fV, %f-%fmA, %f-%f%%)\n", ds.LoBatV-ds.HiBatV, ds.LoBatI-ds.HiBatI, ds.LoBatS-ds.HiBatS)
+	}
     if ds.EnvWarningCount == 0 {
-        s += fmt.Sprintf("  Env %d\n", ds.EnvCount)
+        s += fmt.Sprintf("  Env %d", ds.EnvCount)
     } else {
-        s += fmt.Sprintf("  Env %d (%d out of range %s)\n", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Env %d [%d OOR  %s]", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
+	if ds.EnvCount == 0 {
+		s += fmt.Sprintf("\n")
+	} else {
+		s += fmt.Sprintf("(%f-%fC, %f-%f%%, %f-%fPa)\n", ds.LoEnvT-ds.HiEnvT, ds.LoEnvH-ds.HiEnvH, ds.LoEnvP-ds.HiEnvP)
+	}
     if ds.EncWarningCount == 0 {
-        s += fmt.Sprintf("  Enc %d\n", ds.EncCount)
+        s += fmt.Sprintf("  Enc %dn", ds.EncCount)
     } else {
-        s += fmt.Sprintf("  Enc %d (%d out of range %s)\n", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Enc %d %d OOR %s)", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
+	if ds.EncCount == 0 {
+		s += fmt.Sprintf("\n")
+	} else {
+		s += fmt.Sprintf("(%f-%fC, %f-%f%%, %f-%fPa)\n", ds.LoEncT-ds.HiEncT, ds.LoEncH-ds.HiEncH, ds.LoEncP-ds.HiEncP)
+	}
     if ds.PmsWarningCount == 0 {
-        s += fmt.Sprintf("  Pms %d\n", ds.PmsCount)
+        s += fmt.Sprintf("  Pms %d", ds.PmsCount)
     } else {
-        s += fmt.Sprintf("  Pms %d (%d out of range %s)\n", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Pms %d [%d OOR %s]", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
+	if ds.PmsCount == 0 {
+		s += fmt.Sprintf("\n")
+	} else {
+		s += fmt.Sprintf("(%f-%fPM1, %f-%f%PM2.5, %f-%fPM10)\n", ds.LoPms010-ds.HiPms010, ds.LoPms025-ds.HiPms025, ds.LoPms100-ds.HiPms100)
+	}
     if ds.OpcWarningCount == 0 {
-        s += fmt.Sprintf("  Opc %d\n", ds.OpcCount)
+        s += fmt.Sprintf("  Opc %d", ds.OpcCount)
     } else {
-        s += fmt.Sprintf("  Opc %d (%d out of range %s)\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Opc %d [%d OOR %s]\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
+	if ds.OpcCount == 0 {
+		s += fmt.Sprintf("\n")
+	} else {
+		s += fmt.Sprintf("(%f-%fPM1, %f-%f%PM2.5, %f-%fPM10)\n", ds.LoOpc010-ds.HiOpc010, ds.LoOpc025-ds.HiOpc025, ds.LoOpc100-ds.HiOpc100)
+	}
     geigerConfig := ""
     if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-        geigerConfig = "(no tubes configured)"
+        geigerConfig = "no tubes configured"
         s += fmt.Sprintf("  Lnd 0")
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
-        geigerConfig = "(SINGLE uncovered pancake configuration)"
-        s += fmt.Sprintf("  Lnd %d %s", ds.LndU7318Count, geigerConfig)
+        geigerConfig = "SINGLE uncovered pancake configuration"
+        s += fmt.Sprintf("  Lnd %d (%d-%d) %s", ds.LndU7318Count, ds.LoLndU, ds.HiLndU, geigerConfig)
     } else if ds.LndU7318Count == 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
-        geigerConfig = "(SINGLE covered pancake configuration)"
-        s += fmt.Sprintf("  Lnd %d %s", ds.LndU7318Count, geigerConfig)
+        geigerConfig = "SINGLE covered pancake configuration"
+        s += fmt.Sprintf("  Lnd %d (%d-%d) %s", ds.LndC7318Count, ds.LoLndC, ds.HiLndC, geigerConfig)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 && ds.LndEC7128Count == 0 {
-        s += fmt.Sprintf("  Lnd %d|%d", ds.LndU7318Count, ds.LndC7318Count)
+        s += fmt.Sprintf("  Lnd %d|%d (%d-%d|%d-%d)", ds.LndU7318Count, ds.LndC7318Count, ds.LoLndU, ds.HiLndU, ds.LoLndC, ds.HiLndC)
     } else if ds.LndU7318Count != 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count != 0 {
-        geigerConfig = "(dual-tube EC configuration)"
-        s += fmt.Sprintf("  Lnd %d|%d %s", ds.LndU7318Count, ds.LndEC7128Count, geigerConfig)
+        geigerConfig = "Dual-tube EC configuration"
+        s += fmt.Sprintf("  Lnd %d|%d (%d-%d|%d-%d) %s", ds.LndU7318Count, ds.LndEC7128Count, ds.LoLndU, ds.HiLndU, ds.LoLndEC, ds.HiLndEC, geigerConfig)
     } else {
-        geigerConfig = "(UNRECOGNIZED configuration)"
-        s += fmt.Sprintf("  Lnd %du|%dc|%dec %s", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, geigerConfig)
+        geigerConfig = "UNRECOGNIZED configuration"
+        s += fmt.Sprintf("  Lnd %du|%dc|%dec (%d-%d|%d-%d|%d-%d) %s", ds.LndU7318Count, ds.LndC7318Count, ds.LndEC7128Count, ds.LoLndU, ds.HiLndU, ds.LoLndC, ds.HiLndC, ds.LoLndEC, ds.HiLndEC, geigerConfig)
     }
     if ds.GeigerWarningCount != 0 {
         s += fmt.Sprintf(" (%d out of range %s)", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
@@ -1186,6 +1324,11 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         return s
     }
 
+	// That's all if this isn't purely a test
+	if ds.Measurements != ds.TestMeasurements {
+		return s
+	}
+	
     // Solarcast summary
     s += fmt.Sprintf("Solarcast Checklist:\n")
 
