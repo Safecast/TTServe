@@ -69,7 +69,7 @@ type MeasurementStat struct {
     OpcWarning          bool
     BatV                float64
     BatI                float64
-	BatS				float64
+    BatS                float64
     EnvT                float64
     EnvH                float64
     EnvP                float64
@@ -79,12 +79,12 @@ type MeasurementStat struct {
     LndU                float64
     LndC                float64
     LndEC               float64
-    Opc010				float64
-    Opc025			    float64
-    Opc100				float64
-    Pms010			    float64
-    Pms025		        float64
-    Pms100	            float64
+    Opc010              float64
+    Opc025              float64
+    Opc100              float64
+    Pms010              float64
+    Pms025              float64
+    Pms100              float64
 }
 
 // Stats about all measurements
@@ -195,18 +195,18 @@ type MeasurementDataset struct {
     OpcCount            uint32
     OpcWarningCount     uint32
     OpcWarningFirst     time.Time
-    LoOpc010			float64
-    HiOpc010			float64
-    LoOpc025			float64
-    HiOpc025			float64
-    LoOpc100			float64
-    HiOpc100			float64
-    LoPms010			float64
-    HiPms010			float64
+    LoOpc010            float64
+    HiOpc010            float64
+    LoOpc025            float64
+    HiOpc025            float64
+    LoOpc100            float64
+    HiOpc100            float64
+    LoPms010            float64
+    HiPms010            float64
     LoPms025            float64
     HiPms025            float64
     LoPms100            float64
-    HiPms100	        float64
+    HiPms100            float64
     LoLndU              float64
     HiLndU              float64
     LoLndC              float64
@@ -413,7 +413,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
                     stat.BatWarning = true
                 }
             }
-			stat.BatS = float64(val)
+            stat.BatS = float64(val)
         }
     }
 
@@ -424,18 +424,18 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < -25.0 || val > 80.0 {
                 stat.EnvWarning = true
             }
-			stat.EnvT = float64(val)
+            stat.EnvT = float64(val)
         }
         if sd.Env.Humid != nil {
             val := *sd.Env.Humid
             if val < 0 || val > 100 {
                 stat.EnvWarning = true
             }
-			stat.EnvH = float64(val)
+            stat.EnvH = float64(val)
         }
         if sd.Env.Press != nil {
             val := *sd.Env.Press
-			stat.EnvP = float64(val)
+            stat.EnvP = float64(val)
         }
     }
 
@@ -446,7 +446,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < -25.0 || val > 80.0 {
                 stat.EncWarning = true
             }
-			stat.EncT = float64(val)
+            stat.EncT = float64(val)
         }
         if sd.Dev.Humid != nil {
             stat.hasEnc = true
@@ -454,11 +454,11 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < 0 || val > 100 {
                 stat.EncWarning = true
             }
-			stat.EncH = float64(val)
+            stat.EncH = float64(val)
         }
         if sd.Dev.Press != nil {
             val := *sd.Dev.Press
-			stat.EncP = float64(val)
+            stat.EncP = float64(val)
         }
     }
 
@@ -475,7 +475,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < 0 || val > 500 {
                 stat.GeigerWarning = true
             }
-			stat.LndU = float64(val)
+            stat.LndU = float64(val)
         }
         if sd.Lnd.C7318 != nil {
             stat.hasLndC7318 = true
@@ -483,7 +483,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < 0 || val > 500 {
                 stat.GeigerWarning = true
             }
-			stat.LndC = float64(val)
+            stat.LndC = float64(val)
         }
         if sd.Lnd.EC7128 != nil {
             stat.hasLndEC7128 = true
@@ -491,7 +491,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < 0 || val > 500 {
                 stat.GeigerWarning = true
             }
-			stat.LndEC = float64(val)
+            stat.LndEC = float64(val)
         }
     }
 
@@ -502,21 +502,21 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < -0 || val > 600 {
                 stat.PmsWarning = true
             }
-			stat.Pms010 = float64(val)
+            stat.Pms010 = float64(val)
         }
         if sd.Pms.Pm02_5 != nil {
             val := *sd.Pms.Pm02_5
             if val < -0 || val > 600 {
                 stat.PmsWarning = true
             }
-			stat.Pms025 = float64(val)
+            stat.Pms025 = float64(val)
         }
         if sd.Pms.Pm10_0 != nil {
             val := *sd.Pms.Pm10_0
             if val < -0 || val > 600 {
                 stat.PmsWarning = true
             }
-			stat.Pms100 = float64(val)
+            stat.Pms100 = float64(val)
         }
     }
 
@@ -527,21 +527,21 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
             if val < -0 || val > 600 {
                 stat.OpcWarning = true
             }
-			stat.Opc010 = float64(val)
+            stat.Opc010 = float64(val)
         }
         if sd.Opc.Pm02_5 != nil {
             val := *sd.Opc.Pm02_5
             if val < -0 || val > 600 {
                 stat.OpcWarning = true
             }
-			stat.Opc025 = float64(val)
+            stat.Opc025 = float64(val)
         }
         if sd.Opc.Pm10_0 != nil {
             val := *sd.Opc.Pm10_0
             if val < -0 || val > 600 {
                 stat.OpcWarning = true
             }
-			stat.Opc100 = float64(val)
+            stat.Opc100 = float64(val)
         }
     }
 
@@ -880,63 +880,123 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
     // Sensors
     if stat.hasBat {
         ds.BatCount++
-		ds.LoBatV = math.Min(ds.LoBatV, stat.BatV)
-		ds.HiBatV = math.Max(ds.HiBatV, stat.BatV)
-		ds.LoBatI = math.Min(ds.LoBatI, stat.BatI)
-		ds.HiBatI = math.Max(ds.HiBatI, stat.BatI)
-		ds.LoBatS = math.Min(ds.LoBatS, stat.BatS)
-		ds.HiBatS = math.Max(ds.HiBatS, stat.BatS)
+        if ds.BatCount == 1 {
+            ds.LoBatV = stat.BatV
+            ds.HiBatV = stat.BatV
+            ds.LoBatI = stat.BatI
+            ds.HiBatI = stat.BatI
+            ds.LoBatS = stat.BatS
+            ds.HiBatS = stat.BatS
+        } else {
+            ds.LoBatV = math.Min(ds.LoBatV, stat.BatV)
+            ds.HiBatV = math.Max(ds.HiBatV, stat.BatV)
+            ds.LoBatI = math.Min(ds.LoBatI, stat.BatI)
+            ds.HiBatI = math.Max(ds.HiBatI, stat.BatI)
+            ds.LoBatS = math.Min(ds.LoBatS, stat.BatS)
+            ds.HiBatS = math.Max(ds.HiBatS, stat.BatS)
+        }
     }
     if stat.hasEnv {
         ds.EnvCount++
-		ds.LoEnvT = math.Min(ds.LoEnvT, stat.EnvT)
-		ds.HiEnvT = math.Max(ds.HiEnvT, stat.EnvT)
-		ds.LoEnvH = math.Min(ds.LoEnvH, stat.EnvH)
-		ds.HiEnvH = math.Max(ds.HiEnvH, stat.EnvH)
-		ds.LoEnvP = math.Min(ds.LoEnvP, stat.EnvP)
-		ds.HiEnvP = math.Max(ds.HiEnvP, stat.EnvP)
+        if ds.EnvCount == 1 {
+            ds.LoEnvT = stat.EnvT
+            ds.HiEnvT = stat.EnvT
+            ds.LoEnvH = stat.EnvH
+            ds.HiEnvH = stat.EnvH
+            ds.LoEnvP = stat.EnvP
+            ds.HiEnvP = stat.EnvP
+        } else {
+            ds.LoEnvT = math.Min(ds.LoEnvT, stat.EnvT)
+            ds.HiEnvT = math.Max(ds.HiEnvT, stat.EnvT)
+            ds.LoEnvH = math.Min(ds.LoEnvH, stat.EnvH)
+            ds.HiEnvH = math.Max(ds.HiEnvH, stat.EnvH)
+            ds.LoEnvP = math.Min(ds.LoEnvP, stat.EnvP)
+            ds.HiEnvP = math.Max(ds.HiEnvP, stat.EnvP)
+        }
     }
     if stat.hasEnc {
         ds.EncCount++
-		ds.LoEncT = math.Min(ds.LoEncT, stat.EncT)
-		ds.HiEncT = math.Max(ds.HiEncT, stat.EncT)
-		ds.LoEncH = math.Min(ds.LoEncH, stat.EncH)
-		ds.HiEncH = math.Max(ds.HiEncH, stat.EncH)
-		ds.LoEncP = math.Min(ds.LoEncP, stat.EncP)
-		ds.HiEncP = math.Max(ds.HiEncP, stat.EncP)
+        if ds.EncCount == 1 {
+            ds.LoEncT = stat.EncT
+            ds.HiEncT = stat.EncT
+            ds.LoEncH = stat.EncH
+            ds.HiEncH = stat.EncH
+            ds.LoEncP = stat.EncP
+            ds.HiEncP = stat.EncP
+        } else {
+            ds.LoEncT = math.Min(ds.LoEncT, stat.EncT)
+            ds.HiEncT = math.Max(ds.HiEncT, stat.EncT)
+            ds.LoEncH = math.Min(ds.LoEncH, stat.EncH)
+            ds.HiEncH = math.Max(ds.HiEncH, stat.EncH)
+            ds.LoEncP = math.Min(ds.LoEncP, stat.EncP)
+            ds.HiEncP = math.Max(ds.HiEncP, stat.EncP)
+        }
     }
     if stat.hasLndU7318 {
         ds.LndU7318Count++
-		ds.LoLndU = math.Min(ds.LoLndU, stat.LndU)
-		ds.HiLndU = math.Max(ds.HiLndU, stat.LndU)
+        if ds.LndU7318Count == 1 {
+            ds.LoLndU = stat.LndU
+            ds.HiLndU = stat.LndU
+        } else {
+            ds.LoLndU = math.Min(ds.LoLndU, stat.LndU)
+            ds.HiLndU = math.Max(ds.HiLndU, stat.LndU)
+        }
     }
     if stat.hasLndC7318 {
         ds.LndC7318Count++
-		ds.LoLndC = math.Min(ds.LoLndC, stat.LndC)
-		ds.HiLndC = math.Max(ds.HiLndC, stat.LndC)
+        if ds.LndC7318Count == 1 {
+            ds.LoLndC = stat.LndC
+            ds.HiLndC = stat.LndC
+        } else {
+            ds.LoLndC = math.Min(ds.LoLndC, stat.LndC)
+            ds.HiLndC = math.Max(ds.HiLndC, stat.LndC)
+        }
     }
     if stat.hasLndEC7128 {
         ds.LndEC7128Count++
-		ds.LoLndEC = math.Min(ds.LoLndEC, stat.LndEC)
-		ds.HiLndEC = math.Max(ds.HiLndEC, stat.LndEC)
+        if ds.LndEC7128Count == 1 {
+            ds.LoLndEC = stat.LndEC
+            ds.HiLndEC = stat.LndEC
+        } else {
+            ds.LoLndEC = math.Min(ds.LoLndEC, stat.LndEC)
+            ds.HiLndEC = math.Max(ds.HiLndEC, stat.LndEC)
+        }
     }
     if stat.hasPms {
         ds.PmsCount++
-		ds.LoPms010 = math.Min(ds.LoPms010, stat.Pms010)
-		ds.HiPms010 = math.Max(ds.HiPms010, stat.Pms010)
-		ds.LoPms025 = math.Min(ds.LoPms025, stat.Pms025)
-		ds.HiPms025 = math.Max(ds.HiPms025, stat.Pms025)
-		ds.LoPms100 = math.Min(ds.LoPms100, stat.Pms100)
-		ds.HiPms100 = math.Max(ds.HiPms100, stat.Pms100)
+        if ds.PmsCount == 1 {
+            ds.LoPms010 = stat.Pms010
+            ds.HiPms010 = stat.Pms010
+            ds.LoPms025 = stat.Pms025
+            ds.HiPms025 = stat.Pms025
+            ds.LoPms100 = stat.Pms100
+            ds.HiPms100 = stat.Pms100
+        } else {
+            ds.LoPms010 = math.Min(ds.LoPms010, stat.Pms010)
+            ds.HiPms010 = math.Max(ds.HiPms010, stat.Pms010)
+            ds.LoPms025 = math.Min(ds.LoPms025, stat.Pms025)
+            ds.HiPms025 = math.Max(ds.HiPms025, stat.Pms025)
+            ds.LoPms100 = math.Min(ds.LoPms100, stat.Pms100)
+            ds.HiPms100 = math.Max(ds.HiPms100, stat.Pms100)
+        }
     }
     if stat.hasOpc {
         ds.OpcCount++
-		ds.LoOpc010 = math.Min(ds.LoOpc010, stat.Opc010)
-		ds.HiOpc010 = math.Max(ds.HiOpc010, stat.Opc010)
-		ds.LoOpc025 = math.Min(ds.LoOpc025, stat.Opc025)
-		ds.HiOpc025 = math.Max(ds.HiOpc025, stat.Opc025)
-		ds.LoOpc100 = math.Min(ds.LoOpc100, stat.Opc100)
-		ds.HiOpc100 = math.Max(ds.HiOpc100, stat.Opc100)
+        if ds.OpcCount == 1 {
+            ds.LoOpc010 = stat.Opc010
+            ds.HiOpc010 = stat.Opc010
+            ds.LoOpc025 = stat.Opc025
+            ds.HiOpc025 = stat.Opc025
+            ds.LoOpc100 = stat.Opc100
+            ds.HiOpc100 = stat.Opc100
+        } else {
+            ds.LoOpc010 = math.Min(ds.LoOpc010, stat.Opc010)
+            ds.HiOpc010 = math.Max(ds.HiOpc010, stat.Opc010)
+            ds.LoOpc025 = math.Min(ds.LoOpc025, stat.Opc025)
+            ds.HiOpc025 = math.Max(ds.HiOpc025, stat.Opc025)
+            ds.LoOpc100 = math.Min(ds.LoOpc100, stat.Opc100)
+            ds.HiOpc100 = math.Max(ds.HiOpc100, stat.Opc100)
+        }
     }
     if stat.BatWarning {
         if ds.BatWarningCount == 0 {
@@ -1173,51 +1233,51 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     } else {
         s += fmt.Sprintf("  Bat %5d  [%d OOR %s]", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
-	if ds.BatCount == 0 {
-		s += fmt.Sprintf("\n")
-	} else {
-		s += fmt.Sprintf("    (%.2f-%.2fV, %.1f-%.1fmA, %.0f-%.0f%%)\n", ds.LoBatV, ds.HiBatV, ds.LoBatI, ds.HiBatI, ds.LoBatS, ds.HiBatS)
-	}
+    if ds.BatCount == 0 {
+        s += fmt.Sprintf("\n")
+    } else {
+        s += fmt.Sprintf("    (%.2f-%.2fV, %.1f-%.1fmA, %.0f-%.0f%%)\n", ds.LoBatV, ds.HiBatV, ds.LoBatI, ds.HiBatI, ds.LoBatS, ds.HiBatS)
+    }
     if ds.EnvWarningCount == 0 {
         s += fmt.Sprintf("  Env %5d", ds.EnvCount)
     } else {
         s += fmt.Sprintf("  Env %5d  [%d OOR  %s]", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
-	if ds.EnvCount == 0 {
-		s += fmt.Sprintf("\n")
-	} else {
-		s += fmt.Sprintf("    (%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEnvT, ds.HiEnvT, ds.LoEnvH, ds.HiEnvH, ds.LoEnvP, ds.HiEnvP)
-	}
+    if ds.EnvCount == 0 {
+        s += fmt.Sprintf("\n")
+    } else {
+        s += fmt.Sprintf("    (%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEnvT, ds.HiEnvT, ds.LoEnvH, ds.HiEnvH, ds.LoEnvP, ds.HiEnvP)
+    }
     if ds.EncWarningCount == 0 {
         s += fmt.Sprintf("  Enc %5d", ds.EncCount)
     } else {
         s += fmt.Sprintf("  Enc %5d  [%d OOR %s]", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
-	if ds.EncCount == 0 {
-		s += fmt.Sprintf("\n")
-	} else {
-		s += fmt.Sprintf("    (%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEncT-ds.HiEncT, ds.LoEncH-ds.HiEncH, ds.LoEncP-ds.HiEncP)
-	}
+    if ds.EncCount == 0 {
+        s += fmt.Sprintf("\n")
+    } else {
+        s += fmt.Sprintf("    (%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEncT-ds.HiEncT, ds.LoEncH-ds.HiEncH, ds.LoEncP-ds.HiEncP)
+    }
     if ds.PmsWarningCount == 0 {
         s += fmt.Sprintf("  Pms %5d", ds.PmsCount)
     } else {
         s += fmt.Sprintf("  Pms %5d  [%d OOR %s]", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
-	if ds.PmsCount == 0 {
-		s += fmt.Sprintf("\n")
-	} else {
-		s += fmt.Sprintf("    (%.0f-%.0fpm1, %.0f-%.0fpm2.5, %.0f-%.0fpm10)\n", ds.LoPms010, ds.HiPms010, ds.LoPms025, ds.HiPms025, ds.LoPms100, ds.HiPms100)
-	}
+    if ds.PmsCount == 0 {
+        s += fmt.Sprintf("\n")
+    } else {
+        s += fmt.Sprintf("    (%.0f-%.0fpm1, %.0f-%.0fpm2.5, %.0f-%.0fpm10)\n", ds.LoPms010, ds.HiPms010, ds.LoPms025, ds.HiPms025, ds.LoPms100, ds.HiPms100)
+    }
     if ds.OpcWarningCount == 0 {
         s += fmt.Sprintf("  Opc %5d", ds.OpcCount)
     } else {
         s += fmt.Sprintf("  Opc %5d  [%d OOR %s]\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
-	if ds.OpcCount == 0 {
-		s += fmt.Sprintf("\n")
-	} else {
-		s += fmt.Sprintf("    (%.1f-%.1fpm1, %.1f-%.1fpm2.5, %.1f-%.1fpm10)\n", ds.LoOpc010, ds.HiOpc010, ds.LoOpc025, ds.HiOpc025, ds.LoOpc100, ds.HiOpc100)
-	}
+    if ds.OpcCount == 0 {
+        s += fmt.Sprintf("\n")
+    } else {
+        s += fmt.Sprintf("    (%.1f-%.1fpm1, %.1f-%.1fpm2.5, %.1f-%.1fpm10)\n", ds.LoOpc010, ds.HiOpc010, ds.LoOpc025, ds.HiOpc025, ds.LoOpc100, ds.HiOpc100)
+    }
     geigerConfig := ""
     if ds.LndU7318Count == 0 && ds.LndC7318Count == 0 && ds.LndEC7128Count == 0 {
         geigerConfig = "No tubes configured"
@@ -1324,11 +1384,11 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         return s
     }
 
-	// That's all if this isn't purely a test
-	if ds.Measurements != ds.TestMeasurements {
-		return s
-	}
-	
+    // That's all if this isn't purely a test
+    if ds.Measurements != ds.TestMeasurements {
+        return s
+    }
+
     // Solarcast summary
     s += fmt.Sprintf("Solarcast Checklist:\n")
 
