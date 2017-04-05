@@ -80,7 +80,7 @@ func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv S
 }
 
 // Save the last value in a file
-func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
+func SafecastWriteDeviceStatus(sc SafecastData) {
     var ChangedLoc = false
     var ChangedPms = false
     var ChangedOpc = false
@@ -104,7 +104,6 @@ func SafecastWriteDeviceStatus(UploadedAt string, sc SafecastData) {
         var svc Service
         sc.Service = &svc
     }
-    sc.Service.UploadedAt = &UploadedAt
 
     // Read the current value, or a blank value structure if it's blank.
     // If the value isn't available it's because of a nonrecoverable  error.

@@ -498,7 +498,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     sd.Service.Handler = &TTServeInstanceID
 
     // Log as accurately as we can with regard to what came in
-    SafecastWriteToLogs(req.SvUploadedAt, sd)
+    SafecastWriteToLogs(sd)
 
     // Upload
     SafecastUpload(sd)

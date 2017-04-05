@@ -177,7 +177,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Post to V2
     SafecastUpload(sd)
-    SafecastWriteToLogs(UploadedAt, sd)
+    SafecastWriteToLogs(sd)
     stats.Count.HTTPRedirect++
 
     // It is an error if there is a pending outbound payload for this device, so remove it and report it
