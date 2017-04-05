@@ -10,6 +10,7 @@ import (
     "os"
     "time"
     "fmt"
+    "net/http"
     "strings"
     "strconv"
     "io/ioutil"
@@ -22,6 +23,8 @@ type SafecastGatewayStatus struct {
     Ttg         TTGateReq   `json:"current_values,omitempty"`
 	// for backward compatibility - you can remove after 2017-04
     UploadedAt  string      `json:"when_uploaded,omitempty"`
+	// Our view of the IP info
+	IPInfo				IPInfoData	`json:"gateway_location,omitempty"`
 }
 
 // Get the current value
@@ -83,7 +86,7 @@ func SafecastReadGatewayStatus(gatewayId string) (isAvail bool, isReset bool, sv
 }
 
 // Save the last value in a file
-func SafecastWriteGatewayStatus(ttg TTGateReq) {
+func SafecastWriteGatewayStatus(ttg TTGateReq, IP string) {
     var value SafecastGatewayStatus
 
     // Read the current value, or a blank value structure if it's blank.
@@ -107,6 +110,24 @@ func SafecastWriteGatewayStatus(ttg TTGateReq) {
 
     // Update the uploaded at
     value.UpdatedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
+
+	// If the new one doesn't have a successful IPInfo, we'd like to fetch it
+
+    // If the IP info isn't filled in, fill it in.  This will only happen once.
+    if value.IPInfo.Status == "" {
+        response, err := http.Get("http://ip-api.com/json/" + IP)
+        if err == nil {
+            defer response.Body.Close()
+            contents, err := ioutil.ReadAll(response.Body)
+            if err == nil {
+                var info IPInfoData
+                err = json.Unmarshal(contents, &info)
+                if err == nil {
+                    value.IPInfo = info
+                }
+            }
+        }
+    }
 
     // Write it to the file
     filename := SafecastDirectory() + TTGatewayStatusPath + "/" + ttg.GatewayId + ".json"

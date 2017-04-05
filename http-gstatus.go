@@ -34,25 +34,9 @@ func inboundWebGatewayUpdateHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    // If the IP info isn't filled in, fill it in
-    if ttg.IPInfo.Status != "success" {
-        requestor, _ := getRequestorIPv4(req)
-        response, err := http.Get("http://ip-api.com/json/" + requestor)
-        if err == nil {
-            defer response.Body.Close()
-            contents, err := ioutil.ReadAll(response.Body)
-            if err == nil {
-                var info IPInfoData
-                err = json.Unmarshal(contents, &info)
-                if err == nil {
-                    ttg.IPInfo = info
-                }
-            }
-        }
-    }
-
     fmt.Printf("\n%s Received gateway update for %s\n", logTime(), ttg.GatewayId)
-    go SafecastWriteGatewayStatus(ttg)
+    requestor, _ := getRequestorIPv4(req)
+    go SafecastWriteGatewayStatus(ttg, requestor)
     stats.Count.HTTPGUpdate++
 }
 
