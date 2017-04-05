@@ -428,7 +428,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 
 // Just a debug function that traverses a Response, which took me forever to figure out
 func InfluxResultsToCSV(response *influx.Response, fd *os.File) int {
-
+	buf := make([]byte, 8192)
     fDebug := false
 	results := 0
 
@@ -476,7 +476,8 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) int {
                     fmt.Printf("%d: %d cols\n", i, len(v))
                 }
                 // Initialize JSON data structure
-                s := "{"
+				buflen := 0
+				buflen += copy(buf[buflen:], "{")
                 first := true
                 // Iterate over cells in the row
                 for k, cell := range v {
@@ -643,24 +644,24 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) int {
                         }
                         if colname != "" {
                             if first {
-                                s += rowval
                                 first = false
                             } else {
-                                s += "," + rowval
-                            }
+								buflen += copy(buf[buflen:], ",")
+							}
+							buflen += copy(buf[buflen:], rowval)
                         }
                     }
 
                 }
 
                 // End the JSON structure
-                s += "}"
+				buflen += copy(buf[buflen:], "}")
 
                 // Unmarshal it to Safecast data
                 sd := SafecastData{}
-                err := json.Unmarshal([]byte(s), &sd)
+                err := json.Unmarshal(buf[0:buflen], &sd)
                 if err != nil {
-                    fmt.Printf("\nError unmarshaling %s:\n%s\n", err, s)
+                    fmt.Printf("\nError unmarshaling %s:\n%s\n", err, string(buf[0:buflen]))
                 } else {
 
 					// Append a row to the CSV
