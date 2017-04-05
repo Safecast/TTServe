@@ -467,9 +467,6 @@ func InfluxResultsToNewCSV(response *influx.Response) {
                     fmt.Printf("%d: '%s'\n", i, v)
                 }
             }
-            // Initialize JSON data structure
-            s := "{"
-            first := true
             // Rows of results
             if fDebug {
                 fmt.Printf("%d Rows:\n", len(r.Values))
@@ -478,6 +475,10 @@ func InfluxResultsToNewCSV(response *influx.Response) {
                 if fDebug {
                     fmt.Printf("%d: %d cols\n", i, len(v))
                 }
+                // Initialize JSON data structure
+                s := "{"
+                first := true
+                // Iterate over cells in the row
                 for k, cell := range v {
                     if cell == nil {
                         if fDebug {
@@ -651,19 +652,19 @@ func InfluxResultsToNewCSV(response *influx.Response) {
                     }
 
                 }
+
+                // End the JSON structure
+                s += "}"
+
+                // Unmarshal it to Safecast data
+                sd := SafecastData{}
+                err := json.Unmarshal([]byte(s), &sd)
+                if err != nil {
+                    fmt.Printf("\nError unmarshaling %s:\n%s\n", err, s)
+                } else {
+                    fmt.Printf("Marshalled:\n%v\n", sd)
+                }
             }
-
-			// End the JSON structure
-            s += "}"
-
-			// Unmarshal it to Safecast data
-            sd := SafecastData{}
-            err := json.Unmarshal([]byte(s), &sd)
-            if err != nil {
-				fmt.Printf("\nError unmarshaling %s:\n%s\n", err, s)
-			} else {
-				fmt.Printf("Marshalled:\n%v\n", sd)
-			}
         }
     }
 
