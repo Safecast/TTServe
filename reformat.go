@@ -43,13 +43,13 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
     isPointcast := false
     if devicetype == "pointcast" {
         isPointcast = true
-		did := uint64(*v1.DeviceId / 10)
+		did := uint32(*v1.DeviceId / 10)
         sd.DeviceId = &did
     }
     isSafecastAir := false
     if devicetype == "safecast-air" {
         isSafecastAir = true
-		did := uint64(*v1.DeviceId)
+		did := uint32(*v1.DeviceId)
         sd.DeviceId = &did
     }
     if !isPointcast && !isSafecastAir {

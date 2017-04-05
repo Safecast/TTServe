@@ -29,7 +29,7 @@ type SafecastDeviceStatus struct {
 // Get the current value
 func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv SafecastDeviceStatus) {
     valueEmpty := SafecastDeviceStatus{}
-	did := uint64(deviceId)
+	did := uint32(deviceId)
     valueEmpty.DeviceId = &did
 
     // Generate the filename, which we'll use twice
