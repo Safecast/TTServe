@@ -22,7 +22,7 @@ type TTGateReq struct {
 	GatewayName			string		`json:"gateway_name,omitempty"`
 	MessagesReceived	uint32		`json:"gateway_msgs_received,omitempty"`
 	DevicesSeen			string		`json:"gateway_devices,omitempty"`
-	IPInfo				IPInfoData	`json:"gateway_location,omitempty"`
+	IPInfo				IPInfoData	`json:"gateway_ipinfo,omitempty"`
 
 	// Service Info, when this message is being routed service-to-service
 	Transport			string		`json:"service_transport,omitempty"`
