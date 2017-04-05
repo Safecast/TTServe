@@ -179,9 +179,9 @@ func SafecastGetGatewaySummary(GatewayId string, bol string, fMobile bool, fDeta
     label := value.Ttg.GatewayName
 
     // Get a summary of the location
-    loc := fmt.Sprintf("%s, %s", value.Ttg.IPInfo.City, value.Ttg.IPInfo.Country)
-    if value.Ttg.IPInfo.City == "" {
-        loc = value.Ttg.IPInfo.Country
+    loc := fmt.Sprintf("%s, %s", value.IPInfo.City, value.IPInfo.Country)
+    if value.IPInfo.City == "" {
+        loc = value.IPInfo.Country
     }
 
     // Build the summary
