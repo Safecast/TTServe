@@ -123,7 +123,7 @@ type MeasurementDataset struct {
     LoraModule          string
     FonaModule          string
     AnyErrors           bool
-    AnyConnectErrors    bool
+    ConnectErrors		uint32
     AnyPointcastErrors  bool
     PrevMotionBegan     string
     UniqueMotionBegans  uint32
@@ -780,27 +780,27 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
     // Connect errors
     if stat.ErrorsConnectLora > ds.ThisErrorsConnectLora {
         ds.ThisErrorsConnectLora = stat.ErrorsConnectLora
-        ds.AnyConnectErrors = true
+        ds.ConnectErrors++
     }
     if stat.ErrorsConnectFona > ds.ThisErrorsConnectFona {
         ds.ThisErrorsConnectFona = stat.ErrorsConnectFona
-        ds.AnyConnectErrors = true
+        ds.ConnectErrors++
     }
     if stat.ErrorsConnectWireless > ds.ThisErrorsConnectWireless {
         ds.ThisErrorsConnectWireless = stat.ErrorsConnectWireless
-        ds.AnyConnectErrors = true
+        ds.ConnectErrors++
     }
     if stat.ErrorsConnectGateway > ds.ThisErrorsConnectGateway {
         ds.ThisErrorsConnectGateway = stat.ErrorsConnectGateway
-        ds.AnyConnectErrors = true
+        ds.ConnectErrors++
     }
     if stat.ErrorsConnectData > ds.ThisErrorsConnectData {
         ds.ThisErrorsConnectData = stat.ErrorsConnectData
-        ds.AnyConnectErrors = true
+        ds.ConnectErrors++
     }
     if stat.ErrorsConnectService > ds.ThisErrorsConnectService {
         ds.ThisErrorsConnectService = stat.ErrorsConnectService
-        ds.AnyConnectErrors = true
+        ds.ConnectErrors++
     }
     if stat.ErrorsCommsFailures != 0 {
         if ds.MinErrorsCommsFailures == 0 || (ds.MinErrorsCommsFailures != 0 && stat.ErrorsCommsFailures < ds.MinErrorsCommsFailures) {
@@ -1196,7 +1196,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     // Connect errors
     s += fmt.Sprintf("Connection errors:\n")
-    if !ds.AnyConnectErrors {
+    if ds.ConnectErrors == 0 {
         s += fmt.Sprintf("  None\n")
     } else {
         i := ds.PrevErrorsConnectLora + ds.ThisErrorsConnectLora
@@ -1400,12 +1400,20 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     s += fmt.Sprintf("No device errors.\n")
 
-    if !ds.AnyConnectErrors {
+	SubstantiveConnectErrors := ds.ConnectErrors != 0
+	// If the only connect errors were wireless, look at the number of them
+	if SubstantiveConnectErrors && ds.ConnectErrors == (ds.PrevErrorsConnectWireless + ds.ThisErrorsConnectWireless) {
+		// If only a handful, forgive them
+		if ds.ConnectErrors <= 3 {
+			SubstantiveConnectErrors = false;
+		}
+	}
+    if !SubstantiveConnectErrors {
         s += fmt.Sprintf("  PASS  ")
     } else {
         s += fmt.Sprintf("   --   ")
     }
-    s += fmt.Sprintf("No connection errors.\n")
+    s += fmt.Sprintf("No substantive connection errors.\n")
 
     diff := math.Abs(float64(ds.LoraTransports) - float64(ds.FonaTransports))
     pct := diff / float64(ds.Measurements)
