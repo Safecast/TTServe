@@ -59,11 +59,6 @@ func SafecastLogToInflux(sd SafecastData) bool {
 
     // Extract each safecast field into its influx equivalent
 
-    if sd.DeviceId != nil {
-        fields["device"] = *sd.DeviceId
-        tags["device_str"] = fmt.Sprintf("%d", *sd.DeviceId)
-    }
-
     if sd.CapturedAt != nil {
         fields["when_captured"] = *sd.CapturedAt
         t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
@@ -72,6 +67,11 @@ func SafecastLogToInflux(sd SafecastData) bool {
             setMeasurementTime = true
             measurementTime = t
         }
+    }
+
+    if sd.DeviceId != nil {
+        tags["device_str"] = fmt.Sprintf("%d", *sd.DeviceId)
+        fields["device"] = *sd.DeviceId
     }
 
     if sd.Loc != nil {
@@ -428,13 +428,10 @@ func SafecastLogToInflux(sd SafecastData) bool {
 }
 
 // Just a debug function that traverses a Response, which took me forever to figure out
-func InfluxResultsToJSON(response *influx.Response) string {
+func InfluxResultsToNewCSV(response *influx.Response) {
 
-	fDebug := false
-	
-    s := "{"
-	first := true
-	
+    fDebug := false
+
     for _, result := range response.Results {
         // Ignore this
         if fDebug {
@@ -470,6 +467,9 @@ func InfluxResultsToJSON(response *influx.Response) string {
                     fmt.Printf("%d: '%s'\n", i, v)
                 }
             }
+            // Initialize JSON data structure
+            s := "{"
+            first := true
             // Rows of results
             if fDebug {
                 fmt.Printf("%d Rows:\n", len(r.Values))
@@ -640,24 +640,33 @@ func InfluxResultsToJSON(response *influx.Response) string {
                         if fDebug {
                             fmt.Printf("%s %s\n", dbgval, rowval)
                         }
-						if colname != "" {
-							if first {
-								s += rowval
-								first = false
-							} else {
-								s += "," + rowval
-							}
-						}
+                        if colname != "" {
+                            if first {
+                                s += rowval
+                                first = false
+                            } else {
+                                s += "," + rowval
+                            }
+                        }
                     }
+
                 }
             }
+
+			// End the JSON structure
+            s += "}"
+
+			// Unmarshal it to Safecast data
+            sd := SafecastData{}
+            err := json.Unmarshal([]byte(s), &sd)
+            if err != nil {
+				fmt.Printf("\nError unmarshaling %s:\n%s\n", err, s)
+			} else {
+				fmt.Printf("Marshalled:\n%v\n", sd)
+			}
         }
     }
 
-	s += "}"
-
-	return s
-	
 }
 
 // Quote a string appropriately
@@ -860,8 +869,7 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     }
 
     // Convert to JSON
-	json := InfluxResultsToJSON(response)
-	fmt.Printf("%s\n", json)
+    InfluxResultsToNewCSV(response)
 
     // Create the output file
     file := time.Now().UTC().Format("2006-01-02-150405") + "-" + the_user + ".csv"
