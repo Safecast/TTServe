@@ -1403,8 +1403,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	SubstantiveConnectErrors := ds.ConnectErrors != 0
 	// If the only connect errors were wireless, look at the number of them
 	if SubstantiveConnectErrors && ds.ConnectErrors <= (ds.PrevErrorsConnectWireless + ds.ThisErrorsConnectWireless) {
-		// If only a handful, forgive them
-		if ds.ConnectErrors < 3 {
+		// If that's the only thing and there's only one, forgive it
+		if ds.ConnectErrors < 2 {
 			SubstantiveConnectErrors = false;
 		}
 	}
