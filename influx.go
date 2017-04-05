@@ -461,66 +461,102 @@ func InfluxResultsDebug(response *influx.Response) {
                     if cell == nil {
                         fmt.Printf("%d: NIL\n", k)
                     } else {
+						colname := "?"
+						rowval := "?"
+						dbgval := ""
+						if k < len(r.Columns) {
+							colname = r.Columns[k]
+						}
                         switch cell := cell.(type) {
                         default:
-                            fmt.Printf("%d: '%v' unknown type %T\n", k, cell, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%v\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) unknown type %T\n", k, cell)
                         case json.Number:
-                            fmt.Printf("%d: '%v' json.Number\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%v\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) json.Number\n", k)
                         case string:
-                            fmt.Printf("%d: '%s' string\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%s\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) string\n", k)
                         case bool:
-                            fmt.Printf("%d: '%t' bool\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%t\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) bool\n", k)
                         case *bool:
-                            fmt.Printf("%d: '%t' *bool\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%t\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *bool\n", k)
                         case int:
-                            fmt.Printf("%d: '%d' int\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%d\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) int\n", k)
                         case int8:
-                            fmt.Printf("%d: '%d' int8\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%d\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) int8\n", k)
                         case int16:
-                            fmt.Printf("%d: '%d' int16\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%d\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) int16\n", k)
                         case int32:
-                            fmt.Printf("%d: '%d' int32\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%d\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) int32\n", k)
                         case int64:
-                            fmt.Printf("%d: '%d' int64\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%d\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) int64\n", k)
                         case *int:
-                            fmt.Printf("%d: '%d' *int\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%d\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *int\n", k)
                         case *int8:
-                            fmt.Printf("%d: '%d' *int8\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%d\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *int8\n", k)
                         case *int16:
-                            fmt.Printf("%d: '%d' *int16\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%d\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *int16\n", k)
                         case *int32:
-                            fmt.Printf("%d: '%d' *int32\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%d\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *int32\n", k)
                         case *int64:
-                            fmt.Printf("%d: '%d' *int64\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%d\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *int64\n", k)
                         case uint:
-                            fmt.Printf("%d: '%u' uint\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%u\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) uint\n", k)
                         case uint8:
-                            fmt.Printf("%d: '%u' uint8\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%u\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) uint8\n", k)
                         case uint16:
-                            fmt.Printf("%d: '%u' uint16\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%u\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) uint16\n", k)
                         case uint32:
-                            fmt.Printf("%d: '%u' uint32\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%u\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) uint32\n", k)
                         case uint64:
-                            fmt.Printf("%d: '%u' uint64\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%u\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) uint64\n", k)
                         case *uint:
-                            fmt.Printf("%d: '%u' *uint\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%u\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *uint\n", k)
                         case *uint8:
-                            fmt.Printf("%d: '%u' *uint8\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%u\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *uint8\n", k)
                         case *uint16:
-                            fmt.Printf("%d: '%u' *uint16\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%u\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *uint16\n", k)
                         case *uint32:
-                            fmt.Printf("%d: '%u' *uint32\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%u\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *uint32\n", k)
                         case *uint64:
-                            fmt.Printf("%d: '%u' *uint64\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%u\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *uint64\n", k)
                         case float32:
-                            fmt.Printf("%d: '%f' float32\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%f\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) float32\n", k)
                         case float64:
-                            fmt.Printf("%d: '%f' float64\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%f\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) float64\n", k)
                         case *float32:
-                            fmt.Printf("%d: '%f' *float32\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%f\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *float32\n", k)
                         case *float64:
-                            fmt.Printf("%d: '%f' *float64\n", k, cell)
+                            rowval = fmt.Sprintf("\"%s\":\"%f\"", colname, cell)
+							dbgval = fmt.Sprintf(" (%d) *float64\n", k)
                         }
+					fmt.Printf("%s%s\n", rowval, dbgval)
                     }
                 }
             }
@@ -729,7 +765,7 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     }
 
     // Debug
-    if (false) {
+    if (true) {
         InfluxResultsDebug(response)
     }
 
