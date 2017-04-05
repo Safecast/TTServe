@@ -22,7 +22,7 @@ Within 2200 kilometers...
 `select * from data where loc_olc =~ /85*/`
 
 Other useful queries...
-`select * from data where ( device = ‘217634580’ or device = '1188192954' ) and time > now() - 12h`
+`select * from data where ( device = 217634580 or device = 1188192954 ) and time > now() - 12h`
 
 
 
