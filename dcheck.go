@@ -123,7 +123,7 @@ type MeasurementDataset struct {
     LoraModule          string
     FonaModule          string
     AnyErrors           bool
-    ConnectErrors		uint32
+    ConnectErrors       uint32
     AnyPointcastErrors  bool
     PrevMotionBegan     string
     UniqueMotionBegans  uint32
@@ -829,49 +829,8 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         if stat.UptimeMinutes < ds.PrevUptimeMinutes {
             ds.Boots++
 
-            // Add errors to running totals from prior boots
-            ds.PrevErrorsOpc += ds.ThisErrorsOpc
-            ds.ThisErrorsOpc = 0
-            ds.PrevErrorsPms += ds.ThisErrorsPms
-            ds.ThisErrorsPms = 0
-            ds.PrevErrorsBme0 += ds.ThisErrorsBme0
-            ds.ThisErrorsBme0 = 0
-            ds.PrevErrorsBme1 += ds.ThisErrorsBme1
-            ds.ThisErrorsBme1 = 0
-            ds.PrevErrorsLora += ds.ThisErrorsLora
-            ds.ThisErrorsLora = 0
-            ds.PrevErrorsFona += ds.ThisErrorsFona
-            ds.ThisErrorsFona = 0
-            ds.PrevErrorsCommsPowerFails += ds.ThisErrorsCommsPowerFails
-            ds.ThisErrorsCommsPowerFails = 0
-            ds.PrevErrorsGeiger += ds.ThisErrorsGeiger
-            ds.ThisErrorsGeiger = 0
-            ds.PrevErrorsMax01 += ds.ThisErrorsMax01
-            ds.ThisErrorsMax01 = 0
-            ds.PrevErrorsUgps += ds.ThisErrorsUgps
-            ds.ThisErrorsUgps = 0
-            ds.PrevErrorsLis += ds.ThisErrorsLis
-            ds.ThisErrorsLis = 0
-            ds.PrevErrorsSpi += ds.ThisErrorsSpi
-            ds.ThisErrorsSpi = 0
-            ds.PrevErrorsTwi += ds.ThisErrorsTwi
-            ds.ThisErrorsTwi = 0
-            ds.PrevErrorsConnectLora += ds.ThisErrorsConnectLora
-            ds.ThisErrorsConnectLora = 0
-            ds.PrevErrorsConnectFona += ds.ThisErrorsConnectFona
-            ds.ThisErrorsConnectFona = 0
-            ds.PrevErrorsConnectWireless += ds.ThisErrorsConnectWireless
-            ds.ThisErrorsConnectWireless = 0
-            ds.PrevErrorsConnectGateway += ds.ThisErrorsConnectGateway
-            ds.ThisErrorsConnectGateway = 0
-            ds.PrevErrorsConnectData += ds.ThisErrorsConnectData
-            ds.ThisErrorsConnectData = 0
-            ds.PrevErrorsConnectService += ds.ThisErrorsConnectService
-            ds.ThisErrorsConnectService = 0
-            ds.PrevErrorsCommsFailures += ds.ThisErrorsCommsFailures
-            ds.ThisErrorsCommsFailures = 0
-            ds.PrevErrorsDeviceRestarts += ds.ThisErrorsDeviceRestarts
-            ds.ThisErrorsDeviceRestarts = 0
+            // Aggregate and reset error totals
+            AggregateErrors(ds)
 
         }
         ds.PrevUptimeMinutes = stat.UptimeMinutes
@@ -1039,6 +998,63 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
 
 }
 
+// Aggregate the error counts
+func AggregateErrors(ds *MeasurementDataset) {
+
+    // Add errors to running totals from prior boots
+    ds.PrevErrorsOpc += ds.ThisErrorsOpc
+    ds.ThisErrorsOpc = 0
+    ds.PrevErrorsPms += ds.ThisErrorsPms
+    ds.ThisErrorsPms = 0
+    ds.PrevErrorsBme0 += ds.ThisErrorsBme0
+    ds.ThisErrorsBme0 = 0
+    ds.PrevErrorsBme1 += ds.ThisErrorsBme1
+    ds.ThisErrorsBme1 = 0
+    ds.PrevErrorsLora += ds.ThisErrorsLora
+    ds.ThisErrorsLora = 0
+    ds.PrevErrorsFona += ds.ThisErrorsFona
+    ds.ThisErrorsFona = 0
+    ds.PrevErrorsCommsPowerFails += ds.ThisErrorsCommsPowerFails
+    ds.ThisErrorsCommsPowerFails = 0
+    ds.PrevErrorsGeiger += ds.ThisErrorsGeiger
+    ds.ThisErrorsGeiger = 0
+    ds.PrevErrorsMax01 += ds.ThisErrorsMax01
+    ds.ThisErrorsMax01 = 0
+    ds.PrevErrorsUgps += ds.ThisErrorsUgps
+    ds.ThisErrorsUgps = 0
+    ds.PrevErrorsLis += ds.ThisErrorsLis
+    ds.ThisErrorsLis = 0
+    ds.PrevErrorsSpi += ds.ThisErrorsSpi
+    ds.ThisErrorsSpi = 0
+    ds.PrevErrorsTwi += ds.ThisErrorsTwi
+    ds.ThisErrorsTwi = 0
+    ds.PrevErrorsConnectLora += ds.ThisErrorsConnectLora
+    ds.ThisErrorsConnectLora = 0
+    ds.PrevErrorsConnectFona += ds.ThisErrorsConnectFona
+    ds.ThisErrorsConnectFona = 0
+    ds.PrevErrorsConnectWireless += ds.ThisErrorsConnectWireless
+    ds.ThisErrorsConnectWireless = 0
+    ds.PrevErrorsConnectGateway += ds.ThisErrorsConnectGateway
+    ds.ThisErrorsConnectGateway = 0
+    ds.PrevErrorsConnectData += ds.ThisErrorsConnectData
+    ds.ThisErrorsConnectData = 0
+    ds.PrevErrorsConnectService += ds.ThisErrorsConnectService
+    ds.ThisErrorsConnectService = 0
+    ds.PrevErrorsCommsFailures += ds.ThisErrorsCommsFailures
+    ds.ThisErrorsCommsFailures = 0
+    ds.PrevErrorsDeviceRestarts += ds.ThisErrorsDeviceRestarts
+    ds.ThisErrorsDeviceRestarts = 0
+
+}
+
+// Wrap up the aggregation
+func AggregationCompleted(ds *MeasurementDataset) {
+
+	// Wrap up the final error counts
+	AggregateErrors(ds)
+	
+}
+
 // Check an individual measurement
 func GenerateDatasetSummary(ds MeasurementDataset) string {
     s := ""
@@ -1199,29 +1215,23 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.ConnectErrors == 0 {
         s += fmt.Sprintf("  None\n")
     } else {
-        i := ds.PrevErrorsConnectLora + ds.ThisErrorsConnectLora
-        if i > 0 {
-            s += fmt.Sprintf("  Lora Module  %d\n", i)
+        if ds.PrevErrorsConnectLora > 0 {
+            s += fmt.Sprintf("  Lora Module  %d\n", ds.PrevErrorsConnectLora)
         }
-        i = ds.PrevErrorsConnectFona + ds.ThisErrorsConnectFona
-        if i > 0 {
-            s += fmt.Sprintf("  Fona Module  %d\n", i)
+        if ds.PrevErrorsConnectFona > 0 {
+            s += fmt.Sprintf("  Fona Module  %d\n", ds.PrevErrorsConnectFona)
         }
-        i = ds.PrevErrorsConnectGateway + ds.ThisErrorsConnectGateway
-        if i > 0 {
-            s += fmt.Sprintf("  Lora Gateway %d\n", i)
+        if ds.PrevErrorsConnectGateway > 0 {
+            s += fmt.Sprintf("  Lora Gateway %d\n", ds.PrevErrorsConnectGateway)
         }
-        i = ds.PrevErrorsConnectWireless + ds.ThisErrorsConnectWireless
-        if i > 0 {
-            s += fmt.Sprintf("  Cell Carrier %d\n", i)
+        if ds.PrevErrorsConnectWireless > 0 {
+            s += fmt.Sprintf("  Cell Carrier %d\n", ds.PrevErrorsConnectWireless)
         }
-        i = ds.PrevErrorsConnectData + ds.ThisErrorsConnectData
-        if i > 0 {
-            s += fmt.Sprintf("  Cell Data    %d\n", i)
+        if ds.PrevErrorsConnectData > 0 {
+            s += fmt.Sprintf("  Cell Data    %d\n", ds.PrevErrorsConnectData)
         }
-        i = ds.PrevErrorsConnectService + ds.ThisErrorsConnectService
-        if i > 0 {
-            s += fmt.Sprintf("  Cell Service %d\n", i)
+        if ds.PrevErrorsConnectService > 0 {
+            s += fmt.Sprintf("  Cell Service %d\n", ds.PrevErrorsConnectService)
         }
     }
     s += fmt.Sprintf("\n")
@@ -1282,15 +1292,15 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.GeigerWarningCount != 0 {
         geigerWarning = fmt.Sprintf("  [%d OOR %s]", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
-	if ds.LndU7318Count != 0 {
-		s += fmt.Sprintf("  LndU %4d  %s(%.0f-%.0fcpm)\n", ds.LndU7318Count, geigerWarning, ds.LoLndU, ds.HiLndU)
-	}
-	if ds.LndC7318Count != 0 {
-		s += fmt.Sprintf("  LndC %4d  %s(%.0f-%.0fcpm)\n", ds.LndC7318Count, geigerWarning, ds.LoLndC, ds.HiLndC)
-	}
-	if ds.LndEC7128Count != 0 {
-		s += fmt.Sprintf("  LndEC %3d  %s(%.0f-%.0fcpm) %s\n", ds.LndEC7128Count, geigerWarning, ds.LoLndEC, ds.HiLndEC)
-	}
+    if ds.LndU7318Count != 0 {
+        s += fmt.Sprintf("  LndU %4d  %s(%.0f-%.0fcpm)\n", ds.LndU7318Count, geigerWarning, ds.LoLndU, ds.HiLndU)
+    }
+    if ds.LndC7318Count != 0 {
+        s += fmt.Sprintf("  LndC %4d  %s(%.0f-%.0fcpm)\n", ds.LndC7318Count, geigerWarning, ds.LoLndC, ds.HiLndC)
+    }
+    if ds.LndEC7128Count != 0 {
+        s += fmt.Sprintf("  LndEC %3d  %s(%.0f-%.0fcpm) %s\n", ds.LndEC7128Count, geigerWarning, ds.LoLndEC, ds.HiLndEC)
+    }
 
     s += fmt.Sprintf("\n")
 
@@ -1303,57 +1313,44 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if !ds.AnyErrors {
         s += fmt.Sprintf("  None\n")
     } else {
-        i := ds.PrevErrorsOpc + ds.ThisErrorsOpc
-        if i > 0 {
-            s += fmt.Sprintf("  Opc        %d\n", i)
+        if ds.PrevErrorsOpc > 0 {
+            s += fmt.Sprintf("  Opc        %d\n", ds.PrevErrorsOpc)
         }
-        i = ds.PrevErrorsPms + ds.ThisErrorsPms
-        if i > 0 {
-            s += fmt.Sprintf("  Pms        %d\n", i)
+        if ds.PrevErrorsPms > 0 {
+            s += fmt.Sprintf("  Pms        %d\n", ds.PrevErrorsPms)
         }
-        i = ds.PrevErrorsBme0 + ds.ThisErrorsBme0
-        if i > 0 {
-            s += fmt.Sprintf("  Bme0       %d\n", i)
+        if ds.PrevErrorsBme0 > 0 {
+            s += fmt.Sprintf("  Bme0       %d\n", ds.PrevErrorsBme0)
         }
-        i = ds.PrevErrorsBme1 + ds.ThisErrorsBme1
-        if i > 0 {
-            s += fmt.Sprintf("  Bme1       %d\n", i)
+        if ds.PrevErrorsBme1 > 0 {
+            s += fmt.Sprintf("  Bme1       %d\n", ds.PrevErrorsBme1)
         }
-        i = ds.PrevErrorsLora + ds.ThisErrorsLora
-        if i > 0 {
-            s += fmt.Sprintf("  Lora       %d\n", i)
+        if ds.PrevErrorsLora > 0 {
+            s += fmt.Sprintf("  Lora       %d\n", ds.PrevErrorsLora)
         }
-        i = ds.PrevErrorsFona + ds.ThisErrorsFona
-        if i > 0 {
-            s += fmt.Sprintf("  Fona       %d\n", i)
+        if ds.PrevErrorsFona > 0 {
+            s += fmt.Sprintf("  Fona       %d\n", ds.PrevErrorsFona)
         }
-        i = ds.PrevErrorsCommsPowerFails + ds.ThisErrorsCommsPowerFails
-        if i > 0 {
-            s += fmt.Sprintf("  Fona Power %d\n", i)
+        if ds.PrevErrorsCommsPowerFails > 0 {
+            s += fmt.Sprintf("  Fona Power %d\n", ds.PrevErrorsCommsPowerFails)
         }
-        i = ds.PrevErrorsGeiger + ds.ThisErrorsGeiger
-        if i > 0 {
-            s += fmt.Sprintf("  Geiger     %d\n", i)
+        if ds.PrevErrorsGeiger > 0 {
+            s += fmt.Sprintf("  Geiger     %d\n", ds.PrevErrorsGeiger)
         }
-        i = ds.PrevErrorsMax01 + ds.ThisErrorsMax01
-        if i > 0 {
-            s += fmt.Sprintf("  Max01      %d\n", i)
+        if ds.PrevErrorsMax01 > 0 {
+            s += fmt.Sprintf("  Max01      %d\n", ds.PrevErrorsMax01)
         }
-        i = ds.PrevErrorsUgps + ds.ThisErrorsUgps
-        if i > 0 {
-            s += fmt.Sprintf("  Ugps       %d\n", i)
+        if ds.PrevErrorsUgps > 0 {
+            s += fmt.Sprintf("  Ugps       %d\n", ds.PrevErrorsUgps)
         }
-        i = ds.PrevErrorsLis + ds.ThisErrorsLis
-        if i > 0 {
-            s += fmt.Sprintf("  Lis        %d\n", i)
+        if ds.PrevErrorsLis > 0 {
+            s += fmt.Sprintf("  Lis        %d\n", ds.PrevErrorsLis)
         }
-        i = ds.PrevErrorsSpi + ds.ThisErrorsSpi
-        if i > 0 {
-            s += fmt.Sprintf("  Spi        %d\n", i)
+        if ds.PrevErrorsSpi > 0 {
+            s += fmt.Sprintf("  Spi        %d\n", ds.PrevErrorsSpi)
         }
-        i = ds.PrevErrorsTwi + ds.ThisErrorsTwi
-        if i > 0 || ds.ErrorsTwiInfo != "" {
-            s += fmt.Sprintf("  Twi        %d %s\n", i, ds.ErrorsTwiInfo)
+        if ds.PrevErrorsTwi > 0 || ds.ErrorsTwiInfo != "" {
+            s += fmt.Sprintf("  Twi        %d %s\n", ds.PrevErrorsTwi, ds.ErrorsTwiInfo)
         }
     }
     s += fmt.Sprintf("\n")
@@ -1361,12 +1358,10 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // Pointcast
     if ds.AnyPointcastErrors {
         s += fmt.Sprintf("Pointcast errors new since %s:\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
-        i := ds.PrevErrorsCommsFailures + ds.ThisErrorsCommsFailures
-        j := i - ds.MinErrorsCommsFailures
-        s += fmt.Sprintf("  CommsFailures   %d new / %d total\n", j, i)
-        i = ds.PrevErrorsDeviceRestarts + ds.ThisErrorsDeviceRestarts
-        j = i - ds.MinErrorsDeviceRestarts
-        s += fmt.Sprintf("  DeviceRestarts  %d new / %d total\n", j, i)
+        j := ds.PrevErrorsCommsFailures - ds.MinErrorsCommsFailures
+        s += fmt.Sprintf("  CommsFailures   %d new / %d total\n", j, ds.PrevErrorsCommsFailures)
+        j = ds.PrevErrorsDeviceRestarts - ds.MinErrorsDeviceRestarts
+        s += fmt.Sprintf("  DeviceRestarts  %d new / %d total\n", j, ds.PrevErrorsDeviceRestarts)
         s += fmt.Sprintf("\n")
     }
 
@@ -1400,14 +1395,14 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     s += fmt.Sprintf("No device errors.\n")
 
-	SubstantiveConnectErrors := ds.ConnectErrors != 0
-	// If the only connect errors were wireless, look at the number of them
-	if SubstantiveConnectErrors && ds.ConnectErrors <= (ds.PrevErrorsConnectWireless + ds.ThisErrorsConnectWireless) {
-		// If that's the only thing and there's only one, forgive it
-		if (ds.PrevErrorsConnectWireless + ds.ThisErrorsConnectWireless) < 2 {
-			SubstantiveConnectErrors = false;
-		}
-	}
+    SubstantiveConnectErrors := ds.ConnectErrors != 0
+    // If the only connect errors were wireless, look at the number of them
+    if SubstantiveConnectErrors && ds.ConnectErrors <= ds.PrevErrorsConnectWireless {
+        // If that's the only thing and there's only one, forgive it
+        if ds.PrevErrorsConnectWireless < 2 {
+            SubstantiveConnectErrors = false;
+        }
+    }
     if !SubstantiveConnectErrors {
         s += fmt.Sprintf("  PASS  ")
     } else {

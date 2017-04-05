@@ -66,6 +66,9 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 
 	}
 
+	// Measurements completed
+	AggregationCompleted(&stats)
+
 	// Generate the summary of the aggregation
 	s := GenerateDatasetSummary(stats)
 	
