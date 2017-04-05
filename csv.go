@@ -44,7 +44,7 @@ func csvNew(filename string) (*os.File, error) {
     }
 
     // Write the header
-    fd.WriteString("service_uploaded,when_captured,device,STATS,dev_uptime,lnd_7318u,lnd_7318c,lnd_7128ec,loc_lat,loc_lon,loc_alt,bat_voltage,bat_charge,bat_current,gateway_lora_snr,env_temp,env_humid,env_presspms_pm01_0,pms_pm02_5,pms_pm10_0,pms_c00_30,pms_c00_50,pms_c01_00,pms_c02_50,pms_c05_00,pms_c10_00,pms_csecs,opc_pm01_0,opc_pm02_5,opc_pm10_0,opc_c00_38,opc_c00_54,opc_c01_00,opc_c02_10,opc_c05_00,opc_c10_00,opc_csecs\r\n")
+    fd.WriteString("service_uploaded,when_captured,device,STATS,dev_uptime,lnd_7318u,lnd_7318c,lnd_7128ec,loc_lat,loc_lon,loc_alt,bat_voltage,bat_charge,bat_current,gateway_lora_snr,env_temp,env_humid,env_press,pms_pm01_0,pms_pm02_5,pms_pm10_0,pms_c00_30,pms_c00_50,pms_c01_00,pms_c02_50,pms_c05_00,pms_c10_00,pms_csecs,opc_pm01_0,opc_pm02_5,opc_pm10_0,opc_c00_38,opc_c00_54,opc_c01_00,opc_c02_10,opc_c05_00,opc_c10_00,opc_csecs\r\n")
 
 	// Done
 	return fd, nil
