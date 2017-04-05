@@ -24,7 +24,7 @@ type SafecastGatewayStatus struct {
 	// for backward compatibility - you can remove after 2017-04
     UploadedAt  string      `json:"when_uploaded,omitempty"`
 	// Our view of the IP info
-	IPInfo				IPInfoData	`json:"gateway_location,omitempty"`
+	IPInfo		IPInfoData	`json:"gateway_location,omitempty"`
 }
 
 // Get the current value
