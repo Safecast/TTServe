@@ -9,7 +9,6 @@ import (
     "os"
     "fmt"
     "time"
-    "strings"
     "encoding/json"
     influx "github.com/influxdata/influxdb/client/v2"
 )
@@ -428,9 +427,10 @@ func SafecastLogToInflux(sd SafecastData) bool {
 }
 
 // Just a debug function that traverses a Response, which took me forever to figure out
-func InfluxResultsToNewCSV(response *influx.Response) {
+func InfluxResultsToCSV(response *influx.Response, fd *os.File) int {
 
     fDebug := false
+	results := 0
 
     for _, result := range response.Results {
         // Ignore this
@@ -662,183 +662,21 @@ func InfluxResultsToNewCSV(response *influx.Response) {
                 if err != nil {
                     fmt.Printf("\nError unmarshaling %s:\n%s\n", err, s)
                 } else {
-                    fmt.Printf("Marshalled:\n%v\n", sd)
+
+					// Append a row to the CSV
+					csvAppend(fd, &sd)
+
+					// Bump the number of successful results
+					results++
+
                 }
+
             }
         }
     }
 
-}
-
-// Quote a string appropriately
-func QuoteStringForCSV(str string) string {
-
-    // First, get rid of quotes
-    str = strings.Replace(str, "\"", "'", -1)
-
-    // If we're being crazy about quoting, do it
-    if quoteTextInCSV {
-        return fmt.Sprintf("=\"%s\"", str)
-    }
-
-    // Get rid of commas, because they cause crazy parsing problems
-    str = strings.Replace(str, ",", " ", -1)
-    str = strings.Replace(str, "  ", " ", -1)
-
-    // Get rid of leading/trailing space
-    str = strings.TrimSpace(str)
-
-    // Done
-    return str
-
-}
-
-// Just a debug function that traverses a Response, which took me forever to figure out
-func InfluxResultsToCSV(response *influx.Response, fd *os.File) (int) {
-
-    // Create a blank CSV canvas
-    s := ""
-    numresults := 0
-    firstRow := true
-
-    // Traverse the response
-    for _, result := range response.Results {
-
-        // This outer loop is for sets or groups of results
-        for i, r := range result.Series {
-
-            if i != 0 {
-                s += fmt.Sprintf("\n")
-            }
-            setname := r.Name
-
-            if firstRow {
-                firstRow = false;
-
-                // Write out column headers, making room for setname in col A
-                s += QuoteStringForCSV("")
-
-                // Set name is 'data', put this in column 0
-                // 86 columns, and each v is the column name
-                for _, v := range r.Columns {
-                    s += fmt.Sprintf(",%s", v)
-                }
-                s += fmt.Sprintf("\n")
-
-            }
-
-            // Write out each row of results, with setname in col A
-            numresults += len(r.Values)
-            for _, v := range r.Values {
-                s += QuoteStringForCSV(setname)
-
-                for _, cell := range v {
-
-                    if cell == nil {
-                        s += fmt.Sprintf(",")
-                    } else {
-
-                        switch cell := cell.(type) {
-
-                            // Defensive coding; we've not seen unknown types
-                        default:
-                            s += "," + QuoteStringForCSV(fmt.Sprintf("%v", cell))
-
-                            // Most numbers in Influx appear as json.Number
-                        case json.Number:
-                            // Special-case datetime's, converting to be useful in Excel
-                            numstr := fmt.Sprintf("%v", cell)
-                            if len(numstr) == 19 {
-                                // Convert nanoseconds to excel by (V-DATE(1970,1,1))*86400
-                                seconds, _ := cell.Float64()
-                                seconds = seconds / 1000000000
-                                exceldate := (seconds / 86400) + 25569
-                                s += fmt.Sprintf(",%f", exceldate)
-                            } else {
-                                if strings.Contains(numstr, ".") {
-                                    cell, _ := cell.Float64()
-                                    s += fmt.Sprintf(",%f", cell)
-                                } else {
-                                    cell, _ := cell.Int64()
-                                    s += fmt.Sprintf(",%d", cell)
-                                }
-                            }
-
-                        case string:
-                            s += "," + QuoteStringForCSV(fmt.Sprintf("%s", cell))
-
-                        case bool:
-                            s += fmt.Sprintf(",%t", cell)
-                        case *bool:
-                            s += fmt.Sprintf(",%t", cell)
-                        case int:
-                            s += fmt.Sprintf(",%d", cell)
-                        case int8:
-                            s += fmt.Sprintf(",%d", cell)
-                        case int16:
-                            s += fmt.Sprintf(",%d", cell)
-                        case int32:
-                            s += fmt.Sprintf(",%d", cell)
-                        case int64:
-                            s += fmt.Sprintf(",%d", cell)
-                        case *int:
-                            s += fmt.Sprintf(",%d", cell)
-                        case *int8:
-                            s += fmt.Sprintf(",%d", cell)
-                        case *int16:
-                            s += fmt.Sprintf(",%d", cell)
-                        case *int32:
-                            s += fmt.Sprintf(",%d", cell)
-                        case *int64:
-                            s += fmt.Sprintf(",%d", cell)
-                        case uint:
-                            s += fmt.Sprintf(",%u", cell)
-                        case uint8:
-                            s += fmt.Sprintf(",%u", cell)
-                        case uint16:
-                            s += fmt.Sprintf(",%u", cell)
-                        case uint32:
-                            s += fmt.Sprintf(",%u", cell)
-                        case uint64:
-                            s += fmt.Sprintf(",%u", cell)
-                        case *uint:
-                            s += fmt.Sprintf(",%u", cell)
-                        case *uint8:
-                            s += fmt.Sprintf(",%u", cell)
-                        case *uint16:
-                            s += fmt.Sprintf(",%u", cell)
-                        case *uint32:
-                            s += fmt.Sprintf(",%u", cell)
-                        case *uint64:
-                            s += fmt.Sprintf(",%u", cell)
-                        case float32:
-                            s += fmt.Sprintf(",%f", cell)
-                        case float64:
-                            s += fmt.Sprintf(",%f", cell)
-                        case *float32:
-                            s += fmt.Sprintf(",%f", cell)
-                        case *float64:
-                            s += fmt.Sprintf(",%f", cell)
-
-                        }
-                    }
-                }
-                s += fmt.Sprintf("\n")
-
-                // Write this line to the file
-                fd.WriteString(s)
-
-                // Begin again
-                s = ""
-
-            }
-        }
-
-    }
-
-    // Return the spreadsheet
-    return numresults
-
+	return results
+	
 }
 
 // Perform a query, returning either an URL to results or an error message
@@ -869,22 +707,23 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
         return false, fmt.Sprintf("%v", response.Error()), 0
     }
 
-    // Convert to JSON
-    InfluxResultsToNewCSV(response)
-
-    // Create the output file
+	// Generate the filename
     file := time.Now().UTC().Format("2006-01-02-150405") + "-" + the_user + ".csv"
     filename := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
-    fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
-    if err != nil {
-        return false, fmt.Sprintf("cannot create file: %v", err), 0
-    }
 
-    // Make sure we close the file
-    defer fd.Close()
+    // Create the output file
+	fd, err := csvNew(filename)
+    if err != nil {
+        return false, fmt.Sprintf("cannot create file: %s", err), 0
+    }
 
     // Convert to CSV
     rows := InfluxResultsToCSV(response, fd)
+
+	// Close the file
+	csvClose(fd)
+	
+	// Exit if no results
     if rows == 0 {
         return false, "No results.", 0
     }
