@@ -319,7 +319,7 @@ func generateTTNCTLDeviceRegistrationScript() {
         id := sortedDevices[i].deviceid
         deveui, _, _, _ := SafecastGetDeviceStatusSummary(id)
 		if deveui != "" {
-	        s += fmt.Sprintf("ttnctl devices register %s\n", deveui)
+	        s += fmt.Sprintf("ttnctl devices register %s\n", strings.ToLower(deveui))
 		}
     }
 
