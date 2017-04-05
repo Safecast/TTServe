@@ -114,7 +114,16 @@ func SafecastWriteGatewayStatus(ttg TTGateReq, IP string) {
 	// If the new one doesn't have a successful IPInfo, we'd like to fetch it
 
     // If the IP info isn't filled in, fill it in.  This will only happen once.
+	needUpdate := false
     if value.IPInfo.Status == "" {
+		fmt.Printf("*** First-time IPInfo update for gateway %s\n", IP)
+		needUpdate = true
+	}
+	if value.IPInfo.IP.String() != IP {
+		fmt.Printf("*** Updating gateway IPInfo because of IP change from %s to %s\n", value.IPInfo.IP.String(), IP)
+		needUpdate = true
+	}
+	if needUpdate {
         response, err := http.Get("http://ip-api.com/json/" + IP)
         if err == nil {
             defer response.Body.Close()
