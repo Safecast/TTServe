@@ -132,154 +132,154 @@ func csvAppend(fd *os.File, sd *SafecastData) {
         s += ","
     }
 
-    if sd.Bat != nil && sd.Bat.Voltage == nil {
-        s += ","
-    } else {
+    if sd.Bat != nil && sd.Bat.Voltage != nil {
         s += fmt.Sprintf(",%f", *sd.Bat.Voltage)
-    }
-    if sd.Bat != nil && sd.Bat.Charge == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Bat != nil && sd.Bat.Charge != nil {
         s += fmt.Sprintf(",%f", *sd.Bat.Charge)
-    }
-    if sd.Bat != nil && sd.Bat.Current == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Bat != nil && sd.Bat.Current != nil {
         s += fmt.Sprintf(",%f", *sd.Bat.Current)
+    } else {
+        s += ","
     }
 
-    if sd.Env != nil && sd.Env.Temp == nil {
-        s += ","
-    } else {
+    if sd.Env != nil && sd.Env.Temp != nil {
         s += fmt.Sprintf(",%f", *sd.Env.Temp)
-    }
-    if sd.Env != nil && sd.Env.Humid == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Env != nil && sd.Env.Humid != nil {
         s = s + fmt.Sprintf(",%f", *sd.Env.Humid)
-    }
-    if sd.Env != nil && sd.Env.Press == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Env != nil && sd.Env.Press != nil {
         s = s + fmt.Sprintf(",%f", *sd.Env.Press)
+    } else {
+        s += ","
     }
 
-    if sd.Dev != nil && sd.Dev.Temp == nil {
-        s += ","
-    } else {
+    if sd.Dev != nil && sd.Dev.Temp != nil {
         s += fmt.Sprintf(",%f", *sd.Dev.Temp)
-    }
-    if sd.Dev != nil && sd.Dev.Humid == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Dev != nil && sd.Dev.Humid != nil {
         s = s + fmt.Sprintf(",%f", *sd.Dev.Humid)
-    }
-    if sd.Dev != nil && sd.Dev.Press == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Dev != nil && sd.Dev.Press != nil {
         s = s + fmt.Sprintf(",%f", *sd.Dev.Press)
+    } else {
+        s += ","
     }
 
-    if sd.Pms != nil && sd.Pms.Pm01_0 == nil {
-        s += ","
-    } else {
+    if sd.Pms != nil && sd.Pms.Pm01_0 != nil {
         s += fmt.Sprintf(",%f", *sd.Pms.Pm01_0)
-    }
-    if sd.Pms != nil && sd.Pms.Pm02_5 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Pms != nil && sd.Pms.Pm02_5 != nil {
         s += fmt.Sprintf(",%f", *sd.Pms.Pm02_5)
-    }
-    if sd.Pms != nil && sd.Pms.Pm10_0 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Pms != nil && sd.Pms.Pm10_0 != nil {
         s += fmt.Sprintf(",%f", *sd.Pms.Pm10_0)
-    }
-    if sd.Pms != nil && sd.Pms.Count00_30 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Pms != nil && sd.Pms.Count00_30 != nil {
         s += fmt.Sprintf(",%d", *sd.Pms.Count00_30)
-    }
-    if sd.Pms != nil && sd.Pms.Count00_50 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Pms != nil && sd.Pms.Count00_50 != nil {
         s += fmt.Sprintf(",%d", *sd.Pms.Count00_50)
-    }
-    if sd.Pms != nil && sd.Pms.Count01_00 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Pms != nil && sd.Pms.Count01_00 != nil {
         s += fmt.Sprintf(",%d", *sd.Pms.Count01_00)
-    }
-    if sd.Pms != nil && sd.Pms.Count02_50 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Pms != nil && sd.Pms.Count02_50 != nil {
         s += fmt.Sprintf(",%d", *sd.Pms.Count02_50)
-    }
-    if sd.Pms != nil && sd.Pms.Count05_00 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Pms != nil && sd.Pms.Count05_00 != nil {
         s += fmt.Sprintf(",%d", *sd.Pms.Count05_00)
-    }
-    if sd.Pms != nil && sd.Pms.Count10_00 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Pms != nil && sd.Pms.Count10_00 != nil {
         s += fmt.Sprintf(",%d", *sd.Pms.Count10_00)
-    }
-    if sd.Pms != nil && sd.Pms.CountSecs == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Pms != nil && sd.Pms.CountSecs != nil {
         s += fmt.Sprintf(",%d", *sd.Pms.CountSecs)
+    } else {
+        s += ","
     }
 
-    if sd.Opc != nil && sd.Opc.Pm01_0 == nil {
-        s += ","
-    } else {
+    if sd.Opc != nil && sd.Opc.Pm01_0 != nil {
         s += fmt.Sprintf(",%f", *sd.Opc.Pm01_0)
-    }
-    if sd.Opc != nil && sd.Opc.Pm02_5 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Opc != nil && sd.Opc.Pm02_5 != nil {
         s += fmt.Sprintf(",%f", *sd.Opc.Pm02_5)
-    }
-    if sd.Opc != nil && sd.Opc.Pm10_0 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Opc != nil && sd.Opc.Pm10_0 != nil {
         s += fmt.Sprintf(",%f", *sd.Opc.Pm10_0)
-    }
-    if sd.Opc != nil && sd.Opc.Count00_38 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Opc != nil && sd.Opc.Count00_38 != nil {
         s += fmt.Sprintf(",%d", *sd.Opc.Count00_38)
-    }
-    if sd.Opc != nil && sd.Opc.Count00_54 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Opc != nil && sd.Opc.Count00_54 != nil {
         s += fmt.Sprintf(",%d", *sd.Opc.Count00_54)
-    }
-    if sd.Opc != nil && sd.Opc.Count01_00 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Opc != nil && sd.Opc.Count01_00 != nil {
         s += fmt.Sprintf(",%d", *sd.Opc.Count01_00)
-    }
-    if sd.Opc != nil && sd.Opc.Count02_10 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Opc != nil && sd.Opc.Count02_10 != nil {
         s += fmt.Sprintf(",%d", *sd.Opc.Count02_10)
-    }
-    if sd.Opc != nil && sd.Opc.Count05_00 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Opc != nil && sd.Opc.Count05_00 != nil {
         s += fmt.Sprintf(",%d", *sd.Opc.Count05_00)
-    }
-    if sd.Opc != nil && sd.Opc.Count10_00 == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Opc != nil && sd.Opc.Count10_00 != nil {
         s += fmt.Sprintf(",%d", *sd.Opc.Count10_00)
-    }
-    if sd.Opc != nil && sd.Opc.CountSecs == nil {
-        s += ","
     } else {
+        s += ","
+    }
+    if sd.Opc != nil && sd.Opc.CountSecs != nil {
         s += fmt.Sprintf(",%d", *sd.Opc.CountSecs)
+    } else {
+        s += ","
     }
 
     // Service metadata
@@ -288,10 +288,10 @@ func csvAppend(fd *os.File, sd *SafecastData) {
     } else {
         s += ","
     }
-    if sd.Gateway == nil && sd.Gateway.SNR == nil {
-        s += ","
-    } else {
+    if sd.Gateway != nil && sd.Gateway.SNR != nil {
         s += fmt.Sprintf(",%f", *sd.Gateway.SNR)
+    } else {
+        s += ","
     }
     if sd.Service != nil && sd.Service.Handler != nil {
         s = s + fmt.Sprintf(",%s", *sd.Service.Handler)
