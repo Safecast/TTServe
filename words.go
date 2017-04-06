@@ -48,7 +48,7 @@ func WordsFromNumber(number uint32) string {
 	right := number & 0x000007ff
 
 	// Generate the string
-	return Words2048[SortedWords[left].WordIndex] + "-" + Words2048[SortedWords[middle].WordIndex] + "-" + Words2048[SortedWords[right].WordIndex]
+	return Words2048[left] + "-" + Words2048[middle] + "-" + Words2048[right]
 
 }
 
