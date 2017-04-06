@@ -493,21 +493,21 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         stat.hasPms = true
         if sd.Pms.Pm01_0 != nil {
             val := *sd.Pms.Pm01_0
-            if val < -0 || val > 600 {
+            if val < 0 || val > 600 {
                 stat.PmsWarning = true
             }
             stat.Pms010 = float64(val)
         }
         if sd.Pms.Pm02_5 != nil {
             val := *sd.Pms.Pm02_5
-            if val < -0 || val > 600 {
+            if val < 0 || val > 600 {
                 stat.PmsWarning = true
             }
             stat.Pms025 = float64(val)
         }
         if sd.Pms.Pm10_0 != nil {
             val := *sd.Pms.Pm10_0
-            if val < -0 || val > 600 {
+            if val < 0 || val > 600 {
                 stat.PmsWarning = true
             }
             stat.Pms100 = float64(val)
@@ -518,21 +518,21 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         stat.hasOpc = true
         if sd.Opc.Pm01_0 != nil {
             val := *sd.Opc.Pm01_0
-            if val < -0 || val > 600 {
+            if val < 0 || val > 600 {
                 stat.OpcWarning = true
             }
             stat.Opc010 = float64(val)
         }
         if sd.Opc.Pm02_5 != nil {
             val := *sd.Opc.Pm02_5
-            if val < -0 || val > 600 {
+            if val < 0 || val > 600 {
                 stat.OpcWarning = true
             }
             stat.Opc025 = float64(val)
         }
         if sd.Opc.Pm10_0 != nil {
             val := *sd.Opc.Pm10_0
-            if val < -0 || val > 600 {
+            if val < 0 || val > 600 {
                 stat.OpcWarning = true
             }
             stat.Opc100 = float64(val)
