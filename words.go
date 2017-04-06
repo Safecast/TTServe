@@ -20,7 +20,7 @@ type ByWord [2048]Word
 func (a ByWord) Len() int      { return len(a) }
 func (a ByWord) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a ByWord) Less(i, j int) bool {
-	fmt.Printf("%d %d %s %s %d\n", i, j, Words2048[a[i].WordIndex], Words2048[a[j].WordIndex], strings.Compare(Words2048[a[i].WordIndex], Words2048[a[j].WordIndex]))
+//	fmt.Printf("%d %d %s %s %d\n", i, j, Words2048[a[i].WordIndex], Words2048[a[j].WordIndex], strings.Compare(Words2048[a[i].WordIndex], Words2048[a[j].WordIndex]))
 	return strings.Compare(Words2048[a[i].WordIndex], Words2048[a[j].WordIndex]) < 0
 }
 
@@ -36,7 +36,7 @@ func WordsInit() {
 
 	// Print the sorted array
 	for i:=0; i<2048; i++ {
-		fmt.Printf("%s ", Words2048[Words[i].WordIndex])
+		fmt.Printf("%d:%d %s ", Words2048[Words[i].WordIndex], i, Words[i].WordIndex)
 	}
 	fmt.Printf("\n");
 	
