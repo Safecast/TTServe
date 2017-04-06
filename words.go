@@ -39,12 +39,12 @@ func WordsInit() {
 }
 
 // Convert a single word to a number
-func WordToNumber(what string) (bool, uint32) {
+func WordToNumber(what string) (bool, int) {
 
 	i := sort.Search(2048, func(i int) bool { return Words2048[SortedWords[i].WordIndex] >= what } )
 	
 	if i < 2048 && Words2048[SortedWords[i].WordIndex] == what {
-		return true, uint32(i)
+		return true, SortedWords[i].WordIndex
 	}
 
 	return false, 0
@@ -72,9 +72,9 @@ func WordsToNumber(what string) (bool, uint32) {
 		return false, 0
 	}
 
-	result |= left << 22
-	result |= middle << 11
-	result |= right
+	result |= uint32(left) << 22
+	result |= uint32(middle) << 11
+	result |= uint32(right)
 
 	fmt.Printf("%08x/%d = %08x/%d %08x/%d %08x/%d\n", result, result, left, left, middle, middle, right, right)
 	return true, result
