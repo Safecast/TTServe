@@ -120,6 +120,19 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     case "offline":
         go sendSafecastDeviceSummaryToSlack("", true, fMobile, fDetails)
 
+    case "did":
+    case "deviceid":
+        if len(args) != 2 {
+            sendToSafecastOps("Command format: deviceid three-simple-words", SLACK_MSG_REPLY)
+        } else {
+			found, did := WordsToNumber(args[1])
+			if !found {
+		        sendToSafecastOps("Device ID not found.", SLACK_MSG_REPLY)
+			} else {
+		        sendToSafecastOps(fmt.Sprintf("%d", did), SLACK_MSG_REPLY)
+			}
+		}
+
     case "device":
         fallthrough
     case "devices":
