@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"sort"
 )
@@ -56,6 +57,14 @@ func WordsToNumber(what string) (bool, uint32) {
 	
 	word := strings.Split(what, "-")
 	if len(word) != 3 {
+
+		// See if this is just a simple device ID
+        i64, err := strconv.ParseUint(what, 10, 32)
+		if err == nil {
+			return true, uint32(i64)
+		} else {
+			fmt.Printf("%s\n", err)
+		}
 		return false, 0
 	}
 
@@ -76,7 +85,6 @@ func WordsToNumber(what string) (bool, uint32) {
 	result |= uint32(middle) << 11
 	result |= uint32(right)
 
-	fmt.Printf("%08x/%d = %08x/%d %08x/%d %08x/%d\n", result, result, left, left, middle, middle, right, right)
 	return true, result
 
 }
@@ -93,8 +101,6 @@ func WordsFromNumber(number uint32) string {
 	left := (number >> 22) & 0x000003ff
 	middle := (number >> 11) & 0x000007ff
 	right := number & 0x000007ff
-
-	fmt.Printf("%s %08x %03x/%d %03x/%d %03x/%d\n", Words2048[left] + "-" + Words2048[middle] + "-" + Words2048[right], number, left, left, middle, middle, right, right)
 
 	// Generate the string
 	return Words2048[left] + "-" + Words2048[middle] + "-" + Words2048[right]
