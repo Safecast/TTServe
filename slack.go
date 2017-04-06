@@ -11,6 +11,7 @@ import (
     "html"
     "time"
     "bytes"
+	"strconv"
     "strings"
     "net/url"
     "net/http"
@@ -123,13 +124,22 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         fallthrough
     case "deviceid":
         if len(args) != 2 {
-            sendToSafecastOps("Command format: deviceid three-simple-words", SLACK_MSG_REPLY)
+            sendToSafecastOps("Command format: deviceid <number> or <three-simple-words>", SLACK_MSG_REPLY)
         } else {
-            found, did := WordsToNumber(args[1])
-            if !found {
-                sendToSafecastOps("Device ID not found.", SLACK_MSG_REPLY)
+            if !strings.Contains(args[1], "-") {
+                i64, err := strconv.ParseUint(args[1], 10, 32)
+                if err != nil {
+                    sendToSafecastOps(fmt.Sprintf("%s", err), SLACK_MSG_REPLY)
+                } else {
+                    sendToSafecastOps(WordsFromNumber(uint32(i64)), SLACK_MSG_REPLY)
+                }
             } else {
-                sendToSafecastOps(fmt.Sprintf("%s is %d", args[1], did), SLACK_MSG_REPLY)
+                found, did := WordsToNumber(args[1])
+                if !found {
+                    sendToSafecastOps("Device ID not found.", SLACK_MSG_REPLY)
+                } else {
+                    sendToSafecastOps(fmt.Sprintf("%s is %d", args[1], did), SLACK_MSG_REPLY)
+                }
             }
         }
 
