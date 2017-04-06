@@ -131,7 +131,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
                 if err != nil {
                     sendToSafecastOps(fmt.Sprintf("%s", err), SLACK_MSG_REPLY)
                 } else {
-                    sendToSafecastOps(WordsFromNumber(uint32(i64)), SLACK_MSG_REPLY)
+                    sendToSafecastOps(fmt.Sprintf("%d is %s", i64, WordsFromNumber(uint32(i64))), SLACK_MSG_REPLY)
                 }
             } else {
                 found, did := WordsToNumber(args[1])
