@@ -130,6 +130,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 			if !found {
 		        sendToSafecastOps("Device ID not found.", SLACK_MSG_REPLY)
 			} else {
+				fmt.Printf("%d\n", did)
 		        sendToSafecastOps(fmt.Sprintf("%d", did), SLACK_MSG_REPLY)
 			}
 		}
