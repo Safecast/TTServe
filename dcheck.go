@@ -383,14 +383,8 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         stat.hasBat = true
         if sd.Bat.Voltage != nil {
             val := *sd.Bat.Voltage
-            if stat.Transport == "pointcast" || stat.Transport == "safecast-air" {
-                if val < 3.0 || val > 12.0 {
-                    stat.BatWarning = true
-                }
-            } else {
-                if val < 3.0 || val > 4.5 {
-                    stat.BatWarning = true
-                }
+            if val < 3.0 || val > 12.0 {
+                stat.BatWarning = true
             }
             stat.BatV = float64(val)
         }
@@ -1050,9 +1044,9 @@ func AggregateErrors(ds *MeasurementDataset) {
 // Wrap up the aggregation
 func AggregationCompleted(ds *MeasurementDataset) {
 
-	// Wrap up the final error counts
-	AggregateErrors(ds)
-	
+    // Wrap up the final error counts
+    AggregateErrors(ds)
+
 }
 
 // Check an individual measurement
