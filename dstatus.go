@@ -655,6 +655,9 @@ func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label strin
 
     // Default the label for special device types that have no label
     label := SafecastV1DeviceType(DeviceId)
+	if (true) {
+		label = StringFromWords(DeviceId)
+	}
 
     // Read the file
     isAvail, _, value := SafecastReadDeviceStatus(DeviceId)
