@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 	"sort"
 )
@@ -75,6 +76,7 @@ func WordsToNumber(what string) (bool, uint32) {
 	result |= middle << 11
 	result |= right
 
+	fmt.Printf("%08lx/%d = %08lx/%d %08lx/%d %08lx/%d\n", result, result, left, left, middle, middle, right, right)
 	return true, result
 
 }
@@ -91,6 +93,8 @@ func WordsFromNumber(number uint32) string {
 	left := (number >> 22) & 0x000003ff
 	middle := (number >> 11) & 0x000007ff
 	right := number & 0x000007ff
+
+	fmt.Printf("%s %08lx %03x/%d %03x/%d %03x/%d\n", Words2048[left] + "-" + Words2048[middle] + "-" + Words2048[right], number, left, left, middle, middle, right, right)
 
 	// Generate the string
 	return Words2048[left] + "-" + Words2048[middle] + "-" + Words2048[right]
