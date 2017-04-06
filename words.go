@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"sort"
 )
 
@@ -37,7 +38,10 @@ func WordsInit() {
 
 func WordsToNumber(what string) (bool, uint32) {
 
-	i := sort.Search(2048, func(i int) bool { return Words2048[SortedWords[i].WordIndex] >= what } )
+	i := sort.Search(2048, func(i int) bool {
+		fmt.Printf("%d %s", i,  Words2048[SortedWords[i].WordIndex])
+		return Words2048[SortedWords[i].WordIndex] >= what
+	} )
 
 	if i < 2048 && Words2048[SortedWords[i].WordIndex] == what {
 		return true, uint32(i)
