@@ -1233,9 +1233,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     // Sensors
     s += fmt.Sprintf("Measurement Counts:\n")
     if ds.BatWarningCount == 0 {
-        s += fmt.Sprintf("  Bat %5d", ds.BatCount)
+        s += fmt.Sprintf("  Bat %6d", ds.BatCount)
     } else {
-        s += fmt.Sprintf("  Bat %5d  [%d OOR %s]", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Bat %6d  [%d OOR %s]", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
     if ds.BatCount == 0 {
         s += fmt.Sprintf("\n")
@@ -1243,9 +1243,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("  (%.2f-%.2fV, %.1f to %.1fmA, %.0f-%.0f%%)\n", ds.LoBatV, ds.HiBatV, ds.LoBatI, ds.HiBatI, ds.LoBatS, ds.HiBatS)
     }
     if ds.EnvWarningCount == 0 {
-        s += fmt.Sprintf("  Env %5d", ds.EnvCount)
+        s += fmt.Sprintf("  Env %6d", ds.EnvCount)
     } else {
-        s += fmt.Sprintf("  Env %5d  [%d OOR %s]", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Env %6d  [%d OOR %s]", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
     if ds.EnvCount == 0 {
         s += fmt.Sprintf("\n")
@@ -1253,9 +1253,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("  (%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEnvT, ds.HiEnvT, ds.LoEnvH, ds.HiEnvH, ds.LoEnvP, ds.HiEnvP)
     }
     if ds.EncWarningCount == 0 {
-        s += fmt.Sprintf("  Enc %5d", ds.EncCount)
+        s += fmt.Sprintf("  Enc %6d", ds.EncCount)
     } else {
-        s += fmt.Sprintf("  Enc %5d [%d OOR %s]", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Enc %6d [%d OOR %s]", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
     if ds.EncCount == 0 {
         s += fmt.Sprintf("\n")
@@ -1263,9 +1263,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("  (%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEncT, ds.HiEncT, ds.LoEncH, ds.HiEncH, ds.LoEncP, ds.HiEncP)
     }
     if ds.PmsWarningCount == 0 {
-        s += fmt.Sprintf("  Pms %5d", ds.PmsCount)
+        s += fmt.Sprintf("  Pms %6d", ds.PmsCount)
     } else {
-        s += fmt.Sprintf("  Pms %5d  [%d OOR %s]", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Pms %6d  [%d OOR %s]", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
     if ds.PmsCount == 0 {
         s += fmt.Sprintf("\n")
@@ -1273,9 +1273,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("  (%.0f-%.0fpm1, %.0f-%.0fpm2.5, %.0f-%.0fpm10)\n", ds.LoPms010, ds.HiPms010, ds.LoPms025, ds.HiPms025, ds.LoPms100, ds.HiPms100)
     }
     if ds.OpcWarningCount == 0 {
-        s += fmt.Sprintf("  Opc %5d", ds.OpcCount)
+        s += fmt.Sprintf("  Opc %6d", ds.OpcCount)
     } else {
-        s += fmt.Sprintf("  Opc %5d  [%d OOR %s]\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Opc %6d  [%d OOR %s]\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
     if ds.OpcCount == 0 {
         s += fmt.Sprintf("\n")
@@ -1287,13 +1287,13 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         geigerWarning = fmt.Sprintf("  [%d OOR %s]", ds.GeigerWarningCount, ds.GeigerWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
     if ds.LndU7318Count != 0 {
-        s += fmt.Sprintf("  LndU %4d  %s(%.0f-%.0fcpm)\n", ds.LndU7318Count, geigerWarning, ds.LoLndU, ds.HiLndU)
+        s += fmt.Sprintf("  LndU %5d%s  (%.0f-%.0fcpm)\n", ds.LndU7318Count, geigerWarning, ds.LoLndU, ds.HiLndU)
     }
     if ds.LndC7318Count != 0 {
-        s += fmt.Sprintf("  LndC %4d  %s(%.0f-%.0fcpm)\n", ds.LndC7318Count, geigerWarning, ds.LoLndC, ds.HiLndC)
+        s += fmt.Sprintf("  LndC %5d%s  (%.0f-%.0fcpm)\n", ds.LndC7318Count, geigerWarning, ds.LoLndC, ds.HiLndC)
     }
     if ds.LndEC7128Count != 0 {
-        s += fmt.Sprintf("  LndEC %3d  %s(%.0f-%.0fcpm)\n", ds.LndEC7128Count, geigerWarning, ds.LoLndEC, ds.HiLndEC)
+        s += fmt.Sprintf("  LndEC %4d%s  (%.0f-%.0fcpm)\n", ds.LndEC7128Count, geigerWarning, ds.LoLndEC, ds.HiLndEC)
     }
 
     s += fmt.Sprintf("\n")
