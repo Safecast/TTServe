@@ -1299,7 +1299,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("  LndC %4d  %s(%.0f-%.0fcpm)\n", ds.LndC7318Count, geigerWarning, ds.LoLndC, ds.HiLndC)
     }
     if ds.LndEC7128Count != 0 {
-        s += fmt.Sprintf("  LndEC %3d  %s(%.0f-%.0fcpm) %s\n", ds.LndEC7128Count, geigerWarning, ds.LoLndEC, ds.HiLndEC)
+        s += fmt.Sprintf("  LndEC %3d  %s(%.0f-%.0fcpm)\n", ds.LndEC7128Count, geigerWarning, ds.LoLndEC, ds.HiLndEC)
     }
 
     s += fmt.Sprintf("\n")
