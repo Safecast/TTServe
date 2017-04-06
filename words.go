@@ -5,7 +5,7 @@
 package main
 
 import (
-	"fmt"
+	"strings"
 	"sort"
 )
 
@@ -23,6 +23,7 @@ func (a ByWord) Less(i, j int) bool {
 	return Words2048[a[i].WordIndex] < Words2048[a[j].WordIndex]
 }
 
+// Initialize for quick lookup
 func WordsInit() {
 
 	// Init the index array
@@ -36,24 +37,49 @@ func WordsInit() {
 
 }
 
-func WordsToNumber(what string) (bool, uint32) {
+// Convert a single word to a number
+func WordToNumber(what string) (bool, uint32) {
 
-	i := sort.Search(2048, func(i int) bool {
-		fmt.Printf("%d %s\n", i,  Words2048[SortedWords[i].WordIndex])
-		return Words2048[SortedWords[i].WordIndex] >= what
-	} )
-
-	fmt.Printf("RESULT %d '%s'\n", i, Words2048[SortedWords[i].WordIndex])
+	i := sort.Search(2048, func(i int) bool { return Words2048[SortedWords[i].WordIndex] >= what } )
 	
 	if i < 2048 && Words2048[SortedWords[i].WordIndex] == what {
-		fmt.Printf("true\n");
 		return true, uint32(i)
 	}
-	fmt.Printf("false\n");
 
 	return false, 0
 }
 
+// Look up a number from three simple words
+func WordsToNumber(what string) (bool, uint32) {
+	var result uint32
+	
+	word := strings.Split(what, "-")
+	if len(word) != 3 {
+		return false, 0
+	}
+
+	success, left := WordToNumber(word[0])
+	if !success {
+		return false, 0
+	}
+	success, middle := WordToNumber(word[1])
+	if !success {
+		return false, 0
+	}
+	success, right := WordToNumber(word[2])
+	if !success {
+		return false, 0
+	}
+
+	result |= left << 22
+	result |= middle << 11
+	result |= right
+
+	return true, result
+
+}
+
+// Convert a number to three simple words
 func WordsFromNumber(number uint32) string {
 
 	// If the length isn't precisely 2048, this won't work
