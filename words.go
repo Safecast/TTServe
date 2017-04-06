@@ -39,13 +39,17 @@ func WordsInit() {
 func WordsToNumber(what string) (bool, uint32) {
 
 	i := sort.Search(2048, func(i int) bool {
-		fmt.Printf("%d %s", i,  Words2048[SortedWords[i].WordIndex])
+		fmt.Printf("%d %s\n", i,  Words2048[SortedWords[i].WordIndex])
 		return Words2048[SortedWords[i].WordIndex] >= what
 	} )
 
+	fmt.Printf("RESULT %d '%s'\n", i, Words2048[SortedWords[i].WordIndex])
+	
 	if i < 2048 && Words2048[SortedWords[i].WordIndex] == what {
+		fmt.Printf("true\n");
 		return true, uint32(i)
 	}
+	fmt.Printf("false\n");
 
 	return false, 0
 }
