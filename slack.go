@@ -6,13 +6,12 @@
 package main
 
 import (
-	"os"
+    "os"
     "fmt"
-	"html"
+    "html"
     "time"
     "bytes"
     "strings"
-    "strconv"
     "net/url"
     "net/http"
     "io/ioutil"
@@ -58,23 +57,23 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     }
     message := m[0]
 
-	// If the message is surrounded in backticks to eliminate formatting, remove them
-	message = strings.Replace(message, "`", "", -1)
-	
-	// Process the command arguments
+    // If the message is surrounded in backticks to eliminate formatting, remove them
+    message = strings.Replace(message, "`", "", -1)
+
+    // Process the command arguments
     args := strings.Split(message, " ")
     argsLC := strings.Split(strings.ToLower(message), " ")
 
-	firstArgLC := ""
-	if len(args) > 1 {
-		firstArgLC = argsLC[1]
-	}
+    firstArgLC := ""
+    if len(args) > 1 {
+        firstArgLC = argsLC[1]
+    }
 
-	secondArgLC := ""
-	if len(args) > 2 {
-		secondArgLC = argsLC[2]
-	}
-	
+    secondArgLC := ""
+    if len(args) > 2 {
+        secondArgLC = argsLC[2]
+    }
+
     messageAfterFirstWord := ""
     if len(args) > 1 {
         messageAfterFirstWord = strings.Join(args[1:], " ")
@@ -107,7 +106,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-	// Process common argument
+    // Process common argument
     fMobile := firstArgLC == "mobile" || secondArgLC == "mobile"
     fDetails := fMobile || firstArgLC == "detail" || firstArgLC == "details" || secondArgLC == "detail" || secondArgLC == "-d" || secondArgLC == "details"
 
@@ -121,18 +120,18 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         go sendSafecastDeviceSummaryToSlack("", true, fMobile, fDetails)
 
     case "did":
-		fallthrough
+        fallthrough
     case "deviceid":
         if len(args) != 2 {
             sendToSafecastOps("Command format: deviceid three-simple-words", SLACK_MSG_REPLY)
         } else {
-			found, did := WordsToNumber(args[1])
-			if !found {
-		        sendToSafecastOps("Device ID not found.", SLACK_MSG_REPLY)
-			} else {
-		        sendToSafecastOps(fmt.Sprintf("%s is %d", args[1], did), SLACK_MSG_REPLY)
-			}
-		}
+            found, did := WordsToNumber(args[1])
+            if !found {
+                sendToSafecastOps("Device ID not found.", SLACK_MSG_REPLY)
+            } else {
+                sendToSafecastOps(fmt.Sprintf("%s is %d", args[1], did), SLACK_MSG_REPLY)
+            }
+        }
 
     case "device":
         fallthrough
@@ -168,38 +167,41 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         time.Sleep(1 * time.Second)
         go sendSafecastDeviceSummaryToSlack("== Devices Online ==", false, fMobile, fDetails)
 
-	case "select":
+    case "select":
         if len(args) < 2 {
             sendToSafecastOps("Command format: SELECT <query>", SLACK_MSG_REPLY)
         } else {
-			// Unescape the string, which substitutes &gt for >
-			rawQuery := html.UnescapeString(messageAfterFirstWord)
-			fmt.Printf("\n%s *** Influx query: \"%s\"\n", logTime(), rawQuery)
-			// Perform the query
-			success, result, numrows := InfluxQuery(user, rawQuery)
-			if !success {
-	            sendToSafecastOps(fmt.Sprintf("Query error: %s: %s", result, "SELECT " + rawQuery), SLACK_MSG_REPLY)
-			} else {
-	            sendToSafecastOps(fmt.Sprintf("%d rows of data are <%s|here>, @%s.", numrows, result, user), SLACK_MSG_REPLY)
-			}
-		}
-		
-	case "sn":
+            // Unescape the string, which substitutes &gt for >
+            rawQuery := html.UnescapeString(messageAfterFirstWord)
+            fmt.Printf("\n%s *** Influx query: \"%s\"\n", logTime(), rawQuery)
+            // Perform the query
+            success, result, numrows := InfluxQuery(user, rawQuery)
+            if !success {
+                sendToSafecastOps(fmt.Sprintf("Query error: %s: %s", result, "SELECT " + rawQuery), SLACK_MSG_REPLY)
+            } else {
+                sendToSafecastOps(fmt.Sprintf("%d rows of data are <%s|here>, @%s.", numrows, result, user), SLACK_MSG_REPLY)
+            }
+        }
+
+    case "sn":
         if len(args) != 2 {
             sendToSafecastOps("Command format: sn <deviceID>", SLACK_MSG_REPLY)
         } else {
-            i64, _ := strconv.ParseUint(args[1], 10, 32)
-            deviceID := uint32(i64)
-			sn, reason := SafecastDeviceIDToSN(deviceID)
-			if sn == 0 {
-	            sendToSafecastOps(fmt.Sprintf("Unable to find S/N: %s", reason), SLACK_MSG_REPLY)
-			} else {
-	            sendToSafecastOps(fmt.Sprintf("S/N: %d", sn), SLACK_MSG_REPLY)
-			}
-		}
-		
+            found, deviceID := WordsToNumber(args[1])
+            if !found {
+                sendToSafecastOps(fmt.Sprintf("Invalid device ID."), SLACK_MSG_REPLY)
+            } else {
+                sn, reason := SafecastDeviceIDToSN(deviceID)
+                if sn == 0 {
+                    sendToSafecastOps(fmt.Sprintf("Unable to find S/N: %s", reason), SLACK_MSG_REPLY)
+                } else {
+                    sendToSafecastOps(fmt.Sprintf("S/N: %d", sn), SLACK_MSG_REPLY)
+                }
+            }
+        }
+
     case "deveui":
-		generateTTNCTLDeviceRegistrationScript()
+        generateTTNCTLDeviceRegistrationScript()
 
     case "pending":
         fallthrough
@@ -210,12 +212,15 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         if len(args) != 2 {
             sendToSafecastOps("Command format: cancel <deviceID>", SLACK_MSG_REPLY)
         } else {
-            i64, _ := strconv.ParseUint(args[1], 10, 32)
-            deviceID := uint32(i64)
-            if cancelCommand(deviceID) {
-                sendToSafecastOps("Cancelled.", SLACK_MSG_REPLY)
+            found, deviceID := WordsToNumber(args[1])
+            if !found {
+                sendToSafecastOps("Invalid Device ID.", SLACK_MSG_REPLY)
             } else {
-                sendToSafecastOps("Not found.", SLACK_MSG_REPLY)
+                if cancelCommand(deviceID) {
+                    sendToSafecastOps("Cancelled.", SLACK_MSG_REPLY)
+                } else {
+                    sendToSafecastOps("Not found.", SLACK_MSG_REPLY)
+                }
             }
         }
 
@@ -245,10 +250,9 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
                 sendToSafecastOps("Unrecognized subcommand of 'send'", SLACK_MSG_REPLY)
             }
         } else {
-            i64, err := strconv.ParseUint(args[1], 10, 32)
-            deviceID := uint32(i64)
-            if err != nil {
-                sendToSafecastOps("Command format: send <deviceID> <message>", SLACK_MSG_REPLY)
+            found, deviceID := WordsToNumber(args[1])
+            if !found {
+                sendToSafecastOps("Invalid Device ID.", SLACK_MSG_REPLY)
             } else {
                 sendToSafecastOps(fmt.Sprintf("Sending to %d: %s", deviceID, messageAfterSecondWord), SLACK_MSG_REPLY)
                 sendCommand(user, deviceID, messageAfterSecondWord)
@@ -257,12 +261,11 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
     case "clear-logs":
         if len(args) == 2 {
-            i64, err := strconv.ParseUint(args[1], 10, 32)
-            deviceID := uint32(i64)
-            if err != nil {
-                sendToSafecastOps("Not a device ID.", SLACK_MSG_REPLY)
+            found, deviceID := WordsToNumber(args[1])
+            if !found {
+                sendToSafecastOps("Invalid Device ID.", SLACK_MSG_REPLY)
             } else {
-				sendToSafecastOps(SafecastDeleteLogs(deviceID), SLACK_MSG_REPLY)
+                sendToSafecastOps(SafecastDeleteLogs(deviceID), SLACK_MSG_REPLY)
             }
         } else {
             sendToSafecastOps("Command format: clear <deviceID>", SLACK_MSG_REPLY)
@@ -287,16 +290,16 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 // back to the callers.
 func sendToSafecastOps(msg string, destination int) {
     if destination == SLACK_MSG_UNSOLICITED_ALL {
-	    str := strings.Split(ServiceConfig.SlackOutboundUrls, ",")
+        str := strings.Split(ServiceConfig.SlackOutboundUrls, ",")
         for _, url := range str {
             go sendToOpsViaSlack(msg, url)
         }
     } else if destination == SLACK_MSG_UNSOLICITED_OPS {
-	    str := strings.Split(ServiceConfig.SlackOutboundUrls, ",")
+        str := strings.Split(ServiceConfig.SlackOutboundUrls, ",")
         go sendToOpsViaSlack(msg, str[SLACK_OPS_SAFECAST])
     } else {
         if SlackCommandSource != SLACK_OPS_NONE {
-		    str := strings.Split(ServiceConfig.SlackOutboundUrls, ",")
+            str := strings.Split(ServiceConfig.SlackOutboundUrls, ",")
             go sendToOpsViaSlack(msg, str[SlackCommandSource])
         }
     }

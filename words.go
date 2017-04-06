@@ -5,7 +5,6 @@
 package main
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"sort"
@@ -62,8 +61,6 @@ func WordsToNumber(what string) (bool, uint32) {
         i64, err := strconv.ParseUint(what, 10, 32)
 		if err == nil {
 			return true, uint32(i64)
-		} else {
-			fmt.Printf("%s\n", err)
 		}
 		return false, 0
 	}
