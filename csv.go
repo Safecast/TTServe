@@ -76,6 +76,17 @@ func csvAppend(fd *os.File, sd *SafecastData) {
     s += ","
     if sd.CapturedAt != nil {
         t, err = time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
+		// Handle Safecast Air's misformatted captured at dates
+		if err != nil {
+	        t, err = time.Parse("2006-1-02T15:04:05Z", *sd.CapturedAt)
+		}
+		if err != nil {
+	        t, err = time.Parse("2006-01-2T15:04:05Z", *sd.CapturedAt)
+		}
+		if err != nil {
+	        t, err = time.Parse("2006-1-2T15:04:05Z", *sd.CapturedAt)
+		}
+		// If no error, reformat it
         if err == nil {
             s += t.UTC().Format("2006-01-02 15:04:05")
         } else {
