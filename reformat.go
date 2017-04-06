@@ -9,23 +9,23 @@ import (
     "fmt"
     "strings"
     "strconv"
-	"github.com/google/open-location-code/go"
+    "github.com/google/open-location-code/go"
 )
 
 // Get the type of a device
 func SafecastV1DeviceType(deviceid uint32) string {
-	// For true V2 numbering space
+    // For true V2 numbering space
     if deviceid >= 10000 && deviceid < 19999 {
-		return "pointcast"
-	}
+        return "pointcast"
+    }
     if deviceid >= 50000 && deviceid < 59999 {
         return "safecast-air"
-	}
-	// For V1 numbering space
+    }
+    // For V1 numbering space
     if deviceid >= 100000 && deviceid < 199999 {
-		return "pointcast"
-	}
-	return ""	
+        return "pointcast"
+    }
+    return ""
 }
 
 // Reformat a special V1 payload to Current
@@ -43,13 +43,13 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
     isPointcast := false
     if devicetype == "pointcast" {
         isPointcast = true
-		did := uint32(*v1.DeviceId / 10)
+        did := uint32(*v1.DeviceId / 10)
         sd.DeviceId = &did
     }
     isSafecastAir := false
     if devicetype == "safecast-air" {
         isSafecastAir = true
-		did := uint32(*v1.DeviceId)
+        did := uint32(*v1.DeviceId)
         sd.DeviceId = &did
     }
     if !isPointcast && !isSafecastAir {
@@ -71,9 +71,9 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             alt := float32(*v1.Height)
             loc.Alt = &alt
         }
-		// 11 digits is 3m accuracy
-		Olc := olc.Encode(float64(*loc.Lat), float64(*loc.Lon), 11)
-		loc.Olc = &Olc
+        // 11 digits is 3m accuracy
+        Olc := olc.Encode(float64(*loc.Lat), float64(*loc.Lon), 11)
+        loc.Olc = &Olc
         sd.Loc = &loc
     }
 
@@ -145,10 +145,10 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             var dodev = false
 
             unrecognized := ""
-			status := ""
-			if v1.DeviceTypeId != nil {
-	            status = *v1.DeviceTypeId
-			}
+            status := ""
+            if v1.DeviceTypeId != nil {
+                status = *v1.DeviceTypeId
+            }
             fields := strings.Split(status, ",")
             for v := range fields {
                 field := strings.Split(fields[v], ":")
@@ -156,28 +156,38 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
                 case "Battery Voltage":
                     f64, _ := strconv.ParseFloat(field[1], 32)
                     f32 := float32(f64)
-                    bat.Voltage = &f32
-                    dobat = true
+                    if f32 != 0 {
+                        bat.Voltage = &f32
+                        dobat = true
+                    }
                 case "Fails":
                     u64, _ := strconv.ParseUint(field[1], 10, 32)
                     u32 := uint32(u64)
-                    dev.CommsFails = &u32
-                    dodev = true
+                    if u32 != 0 {
+                        dev.CommsFails = &u32
+                        dodev = true
+                    }
                 case "Restarts":
                     u64, _ := strconv.ParseUint(field[1], 10, 32)
                     u32 := uint32(u64)
-                    dev.DeviceRestarts = &u32
-                    dodev = true
+                    if u32 != 0 {
+                        dev.DeviceRestarts = &u32
+                        dodev = true
+                    }
                 case "FreeRam":
                     u64, _ := strconv.ParseUint(field[1], 10, 32)
                     u32 := uint32(u64)
-                    dev.FreeMem = &u32
-                    dodev = true
+                    if u32 != 0 {
+                        dev.FreeMem = &u32
+                        dodev = true
+                    }
                 case "NTP count":
                     u64, _ := strconv.ParseUint(field[1], 10, 32)
                     u32 := uint32(u64)
-                    dev.NTPCount = &u32
-                    dodev = true
+                    if u32 != 0 {
+                        dev.NTPCount = &u32
+                        dodev = true
+                    }
                 case "Last failure":
                     var LastFailure string = field[1]
                     dev.LastFailure = &LastFailure
@@ -215,14 +225,14 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
         }
     }
 
-	// Test
-	if isTestMeasurement {
-		if sd.Dev == nil {
+    // Test
+    if isTestMeasurement {
+        if sd.Dev == nil {
             var dev Dev
-	        sd.Dev = &dev
-		}
-		sd.Dev.Test = &isTestMeasurement
-	}
+            sd.Dev = &dev
+        }
+        sd.Dev.Test = &isTestMeasurement
+    }
 
     return uint32(*sd.DeviceId), devicetype, sd
 
