@@ -62,6 +62,7 @@ type MeasurementStat struct {
     hasLndU7318         bool
     hasLndC7318         bool
     hasLndEC7128        bool
+    LndWarning          bool
     GeigerWarning       bool
     hasPms              bool
     PmsWarning          bool
@@ -187,6 +188,9 @@ type MeasurementDataset struct {
     LndU7318Count       uint32
     LndC7318Count       uint32
     LndEC7128Count      uint32
+    LndWarning			uint32
+    LndWarningFirst		time.Time
+    EnvWarningFirst     time.Time
     GeigerWarningCount  int32
     GeigerWarningFirst  time.Time
     PmsCount            uint32
@@ -466,7 +470,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         if sd.Lnd.U7318 != nil {
             stat.hasLndU7318 = true
             val := *sd.Lnd.U7318
-            if val <= 0 || val > 500 {
+            if val < 0 || val > 500 {
                 stat.GeigerWarning = true
             }
             stat.LndU = float64(val)
@@ -474,7 +478,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         if sd.Lnd.C7318 != nil {
             stat.hasLndC7318 = true
             val := *sd.Lnd.C7318
-            if val <= 0 || val > 500 {
+            if val < 0 || val > 500 {
                 stat.GeigerWarning = true
             }
             stat.LndC = float64(val)
@@ -482,7 +486,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         if sd.Lnd.EC7128 != nil {
             stat.hasLndEC7128 = true
             val := *sd.Lnd.EC7128
-            if val <= 0 || val > 500 {
+            if val < 0 || val > 500 {
                 stat.GeigerWarning = true
             }
             stat.LndEC = float64(val)
