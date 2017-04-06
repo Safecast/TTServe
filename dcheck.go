@@ -1202,7 +1202,8 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
             f = 0
         } else {
             f = 100*float32(g) / float32(ds.GapsGt0m)
-        }        if f != 0 && ds.GapsGt35m != ds.GapsGt40m {
+        }
+		if f != 0 && ds.GapsGt35m != ds.GapsGt40m {
             s += fmt.Sprintf("  36-40m  %3.0f%% (%d)\n", f, g)
         }
         g = ds.GapsGt30m - ds.GapsGt35m
