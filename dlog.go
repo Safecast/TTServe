@@ -94,3 +94,29 @@ func SafecastCSVDeviceLog(sd SafecastData) {
 	csvClose(fd)
 
 }
+
+// Clear the logs
+func SafecastDeleteLogs(DeviceId uint32) string {
+
+	filename := fmt.Sprintf("%d", DeviceId)
+
+    json_filename := TTDeviceLogPath + "/" + fmt.Sprintf("%s%s.json", time.Now().UTC().Format("2006-01-"), filename)
+    csv_filename := TTDeviceLogPath + "/" + fmt.Sprintf("%s%s.csv", time.Now().UTC().Format("2006-01-"), filename)
+
+	deleted := false
+    err := os.Remove(SafecastDirectory() + json_filename)
+	if err == nil {
+		deleted = true
+	}
+    err = os.Remove(SafecastDirectory() + csv_filename)
+	if err == nil {
+		deleted = true
+	}
+
+	if !deleted {
+		return fmt.Sprintf("Nothing for %d to be cleared.", DeviceId)
+	}
+
+	return fmt.Sprintf("Device logs for %d have been deleted.", DeviceId)
+
+}
