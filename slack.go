@@ -121,6 +121,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         go sendSafecastDeviceSummaryToSlack("", true, fMobile, fDetails)
 
     case "did":
+		fallthrough
     case "deviceid":
         if len(args) != 2 {
             sendToSafecastOps("Command format: deviceid three-simple-words", SLACK_MSG_REPLY)
