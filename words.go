@@ -5,7 +5,6 @@
 package main
 
 import (
-    "fmt"
 	"sort"
 )
 
@@ -20,7 +19,6 @@ type ByWord []Word
 func (a ByWord) Len() int      { return len(a) }
 func (a ByWord) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a ByWord) Less(i, j int) bool {
-//	fmt.Printf("%d %d %s %s %d\n", i, j, Words2048[a[i].WordIndex], Words2048[a[j].WordIndex], strings.Compare(Words2048[a[i].WordIndex], Words2048[a[j].WordIndex]))
 	return Words2048[a[i].WordIndex] < Words2048[a[j].WordIndex]
 }
 
@@ -35,12 +33,6 @@ func WordsInit() {
 	// Sort the array
     sort.Sort(ByWord(SortedWords))
 
-	// Print the sorted array
-	for i:=0; i<2048; i++ {
-		fmt.Printf("%d:%d %s ", i, SortedWords[i].WordIndex, Words2048[SortedWords[i].WordIndex])
-	}
-	fmt.Printf("\n");
-	
 }
 
 func WordsFromNumber(number uint32) string {
