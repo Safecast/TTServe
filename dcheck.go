@@ -1113,7 +1113,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.Measurements > 1 {
         s += fmt.Sprintf("Inter-upload Gaps: (%s to %s)\n", AgoMinutes(ds.MinUploadGapSecs/60), AgoMinutes(ds.MaxUploadGapSecs/60))
         if ds.GapsGt0m == 0 {
-            s += fmt.Sprintf("  None.\n")
+            s += fmt.Sprintf("  None\n")
         } else {
             f := 100*float32(ds.GapsGt1week) / float32(ds.GapsGt0m)
             if f != 0 {
