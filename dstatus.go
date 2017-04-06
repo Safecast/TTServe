@@ -653,10 +653,10 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
 // Get summary of a device
 func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label string, Gps string, Summary string) {
 
-    // Default the label for special device types that have no label
-    label := SafecastV1DeviceType(DeviceId)
-	if (true) {
-		label = WordsFromNumber(DeviceId)
+    // Default the label
+	label := ""
+	if false {
+	    label = SafecastV1DeviceType(DeviceId)
 	}
 
     // Read the file

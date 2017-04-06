@@ -244,6 +244,8 @@ func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, 
 			sortedDevices[i].label = label
         }
 
+		words := WordsFromNumber(id)
+
         s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicDeviceStatus, id, id)
 
         if fWrap {
@@ -281,6 +283,9 @@ func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, 
         if !fWrap && label != "" {
 			s += fmt.Sprintf(" \"%s\"", label)
         }
+		if !fWrap && words != "" {
+			s += fmt.Sprintf(" %s", words)
+		}
 
         if summary != "" {
             if fWrap {
