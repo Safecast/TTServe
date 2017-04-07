@@ -95,11 +95,6 @@ func WordsToNumber(what string) (bool, uint32) {
 // Convert a number to three simple words
 func WordsFromNumber(number uint32) string {
 
-	// If the length isn't precisely 2048, this won't work
-	if len(Words2048) != 2048 {
-		return "not-2048"
-	}
-
 	// Break the 32-bit uint down into 3 bit fields
 	left := (number >> 22) & 0x000003ff
 	middle := (number >> 11) & 0x000007ff
