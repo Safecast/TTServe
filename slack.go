@@ -114,9 +114,9 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     // Process queries
     switch argsLC[0] {
 
-    case "group":
+    case "dev":
         fallthrough
-    case "groups":
+    case "devs":
         fallthrough
     case "mark":
         fallthrough
@@ -126,6 +126,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 		fallthrough
     case "reports":
         response := Command(user, message)
+		fmt.Printf("OZZIE: reply '%s'\n", response)
         sendToSafecastOps(response, SLACK_MSG_REPLY)
 
     case "online":

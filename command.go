@@ -91,6 +91,9 @@ func CommandCacheRefresh() {
 // Find a named object
 func CommandObjGet(user string, objtype string, objname string) (bool, string) {
 
+	// Refresh, just for good measure
+	CommandCacheRefresh()
+
     // Handle global queries
     if strings.HasPrefix(objname, "=") {
         user = ""
@@ -128,6 +131,9 @@ func CommandObjGet(user string, objtype string, objname string) (bool, string) {
 
 // Find a named object
 func CommandObjList(user string, objtype string, objname string) string {
+
+	// Refresh, just for good measure
+	CommandCacheRefresh()
 
 	// Init output buffer
 	out := ""
@@ -168,6 +174,10 @@ func CommandObjList(user string, objtype string, objname string) string {
 
     }
 
+	if out == "" {
+		return "Not found."
+	}
+	
 	return out
 
 }
@@ -188,14 +198,23 @@ func CommandStateUpdate(s State) {
 
     fd, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
     if err == nil {
+
+		// Write the data
         fd.WriteString(string(contents))
         fd.Close()
+
+		// Update the control file time
+	    CommandStateLastModified = ControlFileTime(TTServerCommandStateControlFile, "state update")
+
     }
 
 }
 
 // Find a named object
 func CommandObjSet(user string, objtype string, objname string, objval string) {
+
+	// Refresh, just for good measure
+	CommandCacheRefresh()
 
     // Handle global queries
     if strings.HasPrefix(objname, "=") {
@@ -314,9 +333,6 @@ func CommandParse(user string, objtype string, message string) string {
 // Process a command that will modify the cache and the on-disk state
 func Command(user string, message string) string {
 
-    // Before doing anything else, make sure that the cache is up to date
-    CommandCacheRefresh()
-
     // Process the command arguments
     args := strings.Split(message, " ")
     messageAfterFirstArg := ""
@@ -327,9 +343,9 @@ func Command(user string, message string) string {
     // Dispatch command
     switch args[0] {
 
-    case "groups":
+    case "devs":
 		fallthrough
-    case "group":
+    case "dev":
 		return CommandParse(user, ObjGroup, messageAfterFirstArg)
 
     case "marks":
