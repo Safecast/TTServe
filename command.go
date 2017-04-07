@@ -243,7 +243,7 @@ func CommandObjSet(user string, objtype string, objname string, objval string) {
                 CachedState[i].Objects[j].Value = objval
             } else {
                 if len(s.Objects) == 1 {
-                    s.Objects = nil
+                    CachedState[i].Objects = nil
                 } else  {
                     CachedState[i].Objects[j] = CachedState[i].Objects[len(s.Objects)-1]
                     CachedState[i].Objects = CachedState[i].Objects[:len(s.Objects)-1]
