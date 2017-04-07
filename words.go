@@ -5,14 +5,14 @@
 package main
 
 import (
-	"strconv"
-	"strings"
-	"sort"
+    "strconv"
+    "strings"
+    "sort"
 )
 
 // Word index data structure
 type Word struct {
-	WordIndex uint
+    WordIndex uint
 }
 var SortedWords []Word
 
@@ -25,80 +25,96 @@ func (a ByWord) Less(i, j int) bool { return Words2048[a[i].WordIndex] < Words20
 // Initialize for quick lookup
 func WordsInit() {
 
-	// Init the index array
-	SortedWords = make([]Word, 2048)
-	for i:=0; i<2048; i++ {
-		SortedWords[i].WordIndex = uint(i)
-	}
+    // Init the index array
+    SortedWords = make([]Word, 2048)
+    for i:=0; i<2048; i++ {
+        SortedWords[i].WordIndex = uint(i)
+    }
 
-	// Sort the array
-	sort.Sort(ByWord(SortedWords))
+    // Sort the array
+    sort.Sort(ByWord(SortedWords))
 
 }
 
 // Convert a single word to a number
 func WordToNumber(word string) (bool, uint) {
 
-	// Do a binary chop to find the word or its insertion slot
-	i := sort.Search(2048, func(i int) bool { return Words2048[SortedWords[i].WordIndex] >= word } )
-	
-	// Exit if found.  (If we failed to match the result, it's an insertion slot.)
-	if i < 2048 && Words2048[SortedWords[i].WordIndex] == word {
-		return true, SortedWords[i].WordIndex
-	}
+    // Do a binary chop to find the word or its insertion slot
+    i := sort.Search(2048, func(i int) bool { return Words2048[SortedWords[i].WordIndex] >= word } )
 
-	return false, 0
+    // Exit if found.  (If we failed to match the result, it's an insertion slot.)
+    if i < 2048 && Words2048[SortedWords[i].WordIndex] == word {
+        return true, SortedWords[i].WordIndex
+    }
+
+    return false, 0
 }
 
-// Look up a number from three simple words
+// Look up a number from two or three simple words
 func WordsToNumber(words string) (bool, uint32) {
+	var left, middle, right uint
+	var success bool
 	
-	// For convenience, if a number is supplied just return that number.  I do this so
-	// that you can use this same method to parse either a number or the words to get that number.
-	word := strings.Split(words, "-")
-	if len(word) != 3 {
+    // For convenience, if a number is supplied just return that number.  I do this so
+    // that you can use this same method to parse either a number or the words to get that number.
+    word := strings.Split(words, "-")
+    if len(word) == 1 {
 
-		// See if this parses cleanly as a number
-		i64, err := strconv.ParseUint(words, 10, 32)
-		if err == nil {
-			return true, uint32(i64)
-		}
-		return false, 0
-	}
+        // See if this parses cleanly as a number
+        i64, err := strconv.ParseUint(words, 10, 32)
+        if err == nil {
+            return true, uint32(i64)
+        }
+        return false, 0
+    }
 
-	// Convert words to numbers, msb to lsb
-	success, left := WordToNumber(word[0])
-	if !success {
-		return false, 0
-	}
-	success, middle := WordToNumber(word[1])
-	if !success {
-		return false, 0
-	}
-	success, right := WordToNumber(word[2])
-	if !success {
-		return false, 0
-	}
+    // Convert two or three words to numbers, msb to lsb
+    if len(word) == 2 {
+        success, middle = WordToNumber(word[0])
+        if !success {
+            return false, 0
+        }
+        success, right = WordToNumber(word[1])
+        if !success {
+            return false, 0
+        }
+    } else {
+        success, left = WordToNumber(word[0])
+        if !success {
+            return false, 0
+        }
+        success, middle = WordToNumber(word[1])
+        if !success {
+            return false, 0
+        }
+        success, right = WordToNumber(word[2])
+        if !success {
+            return false, 0
+        }
+    }
 
-	// Map back to bit fields
-	result := uint32(left) << 22
-	result |= uint32(middle) << 11
-	result |= uint32(right)
+    // Map back to bit fields
+    result := uint32(left) << 22
+    result |= uint32(middle) << 11
+    result |= uint32(right)
 
-	return true, result
+    return true, result
 
 }
 
 // Convert a number to three simple words
 func WordsFromNumber(number uint32) string {
 
-	// Break the 32-bit uint down into 3 bit fields
-	left := (number >> 22) & 0x000003ff
-	middle := (number >> 11) & 0x000007ff
-	right := number & 0x000007ff
+    // Break the 32-bit uint down into 3 bit fields
+    left := (number >> 22) & 0x000003ff
+    middle := (number >> 11) & 0x000007ff
+    right := number & 0x000007ff
 
-	// Generate the string
-	return Words2048[left] + "-" + Words2048[middle] + "-" + Words2048[right]
+	// If the high order is 0, which is frequently the case, just use two words
+	if left == 0 {
+		return Words2048[middle] + "-" + Words2048[right]
+	}		
+    return Words2048[left] + "-" + Words2048[middle] + "-" + Words2048[right]
 
 }
 
