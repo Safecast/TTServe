@@ -12,7 +12,7 @@ import (
 
 // Word index data structure
 type Word struct {
-	WordIndex int
+	WordIndex uint
 }
 var SortedWords []Word
 
@@ -28,7 +28,7 @@ func WordsInit() {
 	// Init the index array
 	SortedWords = make([]Word, 2048)
 	for i:=0; i<2048; i++ {
-		SortedWords[i].WordIndex = i
+		SortedWords[i].WordIndex = uint(i)
 	}
 
 	// Sort the array
@@ -37,7 +37,7 @@ func WordsInit() {
 }
 
 // Convert a single word to a number
-func WordToNumber(word string) (bool, int) {
+func WordToNumber(word string) (bool, uint) {
 
 	// Do a binary chop to find the word or its insertion slot
 	i := sort.Search(2048, func(i int) bool { return Words2048[SortedWords[i].WordIndex] >= word } )
