@@ -11,7 +11,7 @@ import (
     "html"
     "time"
     "bytes"
-	"strconv"
+    "strconv"
     "strings"
     "net/url"
     "net/http"
@@ -113,6 +113,20 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Process queries
     switch argsLC[0] {
+
+    case "group":
+        fallthrough
+    case "groups":
+        fallthrough
+    case "mark":
+        fallthrough
+    case "marks":
+        fallthrough
+    case "report":
+		fallthrough
+    case "reports":
+        response := Command(user, message)
+        sendToSafecastOps(response, SLACK_MSG_REPLY)
 
     case "online":
         go sendSafecastDeviceSummaryToSlack("", false, fMobile, fDetails)

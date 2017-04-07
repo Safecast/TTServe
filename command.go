@@ -1,0 +1,349 @@
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
+// Use of this source code is governed by licenses granted by the
+// copyright holder including that found in the LICENSE file.
+
+// Device monitoring
+package main
+
+import (
+	"os"
+    "fmt"
+    "time"
+    "io/ioutil"
+    "strings"
+    "encoding/json"
+)
+
+// Structures
+const (
+    ObjGroup = "group"
+    ObjMark = "mark"
+    ObjReport = "report"
+)
+type Object struct {
+    Name                string          `json:"obj_name,omitempty"`
+    Type                string          `json:"obj_type,omitempty"`
+    Value               string          `json:"obj_value,omitempty"`
+}
+type State struct {
+    User                string          `json:"user,omitempty"`
+    Objects             []Object        `json:"objects,omitempty"`
+}
+var CachedState []State
+
+
+// Statics
+var   CommandStateLastModified time.Time
+
+// Refresh the command cache
+func CommandCacheRefresh() {
+    var RefreshedState []State
+
+    // Exit if nothing needs refreshing
+    LastModified := ControlFileTime(TTServerCommandStateControlFile, "")
+    if LastModified == CommandStateLastModified {
+        return
+    }
+
+    // Make sure that we only do this once per modification, even if errors
+    CommandStateLastModified = LastModified
+
+    // Iterate over all files in the directory, loading their contents
+    files, err := ioutil.ReadDir(SafecastDirectory() + TTCommandStatePath)
+    if err == nil {
+
+        // Iterate over each of the values
+        for _, file := range files {
+
+            // Skip things we can't read
+            if file.IsDir() {
+                continue
+            }
+
+            // Read the file if we can
+            fmt.Printf("OZZIE reading %s\n", SafecastDirectory() + TTCommandStatePath + "/" + file.Name())
+            contents, err := ioutil.ReadFile(SafecastDirectory() + TTCommandStatePath + "/" + file.Name())
+            if err != nil {
+                continue
+            }
+            fmt.Printf("OZZIE got:\n%s\n", contents)
+
+            // Parse the JSON, and ignore it if nonparse-sable
+            value := State{}
+            err = json.Unmarshal(contents, &value)
+            if err != nil {
+                continue
+            }
+            fmt.Printf("OZZIE unmarshaled\n")
+
+            // Add to what we're accumulating
+            RefreshedState = append(RefreshedState, value)
+
+        }
+
+    }
+
+    // Replace the cached state
+    CachedState = RefreshedState
+
+}
+
+// Find a named object
+func CommandObjGet(user string, objtype string, objname string) (bool, string) {
+
+    // Handle global queries
+    if strings.HasPrefix(objname, "=") {
+        user = ""
+        objname = strings.Replace(objname, "=", "", 1)
+    }
+
+    // Loop over all user state objjects
+    for _, s := range CachedState {
+
+        // Skip if not relevant
+        if s.User != user && s.User != "" {
+            continue
+        }
+
+        // Search for this object
+        for _, o := range s.Objects {
+
+            // Skip if not what we're looking for
+            if objtype != o.Type || objname != o.Name {
+                continue
+            }
+
+            // Got it
+            return true, o.Value
+
+        }
+
+
+    }
+
+    // No luck
+    return false, ""
+
+}
+
+// Find a named object
+func CommandObjList(user string, objtype string, objname string) string {
+
+	// Init output buffer
+	out := ""
+	
+    // Loop over all user state objjects
+    for _, s := range CachedState {
+
+        // Skip if not relevant
+        if s.User != user && s.User != "" {
+            continue
+        }
+
+        // Search for this object
+        for _, o := range s.Objects {
+
+            // Skip if not what we're looking for
+            if objtype != o.Type {
+                continue
+            }
+
+			// If objname is specified, skip if not it
+			if objname != "" && o.Name != objname {
+				continue
+			}
+
+			if out != "" {
+				out += "\n"
+			}
+
+			oname := o.Name
+			if s.User == "" {
+				oname = "=" + o.Name
+			}
+			
+			out += fmt.Sprintf("%10s %s", oname, o.Value)
+			
+        }
+
+    }
+
+	return out
+
+}
+
+// Update state
+func CommandStateUpdate(s State) {
+
+    // Marshall the state
+    contents, _ := json.MarshalIndent(s, "", "    ")
+
+    // Update the file
+    filename := s.User
+    if s.User == "" {
+        filename = "global"
+    }
+
+    path := SafecastDirectory() + TTCommandStatePath + "/" + filename + ".json"
+
+    fd, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+    if err == nil {
+        fd.WriteString(string(contents))
+        fd.Close()
+    }
+
+}
+
+// Find a named object
+func CommandObjSet(user string, objtype string, objname string, objval string) {
+
+    // Handle global queries
+    if strings.HasPrefix(objname, "=") {
+        user = ""
+        objname = strings.Replace(objname, "=", "", 1)
+    }
+
+    // Loop over all user state objjects
+    for i, s := range CachedState {
+
+        // Skip if not relevant
+        if s.User != user && s.User != "" {
+            continue
+        }
+
+        // Search for this object
+        for j, o := range s.Objects {
+
+            // Skip if not what we're looking for
+            if objtype != o.Type || objname != o.Name {
+                continue
+            }
+
+            // Update or remove the element
+            if objval != "" {
+                CachedState[i].Objects[j].Value = objval
+            } else {
+                if len(s.Objects) == 1 {
+                    s.Objects = nil
+                } else  {
+                    CachedState[i].Objects[j] = CachedState[i].Objects[len(s.Objects)-1]
+                    CachedState[i].Objects = CachedState[i].Objects[:len(s.Objects)-1]
+                }
+            }
+
+            // Update it
+            CommandStateUpdate(s)
+            return
+
+        }
+
+        // If we couldn't find the object, add it
+        o := Object{}
+        o.Name = objname
+        o.Type = objtype
+        o.Value = objval
+        CachedState[i].Objects = append(CachedState[i].Objects, o)
+
+        // Update it
+        CommandStateUpdate(s)
+        return
+
+    }
+
+    // If we couldn't find the user state, add it
+    o := Object{}
+    o.Name = objname
+    o.Type = objtype
+    o.Value = objval
+    s := State{}
+	s.User = user
+    s.Objects = append(s.Objects, o)
+    CachedState = append(CachedState, s)
+
+	// Update it
+    CommandStateUpdate(s)
+	return
+	
+}
+
+// Find a named object
+func CommandParse(user string, objtype string, message string) string {
+
+    args := strings.Split(message, " ")
+    messageAfterSecondArg := ""
+    if len(args) > 2 {
+        messageAfterSecondArg = strings.Join(args[2:], " ")
+    }
+
+	if message == "" {
+		return CommandObjList(user, objtype, "")
+	}
+
+	objname := args[1]
+	switch args[0] {
+
+	case "get":
+		fallthrough
+	case "show":
+		return CommandObjList(user, objtype, objname)
+		
+	case "add":
+		found, value := CommandObjGet(user, objtype, objname)
+		return(fmt.Sprintf("not yet: get = %t %s", found, value))
+
+	case "remove":
+		found, value := CommandObjGet(user, objtype, objname)
+		return(fmt.Sprintf("not yet: get = %t %s", found, value))
+
+	case "set":
+		CommandObjSet(user, objtype, objname, messageAfterSecondArg)
+		found, value := CommandObjGet(user, objtype, objname)
+		return(fmt.Sprintf("after set, get = %t %s", found, value))
+
+	case "delete":
+		CommandObjSet(user, objtype, objname, "")
+		found, value := CommandObjGet(user, objtype, objname)
+		return(fmt.Sprintf("after del, get = %t %s", found, value))
+
+	}
+
+	return CommandObjList(user, objtype, args[0])
+
+}
+
+// Process a command that will modify the cache and the on-disk state
+func Command(user string, message string) string {
+
+    // Before doing anything else, make sure that the cache is up to date
+    CommandCacheRefresh()
+
+    // Process the command arguments
+    args := strings.Split(message, " ")
+    messageAfterFirstArg := ""
+    if len(args) > 1 {
+        messageAfterFirstArg = strings.Join(args[1:], " ")
+    }
+
+    // Dispatch command
+    switch args[0] {
+
+    case "groups":
+		fallthrough
+    case "group":
+		return CommandParse(user, ObjGroup, messageAfterFirstArg)
+
+    case "marks":
+        fallthrough
+    case "mark":
+		return CommandParse(user, ObjMark, messageAfterFirstArg)
+
+    case "reports":
+        fallthrough
+    case "report":
+		return CommandParse(user, ObjReport, messageAfterFirstArg)
+		
+    }
+
+    return "Unrecognized command"
+
+}
