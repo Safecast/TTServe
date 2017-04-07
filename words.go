@@ -54,7 +54,6 @@ func WordToNumber(what string) (bool, int) {
 
 // Look up a number from three simple words
 func WordsToNumber(what string) (bool, uint32) {
-	var result uint32
 	
 	// For convenience, if a number is supplied just return that number.  I do this so
 	// that you can use this same method to parse either a number or the words to get that number.
@@ -84,7 +83,7 @@ func WordsToNumber(what string) (bool, uint32) {
 	}
 
 	// Map back to bit fields
-	result |= uint32(left) << 22
+	result := uint32(left) << 22
 	result |= uint32(middle) << 11
 	result |= uint32(right)
 
