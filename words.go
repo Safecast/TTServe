@@ -39,13 +39,13 @@ func WordsInit() {
 }
 
 // Convert a single word to a number
-func WordToNumber(what string) (bool, int) {
+func WordToNumber(word string) (bool, int) {
 
 	// Do a binary chop to find the word or its insertion slot
-	i := sort.Search(2048, func(i int) bool { return Words2048[SortedWords[i].WordIndex] >= what } )
+	i := sort.Search(2048, func(i int) bool { return Words2048[SortedWords[i].WordIndex] >= word } )
 	
 	// Exit if found.  (If we failed to match the result, it's an insertion slot.)
-	if i < 2048 && Words2048[SortedWords[i].WordIndex] == what {
+	if i < 2048 && Words2048[SortedWords[i].WordIndex] == word {
 		return true, SortedWords[i].WordIndex
 	}
 
@@ -53,15 +53,15 @@ func WordToNumber(what string) (bool, int) {
 }
 
 // Look up a number from three simple words
-func WordsToNumber(what string) (bool, uint32) {
+func WordsToNumber(words string) (bool, uint32) {
 	
 	// For convenience, if a number is supplied just return that number.  I do this so
 	// that you can use this same method to parse either a number or the words to get that number.
-	word := strings.Split(what, "-")
+	word := strings.Split(words, "-")
 	if len(word) != 3 {
 
 		// See if this parses cleanly as a number
-		i64, err := strconv.ParseUint(what, 10, 32)
+		i64, err := strconv.ParseUint(words, 10, 32)
 		if err == nil {
 			return true, uint32(i64)
 		}
