@@ -6,7 +6,7 @@
 package main
 
 import (
-	"os"
+    "os"
     "fmt"
     "time"
     "io/ioutil"
@@ -91,8 +91,8 @@ func CommandCacheRefresh() {
 // Find a named object
 func CommandObjGet(user string, objtype string, objname string) (bool, string) {
 
-	// Refresh, just for good measure
-	CommandCacheRefresh()
+    // Refresh, just for good measure
+    CommandCacheRefresh()
 
     // Handle global queries
     if strings.HasPrefix(objname, "=") {
@@ -132,12 +132,12 @@ func CommandObjGet(user string, objtype string, objname string) (bool, string) {
 // Find a named object
 func CommandObjList(user string, objtype string, objname string) string {
 
-	// Refresh, just for good measure
-	CommandCacheRefresh()
+    // Refresh, just for good measure
+    CommandCacheRefresh()
 
-	// Init output buffer
-	out := ""
-	
+    // Init output buffer
+    out := ""
+
     // Loop over all user state objjects
     for _, s := range CachedState {
 
@@ -154,31 +154,31 @@ func CommandObjList(user string, objtype string, objname string) string {
                 continue
             }
 
-			// If objname is specified, skip if not it
-			if objname != "" && o.Name != objname {
-				continue
-			}
+            // If objname is specified, skip if not it
+            if objname != "" && o.Name != objname {
+                continue
+            }
 
-			if out != "" {
-				out += "\n"
-			}
+            if out != "" {
+                out += "\n"
+            }
 
-			oname := o.Name
-			if s.User == "" {
-				oname = "=" + o.Name
-			}
-			
-			out += fmt.Sprintf("%s: %s", oname, o.Value)
-			
+            oname := o.Name
+            if s.User == "" {
+                oname = "=" + o.Name
+            }
+
+            out += fmt.Sprintf("%s: %s", oname, o.Value)
+
         }
 
     }
 
-	if out == "" {
-		return "Not found."
-	}
-	
-	return out
+    if out == "" {
+        return "Not found."
+    }
+
+    return out
 
 }
 
@@ -199,12 +199,12 @@ func CommandStateUpdate(s State) {
     fd, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
     if err == nil {
 
-		// Write the data
+        // Write the data
         fd.WriteString(string(contents))
         fd.Close()
 
-		// Update the control file time
-	    CommandStateLastModified = ControlFileTime(TTServerCommandStateControlFile, "state update")
+        // Update the control file time
+        CommandStateLastModified = ControlFileTime(TTServerCommandStateControlFile, "state update")
 
     }
 
@@ -213,8 +213,8 @@ func CommandStateUpdate(s State) {
 // Find a named object
 func CommandObjSet(user string, objtype string, objname string, objval string) {
 
-	// Refresh, just for good measure
-	CommandCacheRefresh()
+    // Refresh, just for good measure
+    CommandCacheRefresh()
 
     // Handle global queries
     if strings.HasPrefix(objname, "=") {
@@ -256,15 +256,20 @@ func CommandObjSet(user string, objtype string, objname string, objval string) {
 
         }
 
-        // If we couldn't find the object, add it
-        o := Object{}
-        o.Name = objname
-        o.Type = objtype
-        o.Value = objval
-        CachedState[i].Objects = append(CachedState[i].Objects, o)
+        // If we couldn't find the object, add it if we're not actually removing it
+        if objval != "" {
 
-        // Update it
-        CommandStateUpdate(CachedState[i])
+            // Append the new object
+            o := Object{}
+            o.Name = objname
+            o.Type = objtype
+            o.Value = objval
+            CachedState[i].Objects = append(CachedState[i].Objects, o)
+
+            // Update it
+            CommandStateUpdate(CachedState[i])
+        }
+
         return
 
     }
@@ -275,14 +280,14 @@ func CommandObjSet(user string, objtype string, objname string, objval string) {
     o.Type = objtype
     o.Value = objval
     s := State{}
-	s.User = user
+    s.User = user
     s.Objects = append(s.Objects, o)
     CachedState = append(CachedState, s)
 
-	// Update it
+    // Update it
     CommandStateUpdate(CachedState[len(CachedState)-1])
-	return
-	
+    return
+
 }
 
 // Find a named object
@@ -294,39 +299,39 @@ func CommandParse(user string, objtype string, message string) string {
         messageAfterSecondArg = strings.Join(args[2:], " ")
     }
 
-	if message == "" || len(args) == 1 {
-		return CommandObjList(user, objtype, "")
-	}
+    if message == "" || len(args) == 1 {
+        return CommandObjList(user, objtype, "")
+    }
 
-	objname := args[1]
-	switch args[0] {
+    objname := args[1]
+    switch args[0] {
 
-	case "get":
-		fallthrough
-	case "show":
-		return CommandObjList(user, objtype, objname)
-		
-	case "add":
-		found, value := CommandObjGet(user, objtype, objname)
-		return(fmt.Sprintf("not yet: get = %t %s", found, value))
+    case "get":
+        fallthrough
+    case "show":
+        return CommandObjList(user, objtype, objname)
 
-	case "remove":
-		found, value := CommandObjGet(user, objtype, objname)
-		return(fmt.Sprintf("not yet: get = %t %s", found, value))
+    case "add":
+        found, value := CommandObjGet(user, objtype, objname)
+        return(fmt.Sprintf("not yet: get = %t %s", found, value))
 
-	case "set":
-		CommandObjSet(user, objtype, objname, messageAfterSecondArg)
-		found, value := CommandObjGet(user, objtype, objname)
-		return(fmt.Sprintf("after set, get = %t %s", found, value))
+    case "remove":
+        found, value := CommandObjGet(user, objtype, objname)
+        return(fmt.Sprintf("not yet: get = %t %s", found, value))
 
-	case "delete":
-		CommandObjSet(user, objtype, objname, "")
-		found, value := CommandObjGet(user, objtype, objname)
-		return(fmt.Sprintf("after del, get = %t %s", found, value))
+    case "set":
+        CommandObjSet(user, objtype, objname, messageAfterSecondArg)
+        found, value := CommandObjGet(user, objtype, objname)
+        return(fmt.Sprintf("after set, get = %t %s", found, value))
 
-	}
+    case "delete":
+        CommandObjSet(user, objtype, objname, "")
+        found, value := CommandObjGet(user, objtype, objname)
+        return(fmt.Sprintf("after del, get = %t %s", found, value))
 
-	return CommandObjList(user, objtype, args[0])
+    }
+
+    return CommandObjList(user, objtype, args[0])
 
 }
 
@@ -344,20 +349,20 @@ func Command(user string, message string) string {
     switch args[0] {
 
     case "devs":
-		fallthrough
+        fallthrough
     case "dev":
-		return CommandParse(user, ObjGroup, messageAfterFirstArg)
+        return CommandParse(user, ObjGroup, messageAfterFirstArg)
 
     case "marks":
         fallthrough
     case "mark":
-		return CommandParse(user, ObjMark, messageAfterFirstArg)
+        return CommandParse(user, ObjMark, messageAfterFirstArg)
 
     case "reports":
         fallthrough
     case "report":
-		return CommandParse(user, ObjReport, messageAfterFirstArg)
-		
+        return CommandParse(user, ObjReport, messageAfterFirstArg)
+
     }
 
     return "Unrecognized command"
