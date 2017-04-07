@@ -61,7 +61,7 @@ func WordsToNumber(what string) (bool, uint32) {
 	if len(word) != 3 {
 
 		// See if this parses cleanly as a number
-        i64, err := strconv.ParseUint(what, 10, 32)
+		i64, err := strconv.ParseUint(what, 10, 32)
 		if err == nil {
 			return true, uint32(i64)
 		}
