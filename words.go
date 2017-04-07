@@ -20,9 +20,7 @@ var SortedWords []Word
 type ByWord []Word
 func (a ByWord) Len() int      { return len(a) }
 func (a ByWord) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ByWord) Less(i, j int) bool {
-	return Words2048[a[i].WordIndex] < Words2048[a[j].WordIndex]
-}
+func (a ByWord) Less(i, j int) bool { return Words2048[a[i].WordIndex] < Words2048[a[j].WordIndex] }
 
 // Initialize for quick lookup
 func WordsInit() {
@@ -34,7 +32,7 @@ func WordsInit() {
 	}
 
 	// Sort the array
-    sort.Sort(ByWord(SortedWords))
+	sort.Sort(ByWord(SortedWords))
 
 }
 
