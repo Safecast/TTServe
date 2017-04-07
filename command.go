@@ -104,7 +104,7 @@ func CommandObjGet(user string, objtype string, objname string) (bool, string) {
     for _, s := range CachedState {
 
         // Skip if not relevant
-        if s.User != user && s.User != "" {
+        if s.User != user {
             continue
         }
 
@@ -242,7 +242,7 @@ func CommandObjSet(user string, objtype string, objname string, objval string) b
     for i, s := range CachedState {
 
         // Skip if not relevant
-        if s.User != user && s.User != "" {
+        if s.User != user {
             continue
         }
 
