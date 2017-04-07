@@ -168,7 +168,7 @@ func CommandObjList(user string, objtype string, objname string) string {
 				oname = "=" + o.Name
 			}
 			
-			out += fmt.Sprintf("%10s %s", oname, o.Value)
+			out += fmt.Sprintf("%s: %s", oname, o.Value)
 			
         }
 
@@ -251,7 +251,7 @@ func CommandObjSet(user string, objtype string, objname string, objval string) {
             }
 
             // Update it
-            CommandStateUpdate(s)
+            CommandStateUpdate(CachedState[i])
             return
 
         }
@@ -264,7 +264,7 @@ func CommandObjSet(user string, objtype string, objname string, objval string) {
         CachedState[i].Objects = append(CachedState[i].Objects, o)
 
         // Update it
-        CommandStateUpdate(s)
+        CommandStateUpdate(CachedState[i])
         return
 
     }
@@ -280,7 +280,7 @@ func CommandObjSet(user string, objtype string, objname string, objval string) {
     CachedState = append(CachedState, s)
 
 	// Update it
-    CommandStateUpdate(s)
+    CommandStateUpdate(CachedState[len(CachedState)-1])
 	return
 	
 }
