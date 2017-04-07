@@ -175,7 +175,23 @@ func CommandObjList(user string, objtype string, objname string) string {
     }
 
     if out == "" {
-        return "Not found."
+
+        switch objtype {
+
+        case ObjGroup:
+            return "No device lists found. Add one by typing: device add <list-name> <device number or name>"
+
+        case ObjMark:
+            return "No saved marks found. Add one by typing: mark set <mark-name>"
+
+        case ObjReport:
+            return "No saved reports found. Add one by typing: report set <mark-name>"
+
+        default:
+            return "Not found."
+
+        }
+
     }
 
     return out
@@ -211,7 +227,7 @@ func CommandStateUpdate(s State) {
 }
 
 // Find a named object
-func CommandObjSet(user string, objtype string, objname string, objval string) {
+func CommandObjSet(user string, objtype string, objname string, objval string) bool {
 
     // Refresh, just for good measure
     CommandCacheRefresh()
@@ -252,25 +268,25 @@ func CommandObjSet(user string, objtype string, objname string, objval string) {
 
             // Update it
             CommandStateUpdate(CachedState[i])
-            return
+            return true
 
         }
 
-        // If we couldn't find the object, add it if we're not actually removing it
-        if objval != "" {
-
-            // Append the new object
-            o := Object{}
-            o.Name = objname
-            o.Type = objtype
-            o.Value = objval
-            CachedState[i].Objects = append(CachedState[i].Objects, o)
-
-            // Update it
-            CommandStateUpdate(CachedState[i])
+        // If we're removing it and it's not there, fail
+        if objval == "" {
+            return false
         }
 
-        return
+        // Append the new object
+        o := Object{}
+        o.Name = objname
+        o.Type = objtype
+        o.Value = objval
+        CachedState[i].Objects = append(CachedState[i].Objects, o)
+
+        // Update it
+        CommandStateUpdate(CachedState[i])
+        return true
 
     }
 
@@ -286,7 +302,7 @@ func CommandObjSet(user string, objtype string, objname string, objval string) {
 
     // Update it
     CommandStateUpdate(CachedState[len(CachedState)-1])
-    return
+    return true
 
 }
 
@@ -308,27 +324,32 @@ func CommandParse(user string, objtype string, message string) string {
 
     case "get":
         fallthrough
+    case "list":
+        fallthrough
     case "show":
         return CommandObjList(user, objtype, objname)
 
     case "add":
-        found, value := CommandObjGet(user, objtype, objname)
-        return(fmt.Sprintf("not yet: get = %t %s", found, value))
-
-    case "remove":
-        found, value := CommandObjGet(user, objtype, objname)
-        return(fmt.Sprintf("not yet: get = %t %s", found, value))
-
+        if objtype == ObjGroup {
+            found, value := CommandObjGet(user, objtype, objname)
+            return(fmt.Sprintf("not yet: get = %t %s", found, value))
+        }
+        // fallthrough
     case "set":
         CommandObjSet(user, objtype, objname, messageAfterSecondArg)
-        found, value := CommandObjGet(user, objtype, objname)
-        return(fmt.Sprintf("after set, get = %t %s", found, value))
+        return(CommandObjList(user, objtype, objname))
 
+    case "remove":
+        if objtype == ObjGroup {
+            found, value := CommandObjGet(user, objtype, objname)
+            return(fmt.Sprintf("not yet: get = %t %s", found, value))
+        }
+        // vallthrough
     case "delete":
-        CommandObjSet(user, objtype, objname, "")
-        found, value := CommandObjGet(user, objtype, objname)
-        return(fmt.Sprintf("after del, get = %t %s", found, value))
-
+        if (!CommandObjSet(user, objtype, objname, "")) {
+            return "Not found."
+        }
+        return "Deleted."
     }
 
     return CommandObjList(user, objtype, args[0])
