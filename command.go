@@ -294,7 +294,7 @@ func CommandParse(user string, objtype string, message string) string {
         messageAfterSecondArg = strings.Join(args[2:], " ")
     }
 
-	if message == "" {
+	if message == "" || len(args) == 1 {
 		return CommandObjList(user, objtype, "")
 	}
 
