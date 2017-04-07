@@ -336,6 +336,9 @@ func CommandParse(user string, objtype string, message string) string {
         }
         // fallthrough
     case "set":
+		if messageAfterSecondArg == "" {
+			return fmt.Sprintf("Please specify the new value for %s.", objname)
+		}
         CommandObjSet(user, objtype, objname, messageAfterSecondArg)
         return(CommandObjList(user, objtype, objname))
 
