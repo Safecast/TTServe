@@ -107,7 +107,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    // Process common argument
+    // Process common arguments
 	devicelist := ""
 	fDetails := false
 	if firstArgLC == "detail" || firstArgLC == "details" {
@@ -118,6 +118,10 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 	} else if secondArgLC == "detail" || secondArgLC == "details" {
 		fDetails = true
 		devicelist = args[1]
+	} else {
+		if firstArgLC != "" {
+			devicelist = args[1]
+		}
 	}
 	
 
