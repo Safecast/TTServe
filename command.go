@@ -685,7 +685,7 @@ func ReportRun(user string, report string) string {
 	}
 
 	// Generate base of query
-	sql := "SELECT * FROM data"
+	sql := "* FROM data"
 
 	// Generate device filter
 	sql += " WHERE ( "
