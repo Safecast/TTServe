@@ -9,6 +9,7 @@ import (
     "os"
     "fmt"
     "time"
+	"strconv"
     "io/ioutil"
     "strings"
     "encoding/json"
@@ -303,10 +304,14 @@ func CommandObjSet(user string, objtype string, objname string, objval string) b
 
 }
 
-// Find a named object
+// Parse a command and execute it
 func CommandParse(user string, objtype string, message string) string {
 
     args := strings.Split(message, " ")
+    messageAfterFirstArg := ""
+    if len(args) > 1 {
+        messageAfterFirstArg = strings.Join(args[1:], " ")
+    }
     messageAfterSecondArg := ""
     if len(args) > 2 {
         messageAfterSecondArg = strings.Join(args[2:], " ")
@@ -334,7 +339,7 @@ func CommandParse(user string, objtype string, message string) string {
 
     case "add":
         if objtype == ObjDevice {
-			valid, result := DeviceVerify(messageAfterSecondArg)
+			valid, result, _ := DeviceVerify(messageAfterSecondArg)
 			if !valid {
 				return result
 			}
@@ -355,7 +360,7 @@ func CommandParse(user string, objtype string, message string) string {
 			}
 			CommandObjSet(user, objtype, objname, result)
 		} else if objtype == ObjReport {
-			valid, result := ReportVerify(messageAfterSecondArg)
+			valid, result, _, _, _ := ReportVerify(user, messageAfterSecondArg)
 			if !valid {
 				return result
 			}
@@ -387,7 +392,12 @@ func CommandParse(user string, objtype string, message string) string {
         return fmt.Sprintf("%s Deleted.", objname)
     }
 
-    return CommandObjList(user, objtype, args[0])
+	// Unrecognized command.  It might just be a raw report
+	if objtype == ObjReport {
+		return(ReportRun(user, messageAfterFirstArg))
+	}
+	
+    return "Valid subcommands are show, add, set, remove, delete"
 
 }
 
@@ -426,21 +436,155 @@ func Command(user string, message string) string {
 }
 
 // Verify a device to be added to the device list
-func DeviceVerify(device string) (bool, string) {
-	return true, device
+func DeviceVerify(device string) (bool, string, uint32) {
+
+	valid, deviceid := WordsToNumber(device)
+	if !valid {
+		return false, fmt.Sprintf("%s is not a valid device identifier.", device), 0
+	}
+
+	return true, device, deviceid
 }
 
 // Verify a mark or transform it
 func MarkVerify(mark string) (bool, string) {
-	return true, mark
+
+	// If nothing is specified, make the mark NOW
+	if mark == "" {
+		return true, nowInUTC()
+	}
+		
+	// Verify that this is a UTC date
+    _, err := time.Parse("2006-01-02T15:04:05Z", mark)
+    if err == nil {
+		return true, mark
+	}
+
+	// If not, see if this is just a number of hours ago
+	if strings.HasSuffix(mark, "h") {
+		mark = strings.TrimSuffix(mark, "h")
+		i64, err := strconv.ParseInt(mark, 10, 32)
+		if err == nil {
+			return true, time.Now().UTC().Add(time.Duration(-i64) * time.Hour).Format("2006-01-02T15:04:05Z")
+		}
+	}
+	if strings.HasSuffix(mark, "m") {
+		mark = strings.TrimSuffix(mark, "m")
+		i64, err := strconv.ParseInt(mark, 10, 32)
+		if err == nil {
+			return true, time.Now().UTC().Add(time.Duration(-i64) * time.Minute).Format("2006-01-02T15:04:05Z")
+		}
+	}
+	
+	// Valid
+	return false, fmt.Sprintf("The mark's UTC time must be either 2017-04-05T19:08:07Z or -5h for 5h ago")
 }
 
 // Verify a report or transform it
-func ReportVerify(report string) (bool, string) {
-	return true, report
+func ReportVerify(user string, report string) (rValid bool, rResult string, rDeviceList []uint32, rFrom string, rTo string) {
+
+	// Break up into its parts
+    args := strings.Split(report, " ")
+
+	// The blank command is more-or-less the help string
+	if report == "" || len(args) < 2 || len(args) > 3 {
+		rValid = false
+		rResult =  "report set <report-name> <device> <from> [<to>]\n<device> can be device ID, device name, or the name of a device list\n<from> can be UTC date, -7h for 7h ago, or a mark name\n<to> can be a UTC date, a mark name, or is 'now' if ommitted"
+		return
+	}
+
+	device_arg := args[0]
+	from_arg := args[1]
+	to_arg := ""
+	if len(args) > 2 {
+		to_arg = args[2]
+	}
+	
+	// See if device is a device ID
+	valid, result, deviceid := DeviceVerify(device_arg)
+	if valid {
+
+		// Just a single device
+		rDeviceList = append(rDeviceList, deviceid)
+
+	} else {
+
+		// Expand the list
+		valid, result := CommandObjGet(user, ObjDevice, device_arg)
+		if valid {
+		    for _, d := range strings.Split(result, ",") {
+				valid, _, deviceid := DeviceVerify(d)
+				if valid {
+					rDeviceList = append(rDeviceList, deviceid)
+				}
+			}
+		} else {
+			rValid = false
+			rResult = fmt.Sprintf("%s is neither a device or a device list name", device_arg)
+			return
+		}
+
+	}
+
+	// See if the next arg is a mark
+	valid, result = MarkVerify(from_arg)
+	if valid {
+		rFrom = result
+	} else {
+
+		// See if it's a mark name
+		valid, result := CommandObjGet(user, ObjMark, from_arg)
+		if valid {
+			rFrom = result
+		} else {
+			rValid = false
+			rResult = fmt.Sprintf("%s is neither a date or a mark name", from_arg)
+			return
+		}
+
+	}
+
+	// We're done if there's no final arg
+	if to_arg == "" {
+		rValid = true
+		rTo = nowInUTC()
+		return
+	}
+
+	// Validate the to arg
+	valid, result = MarkVerify(to_arg)
+	if valid {
+		rTo = result
+	} else {
+
+		// See if it's a mark name
+		valid, result := CommandObjGet(user, ObjMark, to_arg)
+		if valid {
+			rTo = result
+		} else {
+			rValid = false
+			rResult = fmt.Sprintf("%s is neither a date or a mark name", to_arg)
+			return
+		}
+
+	}
+
+	// Valid
+	rValid = true
+	return
+	
 }
 
 // Run a report or transform it
 func ReportRun(user string, report string) string {
-	return "Done with report."
+
+	// Validate and expand the report
+	valid, result, devices, from, to := ReportVerify(user, report)
+	if !valid {
+		return result
+	}
+
+	// Display the results
+	return fmt.Sprintf("User:%s From:%s To:%s Devices:%v", user, from, to, devices)
+
 }
