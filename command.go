@@ -684,7 +684,29 @@ func ReportRun(user string, report string) string {
 		return result
 	}
 
-	// Display the results
-	return fmt.Sprintf("User:%s From:%s To:%s Devices:%v", user, from, to, devices)
+	// Generate base of query
+	sql := "SELECT * FROM data"
+
+	// Generate device filter
+	sql += " WHERE ( "
+	for i, d := range devices {
+		if i != 0 {
+			sql += " OR "
+		}
+		sql += fmt.Sprintf("device = %d", d)
+	}
+	sql += " )"
+
+	// Generate time filter
+	sql += fmt.Sprintf(" AND time > %s AND time < %s", from, to)
+
+	// Execute the query
+	success, result, numrows := InfluxQuery(user, sql)
+	if !success {
+		return result
+	}
+
+	// Done
+	return fmt.Sprintf("%d rows of data are <%s|here>, @%s.", numrows, result, user)
 
 }
