@@ -342,7 +342,7 @@ func CommandParse(user string, objtype string, message string) string {
 	    objname = args[1]
 	}
 	
-    switch args[0] {
+    switch strings.ToLower(args[0]) {
 
     case "get":
         fallthrough
@@ -478,7 +478,7 @@ func Command(user string, message string) string {
     }
 
     // Dispatch command
-    switch args[0] {
+    switch strings.ToLower(args[0]) {
 
     case "devices":
         fallthrough

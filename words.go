@@ -39,6 +39,9 @@ func WordsInit() {
 // Convert a single word to a number
 func WordToNumber(word string) (bool, uint) {
 
+	// First normalize the word
+	word = strings.ToLower(word)
+	
     // Do a binary chop to find the word or its insertion slot
     i := sort.Search(2048, func(i int) bool { return Words2048[SortedWords[i].WordIndex] >= word } )
 
