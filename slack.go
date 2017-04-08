@@ -108,7 +108,18 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Process common argument
-    fDetails := firstArgLC == "detail" || firstArgLC == "details" || secondArgLC == "detail" || secondArgLC == "-d" || secondArgLC == "details"
+	devicelist := ""
+	fDetails := false
+	if firstArgLC == "detail" || firstArgLC == "details" {
+		fDetails = true
+		if secondArgLC != "" {
+			devicelist = args[2]
+		}
+	} else if secondArgLC == "detail" || secondArgLC == "details" {
+		fDetails = true
+		devicelist = args[1]
+	}
+	
 
     // Process queries
     switch argsLC[0] {
@@ -128,10 +139,10 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         sendToSafecastOps(response, SLACK_MSG_REPLY)
 
     case "online":
-        go sendSafecastDeviceSummaryToSlack("", false, fDetails)
+        go sendSafecastDeviceSummaryToSlack(user, "", devicelist, false, fDetails)
 
     case "offline":
-        go sendSafecastDeviceSummaryToSlack("", true, fDetails)
+        go sendSafecastDeviceSummaryToSlack(user, "", devicelist, true, fDetails)
 
     case "did":
         fallthrough
@@ -159,11 +170,9 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     case "device":
         fallthrough
     case "devices":
-        fallthrough
-    case "ttnode":
-        go sendSafecastDeviceSummaryToSlack("== Offline ==", true, fDetails)
+        go sendSafecastDeviceSummaryToSlack(user, "== Offline ==", devicelist, true, fDetails)
         time.Sleep(2 * time.Second)
-        go sendSafecastDeviceSummaryToSlack("== Online ==", false, fDetails)
+        go sendSafecastDeviceSummaryToSlack(user, "== Online ==", devicelist, false, fDetails)
 
     case "gateway":
         fallthrough
@@ -179,16 +188,8 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     case "ttserve":
         sendSafecastServerSummaryToSlack("", fDetails)
 
-    case "summary":
-        fallthrough
     case "status":
-        go sendSafecastServerSummaryToSlack("== Servers ==", fDetails)
-        time.Sleep(1 * time.Second)
-        go sendSafecastGatewaySummaryToSlack("== Gateways ==", fDetails)
-        time.Sleep(1 * time.Second)
-        go sendSafecastDeviceSummaryToSlack("== Devices Offline ==", true, fDetails)
-        time.Sleep(1 * time.Second)
-        go sendSafecastDeviceSummaryToSlack("== Devices Online ==", false, fDetails)
+        go sendSafecastDeviceSummaryToSlack(user, "", devicelist, false, fDetails)
 
     case "select":
         if len(args) < 2 {
