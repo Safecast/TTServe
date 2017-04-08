@@ -491,6 +491,39 @@ func Command(user string, message string) string {
 
 }
 
+// Get a list of devices
+func DeviceList(user string, devicelist string) (rValid bool, rResult string, rDeviceList []uint32) {
+
+	valid, _, deviceid := DeviceVerify(devicelist)
+	if valid {
+
+		// Just a single device
+		rDeviceList = append(rDeviceList, deviceid)
+
+	} else {
+
+		// Expand the list
+		valid, result := CommandObjGet(user, ObjDevice, devicelist)
+		if valid {
+		    for _, d := range strings.Split(result, ",") {
+				valid, _, deviceid := DeviceVerify(d)
+				if valid {
+					rDeviceList = append(rDeviceList, deviceid)
+				}
+			}
+		} else {
+			rValid = false
+			rResult = fmt.Sprintf("%s is neither a device or a device list name", devicelist)
+			return
+		}
+
+	}
+
+	rValid = true
+	return
+
+}
+
 // Verify a device to be added to the device list
 func DeviceVerify(device string) (bool, string, uint32) {
 
@@ -559,31 +592,16 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 		to_arg = args[2]
 	}
 	
-	// See if device is a device ID
-	valid, result, deviceid := DeviceVerify(device_arg)
+	// See if device is a valid device ID
+	valid, result, devicelist := DeviceList(user, device_arg)
 	if valid {
-
-		// Just a single device
-		rDeviceList = append(rDeviceList, deviceid)
-
+		rDeviceList = devicelist
 	} else {
-
-		// Expand the list
-		valid, result := CommandObjGet(user, ObjDevice, device_arg)
-		if valid {
-		    for _, d := range strings.Split(result, ",") {
-				valid, _, deviceid := DeviceVerify(d)
-				if valid {
-					rDeviceList = append(rDeviceList, deviceid)
-				}
-			}
-		} else {
-			rValid = false
-			rResult = fmt.Sprintf("%s is neither a device or a device list name", device_arg)
-			return
-		}
-
+		rValid = false
+		rResult = result
+		return
 	}
+	
 
 	// See if the next arg is a mark
 	valid, result = MarkVerify(from_arg)
