@@ -455,6 +455,12 @@ func CommandParse(user string, objtype string, message string) string {
 
 }
 
+// Do the command and report output to Safecast, usable as a goroutine
+func sendCommandToSlack(user string, message string) {
+    response := Command(user, message)
+    sendToSafecastOps(response, SLACK_MSG_REPLY)
+}
+
 // Process a command that will modify the cache and the on-disk state
 func Command(user string, message string) string {
 

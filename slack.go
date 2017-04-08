@@ -128,6 +128,31 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     // Process queries
     switch argsLC[0] {
 
+	case "help":
+		help := ""
+		help += "Named Device Lists:"
+		help += "  device <subcommand> <devlistname> <args>\n"
+		help += "Get bulk or select device status:"
+		help += "  status [devlistname] [details]\n"
+		help += "Show bulk device status:"
+		help += "  online [details]\n"
+		help += "  offline [details]\n"
+		help += "Show gateway and server status:"
+		help += "  gateway [details]\n"
+		help += "  server [details]\n"
+		help += "Send/cancel/display device-targeted messages:"
+		help += "  send <device> <message>\n"
+		help += "  cancel <device>\n"
+		help += "  pending\n"
+		help += "Reset device logs used for 'chk':"
+		help += "  clear-logs <device>\n"
+		help += "Named report and time marker management"
+		help += "  mark <subcommand> <markername> <args>\n"
+		help += "  report <subcommand> <reportname> <args>\n"
+		help += "Raw log database SQL query to CSV\n"
+		help += "  select <influx query>\n"
+		go sendToSafecastOps(help, SLACK_MSG_REPLY)
+
     case "device":
         fallthrough
     case "devices":
@@ -139,9 +164,8 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     case "report":
 		fallthrough
     case "reports":
-        response := Command(user, message)
-        sendToSafecastOps(response, SLACK_MSG_REPLY)
-
+		go sendCommandToSlack(user, message)
+		
     case "online":
         go sendSafecastDeviceSummaryToSlack(user, "", devicelist, false, fDetails)
 
@@ -174,8 +198,6 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     case "gateway":
         fallthrough
     case "gateways":
-        fallthrough
-    case "ttgate":
         sendSafecastGatewaySummaryToSlack("", fDetails)
 
     case "server":
