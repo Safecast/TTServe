@@ -698,7 +698,7 @@ func ReportRun(user string, report string) string {
 	sql += " )"
 
 	// Generate time filter
-	sql += fmt.Sprintf(" AND time > %s AND time < %s", from, to)
+	sql += fmt.Sprintf(" AND time >= '%s' AND time < '%s'", from, to)
 
 	// Execute the query
 	success, result, numrows := InfluxQuery(user, sql)
