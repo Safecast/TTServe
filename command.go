@@ -150,12 +150,10 @@ func CommandObjList(user string, objtype string, objname string) string {
     for _, s := range CachedState {
 
         // Skip if not relevant
-        if s.User != user {
+        if s.User != user && s.User != "" {
             continue
         }
 
-		first := true
-		
         // Search for this object
         for _, o := range s.Objects {
 
@@ -173,21 +171,15 @@ func CommandObjList(user string, objtype string, objname string) string {
                 out += "\n"
             }
 
-			if first {
-				first = false
-				uname := "For " + s.User + ":"
-				if s.User == "" {
-					uname = "For everyone:"
-				}
-				out += fmt.Sprintf("%s\n", uname)
-			}
-
 			val := o.Value
 			if objtype == ObjDevice {
 				val = strings.Replace(val, ",", "  ", -1)
 			}
-            out += fmt.Sprintf("%s:  %s", o.Name, val)
-
+			if s.User == "" {
+	            out += fmt.Sprintf("%s=  %s", o.Name, val)
+			} else {
+	            out += fmt.Sprintf("%s:  %s", o.Name, val)
+			}
         }
 
     }
