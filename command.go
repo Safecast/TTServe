@@ -512,7 +512,7 @@ func PlusCodePattern(code string) string {
 	// Extract the pattern, and exit if no pattern present
 	components := strings.Split(code, "~")
 	if len(components) != 2 {
-		return "/" + code + "/"
+		return code
 	}
 	c := components[0]
 
@@ -520,27 +520,27 @@ func PlusCodePattern(code string) string {
 	switch strings.ToLower(components[1]) {
 
 	default:
-		return "/" + c + "/"
+		return c
 		
 	case "3m":
-		return "/" + c + "/"
+		return c
 		
 	case "14m":
-		return "/" + c[0:11] + "*/"
+		return c[0:11] + "*"
 
 	case "275m":
-		return "/" + c[0:8] + "*/"
+		return c[0:8] + "*"
 
 	case "5500m":
 		fallthrough
 	case "5.5km":
-		return "/" + c[0:6] + "*/"
+		return c[0:6] + "*"
 
 	case "110km":
-		return "/" + c[0:4] + "*/"
+		return c[0:4] + "*"
 
 	case "2200km":
-		return "/" + c[0:2] + "*/"
+		return c[0:2] + "*"
 		
 	}
 
