@@ -367,6 +367,7 @@ func CommandParse(user string, objtype string, message string) string {
 			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
 			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
 			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
+			fmt.Printf("'%s'\n", messageAfterSecondArg)
 		    for _, d := range strings.Split(messageAfterSecondArg, " ") {
 				valid, result, _ := DeviceVerify(d)
 				if !valid {
