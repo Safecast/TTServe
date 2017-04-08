@@ -189,12 +189,21 @@ func CommandObjList(user string, objtype string, objname string) string {
         switch objtype {
 
         case ObjDevice:
+			if objname != "" {
+				return "No device: " + objname
+			}
             return "No device lists. Add one by typing: device add <list-name> <device number or name>"
 
         case ObjMark:
+			if objname != "" {
+				return "No mark: " + objname
+			}
             return "No marks. Add one by typing: mark add <mark-name>"
 
         case ObjReport:
+			if objname != "" {
+				return "No report: " + objname
+			}
             return "No reports. Add one by typing: report add <mark-name>"
 
         default:
