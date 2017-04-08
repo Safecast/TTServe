@@ -177,13 +177,13 @@ func CommandObjList(user string, objtype string, objname string) string {
         switch objtype {
 
         case ObjDevice:
-            return "No device lists found. Add one by typing: device add <list-name> <device number or name>"
+            return "No device lists. Add one by typing: device add <list-name> <device number or name>"
 
         case ObjMark:
-            return "No saved marks found. Add one by typing: mark set <mark-name>"
+            return "No marks. Add one by typing: mark add <mark-name>"
 
         case ObjReport:
-            return "No saved reports found. Add one by typing: report set <mark-name>"
+            return "No reports. Add one by typing: report add <mark-name>"
 
         default:
             return "Not found."
@@ -335,7 +335,7 @@ func CommandParse(user string, objtype string, message string) string {
 		if objtype != ObjReport {
 			return fmt.Sprintf("%s is not a report.", objname)
 		}
-		return(ReportRun(user, objname))
+		return(ReportRun(user, messageAfterFirstArg))
 
     case "add":
         if objtype == ObjDevice {
@@ -397,7 +397,7 @@ func CommandParse(user string, objtype string, message string) string {
 
 	// Unrecognized command.  It might just be a raw report
 	if objtype == ObjReport {
-		return(ReportRun(user, messageAfterFirstArg))
+		return(ReportRun(user, message))
 	}
 	
     return "Valid subcommands are show, add, set, remove, delete"
@@ -471,14 +471,14 @@ func MarkVerify(mark string) (bool, string) {
 		mark = strings.TrimSuffix(mark, "h")
 		i64, err := strconv.ParseInt(mark, 10, 32)
 		if err == nil {
-			return true, time.Now().UTC().Add(time.Duration(-i64) * time.Hour).Format("2006-01-02T15:04:05Z")
+			return true, time.Now().UTC().Add(time.Duration(i64) * time.Hour).Format("2006-01-02T15:04:05Z")
 		}
 	}
 	if strings.HasSuffix(mark, "m") {
 		mark = strings.TrimSuffix(mark, "m")
 		i64, err := strconv.ParseInt(mark, 10, 32)
 		if err == nil {
-			return true, time.Now().UTC().Add(time.Duration(-i64) * time.Minute).Format("2006-01-02T15:04:05Z")
+			return true, time.Now().UTC().Add(time.Duration(i64) * time.Minute).Format("2006-01-02T15:04:05Z")
 		}
 	}
 	
@@ -495,7 +495,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 	// The blank command is more-or-less the help string
 	if report == "" || len(args) < 2 || len(args) > 3 {
 		rValid = false
-		rResult =  "report set <report-name> <device> <from> [<to>]\n<device> can be device ID, device name, or the name of a device list\n<from> can be UTC date, -7h for 7h ago, or a mark name\n<to> can be a UTC date, a mark name, or is 'now' if ommitted"
+		rResult = "report add <report-name> <device> <from> [<to>]\n<device> can be device ID, device name, or the name of a device list\n<from> can be UTC date, -7h for 7h ago, or a mark name\n<to> can be a UTC date, a mark name, or is 'now' if ommitted"
 		return
 	}
 
@@ -583,6 +583,17 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 
 // Run a report or transform it
 func ReportRun(user string, report string) string {
+
+	// ozzie
+	fmt.Printf("Report: '%s'\n", report);
+	
+	// See if there is only one arg which is the report name
+	found, value := CommandObjGet(user, ObjReport, report)
+	if found {
+		report = value
+	}
+	// ozzie
+	fmt.Printf("Report after lookup: '%s'\n", report);
 
 	// Validate and expand the report
 	valid, result, devices, from, to := ReportVerify(user, report)
