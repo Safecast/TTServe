@@ -577,6 +577,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 
 	// Valid
 	rValid = true
+	rResult = report
 	return
 	
 }
