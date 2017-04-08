@@ -316,8 +316,11 @@ func CommandParse(user string, objtype string, message string) string {
     if len(args) > 2 {
         messageAfterSecondArg = strings.Join(args[2:], " ")
     }
-
-    objname := args[1]
+	objname := ""
+	if len(args) > 1 {
+	    objname = args[1]
+	}
+	
     switch args[0] {
 
     case "get":
