@@ -591,6 +591,8 @@ func DeviceList(user string, devicelist string) (rValid bool, rResult string, rE
 
     }
 
+	// ozzie
+	fmt.Printf("DeviceList: PlusCodes(%d) = %v\n", len(rExpandedPlusCodes), rExpandedPlusCodes)
     rValid = true
     return
 
