@@ -433,6 +433,9 @@ func CommandParse(user string, objtype string, message string) string {
 				return fmt.Sprintf("Device list %s does not contain %s", objname, messageAfterSecondArg)
 			}
 	        CommandObjSet(user, objtype, objname, newvalue)
+			if newvalue == "" {
+		        return fmt.Sprintf("%s deleted.", objname)
+			}
 	        return(CommandObjList(user, objtype, objname))
         }
         fallthrough
@@ -440,7 +443,7 @@ func CommandParse(user string, objtype string, message string) string {
         if (!CommandObjSet(user, objtype, objname, "")) {
             return fmt.Sprintf("%s not found.", objname)
         }
-        return fmt.Sprintf("%s Deleted.", objname)
+        return fmt.Sprintf("%s deleted.", objname)
     }
 
 	// Unrecognized command.  It might just be a raw report
