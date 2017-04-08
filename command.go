@@ -138,6 +138,11 @@ func CommandObjList(user string, objtype string, objname string) string {
     // Refresh, just for good measure
     CommandCacheRefresh()
 
+    if strings.HasPrefix(objname, "=") {
+        objname = strings.Replace(objname, "=", "", 1)
+		return CommandObjList("", objtype, objname)
+    }
+
     // Init output buffer
     out := ""
 
@@ -145,7 +150,7 @@ func CommandObjList(user string, objtype string, objname string) string {
     for _, s := range CachedState {
 
         // Skip if not relevant
-        if s.User != user && s.User != "" {
+        if s.User != user {
             continue
         }
 
@@ -169,6 +174,7 @@ func CommandObjList(user string, objtype string, objname string) string {
             }
 
 			if first {
+				first = false
 				uname := "For " + s.User + ":"
 				if s.User == "" {
 					uname = "For everyone:"
@@ -246,8 +252,8 @@ func CommandObjSet(user string, objtype string, objname string, objval string) b
 
     // Handle global queries
     if strings.HasPrefix(objname, "=") {
-        user = ""
         objname = strings.Replace(objname, "=", "", 1)
+		return CommandObjSet("", objtype, objname, objval)
     }
 
     // Loop over all user state objjects
@@ -447,6 +453,8 @@ func Command(user string, message string) string {
     case "mark":
         return CommandParse(user, ObjMark, messageAfterFirstArg)
 
+    case "run":
+        fallthrough
     case "reports":
         fallthrough
     case "report":
