@@ -212,11 +212,11 @@ func refreshDeviceSummaryLabels() {
 // Get a summary of devices that are older than this many minutes ago
 func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist string, fOffline bool, fDetails bool) {
 
-	// Get the device list if one was specified
-	valid, _, devices := DeviceList(user, devicelist)
-	if !valid {
-		devices = nil
-	}
+    // Get the device list if one was specified
+    valid, _, devices := DeviceList(user, devicelist)
+    if !valid {
+        devices = nil
+    }
 
     // First, age out the expired devices and recompute when last seen
     sendExpiredSafecastDevicesToSlack()
@@ -230,26 +230,28 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
     s := header
     for i := 0; i < len(sortedDevices); i++ {
 
-        isOffline := sortedDevices[i].minutesAgo > (2 * 60)
-        if isOffline != fOffline {
-            continue
+        if devices == nil {
+            isOffline := sortedDevices[i].minutesAgo > (2 * 60)
+            if isOffline != fOffline {
+                continue
+            }
         }
 
         id := sortedDevices[i].deviceid
 
-		if devices != nil {
-			found := false
-	        for _, did := range devices {
-				if did == id {
-					found = true
-					break
-				}
-			}
-			if !found {
-				continue
-			}
-		}
-		
+        if devices != nil {
+            found := false
+            for _, did := range devices {
+                if did == id {
+                    found = true
+                    break
+                }
+            }
+            if !found {
+                continue
+            }
+        }
+
         if s != "" {
             s += fmt.Sprintf("\n")
         }

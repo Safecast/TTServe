@@ -128,9 +128,9 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     // Process queries
     switch argsLC[0] {
 
-    case "dev":
+    case "device":
         fallthrough
-    case "devs":
+    case "devices":
         fallthrough
     case "mark":
         fallthrough
@@ -171,13 +171,6 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             }
         }
 
-    case "device":
-        fallthrough
-    case "devices":
-        go sendSafecastDeviceSummaryToSlack(user, "== Offline ==", devicelist, true, fDetails)
-        time.Sleep(2 * time.Second)
-        go sendSafecastDeviceSummaryToSlack(user, "== Online ==", devicelist, false, fDetails)
-
     case "gateway":
         fallthrough
     case "gateways":
@@ -193,8 +186,14 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         sendSafecastServerSummaryToSlack("", fDetails)
 
     case "status":
-        go sendSafecastDeviceSummaryToSlack(user, "", devicelist, false, fDetails)
-
+		if devicelist != "" {
+	        go sendSafecastDeviceSummaryToSlack(user, "", devicelist, false, fDetails)
+		} else {
+	        go sendSafecastDeviceSummaryToSlack(user, "== Offline ==", devicelist, true, fDetails)
+	        time.Sleep(2 * time.Second)
+	        go sendSafecastDeviceSummaryToSlack(user, "== Online ==", devicelist, false, fDetails)
+		}
+		
     case "select":
         if len(args) < 2 {
             sendToSafecastOps("Command format: SELECT <query>", SLACK_MSG_REPLY)
