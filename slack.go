@@ -126,7 +126,6 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 		fallthrough
     case "reports":
         response := Command(user, message)
-		fmt.Printf("OZZIE: reply '%s'\n", response)
         sendToSafecastOps(response, SLACK_MSG_REPLY)
 
     case "online":

@@ -16,7 +16,7 @@ import (
 
 // Structures
 const (
-    ObjGroup = "group"
+    ObjDevice = "group"
     ObjMark = "mark"
     ObjReport = "report"
 )
@@ -61,12 +61,10 @@ func CommandCacheRefresh() {
             }
 
             // Read the file if we can
-            fmt.Printf("OZZIE reading %s\n", SafecastDirectory() + TTCommandStatePath + "/" + file.Name())
             contents, err := ioutil.ReadFile(SafecastDirectory() + TTCommandStatePath + "/" + file.Name())
             if err != nil {
                 continue
             }
-            fmt.Printf("OZZIE got:\n%s\n", contents)
 
             // Parse the JSON, and ignore it if nonparse-sable
             value := State{}
@@ -74,7 +72,6 @@ func CommandCacheRefresh() {
             if err != nil {
                 continue
             }
-            fmt.Printf("OZZIE unmarshaled\n")
 
             // Add to what we're accumulating
             RefreshedState = append(RefreshedState, value)
@@ -178,7 +175,7 @@ func CommandObjList(user string, objtype string, objname string) string {
 
         switch objtype {
 
-        case ObjGroup:
+        case ObjDevice:
             return "No device lists found. Add one by typing: device add <list-name> <device number or name>"
 
         case ObjMark:
@@ -329,30 +326,65 @@ func CommandParse(user string, objtype string, message string) string {
     case "show":
         return CommandObjList(user, objtype, objname)
 
-    case "add":
-        if objtype == ObjGroup {
-            found, value := CommandObjGet(user, objtype, objname)
-            return(fmt.Sprintf("not yet: get = %t %s", found, value))
-        }
-        // fallthrough
-    case "set":
-		if messageAfterSecondArg == "" {
-			return fmt.Sprintf("Please specify the new value for %s.", objname)
+	case "run":
+		if objtype != ObjReport {
+			return fmt.Sprintf("%s is not a report.", objname)
 		}
-        CommandObjSet(user, objtype, objname, messageAfterSecondArg)
+		return(ReportRun(user, objname))
+
+    case "add":
+        if objtype == ObjDevice {
+			valid, result := DeviceVerify(messageAfterSecondArg)
+			if !valid {
+				return result
+			}
+			found, value := CommandObjGet(user, objtype, objname)
+			if !found {
+				CommandObjSet(user, objtype, objname, result)
+			} else {
+				CommandObjSet(user, objtype, objname, value + "," + result)
+			}
+	        return(CommandObjList(user, objtype, objname))
+        }
+        fallthrough
+    case "set":
+		if objtype == ObjMark {
+			valid, result := MarkVerify(messageAfterSecondArg)
+			if !valid {
+				return result
+			}
+			CommandObjSet(user, objtype, objname, result)
+		} else if objtype == ObjReport {
+			valid, result := ReportVerify(messageAfterSecondArg)
+			if !valid {
+				return result
+			}
+			CommandObjSet(user, objtype, objname, result)
+		}
         return(CommandObjList(user, objtype, objname))
 
     case "remove":
-        if objtype == ObjGroup {
+        if objtype == ObjDevice {
             found, value := CommandObjGet(user, objtype, objname)
-            return(fmt.Sprintf("not yet: get = %t %s", found, value))
+			if !found {
+				return fmt.Sprintf("Device list %s does not exist", objname)
+			}
+		    newvalue := strings.Replace(value, messageAfterSecondArg, "", 1)
+			newvalue = strings.Replace(value, ",,", ",", -1)
+			newvalue = strings.TrimPrefix(value, ",")
+			newvalue = strings.TrimSuffix(value, ",")
+			if newvalue == value {
+				return fmt.Sprintf("Device list %s does not contain %s", objname, messageAfterSecondArg)
+			}
+	        CommandObjSet(user, objtype, objname, messageAfterSecondArg)
+	        return(CommandObjList(user, objtype, objname))
         }
-        // vallthrough
+        fallthrough
     case "delete":
         if (!CommandObjSet(user, objtype, objname, "")) {
-            return "Not found."
+            return fmt.Sprintf("%s not found.", objname)
         }
-        return "Deleted."
+        return fmt.Sprintf("%s Deleted.", objname)
     }
 
     return CommandObjList(user, objtype, args[0])
@@ -375,7 +407,7 @@ func Command(user string, message string) string {
     case "devs":
         fallthrough
     case "dev":
-        return CommandParse(user, ObjGroup, messageAfterFirstArg)
+        return CommandParse(user, ObjDevice, messageAfterFirstArg)
 
     case "marks":
         fallthrough
@@ -391,4 +423,24 @@ func Command(user string, message string) string {
 
     return "Unrecognized command"
 
+}
+
+// Verify a device to be added to the device list
+func DeviceVerify(device string) (bool, string) {
+	return true, device
+}
+
+// Verify a mark or transform it
+func MarkVerify(mark string) (bool, string) {
+	return true, mark
+}
+
+// Verify a report or transform it
+func ReportVerify(report string) (bool, string) {
+	return true, report
+}
+
+// Run a report or transform it
+func ReportRun(user string, report string) string {
+	return "Done with report."
 }
