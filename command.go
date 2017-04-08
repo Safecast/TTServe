@@ -440,6 +440,9 @@ func DeviceVerify(device string) (bool, string, uint32) {
 
 	valid, deviceid := WordsToNumber(device)
 	if !valid {
+		if device == "" {
+			return false, fmt.Sprintf("Please supply a device identifier to add."), 0
+		}			
 		return false, fmt.Sprintf("%s is not a valid device identifier.", device), 0
 	}
 
