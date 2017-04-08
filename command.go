@@ -566,15 +566,15 @@ func MarkVerify(mark string) (rValid bool, rOriginal string, rExpanded string) {
 
 	// If not, see if this is just a number of hours ago
 	if strings.HasSuffix(mark, "h") {
-		mark = strings.TrimSuffix(mark, "h")
-		i64, err := strconv.ParseInt(mark, 10, 32)
+		markval := strings.TrimSuffix(mark, "h")
+		i64, err := strconv.ParseInt(markval, 10, 32)
 		if err == nil {
 			return true, mark, time.Now().UTC().Add(time.Duration(i64) * time.Hour).Format("2006-01-02T15:04:05Z")
 		}
 	}
 	if strings.HasSuffix(mark, "m") {
-		mark = strings.TrimSuffix(mark, "m")
-		i64, err := strconv.ParseInt(mark, 10, 32)
+		markval := strings.TrimSuffix(mark, "m")
+		i64, err := strconv.ParseInt(markval, 10, 32)
 		if err == nil {
 			return true, mark, time.Now().UTC().Add(time.Duration(i64) * time.Minute).Format("2006-01-02T15:04:05Z")
 		}
