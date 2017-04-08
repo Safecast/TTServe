@@ -94,8 +94,8 @@ func CommandObjGet(user string, objtype string, objname string) (bool, string) {
 
     // Handle global queries
     if strings.HasPrefix(objname, "=") {
-        user = ""
         objname = strings.Replace(objname, "=", "", 1)
+		return CommandObjGet("", objtype, objname)
     }
 
     // Loop over all user state objjects
@@ -122,6 +122,11 @@ func CommandObjGet(user string, objtype string, objname string) (bool, string) {
 
     }
 
+	// See if it's there as a global
+	if user != "" {
+		return CommandObjGet("", objtype, objname)
+	}
+
     // No luck
     return false, ""
 
@@ -144,6 +149,8 @@ func CommandObjList(user string, objtype string, objname string) string {
             continue
         }
 
+		first := true
+		
         // Search for this object
         for _, o := range s.Objects {
 
@@ -161,12 +168,15 @@ func CommandObjList(user string, objtype string, objname string) string {
                 out += "\n"
             }
 
-            oname := o.Name
-            if s.User == "" {
-                oname = "=" + o.Name
-            }
+			if first {
+				uname := "For " + s.User
+				if s.User == "" {
+					uname = "For everyone"
+				}
+				out += fmt.Sprintf("%s\n", uname)
+			}
 
-            out += fmt.Sprintf("%s: %s", oname, o.Value)
+            out += fmt.Sprintf("%s: %s", o.Name, o.Value)
 
         }
 
@@ -364,7 +374,14 @@ func CommandParse(user string, objtype string, message string) string {
 				return result
 			}
 			CommandObjSet(user, objtype, objname, result)
-		}
+		} else if objtype == ObjDevice {
+			valid, result, _ := DeviceVerify(messageAfterSecondArg)
+			if !valid {
+				return result
+			}
+			CommandObjSet(user, objtype, objname, result)
+        }
+
         return(CommandObjList(user, objtype, objname))
 
     case "remove":
