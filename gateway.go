@@ -152,7 +152,7 @@ func sendExpiredSafecastGatewaysToSlack() {
 }
 
 // Get a summary of devices that are older than this many minutes ago
-func sendSafecastGatewaySummaryToSlack(header string, fWrap bool, fDetails bool) {
+func sendSafecastGatewaySummaryToSlack(header string, fDetails bool) {
 
     // First, age out the expired devices and recompute when last seen
     sendExpiredSafecastGatewaysToSlack()
@@ -170,7 +170,7 @@ func sendSafecastGatewaySummaryToSlack(header string, fWrap bool, fDetails bool)
         gatewayID := sortedGateways[i].gatewayid
 
         // Emit info about the device
-        summary := SafecastGetGatewaySummary(gatewayID, "    ", fWrap, fDetails)
+        summary := SafecastGetGatewaySummary(gatewayID, "    ", fDetails)
         if summary != "" {
             if s != "" {
                 s += fmt.Sprintf("\n")

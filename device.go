@@ -20,7 +20,7 @@ const deviceWarningAfterMinutes = 90
 // Describes every device that has sent us a message
 type seenDevice struct {
     deviceid            uint32
-	label				string
+    label               string
     seen                time.Time
     everRecentlySeen    bool
     notifiedAsUnseen    bool
@@ -95,7 +95,7 @@ func trackDevice(DeviceId uint32, whenSeen time.Time) {
         minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
         dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes
         dev.notifiedAsUnseen = false
-		dev.label = SafecastV1DeviceType(dev.deviceid)
+        dev.label = SafecastV1DeviceType(dev.deviceid)
         seenDevices = append(seenDevices, dev)
     }
 
@@ -204,13 +204,13 @@ func refreshDeviceSummaryLabels() {
 
     // Sweep over all these devices in sorted order, refreshing label
     for i := 0; i < len(sortedDevices); i++ {
-         _, sortedDevices[i].label, _, _ = SafecastGetDeviceStatusSummary(sortedDevices[i].deviceid)
+        _, sortedDevices[i].label, _, _ = SafecastGetDeviceStatusSummary(sortedDevices[i].deviceid)
     }
 
 }
 
 // Get a summary of devices that are older than this many minutes ago
-func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, fDetails bool) {
+func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fDetails bool) {
 
     // First, age out the expired devices and recompute when last seen
     sendExpiredSafecastDevicesToSlack()
@@ -224,10 +224,10 @@ func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, 
     s := header
     for i := 0; i < len(sortedDevices); i++ {
 
-		isOffline := sortedDevices[i].minutesAgo > (2 * 60)
-		if isOffline != fOffline {
-			continue
-		}
+        isOffline := sortedDevices[i].minutesAgo > (2 * 60)
+        if isOffline != fOffline {
+            continue
+        }
 
         id := sortedDevices[i].deviceid
 
@@ -240,26 +240,19 @@ func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, 
         summary := ""
         if fDetails {
             _, label, gps, summary = SafecastGetDeviceStatusSummary(id)
-			// Refresh cached label
-			sortedDevices[i].label = label
+            // Refresh cached label
+            sortedDevices[i].label = label
         }
 
-		words := WordsFromNumber(id)
+        words := WordsFromNumber(id)
 
         s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicDeviceStatus, id, id)
 
-        if fWrap {
-            if label != "" {
-                s += label
-            }
-            s += "\n        "
-        }
-
         s += fmt.Sprintf("<http://%s%s%d|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, id)
         s += fmt.Sprintf("<http://%s%s%s%d.json|log> ", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), id)
-		if (false) {	// Removed 2017-03-19 to discourage people from using csv, which does not have full data
-	        s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), id)
-		}
+        if (false) {    // Removed 2017-03-19 to discourage people from using csv, which does not have full data
+            s += fmt.Sprintf("<http://%s%s%s%d.csv|csv>", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), id)
+        }
         if fDetails {
             if gps != "" {
                 s += " " + gps
@@ -274,31 +267,23 @@ func sendSafecastDeviceSummaryToSlack(header string, fOffline bool, fWrap bool, 
             s = fmt.Sprintf("%s %s ago", s, AgoMinutes(uint32(sortedDevices[i].minutesAgo)))
         }
 
-        if !fWrap {
-			sn, _ := SafecastDeviceIDToSN(id)
-			if sn != 0 {
-				s += fmt.Sprintf(" #%d", sn)
-			}
+        sn, _ := SafecastDeviceIDToSN(id)
+        if sn != 0 {
+            s += fmt.Sprintf(" #%d", sn)
         }
-        if !fWrap && label != "" {
-			s += fmt.Sprintf(" \"%s\"", label)
+        if label != "" {
+            s += fmt.Sprintf(" \"%s\"", label)
         }
-		if !fWrap && words != "" {
-			s += fmt.Sprintf(" %s", words)
-		}
+        if words != "" {
+            s += fmt.Sprintf(" %s", words)
+        }
 
         if summary != "" {
-            if fWrap {
-                s += "\n        "
-            } else {
-                s += " ( "
-            }
+            s += " ( "
             if summary != "" {
                 s += summary
             }
-            if !fWrap {
-                s += ")"
-            }
+            s += ")"
         }
 
     }
@@ -323,16 +308,16 @@ func generateTTNCTLDeviceRegistrationScript() {
     for i := 0; i < len(sortedDevices); i++ {
         id := sortedDevices[i].deviceid
         deveui, _, _, _ := SafecastGetDeviceStatusSummary(id)
-		if deveui != "" {
-	        s += fmt.Sprintf("ttnctl devices register %s\n", strings.ToLower(deveui))
-		}
+        if deveui != "" {
+            s += fmt.Sprintf("ttnctl devices register %s\n", strings.ToLower(deveui))
+        }
     }
 
     // Send it to Slack
-	if s != "" {
-	    sendToSafecastOps(s, SLACK_MSG_REPLY)
-	} else {
-	    sendToSafecastOps("None found.", SLACK_MSG_REPLY)
-	}
+    if s != "" {
+        sendToSafecastOps(s, SLACK_MSG_REPLY)
+    } else {
+        sendToSafecastOps("None found.", SLACK_MSG_REPLY)
+    }
 
 }
