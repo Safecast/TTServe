@@ -409,10 +409,17 @@ func CommandParse(user string, objtype string, message string) string {
 			if messageAfterSecondArg == "" || strings.Contains(messageAfterSecondArg, " ") {
 				return fmt.Sprintf("Please specify a single device identifier to remove.")
 			}
-		    newvalue := strings.Replace(value, messageAfterSecondArg, "", 1)
-			newvalue = strings.Replace(newvalue, ",,", ",", -1)
-			newvalue = strings.TrimPrefix(newvalue, ",")
-			newvalue = strings.TrimSuffix(newvalue, ",")
+			newvalue := ""
+		    for _, d := range strings.Split(value, ",") {
+				if d == messageAfterSecondArg {
+					continue
+				}
+				if newvalue == "" {
+					newvalue = d
+				} else {
+					newvalue = newvalue + "," + d
+				}
+			}
 			if newvalue == value {
 				return fmt.Sprintf("Device list %s does not contain %s", objname, messageAfterSecondArg)
 			}
@@ -620,9 +627,6 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 // Run a report or transform it
 func ReportRun(user string, report string) string {
 
-	// ozzie
-	fmt.Printf("Report: '%s'\n", report);
-	
 	// See if there is only one arg which is the report name
 	if !strings.Contains(report, " ") {
 		found, value := CommandObjGet(user, ObjReport, report)
@@ -631,9 +635,6 @@ func ReportRun(user string, report string) string {
 		}
 		report = value
 	}	
-
-	// ozzie
-	fmt.Printf("Report after lookup: '%s'\n", report);
 
 	// Validate and expand the report
 	valid, result, devices, from, to := ReportVerify(user, report)
