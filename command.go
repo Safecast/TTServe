@@ -624,8 +624,12 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 		// See if it's a mark name
 		valid, result := CommandObjGet(user, ObjMark, from_arg)
 		if valid {
-			rFrom = result
-		} else {
+			valid, _, result = MarkVerify(result)
+			if valid {
+				rFrom = result
+			}
+		}
+		if !valid {
 			rValid = false
 			rResult = fmt.Sprintf("%s is neither a date or a mark name", from_arg)
 			return
@@ -650,8 +654,12 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 		// See if it's a mark name
 		valid, result := CommandObjGet(user, ObjMark, to_arg)
 		if valid {
-			rTo = result
-		} else {
+			valid, _, result = MarkVerify(result)
+			if valid {
+				rTo = result
+			}
+		}
+		if !valid {
 			rValid = false
 			rResult = fmt.Sprintf("%s is neither a date or a mark name", to_arg)
 			return
