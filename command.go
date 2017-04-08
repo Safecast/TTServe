@@ -384,7 +384,7 @@ func CommandParse(user string, objtype string, message string) string {
 			if newvalue == value {
 				return fmt.Sprintf("Device list %s does not contain %s", objname, messageAfterSecondArg)
 			}
-	        CommandObjSet(user, objtype, objname, messageAfterSecondArg)
+	        CommandObjSet(user, objtype, objname, newvalue)
 	        return(CommandObjList(user, objtype, objname))
         }
         fallthrough
