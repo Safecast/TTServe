@@ -363,12 +363,19 @@ func CommandParse(user string, objtype string, message string) string {
 			if !found {
 				value = ""
 			}
+			if (false) {
 			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, ",", " ", -1)
 			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
 			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
 			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
+			messageAfterSecondArg = strings.TrimPrefix(messageAfterSecondArg, " ")
+			messageAfterSecondArg = strings.TrimSuffix(messageAfterSecondArg, " ")
 			fmt.Printf("'%s'\n", messageAfterSecondArg)
+			}
 		    for _, d := range strings.Split(messageAfterSecondArg, " ") {
+				if d == "" {
+					continue
+				}
 				valid, result, _ := DeviceVerify(d)
 				if !valid {
 					return result
@@ -398,11 +405,18 @@ func CommandParse(user string, objtype string, message string) string {
 			CommandObjSet(user, objtype, objname, result)
 		} else if objtype == ObjDevice {
 			value := ""
+			if (false) {
 			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, ",", " ", -1)
 			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
 			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
 			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
+			messageAfterSecondArg = strings.TrimPrefix(messageAfterSecondArg, " ")
+			messageAfterSecondArg = strings.TrimSuffix(messageAfterSecondArg, " ")
+			}
 		    for _, d := range strings.Split(messageAfterSecondArg, " ") {
+				if d == "" {
+					continue
+				}
 				valid, result, _ := DeviceVerify(d)
 				if !valid {
 					return result
