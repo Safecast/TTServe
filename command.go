@@ -317,10 +317,6 @@ func CommandParse(user string, objtype string, message string) string {
         messageAfterSecondArg = strings.Join(args[2:], " ")
     }
 
-    if message == "" || len(args) == 1 {
-        return CommandObjList(user, objtype, "")
-    }
-
     objname := args[1]
     switch args[0] {
 
@@ -398,7 +394,7 @@ func CommandParse(user string, objtype string, message string) string {
 	// Unrecognized command.  It might just be a raw report
 	if objtype == ObjReport {
 		return(ReportRun(user, message))
-	}
+	} 
 	
     return "Valid subcommands are show, add, set, remove, delete"
 
@@ -554,6 +550,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 	if to_arg == "" {
 		rValid = true
 		rTo = nowInUTC()
+		rResult = report
 		return
 	}
 
