@@ -374,7 +374,11 @@ func CommandParse(user string, objtype string, message string) string {
 			if !found {
 				return fmt.Sprintf("Device list %s does not exist", objname)
 			}
+			if messageAfterSecondArg == "" {
+				return fmt.Sprintf("Please specify a device identifier to remove.")
+			}
 		    newvalue := strings.Replace(value, messageAfterSecondArg, "", 1)
+			fmt.Printf("'%s' '%s' '%s'\n", value, messageAfterSecondArg, newvalue)
 			newvalue = strings.Replace(value, ",,", ",", -1)
 			newvalue = strings.TrimPrefix(value, ",")
 			newvalue = strings.TrimSuffix(value, ",")
