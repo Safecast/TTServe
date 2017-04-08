@@ -363,6 +363,10 @@ func CommandParse(user string, objtype string, message string) string {
 			if !found {
 				value = ""
 			}
+			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, ",", " ", -1)
+			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
+			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
+			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
 		    for _, d := range strings.Split(messageAfterSecondArg, " ") {
 				valid, result, _ := DeviceVerify(d)
 				if !valid {
@@ -393,6 +397,10 @@ func CommandParse(user string, objtype string, message string) string {
 			CommandObjSet(user, objtype, objname, result)
 		} else if objtype == ObjDevice {
 			value := ""
+			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, ",", " ", -1)
+			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
+			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
+			messageAfterSecondArg = strings.Replace(messageAfterSecondArg, "  ", " ", -1)
 		    for _, d := range strings.Split(messageAfterSecondArg, " ") {
 				valid, result, _ := DeviceVerify(d)
 				if !valid {
