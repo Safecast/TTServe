@@ -383,11 +383,19 @@ func CommandParse(user string, objtype string, message string) string {
 			}
 			CommandObjSet(user, objtype, objname, result)
 		} else if objtype == ObjDevice {
-			valid, result, _ := DeviceVerify(messageAfterSecondArg)
-			if !valid {
-				return result
+			value := ""
+		    for _, d := range strings.Split(messageAfterSecondArg, " ") {
+				valid, result, _ := DeviceVerify(d)
+				if !valid {
+					return result
+				}
+				if value == "" {
+					value = result
+				} else {
+					value = value + "," + result
+				}
 			}
-			CommandObjSet(user, objtype, objname, result)
+			CommandObjSet(user, objtype, objname, value)
         }
 
         return(CommandObjList(user, objtype, objname))
@@ -398,8 +406,8 @@ func CommandParse(user string, objtype string, message string) string {
 			if !found {
 				return fmt.Sprintf("Device list %s not found.", objname)
 			}
-			if messageAfterSecondArg == "" {
-				return fmt.Sprintf("Please specify a device identifier to remove.")
+			if messageAfterSecondArg == "" || strings.Contains(messageAfterSecondArg, " ") {
+				return fmt.Sprintf("Please specify a single device identifier to remove.")
 			}
 		    newvalue := strings.Replace(value, messageAfterSecondArg, "", 1)
 			newvalue = strings.Replace(newvalue, ",,", ",", -1)
