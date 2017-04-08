@@ -169,14 +169,18 @@ func CommandObjList(user string, objtype string, objname string) string {
             }
 
 			if first {
-				uname := "For " + s.User
+				uname := "For " + s.User + ":"
 				if s.User == "" {
-					uname = "For everyone"
+					uname = "For everyone:"
 				}
 				out += fmt.Sprintf("%s\n", uname)
 			}
 
-            out += fmt.Sprintf("%s: %s", o.Name, o.Value)
+			val := o.Value
+			if objtype == ObjDevice {
+				val = strings.Replace(val, ",", "  ", -1)
+			}
+            out += fmt.Sprintf("%s:  %s", o.Name, val)
 
         }
 
