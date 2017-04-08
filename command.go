@@ -383,7 +383,7 @@ func CommandParse(user string, objtype string, message string) string {
         fallthrough
     case "set":
 		if objtype == ObjMark {
-			valid, result := MarkVerify(messageAfterSecondArg)
+			valid, result, _ := MarkVerify(messageAfterSecondArg)
 			if !valid {
 				return result
 			}
@@ -504,13 +504,13 @@ func Command(user string, message string) string {
 }
 
 // Get a list of devices
-func DeviceList(user string, devicelist string) (rValid bool, rResult string, rDeviceList []uint32) {
-
+func DeviceList(user string, devicelist string) (rValid bool, rResult string, rExpanded []uint32) {
+	
 	valid, _, deviceid := DeviceVerify(devicelist)
 	if valid {
 
 		// Just a single device
-		rDeviceList = append(rDeviceList, deviceid)
+		rExpanded = append(rExpanded, deviceid)
 
 	} else {
 
@@ -520,7 +520,7 @@ func DeviceList(user string, devicelist string) (rValid bool, rResult string, rD
 		    for _, d := range strings.Split(result, ",") {
 				valid, _, deviceid := DeviceVerify(d)
 				if valid {
-					rDeviceList = append(rDeviceList, deviceid)
+					rExpanded = append(rExpanded, deviceid)
 				}
 			}
 		} else {
@@ -537,7 +537,7 @@ func DeviceList(user string, devicelist string) (rValid bool, rResult string, rD
 }
 
 // Verify a device to be added to the device list
-func DeviceVerify(device string) (bool, string, uint32) {
+func DeviceVerify(device string) (rValid bool, rResult string, rDeviceId uint32) {
 
 	valid, deviceid := WordsToNumber(device)
 	if !valid {
@@ -551,17 +551,17 @@ func DeviceVerify(device string) (bool, string, uint32) {
 }
 
 // Verify a mark or transform it
-func MarkVerify(mark string) (bool, string) {
+func MarkVerify(mark string) (rValid bool, rOriginal string, rExpanded string) {
 
 	// If nothing is specified, make the mark NOW
 	if mark == "" {
-		return true, nowInUTC()
+		return true, "0h", nowInUTC()
 	}
 		
 	// Verify that this is a UTC date
     _, err := time.Parse("2006-01-02T15:04:05Z", mark)
     if err == nil {
-		return true, mark
+		return true, mark, mark
 	}
 
 	// If not, see if this is just a number of hours ago
@@ -569,19 +569,19 @@ func MarkVerify(mark string) (bool, string) {
 		mark = strings.TrimSuffix(mark, "h")
 		i64, err := strconv.ParseInt(mark, 10, 32)
 		if err == nil {
-			return true, time.Now().UTC().Add(time.Duration(i64) * time.Hour).Format("2006-01-02T15:04:05Z")
+			return true, mark, time.Now().UTC().Add(time.Duration(i64) * time.Hour).Format("2006-01-02T15:04:05Z")
 		}
 	}
 	if strings.HasSuffix(mark, "m") {
 		mark = strings.TrimSuffix(mark, "m")
 		i64, err := strconv.ParseInt(mark, 10, 32)
 		if err == nil {
-			return true, time.Now().UTC().Add(time.Duration(i64) * time.Minute).Format("2006-01-02T15:04:05Z")
+			return true, mark, time.Now().UTC().Add(time.Duration(i64) * time.Minute).Format("2006-01-02T15:04:05Z")
 		}
 	}
 	
 	// Valid
-	return false, fmt.Sprintf("The mark's UTC time must be either 2017-04-05T19:08:07Z or -5h for 5h ago")
+	return false, fmt.Sprintf("The mark's UTC time must be either 2017-04-05T19:08:07Z or -5h for 5h ago"), ""
 }
 
 // Verify a report or transform it
@@ -616,7 +616,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 	
 
 	// See if the next arg is a mark
-	valid, result = MarkVerify(from_arg)
+	valid, _, result = MarkVerify(from_arg)
 	if valid {
 		rFrom = result
 	} else {
@@ -642,7 +642,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 	}
 
 	// Validate the to arg
-	valid, result = MarkVerify(to_arg)
+	valid, _, result = MarkVerify(to_arg)
 	if valid {
 		rTo = result
 	} else {
