@@ -371,7 +371,7 @@ func CommandParse(user string, objtype string, message string) string {
         if objtype == ObjDevice {
             found, value := CommandObjGet(user, objtype, objname)
 			if !found {
-				return fmt.Sprintf("Device list %s does not exist", objname)
+				return fmt.Sprintf("Device list %s not found.", objname)
 			}
 			if messageAfterSecondArg == "" {
 				return fmt.Sprintf("Please specify a device identifier to remove.")
@@ -589,10 +589,14 @@ func ReportRun(user string, report string) string {
 	fmt.Printf("Report: '%s'\n", report);
 	
 	// See if there is only one arg which is the report name
-	found, value := CommandObjGet(user, ObjReport, report)
-	if found {
+	if !strings.Contains(report, " ") {
+		found, value := CommandObjGet(user, ObjReport, report)
+		if !found {
+			return fmt.Sprintf("Report %s not found.", report)
+		}
 		report = value
-	}
+	}	
+
 	// ozzie
 	fmt.Printf("Report after lookup: '%s'\n", report);
 
