@@ -213,7 +213,7 @@ func refreshDeviceSummaryLabels() {
 func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist string, fOffline bool, fDetails bool) {
 
     // Get the device list if one was specified
-    valid, _, devices := DeviceList(user, devicelist)
+    valid, _, devices, _ := DeviceList(user, devicelist)
     if !valid {
         devices = nil
     }

@@ -1,6 +1,6 @@
-// Copyright 2017 Inca Roads LLC.  All rights reserved.   
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
 // Use of this source code is governed by licenses granted by the
-// copyright holder including that found in the LICENSE file.  
+// copyright holder including that found in the LICENSE file.
 
 // Device monitoring
 package main
@@ -9,7 +9,7 @@ import (
     "os"
     "fmt"
     "time"
-	"strconv"
+    "strconv"
     "io/ioutil"
     "strings"
     "encoding/json"
@@ -95,7 +95,7 @@ func CommandObjGet(user string, objtype string, objname string) (bool, string) {
     // Handle global queries
     if strings.HasPrefix(objname, "=") {
         objname = strings.Replace(objname, "=", "", 1)
-		return CommandObjGet("", objtype, objname)
+        return CommandObjGet("", objtype, objname)
     }
 
     // Loop over all user state objjects
@@ -122,10 +122,10 @@ func CommandObjGet(user string, objtype string, objname string) (bool, string) {
 
     }
 
-	// See if it's there as a global
-	if user != "" {
-		return CommandObjGet("", objtype, objname)
-	}
+    // See if it's there as a global
+    if user != "" {
+        return CommandObjGet("", objtype, objname)
+    }
 
     // No luck
     return false, ""
@@ -140,7 +140,7 @@ func CommandObjList(user string, objtype string, objname string) string {
 
     if strings.HasPrefix(objname, "=") {
         objname = strings.Replace(objname, "=", "", 1)
-		return CommandObjList("", objtype, objname)
+        return CommandObjList("", objtype, objname)
     }
 
     // Init output buffer
@@ -171,15 +171,15 @@ func CommandObjList(user string, objtype string, objname string) string {
                 out += "\n"
             }
 
-			val := o.Value
-			if objtype == ObjDevice {
-				val = strings.Replace(val, ",", "  ", -1)
-			}
-			if s.User == "" {
-	            out += fmt.Sprintf("%s=  %s", o.Name, val)
-			} else {
-	            out += fmt.Sprintf("%s:  %s", o.Name, val)
-			}
+            val := o.Value
+            if objtype == ObjDevice {
+                val = strings.Replace(val, ",", "  ", -1)
+            }
+            if s.User == "" {
+                out += fmt.Sprintf("%s=  %s", o.Name, val)
+            } else {
+                out += fmt.Sprintf("%s:  %s", o.Name, val)
+            }
         }
 
     }
@@ -189,21 +189,21 @@ func CommandObjList(user string, objtype string, objname string) string {
         switch objtype {
 
         case ObjDevice:
-			if objname != "" {
-				return "No device: " + objname
-			}
+            if objname != "" {
+                return "No device: " + objname
+            }
             return "No device lists. Add one by typing: device add <list-name> <device number or name>"
 
         case ObjMark:
-			if objname != "" {
-				return "No mark: " + objname
-			}
+            if objname != "" {
+                return "No mark: " + objname
+            }
             return "No marks. Add one by typing: mark add <mark-name>"
 
         case ObjReport:
-			if objname != "" {
-				return "No report: " + objname
-			}
+            if objname != "" {
+                return "No report: " + objname
+            }
             return "No reports. Add one by typing: report add <mark-name>"
 
         default:
@@ -254,7 +254,7 @@ func CommandObjSet(user string, objtype string, objname string, objval string) b
     // Handle global queries
     if strings.HasPrefix(objname, "=") {
         objname = strings.Replace(objname, "=", "", 1)
-		return CommandObjSet("", objtype, objname, objval)
+        return CommandObjSet("", objtype, objname, objval)
     }
 
     // Loop over all user state objjects
@@ -337,11 +337,11 @@ func CommandParse(user string, objtype string, message string) string {
     if len(args) > 2 {
         messageAfterSecondArg = strings.Join(args[2:], " ")
     }
-	objname := ""
-	if len(args) > 1 {
-	    objname = args[1]
-	}
-	
+    objname := ""
+    if len(args) > 1 {
+        objname = args[1]
+    }
+
     switch strings.ToLower(args[0]) {
 
     case "get":
@@ -351,66 +351,66 @@ func CommandParse(user string, objtype string, message string) string {
     case "show":
         return CommandObjList(user, objtype, objname)
 
-	case "run":
-		if objtype != ObjReport {
-			return fmt.Sprintf("%s is not a report.", objname)
-		}
-		return(ReportRun(user, messageAfterFirstArg))
+    case "run":
+        if objtype != ObjReport {
+            return fmt.Sprintf("%s is not a report.", objname)
+        }
+        return(ReportRun(user, messageAfterFirstArg))
 
     case "add":
         if objtype == ObjDevice {
-			found, value := CommandObjGet(user, objtype, objname)
-			if !found {
-				value = ""
-			}
-		    for _, d := range strings.Split(messageAfterSecondArg, " ") {
-				if d == "" {
-					continue
-				}
-				valid, result, _ := DeviceVerify(d)
-				if !valid {
-					return result
-				}
-				if value == "" {
-					value = result
-				} else {
-					value = value + "," + result
-				}
-			}
-			CommandObjSet(user, objtype, objname, value)
-	        return(CommandObjList(user, objtype, objname))
+            found, value := CommandObjGet(user, objtype, objname)
+            if !found {
+                value = ""
+            }
+            for _, d := range strings.Split(messageAfterSecondArg, " ") {
+                if d == "" {
+                    continue
+                }
+                valid, result, _ := DeviceVerify(d)
+                if !valid {
+                    return result
+                }
+                if value == "" {
+                    value = result
+                } else {
+                    value = value + "," + result
+                }
+            }
+            CommandObjSet(user, objtype, objname, value)
+            return(CommandObjList(user, objtype, objname))
         }
         fallthrough
     case "set":
-		if objtype == ObjMark {
-			valid, result, _ := MarkVerify(messageAfterSecondArg)
-			if !valid {
-				return result
-			}
-			CommandObjSet(user, objtype, objname, result)
-		} else if objtype == ObjReport {
-			valid, result, _, _, _ := ReportVerify(user, messageAfterSecondArg)
-			if !valid {
-				return result
-			}
-			CommandObjSet(user, objtype, objname, result)
-		} else if objtype == ObjDevice {
-			value := ""
-		    for _, d := range strings.Split(messageAfterSecondArg, " ") {
-				if d == "" {
-					continue
-				}
-				valid, result, _ := DeviceVerify(d)
-				if !valid {
-					return result
-				}
-				if value == "" {
-					value = result
-				} else {
-					value = value + "," + result
-				}
-			}
-			CommandObjSet(user, objtype, objname, value)
+        if objtype == ObjMark {
+            valid, result, _ := MarkVerify(messageAfterSecondArg)
+            if !valid {
+                return result
+            }
+            CommandObjSet(user, objtype, objname, result)
+        } else if objtype == ObjReport {
+            valid, result, _, _, _, _ := ReportVerify(user, messageAfterSecondArg)
+            if !valid {
+                return result
+            }
+            CommandObjSet(user, objtype, objname, result)
+        } else if objtype == ObjDevice {
+            value := ""
+            for _, d := range strings.Split(messageAfterSecondArg, " ") {
+                if d == "" {
+                    continue
+                }
+                valid, result, _ := DeviceVerify(d)
+                if !valid {
+                    return result
+                }
+                if value == "" {
+                    value = result
+                } else {
+                    value = value + "," + result
+                }
+            }
+            CommandObjSet(user, objtype, objname, value)
         }
 
         return(CommandObjList(user, objtype, objname))
@@ -418,31 +418,31 @@ func CommandParse(user string, objtype string, message string) string {
     case "remove":
         if objtype == ObjDevice {
             found, value := CommandObjGet(user, objtype, objname)
-			if !found {
-				return fmt.Sprintf("Device list %s not found.", objname)
-			}
-			if messageAfterSecondArg == "" || strings.Contains(messageAfterSecondArg, " ") {
-				return fmt.Sprintf("Please specify a single device identifier to remove.")
-			}
-			newvalue := ""
-		    for _, d := range strings.Split(value, ",") {
-				if d == messageAfterSecondArg {
-					continue
-				}
-				if newvalue == "" {
-					newvalue = d
-				} else {
-					newvalue = newvalue + "," + d
-				}
-			}
-			if newvalue == value {
-				return fmt.Sprintf("Device list %s does not contain %s", objname, messageAfterSecondArg)
-			}
-	        CommandObjSet(user, objtype, objname, newvalue)
-			if newvalue == "" {
-		        return fmt.Sprintf("%s deleted.", objname)
-			}
-	        return(CommandObjList(user, objtype, objname))
+            if !found {
+                return fmt.Sprintf("Device list %s not found.", objname)
+            }
+            if messageAfterSecondArg == "" || strings.Contains(messageAfterSecondArg, " ") {
+                return fmt.Sprintf("Please specify a single device identifier to remove.")
+            }
+            newvalue := ""
+            for _, d := range strings.Split(value, ",") {
+                if d == messageAfterSecondArg {
+                    continue
+                }
+                if newvalue == "" {
+                    newvalue = d
+                } else {
+                    newvalue = newvalue + "," + d
+                }
+            }
+            if newvalue == value {
+                return fmt.Sprintf("Device list %s does not contain %s", objname, messageAfterSecondArg)
+            }
+            CommandObjSet(user, objtype, objname, newvalue)
+            if newvalue == "" {
+                return fmt.Sprintf("%s deleted.", objname)
+            }
+            return(CommandObjList(user, objtype, objname))
         }
         fallthrough
     case "delete":
@@ -452,11 +452,11 @@ func CommandParse(user string, objtype string, message string) string {
         return fmt.Sprintf("%s deleted.", objname)
     }
 
-	// Unrecognized command.  It might just be a raw report
-	if objtype == ObjReport {
-		return(ReportRun(user, message))
-	} 
-	
+    // Unrecognized command.  It might just be a raw report
+    if objtype == ObjReport {
+        return(ReportRun(user, message))
+    }
+
     return "Valid subcommands are show, add, set, remove, delete"
 
 }
@@ -503,218 +503,291 @@ func Command(user string, message string) string {
 
 }
 
-// Get a list of devices
-func DeviceList(user string, devicelist string) (rValid bool, rResult string, rExpanded []uint32) {
+// Parse the plus code pttern
+func PlusCodePattern(code string) string {
+
+	// Turn it into a pattern by replacing the + wildcard with a single-char wildcard
+	code = strings.Replace(code, "+", ".", 1)
 	
-	valid, _, deviceid := DeviceVerify(devicelist)
-	if valid {
+	// Extract the pattern, and exit if no pattern present
+	components := strings.Split(code, "~")
+	if len(components) != 2 {
+		return "/" + code + "/"
+	}
+	c := components[0]
 
-		// Just a single device
-		rExpanded = append(rExpanded, deviceid)
+	// Try to recognize the pattern
+	switch strings.ToLower(components[1]) {
 
-	} else {
+	default:
+		return "/" + c + "/"
+		
+	case "3m":
+		return "/" + c + "/"
+		
+	case "14m":
+		return "/" + c[0:11] + "*/"
 
-		// Expand the list
-		valid, result := CommandObjGet(user, ObjDevice, devicelist)
-		if valid {
-		    for _, d := range strings.Split(result, ",") {
-				valid, _, deviceid := DeviceVerify(d)
-				if valid {
-					rExpanded = append(rExpanded, deviceid)
-				}
-			}
-		} else {
-			rValid = false
-			rResult = fmt.Sprintf("%s is neither a device or a device list name", devicelist)
-			return
-		}
+	case "275m":
+		return "/" + c[0:8] + "*/"
 
+	case "5500m":
+		fallthrough
+	case "5.5km":
+		return "/" + c[0:6] + "*/"
+
+	case "110km":
+		return "/" + c[0:4] + "*/"
+
+	case "2200km":
+		return "/" + c[0:2] + "*/"
+		
 	}
 
-	rValid = true
-	return
+}
+
+// See if this string is a location query specifier
+func PlusCode(code string) bool {
+    if strings.Contains(code, "+") {
+        return true
+    }
+    return false
+}
+
+// Get a list of devices
+func DeviceList(user string, devicelist string) (rValid bool, rResult string, rExpanded []uint32, rExpandedPlusCodes []string) {
+
+    valid, result, deviceid := DeviceVerify(devicelist)
+    if valid {
+
+        // Just a single device or plus code
+        if deviceid != 0 {
+            rExpanded = append(rExpanded, deviceid)
+        } else {
+            rExpandedPlusCodes = append(rExpandedPlusCodes, result)
+        }
+
+    } else {
+
+        // Expand the list
+        valid, result := CommandObjGet(user, ObjDevice, devicelist)
+        if valid {
+            for _, d := range strings.Split(result, ",") {
+                valid, result, deviceid := DeviceVerify(d)
+                if valid {
+			        // Append the device or plus code
+                    if deviceid != 0 {
+                        rExpanded = append(rExpanded, deviceid)
+                    } else {
+                        rExpandedPlusCodes = append(rExpandedPlusCodes, result)
+                    }
+                }
+            }
+        } else {
+            rValid = false
+            rResult = fmt.Sprintf("%s is neither a device or a device list name", devicelist)
+            return
+        }
+
+    }
+
+    rValid = true
+    return
 
 }
 
 // Verify a device to be added to the device list
 func DeviceVerify(device string) (rValid bool, rResult string, rDeviceId uint32) {
 
-	valid, deviceid := WordsToNumber(device)
-	if !valid {
-		if device == "" {
-			return false, fmt.Sprintf("Please supply a device identifier to add."), 0
-		}			
-		return false, fmt.Sprintf("%s is not a valid device identifier.", device), 0
-	}
+    valid, deviceid := WordsToNumber(device)
+    if !valid {
+        if PlusCode(device) {
+            return true, device, 0
+        }
+        if device == "" {
+            return false, fmt.Sprintf("Please supply a device identifier to add."), 0
+        }
+        return false, fmt.Sprintf("%s is not a valid device identifier.", device), 0
+    }
 
-	return true, device, deviceid
+    return true, device, deviceid
 }
 
 // Verify a mark or transform it
 func MarkVerify(mark string) (rValid bool, rOriginal string, rExpanded string) {
 
-	// If nothing is specified, make the mark NOW
-	if mark == "" {
-		return true, "0h", nowInUTC()
-	}
-		
-	// Verify that this is a UTC date
+    // If nothing is specified, make the mark NOW
+    if mark == "" {
+        return true, "0h", nowInUTC()
+    }
+
+    // Verify that this is a UTC date
     _, err := time.Parse("2006-01-02T15:04:05Z", mark)
     if err == nil {
-		return true, mark, mark
-	}
+        return true, mark, mark
+    }
 
-	// If not, see if this is just a number of hours ago
-	if strings.HasSuffix(mark, "h") {
-		markval := strings.TrimSuffix(mark, "h")
-		i64, err := strconv.ParseInt(markval, 10, 32)
-		if err == nil {
-			return true, mark, time.Now().UTC().Add(time.Duration(i64) * time.Hour).Format("2006-01-02T15:04:05Z")
-		}
-	}
-	if strings.HasSuffix(mark, "m") {
-		markval := strings.TrimSuffix(mark, "m")
-		i64, err := strconv.ParseInt(markval, 10, 32)
-		if err == nil {
-			return true, mark, time.Now().UTC().Add(time.Duration(i64) * time.Minute).Format("2006-01-02T15:04:05Z")
-		}
-	}
-	
-	// Valid
-	return false, fmt.Sprintf("The mark's UTC time must be either 2017-04-05T19:08:07Z or -5h for 5h ago"), ""
+    // If not, see if this is just a number of hours ago
+    if strings.HasSuffix(mark, "h") {
+        markval := strings.TrimSuffix(mark, "h")
+        i64, err := strconv.ParseInt(markval, 10, 32)
+        if err == nil {
+            return true, mark, time.Now().UTC().Add(time.Duration(i64) * time.Hour).Format("2006-01-02T15:04:05Z")
+        }
+    }
+    if strings.HasSuffix(mark, "m") {
+        markval := strings.TrimSuffix(mark, "m")
+        i64, err := strconv.ParseInt(markval, 10, 32)
+        if err == nil {
+            return true, mark, time.Now().UTC().Add(time.Duration(i64) * time.Minute).Format("2006-01-02T15:04:05Z")
+        }
+    }
+
+    // Valid
+    return false, fmt.Sprintf("The mark's UTC time must be either 2017-04-05T19:08:07Z or -5h for 5h ago"), ""
 }
 
 // Verify a report or transform it
-func ReportVerify(user string, report string) (rValid bool, rResult string, rDeviceList []uint32, rFrom string, rTo string) {
+func ReportVerify(user string, report string) (rValid bool, rResult string, rDeviceList []uint32, rPlusCodeList []string, rFrom string, rTo string) {
 
-	// Break up into its parts
+    // Break up into its parts
     args := strings.Split(report, " ")
 
-	// The blank command is more-or-less the help string
-	if report == "" || len(args) < 2 || len(args) > 3 {
-		rValid = false
-		rResult = "report add <report-name> <device> <from> [<to>]\n<device> can be device ID, device name, or the name of a device list\n<from> can be UTC date, -7h for 7h ago, or a mark name\n<to> can be a UTC date, a mark name, or is 'now' if ommitted"
-		return
-	}
+    // The blank command is more-or-less the help string
+    if report == "" || len(args) < 2 || len(args) > 3 {
+        rValid = false
+        rResult = "report add <report-name> <device> <from> [<to>]\n<device> can be device ID, device name, or the name of a device list\n<from> can be UTC date, -7h for 7h ago, or a mark name\n<to> can be a UTC date, a mark name, or is 'now' if ommitted"
+        return
+    }
 
-	device_arg := args[0]
-	from_arg := args[1]
-	to_arg := ""
-	if len(args) > 2 {
-		to_arg = args[2]
-	}
-	
-	// See if device is a valid device ID
-	valid, result, devicelist := DeviceList(user, device_arg)
-	if valid {
-		rDeviceList = devicelist
-	} else {
-		rValid = false
-		rResult = result
-		return
-	}
-	
+    device_arg := args[0]
+    from_arg := args[1]
+    to_arg := ""
+    if len(args) > 2 {
+        to_arg = args[2]
+    }
 
-	// See if the next arg is a mark
-	valid, _, result = MarkVerify(from_arg)
-	if valid {
-		rFrom = result
-	} else {
+    // See if device is a valid device ID
+    valid, result, devicelist, pluscodelist := DeviceList(user, device_arg)
+    if valid {
+        rDeviceList = devicelist
+        rPlusCodeList = pluscodelist
+    } else {
+        rValid = false
+        rResult = result
+        return
+    }
 
-		// See if it's a mark name
-		valid, result := CommandObjGet(user, ObjMark, from_arg)
-		if valid {
-			valid, _, result = MarkVerify(result)
-			if valid {
-				rFrom = result
-			}
-		}
-		if !valid {
-			rValid = false
-			rResult = fmt.Sprintf("%s is neither a date or a mark name", from_arg)
-			return
-		}
 
-	}
+    // See if the next arg is a mark
+    valid, _, result = MarkVerify(from_arg)
+    if valid {
+        rFrom = result
+    } else {
 
-	// We're done if there's no final arg
-	if to_arg == "" {
-		rValid = true
-		rTo = nowInUTC()
-		rResult = report
-		return
-	}
+        // See if it's a mark name
+        valid, result := CommandObjGet(user, ObjMark, from_arg)
+        if valid {
+            valid, _, result = MarkVerify(result)
+            if valid {
+                rFrom = result
+            }
+        }
+        if !valid {
+            rValid = false
+            rResult = fmt.Sprintf("%s is neither a date or a mark name", from_arg)
+            return
+        }
 
-	// Validate the to arg
-	valid, _, result = MarkVerify(to_arg)
-	if valid {
-		rTo = result
-	} else {
+    }
 
-		// See if it's a mark name
-		valid, result := CommandObjGet(user, ObjMark, to_arg)
-		if valid {
-			valid, _, result = MarkVerify(result)
-			if valid {
-				rTo = result
-			}
-		}
-		if !valid {
-			rValid = false
-			rResult = fmt.Sprintf("%s is neither a date or a mark name", to_arg)
-			return
-		}
+    // We're done if there's no final arg
+    if to_arg == "" {
+        rValid = true
+        rTo = nowInUTC()
+        rResult = report
+        return
+    }
 
-	}
+    // Validate the to arg
+    valid, _, result = MarkVerify(to_arg)
+    if valid {
+        rTo = result
+    } else {
 
-	// Valid
-	rValid = true
-	rResult = report
-	return
-	
+        // See if it's a mark name
+        valid, result := CommandObjGet(user, ObjMark, to_arg)
+        if valid {
+            valid, _, result = MarkVerify(result)
+            if valid {
+                rTo = result
+            }
+        }
+        if !valid {
+            rValid = false
+            rResult = fmt.Sprintf("%s is neither a date or a mark name", to_arg)
+            return
+        }
+
+    }
+
+    // Valid
+    rValid = true
+    rResult = report
+    return
+
 }
 
 // Run a report or transform it
 func ReportRun(user string, report string) string {
 
-	// See if there is only one arg which is the report name
-	if !strings.Contains(report, " ") {
-		found, value := CommandObjGet(user, ObjReport, report)
-		if !found {
-			return fmt.Sprintf("Report %s not found.", report)
-		}
-		report = value
-	}	
+    // See if there is only one arg which is the report name
+    if !strings.Contains(report, " ") {
+        found, value := CommandObjGet(user, ObjReport, report)
+        if !found {
+            return fmt.Sprintf("Report %s not found.", report)
+        }
+        report = value
+    }
 
-	// Validate and expand the report
-	valid, result, devices, from, to := ReportVerify(user, report)
-	if !valid {
-		return result
-	}
+    // Validate and expand the report
+    valid, result, devices, pluscodes, from, to := ReportVerify(user, report)
+    if !valid {
+        return result
+    }
 
-	// Generate base of query
-	sql := "* FROM data"
+    // Generate base of query
+    sql := "* FROM data"
 
-	// Generate device filter
-	sql += " WHERE ( "
-	for i, d := range devices {
-		if i != 0 {
-			sql += " OR "
-		}
-		sql += fmt.Sprintf("device = %d", d)
-	}
-	sql += " )"
+    // Generate device filter, which is required
+    sql += " WHERE ( "
+	first := false
+    for _, d := range devices {
+        if !first {
+            sql += " OR "
+        }
+		first = false
+        sql += fmt.Sprintf("device = %d", d)
+    }
+    for _, s := range pluscodes {
+        if !first {
+            sql += " OR "
+        }
+		first = false
+        sql += fmt.Sprintf("loc_olc =~ /%s/", PlusCodePattern(s))
+    }
+    sql += " )"
 
-	// Generate time filter
-	sql += fmt.Sprintf(" AND time >= '%s' AND time < '%s'", from, to)
+    // Generate time filter
+    sql += fmt.Sprintf(" AND ( time >= '%s' AND time < '%s' )", from, to)
 
-	// Execute the query
-	success, result, numrows := InfluxQuery(user, sql)
-	if !success {
-		return result
-	}
+    // Execute the query
+    success, result, numrows := InfluxQuery(user, sql)
+    if !success {
+        return result
+    }
 
-	// Done
-	return fmt.Sprintf("%d rows of data are <%s|here>, @%s.", numrows, result, user)
+    // Done
+    return fmt.Sprintf("%d rows of data are <%s|here>, @%s.", numrows, result, user)
 
 }
