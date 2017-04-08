@@ -468,9 +468,9 @@ func Command(user string, message string) string {
     // Dispatch command
     switch args[0] {
 
-    case "devs":
+    case "devices":
         fallthrough
-    case "dev":
+    case "device":
         return CommandParse(user, ObjDevice, messageAfterFirstArg)
 
     case "marks":
