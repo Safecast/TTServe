@@ -761,7 +761,7 @@ func ReportRun(user string, report string) string {
 
     // Generate device filter, which is required
     sql += " WHERE ( "
-	first := false
+	first := true
     for _, d := range devices {
         if !first {
             sql += " OR "
