@@ -20,7 +20,7 @@ const (
     ObjDevice = "group"
     ObjMark = "mark"
     ObjReport = "report"
-	ReportHelp = "report <show, set, delete, run>\nreport <report-name>\nreport <device> <from> [<to>]\n    <device> is device name/number or device list name\n    <from> is UTC datetime or NNh/NNm ago or mark name\n    <to> is UTC datetime or NNh/NNm duration or mark name"
+	ReportHelp = "report <show, set, delete, run>\nreport <report-name>\nreport <device> <from> [<to>]\n    <device> is device name/number or device list name\n    <from> is UTC datetime or NNh/NNm *ago* or mark name\n    <to> is UTC datetime or NNh/NNm *duration* or mark name"
 )
 
 type Object struct {
