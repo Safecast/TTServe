@@ -148,7 +148,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         help += "     clear-logs <device>\n"
         help += "Named report and time marker management\n"
         help += "     mark <subcommand> <markername> <args>\n"
-        help += "     report <subcommand> <reportname> <args>\n"
+        help += "     report <args> (type 'report' for more info)\n"
         help += "Raw log database SQL query to CSV\n"
         help += "     select <influx query>\n"
         go sendToSafecastOps(help, SLACK_MSG_REPLY)

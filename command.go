@@ -20,7 +20,9 @@ const (
     ObjDevice = "group"
     ObjMark = "mark"
     ObjReport = "report"
+	ReportHelp = "report <show, set, delete, run>\nreport <report-name>\nreport <device> <from> [<to>]\n    <device> is device name/number or device list name\n    <from> is UTC datetime or NNh/NNm ago or mark name\n    <to> is UTC datetime or NNh/NNm duration or mark name"
 )
+
 type Object struct {
     Name                string          `json:"obj_name,omitempty"`
     Type                string          `json:"obj_type,omitempty"`
@@ -457,7 +459,7 @@ func CommandParse(user string, objtype string, message string) string {
 
 		// If blank, reject
 		if objname == "" {
-			return "run <show, set, delete, run> or run <report-name>"
+			return ReportHelp
 		}
 
 		// Run the report
@@ -680,7 +682,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
     // The blank command is more-or-less the help string
     if report == "" || len(args) < 2 || len(args) > 3 {
         rValid = false
-        rResult = "report add <report-name> <device> <from> [<to>]\n<device> can be device ID, device name, or the name of a device list\n<from> can be UTC date, ie '7h' or '45m' ago, or a mark name\n<to> can be a UTC date, a mark name, or is 'now' if ommitted"
+        rResult = ReportHelp
         return
     }
 
