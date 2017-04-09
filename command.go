@@ -764,6 +764,9 @@ func ReportRun(user string, report string) string {
 	
     // See if there is only one arg which is the report name
     if !strings.Contains(report, " ") {
+		if report == "" {
+			return ReportHelp
+		}
         found, value := CommandObjGet(user, ObjReport, report)
         if !found {
             return fmt.Sprintf("Report %s not found.", report)
