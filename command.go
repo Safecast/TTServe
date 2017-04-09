@@ -457,11 +457,6 @@ func CommandParse(user string, objtype string, message string) string {
     // Unrecognized command.  It might just be a raw report
     if objtype == ObjReport {
 
-		// If blank, reject
-		if objname == "" {
-			return ReportHelp
-		}
-
 		// Run the report
         return(ReportRun(user, message))
 
