@@ -383,7 +383,7 @@ func CommandParse(user string, objtype string, message string) string {
         fallthrough
     case "set":
         if objtype == ObjMark {
-            valid, result, _ := MarkVerify(messageAfterSecondArg)
+            valid, result, _ := MarkVerify(messageAfterSecondArg, nowInUTC(), false)
             if !valid {
                 return result
             }
@@ -454,7 +454,15 @@ func CommandParse(user string, objtype string, message string) string {
 
     // Unrecognized command.  It might just be a raw report
     if objtype == ObjReport {
+
+		// If blank, reject
+		if objname == "" {
+			return "run <show, set, delete, run> or run <report-name>"
+		}
+
+		// Run the report
         return(ReportRun(user, message))
+
     }
 
     return "Valid subcommands are show, add, set, remove, delete"
@@ -614,37 +622,53 @@ func DeviceVerify(device string) (rValid bool, rResult string, rDeviceId uint32)
 }
 
 // Verify a mark or transform it
-func MarkVerify(mark string) (rValid bool, rOriginal string, rExpanded string) {
+func MarkVerify(mark string, reference string, fBackwards bool) (rValid bool, rOriginal string, rExpanded string) {
 
-    // If nothing is specified, make the mark NOW
+    // If nothing is specified, just return the reference
     if mark == "" {
-        return true, "0h", nowInUTC()
+        return true, "0h", reference
     }
 
-    // Verify that this is a UTC date
-    _, err := time.Parse("2006-01-02T15:04:05Z", mark)
-    if err == nil {
-        return true, mark, mark
-    }
-
-    // If not, see if this is just a number of hours ago
+    // If not, see if this is just a number of hours
+	minutesOffset := 0
     if strings.HasSuffix(mark, "h") {
         markval := strings.TrimSuffix(mark, "h")
         i64, err := strconv.ParseInt(markval, 10, 32)
-        if err == nil {
-            return true, mark, time.Now().UTC().Add(time.Duration(i64) * time.Hour).Format("2006-01-02T15:04:05Z")
+        if err != nil {
+		    return false, fmt.Sprintf("Badly formatted number of hours: %s", mark), ""
         }
+		minutesOffset = int(i64) * 60
     }
     if strings.HasSuffix(mark, "m") {
         markval := strings.TrimSuffix(mark, "m")
         i64, err := strconv.ParseInt(markval, 10, 32)
-        if err == nil {
-            return true, mark, time.Now().UTC().Add(time.Duration(i64) * time.Minute).Format("2006-01-02T15:04:05Z")
+        if err != nil {
+		    return false, fmt.Sprintf("Badly formatted number of minutes: %s", mark), ""
         }
+		minutesOffset = int(i64)
     }
 
-    // Valid
-    return false, fmt.Sprintf("The mark's UTC time must be either 2017-04-05T19:08:07Z or -5h for 5h ago"), ""
+    // Verify that this is a UTC date
+	if minutesOffset == 0 {
+	    _, err := time.Parse("2006-01-02T15:04:05Z", mark)
+	    if err != nil {
+		    return false, fmt.Sprintf("Badly formatted UTC date: %s", mark), ""
+		}
+        return true, mark, mark
+	}
+
+	// We need to offset the reference time by either a positive or negative amount of time
+    referenceTime, err := time.Parse("2006-01-02T15:04:05Z", reference)
+    if err != nil {
+	    return false, fmt.Sprintf("Badly formatted UTC reference date: %s", reference), ""
+	}
+
+	if fBackwards {
+		minutesOffset = -minutesOffset
+	}
+
+    return true, mark, referenceTime.UTC().Add(time.Duration(minutesOffset) * time.Minute).Format("2006-01-02T15:04:05Z")
+
 }
 
 // Verify a report or transform it
@@ -656,7 +680,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
     // The blank command is more-or-less the help string
     if report == "" || len(args) < 2 || len(args) > 3 {
         rValid = false
-        rResult = "report add <report-name> <device> <from> [<to>]\n<device> can be device ID, device name, or the name of a device list\n<from> can be UTC date, -7h for 7h ago, or a mark name\n<to> can be a UTC date, a mark name, or is 'now' if ommitted"
+        rResult = "report add <report-name> <device> <from> [<to>]\n<device> can be device ID, device name, or the name of a device list\n<from> can be UTC date, ie '7h' or '45m' ago, or a mark name\n<to> can be a UTC date, a mark name, or is 'now' if ommitted"
         return
     }
 
@@ -680,7 +704,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 
 
     // See if the next arg is a mark
-    valid, _, result = MarkVerify(from_arg)
+    valid, _, result = MarkVerify(from_arg, nowInUTC(), true)
     if valid {
         rFrom = result
     } else {
@@ -688,7 +712,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
         // See if it's a mark name
         valid, result := CommandObjGet(user, ObjMark, from_arg)
         if valid {
-            valid, _, result = MarkVerify(result)
+            valid, _, result = MarkVerify(result, nowInUTC(), true)
             if valid {
                 rFrom = result
             }
@@ -710,7 +734,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
     }
 
     // Validate the to arg
-    valid, _, result = MarkVerify(to_arg)
+	valid, _, result = MarkVerify(to_arg, rFrom, false)
     if valid {
         rTo = result
     } else {
@@ -718,7 +742,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
         // See if it's a mark name
         valid, result := CommandObjGet(user, ObjMark, to_arg)
         if valid {
-            valid, _, result = MarkVerify(result)
+            valid, _, result = MarkVerify(result, rFrom, false)
             if valid {
                 rTo = result
             }
@@ -740,7 +764,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 
 // Run a report or transform it
 func ReportRun(user string, report string) string {
-
+	
     // See if there is only one arg which is the report name
     if !strings.Contains(report, " ") {
         found, value := CommandObjGet(user, ObjReport, report)
