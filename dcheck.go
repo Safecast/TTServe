@@ -1284,7 +1284,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.OpcCount == 0 {
         s += fmt.Sprintf("\n")
     } else {
-        s += fmt.Sprintf("  (%.1f-%.1fpm1, %.1f-%.1fpm2.5, %.1f-%.1fpm10)\n", ds.LoOpc010, ds.HiOpc010, ds.LoOpc025, ds.HiOpc025, ds.LoOpc100, ds.HiOpc100)
+        s += fmt.Sprintf("  (%.4f-%.4fpm1, %.4f-%.4fpm2.5, %.4f-%.4fpm10)\n", ds.LoOpc010, ds.HiOpc010, ds.LoOpc025, ds.HiOpc025, ds.LoOpc100, ds.HiOpc100)
     }
     geigerWarning := ""
     if ds.GeigerWarningCount != 0 {
