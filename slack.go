@@ -326,7 +326,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
     case "hello":
         if len(args) == 1 {
-            sendToSafecastOps(fmt.Sprintf("Hello back, %s.", user), SLACK_MSG_REPLY)
+            sendToSafecastOps(fmt.Sprintf("Hello there. Nice day, isn't it, %s?", user), SLACK_MSG_REPLY)
         } else {
             sendToSafecastOps(fmt.Sprintf("Back at you: %s", messageAfterFirstWord), SLACK_MSG_REPLY)
         }
