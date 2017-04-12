@@ -213,7 +213,7 @@ func refreshDeviceSummaryLabels() {
 func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist string, fOffline bool, fDetails bool) {
 
     // Get the device list if one was specified
-    valid, _, devices, _ := DeviceList(user, devicelist)
+    valid, _, devices, ranges, _ := DeviceList(user, devicelist)
     if !valid {
         devices = nil
     }
@@ -230,26 +230,43 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
     s := header
     for i := 0; i < len(sortedDevices); i++ {
 
+		// Skip if the online state doesn't match
         isOffline := sortedDevices[i].minutesAgo > (2 * 60)
         if isOffline != fOffline {
             continue
         }
 
+		// Skip if this device isn't within a supplied list or range
         id := sortedDevices[i].deviceid
 
-        if devices != nil {
-            found := false
+		found := true
+		if devices != nil || ranges != nil {
+			found = false
+		}
+		
+        if !found && devices != nil {
             for _, did := range devices {
                 if did == id {
                     found = true
                     break
                 }
             }
-            if !found {
-                continue
+        }
+
+        if !found && ranges != nil {
+            for _, r := range ranges {
+                if id >= r.Low && id <= r.High {
+                    found = true
+                    break
+                }
             }
         }
 
+        if !found {
+            continue
+        }
+
+		// Add it to the summary
         if s != "" {
             s += fmt.Sprintf("\n")
         }

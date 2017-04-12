@@ -34,6 +34,10 @@ type State struct {
 }
 var CachedState []State
 
+type Range struct {
+	Low		uint32
+	High	uint32
+}
 
 // Statics
 var   CommandStateLastModified time.Time
@@ -391,7 +395,7 @@ func CommandParse(user string, objtype string, message string) string {
             }
             CommandObjSet(user, objtype, objname, result)
         } else if objtype == ObjReport {
-            valid, result, _, _, _, _ := ReportVerify(user, messageAfterSecondArg)
+            valid, result, _, _, _, _, _ := ReportVerify(user, messageAfterSecondArg)
             if !valid {
                 return result
             }
@@ -559,11 +563,43 @@ func PlusCode(code string) bool {
     return false
 }
 
-// Get a list of devices
-func DeviceList(user string, devicelist string) (rValid bool, rResult string, rExpanded []uint32, rExpandedPlusCodes []string) {
+// Look up a number from two or three simple words
+func RangeVerify(what string) (bool, Range) {
+	var r Range
+	
+    parts := strings.Split(what, "-")
+    if len(parts) != 2 {
+		return false, Range{}
+	}
 
-    valid, result, deviceid := DeviceVerify(devicelist)
-    if valid {
+    // See if low part parses cleanly as a number
+    i64, err := strconv.ParseUint(parts[0], 10, 32)
+    if err != nil {
+		return false, Range{}
+	}
+	r.Low = uint32(i64)
+
+    // See if high part parses cleanly as a number
+    i64, err = strconv.ParseUint(parts[1], 10, 32)
+    if err != nil {
+		return false, Range{}
+	}
+	r.High = uint32(i64)
+
+	return true, r
+}
+
+// Get a list of devices
+func DeviceList(user string, devicelist string) (rValid bool, rResult string, rExpanded []uint32, rExpandedRange []Range, rExpandedPlusCodes []string) {
+
+	isrange, r := RangeVerify(devicelist)
+    isdevice, result, deviceid := DeviceVerify(devicelist)
+
+	if isrange {
+
+		rExpandedRange = append(rExpandedRange, r)
+		
+    } else if isdevice {
 
         // Just a single device or plus code
         if deviceid != 0 {
@@ -578,20 +614,32 @@ func DeviceList(user string, devicelist string) (rValid bool, rResult string, rE
         valid, result := CommandObjGet(user, ObjDevice, devicelist)
         if valid {
             for _, d := range strings.Split(result, ",") {
-                valid, result, deviceid := DeviceVerify(d)
-                if valid {
+
+				isrange, r := RangeVerify(d)
+			    isdevice, result, deviceid := DeviceVerify(d)
+
+				if isrange {
+					rExpandedRange = append(rExpandedRange, r)
+
+                } else if isdevice {
+					
 			        // Append the device or plus code
                     if deviceid != 0 {
                         rExpanded = append(rExpanded, deviceid)
                     } else {
                         rExpandedPlusCodes = append(rExpandedPlusCodes, result)
                     }
+
                 }
+
             }
+
         } else {
+
             rValid = false
             rResult = fmt.Sprintf("%s is neither a device or a device list name", devicelist)
             return
+
         }
 
     }
@@ -669,7 +717,7 @@ func MarkVerify(mark string, reference string, fBackwards bool) (rValid bool, rO
 }
 
 // Verify a report or transform it
-func ReportVerify(user string, report string) (rValid bool, rResult string, rDeviceList []uint32, rPlusCodeList []string, rFrom string, rTo string) {
+func ReportVerify(user string, report string) (rValid bool, rResult string, rDeviceList []uint32, rDeviceRange []Range, rPlusCodeList []string, rFrom string, rTo string) {
 
     // Break up into its parts
     args := strings.Split(report, " ")
@@ -689,9 +737,10 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
     }
 
     // See if device is a valid device ID
-    valid, result, devicelist, pluscodelist := DeviceList(user, device_arg)
+    valid, result, devicelist, devicerange, pluscodelist := DeviceList(user, device_arg)
     if valid {
         rDeviceList = devicelist
+		rDeviceRange = devicerange
         rPlusCodeList = pluscodelist
     } else {
         rValid = false
@@ -775,7 +824,7 @@ func ReportRun(user string, report string) string {
     }
 
     // Validate and expand the report
-    valid, result, devices, pluscodes, from, to := ReportVerify(user, report)
+    valid, result, devices, ranges, pluscodes, from, to := ReportVerify(user, report)
     if !valid {
         return result
     }
@@ -792,6 +841,13 @@ func ReportRun(user string, report string) string {
         }
 		first = false
         sql += fmt.Sprintf("device = %d", d)
+    }
+    for _, r := range ranges {
+        if !first {
+            sql += " OR "
+        }
+		first = false
+		sql += fmt.Sprintf("( device >= %d AND device <= %d )", r.Low, r.High)
     }
     for _, s := range pluscodes {
         if !first {
