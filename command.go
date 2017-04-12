@@ -681,14 +681,28 @@ func MarkVerify(mark string, reference string, fBackwards bool) (rValid bool, rO
         return true, "0h", reference
     }
 
-    // If not, see if this is just a number of hours
+    // If not, see if this is just a number of days/hrs/mins
 	minutesOffset := 0
+    if strings.HasSuffix(mark, "d") {
+        markval := strings.TrimSuffix(mark, "d")
+        i64, err := strconv.ParseInt(markval, 10, 32)
+        if err != nil {
+		    return false, fmt.Sprintf("Badly formatted number of days: %s", mark), ""
+        }
+		if i64 < 0 {
+			i64 = -i64
+		}
+		minutesOffset = int(i64) * 60 * 24
+    }
     if strings.HasSuffix(mark, "h") {
         markval := strings.TrimSuffix(mark, "h")
         i64, err := strconv.ParseInt(markval, 10, 32)
         if err != nil {
 		    return false, fmt.Sprintf("Badly formatted number of hours: %s", mark), ""
         }
+		if i64 < 0 {
+			i64 = -i64
+		}
 		minutesOffset = int(i64) * 60
     }
     if strings.HasSuffix(mark, "m") {
@@ -697,6 +711,9 @@ func MarkVerify(mark string, reference string, fBackwards bool) (rValid bool, rO
         if err != nil {
 		    return false, fmt.Sprintf("Badly formatted number of minutes: %s", mark), ""
         }
+		if i64 < 0 {
+			i64 = -i64
+		}
 		minutesOffset = int(i64)
     }
 
