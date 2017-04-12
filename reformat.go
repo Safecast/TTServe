@@ -87,6 +87,15 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
         did := uint32(*v1.DeviceId)
         sd.DeviceId = &did
     }
+
+	// Catch attempts to use DeviceID == 0 by placing it into somewhere we can watch
+	if *v1.DeviceId == 0 {
+        isNgeigie = true
+        did := uint32(1)
+        sd.DeviceId = &did
+	}
+	
+	// Reject non-reformattable devices
     if !isPointcast && !isSafecastAir && !isNgeigie {
         fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceId)
         return 0, "", sd

@@ -1,0 +1,3 @@
+*** Reformat: unsuccessful attempt to reformat Device ID 0
+{"longitude":"140.9917","latitude":"37.5635","device_id":"0","value":"0","unit":"cpm","height":"5","devicetype_id":"Pointcast V1"}
+&{0xc82000fd00 0xc82000fc50 <nil> 0xc82000fc60 <nil> 0xc82000fbf8 <nil> <nil> <nil> <nil> <nil> 0xc82000fbfc 0xc82000fcb0 0xc82000fcb4 0xc82000fcb8}

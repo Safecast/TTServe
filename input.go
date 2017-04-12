@@ -34,9 +34,6 @@ func inputHandler() {
 	        ServerLog(fmt.Sprintf("*** RESTARTING at console request\n"))
 			os.Exit(0)
 			
-        case "sh":
-            fmt.Printf("spawn shell!\n")
-
         }
 
     }
