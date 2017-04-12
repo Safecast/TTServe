@@ -656,7 +656,7 @@ func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label strin
     // Default the label
 	label := ""
 	if false {
-	    label = SafecastV1DeviceType(DeviceId)
+	    label = SafecastV1V2DeviceType(DeviceId)
 	}
 
     // Read the file

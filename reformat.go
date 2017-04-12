@@ -12,19 +12,48 @@ import (
     "github.com/google/open-location-code/go"
 )
 
-// Get the type of a device
-func SafecastV1DeviceType(deviceid uint32) string {
-    // For true V2 numbering space
-    if deviceid > 0 && deviceid < 19999 {
+// Get the type of a device AS NUMBERED in our
+// V2 address space
+func SafecastV1V2DeviceType(deviceid uint32) string {
+
+    // nGeigie
+    if deviceid > 0 && deviceid <= 999 {
+        return "ngeigie"
+    }
+
+    // Pointcast
+    if deviceid >= 1000 && deviceid <= 19999 {
         return "pointcast"
     }
-    if deviceid >= 50000 && deviceid < 59999 {
+
+    // Air
+    if deviceid >= 50000 && deviceid <= 59999 {
         return "safecast-air"
     }
+
+	return ""
+	
+}
+
+// Get the type of a device AS NATIVELY NUMBERED
+// by pointcast, safecast-air, or ngeigie devices
+func SafecastV1DeviceType(deviceid uint32) string {
+
+    // nGeigie
+    if deviceid > 0 && deviceid <= 999 {
+        return "ngeigie"
+    }
+
     // For V1 numbering space
     if deviceid >= 100000 && deviceid < 299999 {
         return "pointcast"
     }
+
+    // Air
+    if deviceid >= 50000 && deviceid < 59999 {
+        return "safecast-air"
+    }
+
     return ""
 }
 
@@ -52,7 +81,13 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
         did := uint32(*v1.DeviceId)
         sd.DeviceId = &did
     }
-    if !isPointcast && !isSafecastAir {
+    isNgeigie := false
+    if devicetype == "ngeigie" {
+        isNgeigie = true
+        did := uint32(*v1.DeviceId)
+        sd.DeviceId = &did
+    }
+    if !isPointcast && !isSafecastAir && !isNgeigie {
         fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceId)
         return 0, "", sd
     }
@@ -107,7 +142,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             sd.Env = &env
 
         case "celcius":
-			fallthrough
+            fallthrough
         case "tempc":
             var env Env
             temp := *v1.Value
@@ -115,9 +150,12 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             sd.Env = &env
 
         case "cpm":
-            if !isPointcast {
-                fmt.Printf("*** Reformat: Received CPM for non-Pointcast %d\n", *sd.DeviceId)
-            } else {
+            if isNgeigie {
+                var lnd Lnd
+                cpm := *v1.Value
+                lnd.U7318 = &cpm
+                sd.Lnd = &lnd
+            } else if isPointcast {
                 if 1 == (*v1.DeviceId % 10) {
                     var lnd Lnd
                     cpm := *v1.Value
@@ -132,7 +170,10 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
                 } else {
                     fmt.Printf("*** Reformat: %d cpm not understood for this subtype\n", *sd.DeviceId)
                 }
+            } else {
+                fmt.Printf("*** Reformat: Received CPM for unrecognized device %d\n", *sd.DeviceId)
             }
+
         case "status":
             // The value is the temp
             var env Env

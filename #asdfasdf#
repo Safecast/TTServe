@@ -14,7 +14,3 @@ nit":"cpm","height":"10","devicetype_id":"Pointcast V1"}
 {"longitude":"-122.345039","latitude":"47.612268","device_id":"200072","value":"11","unit":"cpm","height":"36","devicetype_id":"Pointcast V1"}
 &{0xc820286260 0xc8202861e0 <nil> 0xc8202861f0 <nil> 0xc820286188 <nil
 
-*** Reformat: unsuccessful attempt to reformat Device ID 200099
-{"longitude":"-71.111946","latitude":"42.381242","device_id":"200099","value":"28.4","unit":"status","height":"5","devicetype_id":"DeviceID:20009,Temperature:28.4,Battery Voltage:8.34,Fails:369,Restarts:118,FreeRam:53724,Last failure:,NTP count:1"}
-&{0xc8204685f0 0xc820468570 <nil> 0xc820468580 <nil> 0xc82046852c <nil> <nil> <nil> <nil> <nil> 0xc8204685b0 0xc8204685b4 0xc8204685b8 0xc8204685bc}
-
