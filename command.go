@@ -373,7 +373,10 @@ func CommandParse(user string, objtype string, message string) string {
                 if d == "" {
                     continue
                 }
-                valid, result, _ := DeviceVerify(d)
+				valid, result, _ := RangeVerify(d)
+				if !valid {
+	                valid, result, _ = DeviceVerify(d)
+				}
                 if !valid {
                     return result
                 }
@@ -406,7 +409,10 @@ func CommandParse(user string, objtype string, message string) string {
                 if d == "" {
                     continue
                 }
-                valid, result, _ := DeviceVerify(d)
+				valid, result, _ := RangeVerify(d)
+				if !valid {
+	                valid, result, _ = DeviceVerify(d)
+				}
                 if !valid {
                     return result
                 }
@@ -564,35 +570,35 @@ func PlusCode(code string) bool {
 }
 
 // Look up a number from two or three simple words
-func RangeVerify(what string) (bool, Range) {
+func RangeVerify(what string) (bool, string, Range) {
 	var r Range
 	
     parts := strings.Split(what, "-")
     if len(parts) != 2 {
-		return false, Range{}
+		return false, "Not a device range", Range{}
 	}
 
     // See if low part parses cleanly as a number
     i64, err := strconv.ParseUint(parts[0], 10, 32)
     if err != nil {
-		return false, Range{}
+		return false, "Not a device range", Range{}
 	}
 	r.Low = uint32(i64)
 
     // See if high part parses cleanly as a number
     i64, err = strconv.ParseUint(parts[1], 10, 32)
     if err != nil {
-		return false, Range{}
+		return false, "Not a device range", Range{}
 	}
 	r.High = uint32(i64)
 
-	return true, r
+	return true, what, r
 }
 
 // Get a list of devices
 func DeviceList(user string, devicelist string) (rValid bool, rResult string, rExpanded []uint32, rExpandedRange []Range, rExpandedPlusCodes []string) {
 
-	isrange, r := RangeVerify(devicelist)
+	isrange, _, r := RangeVerify(devicelist)
     isdevice, result, deviceid := DeviceVerify(devicelist)
 
 	if isrange {
@@ -615,10 +621,11 @@ func DeviceList(user string, devicelist string) (rValid bool, rResult string, rE
         if valid {
             for _, d := range strings.Split(result, ",") {
 
-				isrange, r := RangeVerify(d)
+				isrange, _, r := RangeVerify(d)
 			    isdevice, result, deviceid := DeviceVerify(d)
 
 				if isrange {
+
 					rExpandedRange = append(rExpandedRange, r)
 
                 } else if isdevice {
