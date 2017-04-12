@@ -324,6 +324,15 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 
     }
 
+	// None
+	if s == header {
+		if fOffline {
+			s = "All devices are currently online."
+		} else {
+			s = "All devices are currently offline."
+		}
+	}
+	
     // Send it to Slack
     sendToSafecastOps(s, SLACK_MSG_REPLY)
 
