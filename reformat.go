@@ -106,6 +106,8 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             env.Humid = &humid
             sd.Env = &env
 
+        case "celcius":
+			fallthrough
         case "tempc":
             var env Env
             temp := *v1.Value
