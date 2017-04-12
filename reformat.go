@@ -22,7 +22,7 @@ func SafecastV1DeviceType(deviceid uint32) string {
         return "safecast-air"
     }
     // For V1 numbering space
-    if deviceid >= 100000 && deviceid < 199999 {
+    if deviceid >= 100000 && deviceid < 299999 {
         return "pointcast"
     }
     return ""
