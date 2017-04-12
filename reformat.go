@@ -15,7 +15,7 @@ import (
 // Get the type of a device
 func SafecastV1DeviceType(deviceid uint32) string {
     // For true V2 numbering space
-    if deviceid >= 10000 && deviceid < 19999 {
+    if deviceid > 0 && deviceid < 19999 {
         return "pointcast"
     }
     if deviceid >= 50000 && deviceid < 59999 {
