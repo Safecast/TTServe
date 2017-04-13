@@ -27,9 +27,10 @@ func ipv4(Str1 string) string {
 // over just calling ipv4(req.RemoteAddr), which returns the internal LB address.
 // Thanks to https://husobee.github.io/golang/ip-address/2015/12/17/remote-ip-go.html
 func getRequestorIPv4(r *http.Request) (IPstr string, isReal bool) {
-	fmt.Printf("GetRequestorIPv4: \n%v\n", r.Header)
+	if (false) {
+		fmt.Printf("GetRequestorIPv4: \n%v\n", r.Header)
+	}
 	for _, h := range []string{"X-Forwarded-For", "X-Real-Ip"} {
-		fmt.Printf("GetRequestorIPv4: %s = '%s' -> ", h, r.Header.Get(h))
 		addresses := strings.Split(r.Header.Get(h), ",")
 		// march from right to left until we get a public address
 		// that will be the address right before our proxy.
@@ -41,11 +42,9 @@ func getRequestorIPv4(r *http.Request) (IPstr string, isReal bool) {
 				// bad address, go to next
 				continue
 			}
-			fmt.Printf("TrUe %s\n", ip)
 			return ip, true
 		}
 	}
-	fmt.Printf("%t %s\n", !isPrivateSubnet(net.ParseIP(ipv4(r.RemoteAddr))), ipv4(r.RemoteAddr))
 	return ipv4(r.RemoteAddr), !isPrivateSubnet(net.ParseIP(ipv4(r.RemoteAddr)))
 }
 
