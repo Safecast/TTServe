@@ -60,6 +60,7 @@ func SafecastV1DeviceType(deviceid uint32) string {
 // Reformat a special V1 payload to Current
 func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint32, devtype string, data SafecastData) {
     var sd SafecastData
+	var v1DeviceId uint32
 
     // Required field
     if v1.DeviceId == nil {
@@ -67,39 +68,48 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
         return 0, "", sd
     }
 
+	// Fetch the V1 device ID and place it into a var so we can manipulate it
+	v1DeviceId = *v1.DeviceId
+
 	// Catch attempts to use DeviceID == 0 by placing it into somewhere we can watch.
 	// We're putting this here 2017-04-12 because we're observing that nGeigie Device #40
 	// is occasionally sending:
 	// {"longitude":"140.9917","latitude":"37.5635","device_id":"0","value":"0",
 	//  "unit":"cpm","height":"5","devicetype_id":"Pointcast V1"}
-	if *v1.DeviceId == 0 {
+	if v1DeviceId == 0 {
         return 0, "", sd
 	}
 
+	// Special-case a single nGeigie that had been partially converted to Pointcast firmware,
+	// a bug fix we put in on 2017-04-13 at Rob's guidance.
+	if v1DeviceId == 48 {
+		v1DeviceId = 40
+	}
+	
     // Detect what range it is within, and process the conversion differently
-    devicetype := SafecastV1DeviceType(*v1.DeviceId)
+    devicetype := SafecastV1DeviceType(v1DeviceId)
     isPointcast := false
     if devicetype == "pointcast" {
         isPointcast = true
-        did := uint32(*v1.DeviceId / 10)
+        did := uint32(v1DeviceId / 10)
         sd.DeviceId = &did
     }
     isSafecastAir := false
     if devicetype == "safecast-air" {
         isSafecastAir = true
-        did := uint32(*v1.DeviceId)
+        did := uint32(v1DeviceId)
         sd.DeviceId = &did
     }
     isNgeigie := false
     if devicetype == "ngeigie" {
         isNgeigie = true
-        did := uint32(*v1.DeviceId)
+        did := uint32(v1DeviceId)
         sd.DeviceId = &did
     }
 	
 	// Reject non-reformattable devices
     if !isPointcast && !isSafecastAir && !isNgeigie {
-        fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", *v1.DeviceId)
+        fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", v1DeviceId)
         return 0, "", sd
     }
 
@@ -167,13 +177,13 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
                 lnd.U7318 = &cpm
                 sd.Lnd = &lnd
             } else if isPointcast {
-                if 1 == (*v1.DeviceId % 10) {
+                if 1 == (v1DeviceId % 10) {
                     var lnd Lnd
                     cpm := *v1.Value
                     lnd.U7318 = &cpm
                     sd.Lnd = &lnd
 
-                } else if 2 == (*v1.DeviceId % 10) {
+                } else if 2 == (v1DeviceId % 10) {
                     var lnd Lnd
                     cpm := *v1.Value
                     lnd.EC7128 = &cpm
@@ -274,7 +284,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             }
 
         default:
-            fmt.Printf("*** Reformat Warning ***\n*** %s id=%d Unit %s = Value %f UNRECOGNIZED\n", devicetype, *v1.DeviceId, *v1.Unit, *v1.Value)
+            fmt.Printf("*** Reformat Warning ***\n*** %s id=%d Unit %s = Value %f UNRECOGNIZED\n", devicetype, v1DeviceId, *v1.Unit, *v1.Value)
 
         }
     }
