@@ -67,6 +67,15 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
         return 0, "", sd
     }
 
+	// Catch attempts to use DeviceID == 0 by placing it into somewhere we can watch.
+	// We're putting this here 2017-04-12 because we're observing that nGeigie Device #40
+	// is occasionally sending:
+	// {"longitude":"140.9917","latitude":"37.5635","device_id":"0","value":"0",
+	//  "unit":"cpm","height":"5","devicetype_id":"Pointcast V1"}
+	if *v1.DeviceId == 0 {
+        return 0, "", sd
+	}
+
     // Detect what range it is within, and process the conversion differently
     devicetype := SafecastV1DeviceType(*v1.DeviceId)
     isPointcast := false
@@ -87,13 +96,6 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
         did := uint32(*v1.DeviceId)
         sd.DeviceId = &did
     }
-
-	// Catch attempts to use DeviceID == 0 by placing it into somewhere we can watch
-	if *v1.DeviceId == 0 {
-        isNgeigie = true
-        did := uint32(1)
-        sd.DeviceId = &did
-	}
 	
 	// Reject non-reformattable devices
     if !isPointcast && !isSafecastAir && !isNgeigie {
