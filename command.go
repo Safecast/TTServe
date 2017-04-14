@@ -678,7 +678,7 @@ func MarkVerify(mark string, reference string, fBackwards bool) (rValid bool, rO
 
     // If nothing is specified, just return the reference
     if mark == "" {
-        return true, "0h", reference
+        return true, nowInUTC(), reference
     }
 
     // If not, see if this is just a number of days/hrs/mins
