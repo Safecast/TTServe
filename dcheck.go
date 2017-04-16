@@ -37,6 +37,7 @@ type MeasurementStat struct {
     ErrorsLora          uint32
     ErrorsFona          uint32
     ErrorsCommsPowerFails uint32
+    ErrorsCommsAntFails uint32
     ErrorsGeiger        uint32
     ErrorsMax01         uint32
     ErrorsUgps          uint32
@@ -141,6 +142,8 @@ type MeasurementDataset struct {
     ThisErrorsFona      uint32
     PrevErrorsCommsPowerFails uint32
     ThisErrorsCommsPowerFails uint32
+    PrevErrorsCommsAntFails uint32
+    ThisErrorsCommsAntFails uint32
     PrevErrorsGeiger    uint32
     ThisErrorsGeiger    uint32
     PrevErrorsMax01     uint32
@@ -326,6 +329,9 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
         if sd.Dev.CommsPowerFails != nil {
             stat.ErrorsCommsPowerFails = *sd.Dev.CommsPowerFails
+        }
+        if sd.Dev.CommsAntFails != nil {
+            stat.ErrorsCommsAntFails = *sd.Dev.CommsAntFails
         }
         if sd.Dev.ErrorsGeiger != nil {
             stat.ErrorsGeiger = *sd.Dev.ErrorsGeiger
@@ -726,6 +732,10 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.ThisErrorsCommsPowerFails = stat.ErrorsCommsPowerFails
         ds.AnyErrors = true
     }
+    if stat.ErrorsCommsAntFails > ds.ThisErrorsCommsAntFails {
+        ds.ThisErrorsCommsAntFails = stat.ErrorsCommsAntFails
+        ds.AnyErrors = true
+    }
     if stat.ErrorsGeiger > ds.ThisErrorsGeiger {
         ds.ThisErrorsGeiger = stat.ErrorsGeiger
         ds.AnyErrors = true
@@ -1010,6 +1020,8 @@ func AggregateErrors(ds *MeasurementDataset) {
     ds.ThisErrorsFona = 0
     ds.PrevErrorsCommsPowerFails += ds.ThisErrorsCommsPowerFails
     ds.ThisErrorsCommsPowerFails = 0
+    ds.PrevErrorsCommsAntFails += ds.ThisErrorsCommsAntFails
+    ds.ThisErrorsCommsAntFails = 0
     ds.PrevErrorsGeiger += ds.ThisErrorsGeiger
     ds.ThisErrorsGeiger = 0
     ds.PrevErrorsMax01 += ds.ThisErrorsMax01
@@ -1312,43 +1324,46 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         s += fmt.Sprintf("  None\n")
     } else {
         if ds.PrevErrorsOpc > 0 {
-            s += fmt.Sprintf("  Opc        %d\n", ds.PrevErrorsOpc)
+            s += fmt.Sprintf("  Opc          %d\n", ds.PrevErrorsOpc)
         }
         if ds.PrevErrorsPms > 0 {
-            s += fmt.Sprintf("  Pms        %d\n", ds.PrevErrorsPms)
+            s += fmt.Sprintf("  Pms          %d\n", ds.PrevErrorsPms)
         }
         if ds.PrevErrorsBme0 > 0 {
-            s += fmt.Sprintf("  Bme0       %d\n", ds.PrevErrorsBme0)
+            s += fmt.Sprintf("  Bme0         %d\n", ds.PrevErrorsBme0)
         }
         if ds.PrevErrorsBme1 > 0 {
-            s += fmt.Sprintf("  Bme1       %d\n", ds.PrevErrorsBme1)
+            s += fmt.Sprintf("  Bme1         %d\n", ds.PrevErrorsBme1)
         }
         if ds.PrevErrorsLora > 0 {
-            s += fmt.Sprintf("  Lora       %d\n", ds.PrevErrorsLora)
+            s += fmt.Sprintf("  Lora         %d\n", ds.PrevErrorsLora)
         }
         if ds.PrevErrorsFona > 0 {
-            s += fmt.Sprintf("  Fona       %d\n", ds.PrevErrorsFona)
+            s += fmt.Sprintf("  Fona         %d\n", ds.PrevErrorsFona)
         }
         if ds.PrevErrorsCommsPowerFails > 0 {
-            s += fmt.Sprintf("  Fona Power %d\n", ds.PrevErrorsCommsPowerFails)
+            s += fmt.Sprintf("  Fona Power   %d\n", ds.PrevErrorsCommsPowerFails)
+        }
+        if ds.PrevErrorsCommsAntFails > 0 {
+            s += fmt.Sprintf("  Fona Antenna %d\n", ds.PrevErrorsCommsAntFails)
         }
         if ds.PrevErrorsGeiger > 0 {
-            s += fmt.Sprintf("  Geiger     %d\n", ds.PrevErrorsGeiger)
+            s += fmt.Sprintf("  Geiger       %d\n", ds.PrevErrorsGeiger)
         }
         if ds.PrevErrorsMax01 > 0 {
-            s += fmt.Sprintf("  Max01      %d\n", ds.PrevErrorsMax01)
+            s += fmt.Sprintf("  Max01        %d\n", ds.PrevErrorsMax01)
         }
         if ds.PrevErrorsUgps > 0 {
-            s += fmt.Sprintf("  Ugps       %d\n", ds.PrevErrorsUgps)
+            s += fmt.Sprintf("  Ugps         %d\n", ds.PrevErrorsUgps)
         }
         if ds.PrevErrorsLis > 0 {
-            s += fmt.Sprintf("  Lis        %d\n", ds.PrevErrorsLis)
+            s += fmt.Sprintf("  Lis          %d\n", ds.PrevErrorsLis)
         }
         if ds.PrevErrorsSpi > 0 {
-            s += fmt.Sprintf("  Spi        %d\n", ds.PrevErrorsSpi)
+            s += fmt.Sprintf("  Spi          %d\n", ds.PrevErrorsSpi)
         }
         if ds.PrevErrorsTwi > 0 || ds.ErrorsTwiInfo != "" {
-            s += fmt.Sprintf("  Twi        %d %s\n", ds.PrevErrorsTwi, ds.ErrorsTwiInfo)
+            s += fmt.Sprintf("  Twi          %d %s\n", ds.PrevErrorsTwi, ds.ErrorsTwiInfo)
         }
     }
     s += fmt.Sprintf("\n")
