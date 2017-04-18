@@ -687,7 +687,7 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
             // We'd like to return the response
             respstr := string(buf)
             if strings.Contains(respstr, "<head>") {
-                fmt.Printf("******** %s response is HTML (%d bytes) rather than JSON ********\n", domain, len(respstr))
+                fmt.Printf("*** %s response is HTML (%d bytes) rather than JSON ***\n", domain, len(respstr))
 			    filename := SafecastDirectory() + TTServerLogPath + "/" + domain + ".txt"
 		        fd, e := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
 				if e == nil {
