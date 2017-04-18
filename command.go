@@ -468,7 +468,7 @@ func CommandParse(user string, command string, objtype string, message string) s
     if objtype == ObjReport {
 
 		// Run the report
-		if strings.ToLower(args[0]) != "check" {
+		if strings.ToLower(command) != "check" {
 	        return(ReportRun(user, true, message))
 		}
 
