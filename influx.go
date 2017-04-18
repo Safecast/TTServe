@@ -688,7 +688,7 @@ func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int 
 }
 
 // Perform a query, returning either an URL to results or an error message
-func InfluxQuery(the_user string, the_query string, is_csv bool) (success bool, result string, numresults int) {
+func InfluxQuery(the_user string, the_query string, is_csv bool) (success bool, numresults int, result string, resultfilename string) {
 
 	// Request for influx query
 	fmt.Printf("\n*** %s requested query '%s'\n", the_user, the_query)
@@ -701,7 +701,7 @@ func InfluxQuery(the_user string, the_query string, is_csv bool) (success bool, 
     if clerr == nil {
         defer cl.Close()
     } else {
-        return false, fmt.Sprintf("%v", clerr), 0
+        return false, 0, fmt.Sprintf("%v", clerr), ""
     }
 
     // Perform the query
@@ -710,12 +710,12 @@ func InfluxQuery(the_user string, the_query string, is_csv bool) (success bool, 
     q.ChunkSize = 100
     response, qerr := cl.Query(q)
     if qerr != nil {
-        return false, fmt.Sprintf("%v", qerr), 0
+        return false, 0, fmt.Sprintf("%v", qerr), ""
     }
 
     // Exit if an err
     if response.Error() != nil {
-        return false, fmt.Sprintf("%v", response.Error()), 0
+        return false, 0, fmt.Sprintf("%v", response.Error()), ""
     }
 
 	// Generate the filename
@@ -736,7 +736,7 @@ func InfluxQuery(the_user string, the_query string, is_csv bool) (success bool, 
 		fd, err = jsonNew(filename)
 	}
     if err != nil {
-        return false, fmt.Sprintf("cannot create file: %s", err), 0
+        return false, 0, fmt.Sprintf("cannot create file: %s", err), ""
     }
 
     // Convert to CSV
@@ -751,13 +751,11 @@ func InfluxQuery(the_user string, the_query string, is_csv bool) (success bool, 
 
 	// Exit if no results
     if rows == 0 {
-        return false, "No results.", 0
+        return false, 0, "No results.", ""
     }
 
     // Return the URL to the file
     url := fmt.Sprintf("http://%s%s%s", TTServerHTTPAddress, TTServerTopicQueryResults, file)
-
-    // const TTInfluxQueryPath = "/influx-query"
-    return true, url, rows
+    return true, rows, url, filename
 
 }

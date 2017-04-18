@@ -230,7 +230,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             rawQuery := html.UnescapeString(messageAfterFirstWord)
             fmt.Printf("\n%s *** Influx query: \"%s\"\n", logTime(), rawQuery)
             // Perform the query
-            success, result, numrows := InfluxQuery(user, rawQuery, true)
+            success, numrows, result, _ := InfluxQuery(user, rawQuery, true)
             if !success {
                 sendToSafecastOps(fmt.Sprintf("Query error: %s: %s", result, "SELECT " + rawQuery), SLACK_MSG_REPLY)
             } else {

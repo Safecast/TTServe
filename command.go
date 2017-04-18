@@ -361,7 +361,8 @@ func CommandParse(user string, command string, objtype string, message string) s
         if objtype != ObjReport {
             return fmt.Sprintf("%s is not a report.", objname)
         }
-        return(ReportRun(user, true, messageAfterFirstArg))
+		_, result, _ := ReportRun(user, true, messageAfterFirstArg)
+        return result
 
     case "add":
         if objtype == ObjDevice {
@@ -469,11 +470,38 @@ func CommandParse(user string, command string, objtype string, message string) s
 
 		// Run the report
 		if strings.ToLower(command) != "check" {
-	        return(ReportRun(user, true, message))
+			_, result, _ := ReportRun(user, true, message)
+	        return result
 		}
 
 		// Get the JSON
-        return(ReportRun(user, false, message))
+		
+        success, result, filename := ReportRun(user, false, message)
+		if !success {
+			return result
+		}
+
+		// Create the output file for the check
+	    file := time.Now().UTC().Format("2006-01-02-150405") + "-" + user + ".txt"
+	    outfile := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
+	    fd, err := os.OpenFile(outfile, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+		if err != nil {
+			return fmt.Sprintf("Error creating output file: %s", err)
+		}
+	    defer fd.Close()
+
+		// Perform the check
+		checksuccess, checkresults := CheckJSON(filename, "")
+		if !checksuccess {
+			return checkresults
+		}
+
+		// Write it to the file
+	    fd.WriteString(checkresults)
+
+		// Done
+	    url := fmt.Sprintf("http://%s%s%s", TTServerHTTPAddress, TTServerTopicQueryResults, file)
+		return fmt.Sprintf("Check results are <%s|here> and %s", url, result)
 
     }
 
@@ -840,16 +868,16 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 }
 
 // Run a report or transform it
-func ReportRun(user string, csv bool, report string) string {
+func ReportRun(user string, csv bool, report string) (success bool, result string, filename string) {
 	
     // See if there is only one arg which is the report name
     if !strings.Contains(report, " ") {
 		if report == "" {
-			return ReportHelp
+			return false, ReportHelp, ""
 		}
         found, value := CommandObjGet(user, ObjReport, report)
         if !found {
-            return fmt.Sprintf("Report %s not found.", report)
+            return false, fmt.Sprintf("Report %s not found.", report), ""
         }
         report = value
     }
@@ -857,7 +885,7 @@ func ReportRun(user string, csv bool, report string) string {
     // Validate and expand the report
     valid, result, devices, ranges, pluscodes, from, to := ReportVerify(user, report)
     if !valid {
-        return result
+        return false, result, ""
     }
 
     // Generate base of query
@@ -893,12 +921,12 @@ func ReportRun(user string, csv bool, report string) string {
     sql += fmt.Sprintf(" AND ( time >= '%s' AND time < '%s' )", from, to)
 
     // Execute the query
-    success, result, numrows := InfluxQuery(user, sql, csv)
+    success, numrows, result, filename := InfluxQuery(user, sql, csv)
     if !success {
-        return result
+        return false, result, ""
     }
 
     // Done
-    return fmt.Sprintf("%d rows of data are <%s|here>, @%s.", numrows, result, user)
+    return true, fmt.Sprintf("%d rows of data are <%s|here>, @%s.", numrows, result, user), filename
 
 }

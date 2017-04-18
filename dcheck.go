@@ -239,8 +239,12 @@ type MeasurementDataset struct {
 func NewMeasurementDataset(deviceidstr string) MeasurementDataset {
     ds := MeasurementDataset{}
 
-    u64, _ := strconv.ParseUint(deviceidstr, 10, 32)
-    ds.DeviceId = uint32(u64)
+	if deviceidstr == "" {
+		ds.DeviceId = 0
+	} else {
+	    u64, _ := strconv.ParseUint(deviceidstr, 10, 32)
+	    ds.DeviceId = uint32(u64)
+	}
     ds.LoraModule = "unidentified lora module"
     ds.FonaModule = "unidentified fona module"
     ds.Boots++
@@ -1067,11 +1071,13 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     // High-level stats
     s += fmt.Sprintf("Checkup:\n")
-    s += fmt.Sprintf("  id %d", ds.DeviceId)
-    if time.Now().Sub(ds.NewestUpload)/time.Minute > 90 {
-        s += fmt.Sprintf(" (OFFLINE)")
-    }
-    s += fmt.Sprintf("\n")
+	if ds.DeviceId != 0 {
+	    s += fmt.Sprintf("  id %d", ds.DeviceId)
+	    if time.Now().Sub(ds.NewestUpload)/time.Minute > 90 {
+	        s += fmt.Sprintf(" (OFFLINE)")
+	    }
+	    s += fmt.Sprintf("\n")
+	}
     s += fmt.Sprintf("  at %s\n", time.Now().Format("2006-01-02 15:04 UTC"))
     if ds.Firmware != "" {
         s += fmt.Sprintf("  on %s\n", ds.Firmware)
