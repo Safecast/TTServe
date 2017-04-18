@@ -1314,7 +1314,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.OpcWarningCount == 0 {
         s += fmt.Sprintf("  Opc %6d", ds.OpcCount)
     } else {
-        s += fmt.Sprintf("  Opc %6d  [%d OOR %s]\n", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Opc %6d  [%d OOR %s]", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
     if ds.OpcCount == 0 {
         s += fmt.Sprintf("\n")
