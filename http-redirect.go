@@ -140,7 +140,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // Convert to current data format
     deviceID, deviceType, sd := SafecastReformat(sdV1, isTestMeasurement)
     if deviceID == 0 {
-        fmt.Printf("%s\n%v\n", string(body), sdV1)
+	    requestor, _ := getRequestorIPv4(req)
+	    transportStr := deviceType+":" + requestor
+	    fmt.Printf("\n%s ** Ignoring message with DeviceID == 0 from %s:\n%s\n", logTime(), transportStr, string(body))
         return
     }
 
