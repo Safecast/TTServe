@@ -1294,7 +1294,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     if ds.EncWarningCount == 0 {
         s += fmt.Sprintf("  Enc %6d", ds.EncCount)
     } else {
-        s += fmt.Sprintf("  Enc %6d [%d OOR %s]", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        s += fmt.Sprintf("  Enc %6d  [%d OOR %s]", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
     }
     if ds.EncCount == 0 {
         s += fmt.Sprintf("\n")
