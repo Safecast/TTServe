@@ -396,7 +396,7 @@ func csvAppend(fd *os.File, sd *SafecastData) {
         s += ","
     }
     if sd.Dev != nil && sd.Dev.Iccid != nil {
-        s += fmt.Sprintf(",\"%s\"", *sd.Dev.Iccid)
+        s += fmt.Sprintf(",\"SIM %s\"", *sd.Dev.Iccid)
     } else {
         s += ","
     }
