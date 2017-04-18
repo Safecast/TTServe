@@ -893,7 +893,7 @@ func ReportRun(user string, csv bool, report string) string {
     sql += fmt.Sprintf(" AND ( time >= '%s' AND time < '%s' )", from, to)
 
     // Execute the query
-    success, result, numrows := InfluxQuery(user, sql, true)
+    success, result, numrows := InfluxQuery(user, sql, csv)
     if !success {
         return result
     }
