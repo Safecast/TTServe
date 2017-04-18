@@ -29,15 +29,28 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 
     fmt.Printf("%s LOG ANALYSIS request for %s\n", logTime(), filename)
 
+	// Check it
+	success, s := CheckJSON(SafecastDirectory() + filename, deviceidstr)
+	if !success {
+		io.WriteString(rw, s)
+	}
+	
+	// Done
+	io.WriteString(rw, s)
+
+}
+
+// Check a JSON file
+func CheckJSON(infile string, outfile string) (success bool, result string) {
+	
 	// Read the log
-    contents, err := ioutil.ReadFile(SafecastDirectory() + filename)
+    contents, err := ioutil.ReadFile(infile)
     if err != nil {
-        io.WriteString(rw, errorString(err))
-        return
+        return false, errorString(err)
     }
 
 	// Begin taking stats
-	stats := NewMeasurementDataset(deviceidstr)
+	stats := NewMeasurementDataset(outfile)
 
 	// Split the contents into a number of slices based on the commas
 	splitContents := strings.Split(string(contents), "\n,")
@@ -71,8 +84,8 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// Generate the summary of the aggregation
 	s := GenerateDatasetSummary(stats)
-	
-	// Write to the browser and exit
-	io.WriteString(rw, s)
 
+	// Done
+	return true, s
+	
 }
