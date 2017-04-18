@@ -57,7 +57,7 @@ func csvClose(fd *os.File) {
 }
 
 // Append a measurement to the dataset
-func csvAppend(fd *os.File, sd *SafecastData) {
+func csvAppend(fd *os.File, sd *SafecastData, first bool) {
 
     // Write the stuff
     s := ""

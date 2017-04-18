@@ -434,7 +434,8 @@ func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int 
 	buf := make([]byte, 8192)
     fDebug := false
 	results := 0
-
+	firstrow := true
+	
     for _, result := range response.Results {
         // Ignore this
         if fDebug {
@@ -669,11 +670,12 @@ func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int 
 
 					// Append a row to the file
 					if fCSV {
-						csvAppend(fd, &sd)
+						csvAppend(fd, &sd, firstrow)
 					} else {
-						jsonAppend(fd, &sd)
+						jsonAppend(fd, &sd, firstrow)
 					}
-
+					firstrow = false
+					
 					// Bump the number of successful results
 					results++
 

@@ -55,21 +55,23 @@ func jsonNew(filename string) (*os.File, error) {
 func jsonClose(fd *os.File) {
 
     // Write the header
-    fd.WriteString("]\r\n")
+    fd.WriteString("\r\n]")
 
     fd.Close()
 }
 
 // Append a measurement to the dataset
-func jsonAppend(fd *os.File, sd *SafecastData) {
+func jsonAppend(fd *os.File, sd *SafecastData, first bool) {
 
 	// Marshal it
     scJSON, _ := json.Marshal(sd)
 
+	// Append a separator if not the first
+	if !first {
+		io.WriteString(fd, "\r\n,\r\n")
+	}
+
 	// Write it
     io.WriteString(fd, string(scJSON))
-
-	// Append a separator
-	io.WriteString(fd, "\r\n,\r\n")
 
 }

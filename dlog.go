@@ -89,7 +89,7 @@ func SafecastCSVDeviceLog(sd SafecastData) {
     }
 
 	// Append this measurement
-	csvAppend(fd, &sd)
+	csvAppend(fd, &sd, false)
 
 	// Done
 	csvClose(fd)
