@@ -30,7 +30,7 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
     fmt.Printf("%s LOG ANALYSIS request for %s\n", logTime(), filename)
 
 	// Check it
-	success, s := CheckJSON(SafecastDirectory() + filename, deviceidstr)
+	success, s := CheckJSON(SafecastDirectory() + filename)
 	if !success {
 		io.WriteString(rw, s)
 	}
@@ -41,7 +41,7 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 }
 
 // Check a JSON file
-func CheckJSON(infile string, outfile string) (success bool, result string) {
+func CheckJSON(infile string) (success bool, result string) {
 	
 	// Read the log
     contents, err := ioutil.ReadFile(infile)
@@ -50,7 +50,7 @@ func CheckJSON(infile string, outfile string) (success bool, result string) {
     }
 
 	// Begin taking stats
-	stats := NewMeasurementDataset(outfile)
+	stats := NewMeasurementDataset()
 
 	// Split the contents into a number of slices based on the commas
 	splitContents := strings.Split(string(contents), "\n,")

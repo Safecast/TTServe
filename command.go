@@ -491,7 +491,7 @@ func CommandParse(user string, command string, objtype string, message string) s
 	    defer fd.Close()
 
 		// Perform the check
-		checksuccess, checkresults := CheckJSON(filename, "")
+		checksuccess, checkresults := CheckJSON(filename)
 		if !checksuccess {
 			return checkresults
 		}

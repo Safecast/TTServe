@@ -8,7 +8,6 @@ package main
 import (
     "fmt"
     "math"
-    "strconv"
     "strings"
     "time"
 )
@@ -19,6 +18,7 @@ import (
 
 // Stats about a single measurement
 type MeasurementStat struct {
+    DeviceId            uint32
     Valid               bool
     Test                bool
     Firmware            string
@@ -90,7 +90,7 @@ type MeasurementStat struct {
 
 // Stats about all measurements
 type MeasurementDataset struct {
-    DeviceId            uint32
+    DeviceId            []uint32
     Firmware            string
     MultiFirmware       bool
     OldestUpload        time.Time
@@ -236,19 +236,11 @@ type MeasurementDataset struct {
     HiEncP              float64
 }
 
-func NewMeasurementDataset(deviceidstr string) MeasurementDataset {
+func NewMeasurementDataset() MeasurementDataset {
     ds := MeasurementDataset{}
-
-	if deviceidstr == "" {
-		ds.DeviceId = 0
-	} else {
-	    u64, _ := strconv.ParseUint(deviceidstr, 10, 32)
-	    ds.DeviceId = uint32(u64)
-	}
     ds.LoraModule = "unidentified lora module"
     ds.FonaModule = "unidentified fona module"
     ds.Boots++
-
     return ds
 
 }
@@ -263,6 +255,11 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
     }
     stat.Valid = true
 
+	// Device ID
+	if sd.DeviceId != nil {
+		stat.DeviceId = *sd.DeviceId
+	}
+	
     // Process service-related stats
     if sd.Service != nil {
 
@@ -566,6 +563,20 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.TestMeasurements++
     }
 
+	// Device ID
+	if stat.DeviceId != 0 {
+		foundDevice := false
+        for _, d := range ds.DeviceId {
+			if d == stat.DeviceId {
+				foundDevice = true
+				break
+			}
+		}
+		if !foundDevice {
+            ds.DeviceId = append(ds.DeviceId, stat.DeviceId)
+		}
+	}
+	
     // Firmware
     if stat.Firmware != "" {
         foundFirmware := false
@@ -1071,8 +1082,14 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 
     // High-level stats
     s += fmt.Sprintf("Checkup:\n")
-	if ds.DeviceId != 0 {
-	    s += fmt.Sprintf("  id %d", ds.DeviceId)
+	if len(ds.DeviceId) != 0 {
+	    s += fmt.Sprintf("  id ")
+        for i, d := range ds.DeviceId {
+			if i != 0 {
+				s += ","
+			}
+		    s += fmt.Sprintf("%d", d)
+		}
 	    if time.Now().Sub(ds.NewestUpload)/time.Minute > 90 {
 	        s += fmt.Sprintf(" (OFFLINE)")
 	    }
