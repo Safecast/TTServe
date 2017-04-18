@@ -6,6 +6,7 @@
 package main
 
 import (
+	"strings"
 	"os"
     "net/http"
     "fmt"
@@ -29,9 +30,11 @@ func inboundWebQueryResultsHandler(rw http.ResponseWriter, req *http.Request) {
     }
     defer fd.Close()
 
-	// Force a download
-	rw.Header().Set("Content-Disposition", "attachment; filename=" + filename)
-	rw.Header().Set("Content-Type", "application/octet-stream")
+	// Force a download if it's a csv
+    if strings.HasSuffix(filename, ".csv") {
+		rw.Header().Set("Content-Disposition", "attachment; filename=" + filename)
+		rw.Header().Set("Content-Type", "application/octet-stream")
+	}
 	
     // Copy the file to output
     io.Copy(rw, fd)
