@@ -153,6 +153,8 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         help += "     select <influx query>\n"
         go sendToSafecastOps(help, SLACK_MSG_REPLY)
 
+    case "check":
+        fallthrough
     case "device":
         fallthrough
     case "devices":
