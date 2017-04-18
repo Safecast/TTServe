@@ -1406,6 +1406,11 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         return s
     }
 
+	// That's all if we've measured more than one device
+	if len(ds.DeviceId) != 1 {
+		return s
+	}
+
     // Solarcast summary
     s += fmt.Sprintf("Solarcast Checklist:\n")
 
