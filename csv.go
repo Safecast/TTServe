@@ -2,7 +2,7 @@
 // Use of this source code is governed by licenses granted by the
 // copyright holder including that found in the LICENSE file.
 
-// Log file handling, whether JSON or CSV
+// CSV file handling
 package main
 
 import (

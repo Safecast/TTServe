@@ -332,7 +332,7 @@ func CommandObjSet(user string, objtype string, objname string, objval string) b
 }
 
 // Parse a command and execute it
-func CommandParse(user string, objtype string, message string) string {
+func CommandParse(user string, command string, objtype string, message string) string {
 
     args := strings.Split(message, " ")
     messageAfterFirstArg := ""
@@ -361,7 +361,7 @@ func CommandParse(user string, objtype string, message string) string {
         if objtype != ObjReport {
             return fmt.Sprintf("%s is not a report.", objname)
         }
-        return(ReportRun(user, messageAfterFirstArg))
+        return(ReportRun(user, true, messageAfterFirstArg))
 
     case "add":
         if objtype == ObjDevice {
@@ -468,7 +468,12 @@ func CommandParse(user string, objtype string, message string) string {
     if objtype == ObjReport {
 
 		// Run the report
-        return(ReportRun(user, message))
+		if strings.ToLower(args[0]) != "check" {
+	        return(ReportRun(user, true, message))
+		}
+
+		// Get the JSON
+        return(ReportRun(user, false, message))
 
     }
 
@@ -498,19 +503,21 @@ func Command(user string, message string) string {
     case "devices":
         fallthrough
     case "device":
-        return CommandParse(user, ObjDevice, messageAfterFirstArg)
+        return CommandParse(user, args[0], ObjDevice, messageAfterFirstArg)
 
     case "marks":
         fallthrough
     case "mark":
-        return CommandParse(user, ObjMark, messageAfterFirstArg)
+        return CommandParse(user, args[0], ObjMark, messageAfterFirstArg)
 
     case "run":
         fallthrough
     case "reports":
         fallthrough
+    case "check":
+        fallthrough
     case "report":
-        return CommandParse(user, ObjReport, messageAfterFirstArg)
+        return CommandParse(user, args[0], ObjReport, messageAfterFirstArg)
 
     }
 
@@ -833,7 +840,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
 }
 
 // Run a report or transform it
-func ReportRun(user string, report string) string {
+func ReportRun(user string, csv bool, report string) string {
 	
     // See if there is only one arg which is the report name
     if !strings.Contains(report, " ") {
@@ -886,7 +893,7 @@ func ReportRun(user string, report string) string {
     sql += fmt.Sprintf(" AND ( time >= '%s' AND time < '%s' )", from, to)
 
     // Execute the query
-    success, result, numrows := InfluxQuery(user, sql)
+    success, result, numrows := InfluxQuery(user, sql, true)
     if !success {
         return result
     }

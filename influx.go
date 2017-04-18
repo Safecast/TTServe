@@ -430,7 +430,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 }
 
 // Just a debug function that traverses a Response, which took me forever to figure out
-func InfluxResultsToCSV(response *influx.Response, fd *os.File) int {
+func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int {
 	buf := make([]byte, 8192)
     fDebug := false
 	results := 0
@@ -667,8 +667,12 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) int {
                     fmt.Printf("\nError unmarshaling %s:\n%s\n", err, string(buf[0:buflen]))
                 } else {
 
-					// Append a row to the CSV
-					csvAppend(fd, &sd)
+					// Append a row to the file
+					if fCSV {
+						csvAppend(fd, &sd)
+					} else {
+						jsonAppend(fd, &sd)
+					}
 
 					// Bump the number of successful results
 					results++
@@ -684,7 +688,7 @@ func InfluxResultsToCSV(response *influx.Response, fd *os.File) int {
 }
 
 // Perform a query, returning either an URL to results or an error message
-func InfluxQuery(the_user string, the_query string) (success bool, result string, numresults int) {
+func InfluxQuery(the_user string, the_query string, is_csv bool) (success bool, result string, numresults int) {
 
 	// Request for influx query
 	fmt.Printf("\n*** %s requested query '%s'\n", the_user, the_query)
@@ -715,21 +719,36 @@ func InfluxQuery(the_user string, the_query string) (success bool, result string
     }
 
 	// Generate the filename
-    file := time.Now().UTC().Format("2006-01-02-150405") + "-" + the_user + ".csv"
+    file := time.Now().UTC().Format("2006-01-02-150405") + "-" + the_user
+	if is_csv {
+		file = file + ".csv"
+	} else {
+		file = file + ".json"
+	}
     filename := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
 
     // Create the output file
-	fd, err := csvNew(filename)
+	var fd *os.File
+	var err error
+	if is_csv {
+		fd, err = csvNew(filename)
+	} else {
+		fd, err = jsonNew(filename)
+	}
     if err != nil {
         return false, fmt.Sprintf("cannot create file: %s", err), 0
     }
 
     // Convert to CSV
-    rows := InfluxResultsToCSV(response, fd)
+    rows := InfluxResultsToFile(response, is_csv, fd)
 
 	// Close the file
-	csvClose(fd)
-	
+	if is_csv {
+		csvClose(fd)
+	} else {
+		jsonClose(fd)
+	}
+
 	// Exit if no results
     if rows == 0 {
         return false, "No results.", 0
