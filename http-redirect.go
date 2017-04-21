@@ -79,8 +79,12 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         }
     }
 
+	// Clean up the json.  Specifically, Device ID 100049 puts a newline into
+	// the devietype_id string literal, which is choked on by the JSON parser
+    clean_body := []byte(strings.Replace(string(body), "\n", "", -1))
+
     // Decode the request with custom marshaling
-    sdV1, sdV1Emit, err = SafecastV1Decode(bytes.NewReader(body))
+    sdV1, sdV1Emit, err = SafecastV1Decode(bytes.NewReader(clean_body))
     if err != nil {
         stats.Count.HTTP++
         // Eliminate a bit of the noise caused by load balancer health checks
@@ -90,8 +94,8 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
             } else {
                 fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", logTime(), RequestURI, remoteAddr, err)
             }
-            if len(body) != 0 {
-                fmt.Printf("%s\n", string(body))
+            if len(clean_body) != 0 {
+                fmt.Printf("%s\n", string(clean_body))
             }
         }
         io.WriteString(rw, fmt.Sprintf("Live Free or Die.\n"))
@@ -125,7 +129,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // If debugging, display it
     if redirectDebug {
         fmt.Printf("\n\n*** Redirect %s test:%v %s\n", method, isTestMeasurement, req.RequestURI)
-        fmt.Printf("*** Redirect received:\n%s\n", string(body))
+        fmt.Printf("*** Redirect received:\n%s\n", string(clean_body))
         fmt.Printf("*** Redirect decoded to V1:\n%s\n", sdV1EmitJSON)
     }
 
@@ -142,7 +146,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     if deviceID == 0 {
 	    requestor, _ := getRequestorIPv4(req)
 	    transportStr := deviceType+":" + requestor
-	    fmt.Printf("\n%s ** Ignoring message with DeviceID == 0 from %s:\n%s\n", logTime(), transportStr, string(body))
+	    fmt.Printf("\n%s ** Ignoring message with DeviceID == 0 from %s:\n%s\n", logTime(), transportStr, string(clean_body))
         return
     }
 
@@ -161,7 +165,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     sd.Service = &svc
 
     fmt.Printf("\n%s Received payload for %d from %s\n", logTime(), *sd.DeviceId, transportStr)
-    fmt.Printf("%s\n", body)
+    fmt.Printf("%s\n", clean_body)
 
     // If the data doesn't have anything useful in it, optimize it completely away.  This is
     // observed to happen for Safecast Air from time to time

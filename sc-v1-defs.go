@@ -90,10 +90,8 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	}
 	switch t := in.DeviceTypeIdRaw.(type) {
 	case string:
-		// Device ID 100049 puts a newline into devicetype_id
-        cleaned := strings.Replace(t, "\n", "", -1)
-		out.DeviceTypeId = &cleaned
-		emit.DeviceTypeId = &cleaned
+		out.DeviceTypeId = &t
+		emit.DeviceTypeId = &t
 	}
 	switch t := in.LocationNameRaw.(type) {
 	case string:
