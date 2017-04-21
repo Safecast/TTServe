@@ -81,7 +81,11 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// Clean up the json.  Specifically, Device ID 100049 puts a newline into
 	// the devietype_id string literal, which is choked on by the JSON parser
-    clean_body := []byte(strings.Replace(string(body), "\n", "", -1))
+	clean_body_str := string(body)
+    clean_body_str = strings.Replace(clean_body_str, "\n", "", -1)
+    clean_body_str = strings.Replace(clean_body_str, "\r", "", -1)
+    clean_body_str = strings.Replace(clean_body_str, "\\r", "", -1)
+	clean_body := []byte(clean_body_str)
 
     // Decode the request with custom marshaling
     sdV1, sdV1Emit, err = SafecastV1Decode(bytes.NewReader(clean_body))
