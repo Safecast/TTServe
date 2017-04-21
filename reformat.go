@@ -14,15 +14,15 @@ import (
 
 // Get the type of a device AS NUMBERED in our
 // V2 address space
-func SafecastV1V2DeviceType(deviceid uint32) string {
-
-    // nGeigie
-    if deviceid > 0 && deviceid <= 999 {
-        return "ngeigie"
-    }
+func SafecastDeviceType(deviceid uint32) string {
 
     // Pointcast
-    if deviceid >= 1000 && deviceid <= 19999 {
+    if deviceid >= 10000 && deviceid <= 29999 {
+        return "pointcast"
+    }
+
+    // Exception for pointcast device 100
+    if deviceid == 100 {
         return "pointcast"
     }
 
@@ -31,35 +31,42 @@ func SafecastV1V2DeviceType(deviceid uint32) string {
         return "safecast-air"
     }
 
+    // nGeigie
+    if deviceid > 0 && deviceid <= 999 {
+        return "ngeigie"
+    }
+
+	// Unknown (or solarcast)
 	return ""
 	
 }
 
 // Get the type of a device AS NATIVELY NUMBERED
 // by pointcast, safecast-air, or ngeigie devices
-func SafecastV1DeviceType(deviceid uint32) string {
-
-    // nGeigie
-    if deviceid > 0 && deviceid <= 999 {
-        return "ngeigie"
-    }
+func SafecastV1DeviceType(deviceid uint32) (devicetype string, v2DeviceID uint32) {
 
     // For standard V1 pointcast numbering space
     if deviceid >= 100000 && deviceid < 299999 {
-        return "pointcast"
+        return "pointcast", deviceid/10
     }
 
-    // Exception for pointcast device 1002
-    if deviceid >= 10000 && deviceid < 29999 {
-        return "pointcast"
+    // Exception for pointcast device 100x
+    if deviceid >= 1000 && deviceid < 1999 {
+        return "pointcast", deviceid/10
     }
 
     // Air
     if deviceid >= 50000 && deviceid < 59999 {
-        return "safecast-air"
+        return "safecast-air", deviceid
     }
 
-    return ""
+    // nGeigie
+    if deviceid > 0 && deviceid <= 999 {
+        return "ngeigie", deviceid
+    }
+
+    return "", deviceid
+
 }
 
 // Reformat a special V1 payload to Current
@@ -91,47 +98,30 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
 		v1DeviceId = 40
 	}
 	
-    // Detect what range it is within, and process the conversion differently
-    devicetype := SafecastV1DeviceType(v1DeviceId)
-	v2DeviceId := uint32(0)
-    isPointcast := false
-    if devicetype == "pointcast" {
-        isPointcast = true
-        v2DeviceId = uint32(v1DeviceId / 10)
-        sd.DeviceId = &v2DeviceId
-    }
-    isSafecastAir := false
-    if devicetype == "safecast-air" {
-        isSafecastAir = true
-        v2DeviceId = uint32(v1DeviceId)
-        sd.DeviceId = &v2DeviceId
-    }
-    isNgeigie := false
-    if devicetype == "ngeigie" {
-        isNgeigie = true
-        v2DeviceId = uint32(v1DeviceId)
-        sd.DeviceId = &v2DeviceId
-    }
-	
-	// Reject non-reformattable devices
-    if !isPointcast && !isSafecastAir && !isNgeigie {
+    // Detect what range it is within, and process the conversion differently,
+	// rejecting non-reformattable devices
+    devicetype, v2DeviceId := SafecastV1DeviceType(v1DeviceId)
+    if devicetype == "" {
         fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", v1DeviceId)
         return 0, "", sd
     }
 
 	// THIS is where we determine sensor types based on device ID
 	tubeType := "unknown"
-	if v2DeviceId == 1002 || v2DeviceId == 63 || v2DeviceId == 54 {
+	if v2DeviceId == 100 || v2DeviceId == 63 || v2DeviceId == 54 {
 		tubeType = "U712"
 	} else if v2DeviceId == 78 {
 		tubeType = "W78017"
-	} else if isNgeigie {
+	} else if devicetype == "ngeigie" {
 		tubeType = "U7318"
-	} else if isPointcast && v1DeviceId % 10 == 1 {
+	} else if devicetype == "pointcast" && v1DeviceId % 10 == 1 {
 		tubeType = "U7318"
-	} else if isPointcast && v1DeviceId % 10 == 2 {
+	} else if devicetype == "pointcast" && v1DeviceId % 10 == 2 {
 		tubeType = "EC7128"
 	}
+
+	// Device ID
+    sd.DeviceId = &v2DeviceId
 
     // Captured
     if v1.CapturedAt != nil {
