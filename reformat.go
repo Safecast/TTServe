@@ -183,6 +183,10 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
         case "cpm":
             var lnd Lnd
             cpm := *v1.Value
+			// Special case for missing tube on this sensor
+			if v1DeviceId == 1001 && cpm == 0 {
+		        return 0, "", sd
+			}
 			switch tubeType {
 			case "U7318":
                 lnd.U7318 = &cpm
