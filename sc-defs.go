@@ -36,6 +36,10 @@ type Lnd struct {
     C7318 *float32			`json:"lnd_7318c,omitempty"`
 	// Energy-compensated LND 7128
     EC7128 *float32			`json:"lnd_7128ec,omitempty"`
+	// Unshielded LND 712
+    U712 *float32			`json:"lnd_712u,omitempty"`
+	// Water-attenuated LND LND 78017
+    W78017 *float32			`json:"lnd_78017w,omitempty"`
 }
 
 // Plantower Air Sensor Data - PM all are optional

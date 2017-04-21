@@ -44,8 +44,13 @@ func SafecastV1DeviceType(deviceid uint32) string {
         return "ngeigie"
     }
 
-    // For V1 numbering space
+    // For standard V1 pointcast numbering space
     if deviceid >= 100000 && deviceid < 299999 {
+        return "pointcast"
+    }
+
+    // Exception for pointcast device 1002
+    if deviceid >= 10000 && deviceid < 29999 {
         return "pointcast"
     }
 
@@ -88,23 +93,24 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
 	
     // Detect what range it is within, and process the conversion differently
     devicetype := SafecastV1DeviceType(v1DeviceId)
+	v2DeviceId := uint32(0)
     isPointcast := false
     if devicetype == "pointcast" {
         isPointcast = true
-        did := uint32(v1DeviceId / 10)
-        sd.DeviceId = &did
+        v2DeviceId = uint32(v1DeviceId / 10)
+        sd.DeviceId = &v2DeviceId
     }
     isSafecastAir := false
     if devicetype == "safecast-air" {
         isSafecastAir = true
-        did := uint32(v1DeviceId)
-        sd.DeviceId = &did
+        v2DeviceId = uint32(v1DeviceId)
+        sd.DeviceId = &v2DeviceId
     }
     isNgeigie := false
     if devicetype == "ngeigie" {
         isNgeigie = true
-        did := uint32(v1DeviceId)
-        sd.DeviceId = &did
+        v2DeviceId = uint32(v1DeviceId)
+        sd.DeviceId = &v2DeviceId
     }
 	
 	// Reject non-reformattable devices
@@ -112,6 +118,20 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
         fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", v1DeviceId)
         return 0, "", sd
     }
+
+	// THIS is where we determine sensor types based on device ID
+	tubeType := "unknown"
+	if v2DeviceId == 1002 || v2DeviceId == 63 || v2DeviceId == 54 {
+		tubeType = "U712"
+	} else if v2DeviceId == 78 {
+		tubeType = "W78017"
+	} else if isNgeigie {
+		tubeType = "U7318"
+	} else if isPointcast && v1DeviceId % 10 == 1 {
+		tubeType = "U7318"
+	} else if isPointcast && v1DeviceId % 10 == 2 {
+		tubeType = "EC7128"
+	}
 
     // Captured
     if v1.CapturedAt != nil {
@@ -171,27 +191,22 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             sd.Env = &env
 
         case "cpm":
-            if isNgeigie {
-                var lnd Lnd
-                cpm := *v1.Value
+            var lnd Lnd
+            cpm := *v1.Value
+			switch tubeType {
+			case "U7318":
                 lnd.U7318 = &cpm
-                sd.Lnd = &lnd
-            } else if isPointcast {
-                if 1 == (v1DeviceId % 10) {
-                    var lnd Lnd
-                    cpm := *v1.Value
-                    lnd.U7318 = &cpm
-                    sd.Lnd = &lnd
-
-                } else if 2 == (v1DeviceId % 10) {
-                    var lnd Lnd
-                    cpm := *v1.Value
-                    lnd.EC7128 = &cpm
-                    sd.Lnd = &lnd
-                } else {
-                    fmt.Printf("*** Reformat: %d cpm not understood for this subtype\n", *sd.DeviceId)
-                }
-            } else {
+	            sd.Lnd = &lnd
+			case "U712":
+                lnd.U712 = &cpm
+	            sd.Lnd = &lnd
+			case "EC7128":
+                lnd.EC7128 = &cpm
+	            sd.Lnd = &lnd
+			case "W78017":
+                lnd.W78017 = &cpm
+	            sd.Lnd = &lnd
+			default:
                 fmt.Printf("*** Reformat: Received CPM for unrecognized device %d\n", *sd.DeviceId)
             }
 

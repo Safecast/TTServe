@@ -129,6 +129,12 @@ func SafecastLogToInflux(sd SafecastData) bool {
         if sd.Lnd.EC7128 != nil {
             fields["lnd_7128ec"] = *sd.Lnd.EC7128
         }
+        if sd.Lnd.U712 != nil {
+            fields["lnd_712u"] = *sd.Lnd.U712
+        }
+        if sd.Lnd.W78017 != nil {
+            fields["lnd_78017w"] = *sd.Lnd.W78017
+        }
     }
 
     if sd.Pms != nil {

@@ -63,6 +63,8 @@ type MeasurementStat struct {
     hasLndU7318         bool
     hasLndC7318         bool
     hasLndEC7128        bool
+    hasLndU712          bool
+    hasLndW78017        bool
     GeigerWarning       bool
     hasPms              bool
     PmsWarning          bool
@@ -80,6 +82,8 @@ type MeasurementStat struct {
     LndU                float64
     LndC                float64
     LndEC               float64
+    LndU2             float64
+    LndW               float64
     Opc010              float64
     Opc025              float64
     Opc100              float64
@@ -190,6 +194,8 @@ type MeasurementDataset struct {
     LndU7318Count       uint32
     LndC7318Count       uint32
     LndEC7128Count      uint32
+    LndU712Count	    uint32
+    LndW78017Count      uint32
     GeigerWarningCount  int32
     GeigerWarningFirst  time.Time
     PmsCount            uint32
@@ -216,6 +222,10 @@ type MeasurementDataset struct {
     HiLndC              float64
     LoLndEC             float64
     HiLndEC             float64
+    LoLndU2           float64
+    HiLndU2           float64
+    LoLndW              float64
+    HiLndW              float64
     LoBatV              float64
     HiBatV              float64
     LoBatI              float64
@@ -493,6 +503,22 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
                 stat.GeigerWarning = true
             }
             stat.LndEC = float64(val)
+        }
+        if sd.Lnd.U712 != nil {
+            stat.hasLndU712 = true
+            val := *sd.Lnd.U712
+            if val <= 0 || val > 500 {
+                stat.GeigerWarning = true
+            }
+            stat.LndU2 = float64(val)
+        }
+        if sd.Lnd.W78017 != nil {
+            stat.hasLndW78017 = true
+            val := *sd.Lnd.W78017
+            if val <= 0 || val > 500 {
+                stat.GeigerWarning = true
+            }
+            stat.LndW = float64(val)
         }
     }
 
@@ -940,6 +966,26 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
             ds.HiLndEC = math.Max(ds.HiLndEC, stat.LndEC)
         }
     }
+    if stat.hasLndU712 {
+        ds.LndU712Count++
+        if ds.LndU712Count == 1 {
+            ds.LoLndU2 = stat.LndU2
+            ds.HiLndU2 = stat.LndU2
+        } else {
+            ds.LoLndU2 = math.Min(ds.LoLndU2, stat.LndU2)
+            ds.HiLndU2 = math.Max(ds.HiLndU2, stat.LndU2)
+        }
+    }
+    if stat.hasLndW78017 {
+        ds.LndW78017Count++
+        if ds.LndW78017Count == 1 {
+            ds.LoLndW = stat.LndW
+            ds.HiLndW = stat.LndW
+        } else {
+            ds.LoLndW = math.Min(ds.LoLndW, stat.LndW)
+            ds.HiLndW = math.Max(ds.HiLndW, stat.LndW)
+        }
+    }
     if stat.hasPms {
         ds.PmsCount++
         if ds.PmsCount == 1 {
@@ -1333,6 +1379,12 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
     if ds.LndEC7128Count != 0 {
         s += fmt.Sprintf("  LndEC %4d%s  (%.0f-%.0fcpm)\n", ds.LndEC7128Count, geigerWarning, ds.LoLndEC, ds.HiLndEC)
+    }
+    if ds.LndU712Count != 0 {
+        s += fmt.Sprintf("  LndU2 %4d%s  (%.0f-%.0fcpm)\n", ds.LndU712Count, geigerWarning, ds.LoLndU2, ds.HiLndU2)
+    }
+    if ds.LndW78017Count != 0 {
+        s += fmt.Sprintf("  LndW %5d%s  (%.0f-%.0fcpm)\n", ds.LndW78017Count, geigerWarning, ds.LoLndW, ds.HiLndW)
     }
 
     s += fmt.Sprintf("\n")

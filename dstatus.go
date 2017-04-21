@@ -332,6 +332,26 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
                 ChangedGeiger = true
             }
         }
+        if sc.Lnd.U712 != nil {
+            var val float32
+            if value.Lnd.U712 == nil {
+                value.Lnd.U712 = &val
+            }
+            if *value.Lnd.U712 != *sc.Lnd.U712 {
+                value.Lnd.U712 = sc.Lnd.U712
+                ChangedGeiger = true
+            }
+        }
+        if sc.Lnd.W78017 != nil {
+            var val float32
+            if value.Lnd.W78017 == nil {
+                value.Lnd.W78017 = &val
+            }
+            if *value.Lnd.W78017 != *sc.Lnd.W78017 {
+                value.Lnd.W78017 = sc.Lnd.W78017
+                ChangedGeiger = true
+            }
+        }
     }
     if sc.Dev != nil {
         var dev Dev
@@ -711,6 +731,20 @@ func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label strin
                 s += "|"
             }
             s += fmt.Sprintf("%.0f", *value.Lnd.EC7128)
+            didlnd = true
+        }
+        if value.Lnd.U712 != nil {
+            if didlnd {
+                s += "|"
+            }
+            s += fmt.Sprintf("%.0f", *value.Lnd.U712)
+            didlnd = true
+        }
+        if value.Lnd.W78017 != nil {
+            if didlnd {
+                s += "|"
+            }
+            s += fmt.Sprintf("%.0f", *value.Lnd.W78017)
             didlnd = true
         }
         if didlnd {

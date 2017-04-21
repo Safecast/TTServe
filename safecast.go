@@ -489,6 +489,16 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         lnd.EC7128 = &cpm
         dolnd = true
     }
+    if msg.Lnd_712U != nil {
+        var cpm float32 = float32(msg.GetLnd_712U())
+        lnd.U712 = &cpm
+        dolnd = true
+    }
+    if msg.Lnd_78017W != nil {
+        var cpm float32 = float32(msg.GetLnd_78017W())
+        lnd.W78017 = &cpm
+        dolnd = true
+    }
 
     if dolnd {
         sd.Lnd = &lnd
