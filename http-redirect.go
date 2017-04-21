@@ -85,6 +85,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     clean_body_str = strings.Replace(clean_body_str, "\n", "", -1)
     clean_body_str = strings.Replace(clean_body_str, "\r", "", -1)
     clean_body_str = strings.Replace(clean_body_str, "\\r", "", -1)
+    clean_body_str = strings.Replace(clean_body_str, "\":\" ", "\":\"", -1)
 	clean_body := []byte(clean_body_str)
 
     // Decode the request with custom marshaling
