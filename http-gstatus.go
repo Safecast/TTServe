@@ -34,7 +34,7 @@ func inboundWebGatewayUpdateHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    fmt.Printf("\n%s Received gateway update for %s %s\n", logTime(), ttg.GatewayId, ttg.GatewayName)
+    fmt.Printf("\n%s Received gateway update for %s %s (%s)\n", logTime(), ttg.GatewayId, ttg.GatewayName, ttg.GatewayRegion)
     requestor, _ := getRequestorIPv4(req)
     go SafecastWriteGatewayStatus(ttg, requestor)
     stats.Count.HTTPGUpdate++
