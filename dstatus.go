@@ -409,8 +409,8 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
         if sc.Dev.DeviceRestarts != nil {
             value.Dev.DeviceRestarts = sc.Dev.DeviceRestarts
         }
-        if sc.Dev.Motiondrops != nil {
-            value.Dev.Motiondrops = sc.Dev.Motiondrops
+        if sc.Dev.MotionEvents != nil {
+            value.Dev.MotionEvents = sc.Dev.MotionEvents
         }
         if sc.Dev.Oneshots != nil {
             value.Dev.Oneshots = sc.Dev.Oneshots

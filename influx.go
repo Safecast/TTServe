@@ -207,6 +207,9 @@ func SafecastLogToInflux(sd SafecastData) bool {
         if sd.Dev.Test != nil {
             fields["dev_test"] = *sd.Dev.Test
         }
+        if sd.Dev.Motion != nil {
+            fields["dev_motion"] = *sd.Dev.Motion
+        }
         if sd.Dev.DeviceLabel != nil {
             fields["dev_label"] = *sd.Dev.DeviceLabel
         }
@@ -252,8 +255,8 @@ func SafecastLogToInflux(sd SafecastData) bool {
         if sd.Dev.DeviceRestarts != nil {
             fields["dev_restarts"] = *sd.Dev.DeviceRestarts
         }
-        if sd.Dev.Motiondrops != nil {
-            fields["dev_motiondrops"] = *sd.Dev.Motiondrops
+        if sd.Dev.MotionEvents != nil {
+            fields["dev_motion_events"] = *sd.Dev.MotionEvents
         }
         if sd.Dev.Oneshots != nil {
             fields["dev_oneshots"] = *sd.Dev.Oneshots

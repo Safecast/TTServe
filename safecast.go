@@ -117,6 +117,11 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         dev.Test = &mode
         dodev = true
     }
+    if msg.Motion != nil {
+        mode := msg.GetMotion()
+        dev.Motion = &mode
+        dodev = true
+    }
     if msg.EncTemp != nil {
         dev.Temp = msg.EncTemp
         dodev = true
@@ -173,8 +178,8 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         dev.OneshotSeconds = msg.StatsOneshotSeconds
         dodev = true
     }
-    if msg.StatsMotiondrops != nil {
-        dev.Motiondrops = msg.StatsMotiondrops
+    if msg.StatsMotionEvents != nil {
+        dev.MotionEvents = msg.StatsMotionEvents
         dodev = true
     }
     if msg.StatsIccid != nil {

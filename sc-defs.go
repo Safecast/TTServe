@@ -73,6 +73,7 @@ type Opc struct {
 // General Device Statistics - All Optional
 type Dev struct {
 	Test *bool				`json:"dev_test,omitempty"`
+	Motion *bool			`json:"dev_motion,omitempty"`
     DeviceLabel *string		`json:"dev_label,omitempty"`
     UptimeMinutes *uint32	`json:"dev_uptime,omitempty"`
     AppVersion *string		`json:"dev_firmware,omitempty"`
@@ -87,7 +88,7 @@ type Dev struct {
     CommsFails *uint32		`json:"dev_comms_failures,omitempty"`
     CommsPowerFails *uint32	`json:"dev_comms_power_fails,omitempty"`
     DeviceRestarts *uint32	`json:"dev_restarts,omitempty"`
-    Motiondrops *uint32		`json:"dev_motiondrops,omitempty"`
+    MotionEvents *uint32	`json:"dev_motion_events,omitempty"`
     Oneshots *uint32		`json:"dev_oneshots,omitempty"`
     OneshotSeconds *uint32	`json:"dev_oneshot_seconds,omitempty"`
     Iccid *string			`json:"dev_iccid,omitempty"`
