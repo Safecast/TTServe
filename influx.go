@@ -441,7 +441,8 @@ func SafecastLogToInflux(sd SafecastData) bool {
 // Just a debug function that traverses a Response, which took me forever to figure out
 func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int {
 	buf := make([]byte, 8192)
-    fDebug := false
+    fDebug := true
+    fDebugMax := false
 	results := 0
 	firstrow := true
 	
@@ -458,34 +459,34 @@ func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int 
             fmt.Printf("%d Sets:\n", len(result.Series))
         }
         for i, r := range result.Series {
-            if fDebug {
+            if fDebugMax {
                 // Set name is 'data', put this in column 0
                 fmt.Printf("%d: Name:'%s' Tags:'%d' Cols:'%d' Rows:'%d'\n", i, r.Name, len(r.Tags), len(r.Columns), len(r.Values))
             }
             // Partial, or not
-            if fDebug {
+            if fDebugMax {
                 fmt.Printf("%d: PARTIAL = %t\n", i, r.Partial)
             }
             // No tags - don't even know what to do with
-            if fDebug {
+            if fDebugMax {
                 fmt.Printf("%d Tags:\n", len(r.Tags))
                 for k, v := range r.Tags {
                     fmt.Printf("'%s':'%s'\n", k, v)
                 }
             }
             // 86 columns, and each v is the column name
-            if fDebug {
+            if fDebugMax {
                 fmt.Printf("%d Columns:\n", len(r.Columns))
                 for i, v := range r.Columns {
                     fmt.Printf("%d: '%s'\n", i, v)
                 }
             }
             // Rows of results
-            if fDebug {
+            if fDebugMax {
                 fmt.Printf("%d Rows:\n", len(r.Values))
             }
             for i, v := range r.Values {
-                if fDebug {
+                if fDebugMax {
                     fmt.Printf("%d: %d cols\n", i, len(v))
                 }
                 // Initialize JSON data structure
@@ -495,7 +496,7 @@ func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int 
                 // Iterate over cells in the row
                 for k, cell := range v {
                     if cell == nil {
-                        if fDebug {
+                        if fDebugMax {
                             fmt.Printf("%d: NIL\n", k)
                         }
                     } else {
@@ -508,151 +509,151 @@ func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int 
                         switch cell := cell.(type) {
                         default:
                             rowval = fmt.Sprintf("\"%s\":\"%v\"", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: unknown type %T", k, cell)
                             }
                         case json.Number:
                             rowval = fmt.Sprintf("\"%s\":%v", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: json.Number", k)
                             }
                         case string:
                             rowval = fmt.Sprintf("\"%s\":\"%s\"", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: string", k)
                             }
                         case bool:
                             rowval = fmt.Sprintf("\"%s\":%t", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: bool", k)
                             }
                         case *bool:
                             rowval = fmt.Sprintf("\"%s\":%t", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *bool", k)
                             }
                         case int:
                             rowval = fmt.Sprintf("\"%s\":%d", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: int", k)
                             }
                         case int8:
                             rowval = fmt.Sprintf("\"%s\":%d", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: int8", k)
                             }
                         case int16:
                             rowval = fmt.Sprintf("\"%s\":%d", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: int16", k)
                             }
                         case int32:
                             rowval = fmt.Sprintf("\"%s\":%d", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: int32", k)
                             }
                         case int64:
                             rowval = fmt.Sprintf("\"%s\":%d", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: int64", k)
                             }
                         case *int:
                             rowval = fmt.Sprintf("\"%s\":%d", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *int", k)
                             }
                         case *int8:
                             rowval = fmt.Sprintf("\"%s\":%d", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *int8", k)
                             }
                         case *int16:
                             rowval = fmt.Sprintf("\"%s\":%d", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *int16", k)
                             }
                         case *int32:
                             rowval = fmt.Sprintf("\"%s\":%d", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *int32", k)
                             }
                         case *int64:
                             rowval = fmt.Sprintf("\"%s\":%d", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *int64", k)
                             }
                         case uint:
                             rowval = fmt.Sprintf("\"%s\":%u", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: uint", k)
                             }
                         case uint8:
                             rowval = fmt.Sprintf("\"%s\":%u", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: uint8", k)
                             }
                         case uint16:
                             rowval = fmt.Sprintf("\"%s\":%u", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: uint16", k)
                             }
                         case uint32:
                             rowval = fmt.Sprintf("\"%s\":%u", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: uint32", k)
                             }
                         case uint64:
                             rowval = fmt.Sprintf("\"%s\":%u", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: uint64", k)
                             }
                         case *uint:
                             rowval = fmt.Sprintf("\"%s\":%u", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *uint", k)
                             }
                         case *uint8:
                             rowval = fmt.Sprintf("\"%s\":%u", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *uint8", k)
                             }
                         case *uint16:
                             rowval = fmt.Sprintf("\"%s\":%u", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *uint16", k)
                             }
                         case *uint32:
                             rowval = fmt.Sprintf("\"%s\":%u", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *uint32", k)
                             }
                         case *uint64:
                             rowval = fmt.Sprintf("\"%s\":%u", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *uint64", k)
                             }
                         case float32:
                             rowval = fmt.Sprintf("\"%s\":%f", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: float32", k)
                             }
                         case float64:
                             rowval = fmt.Sprintf("\"%s\":%f", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: float64", k)
                             }
                         case *float32:
                             rowval = fmt.Sprintf("\"%s\":%f", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *float32", k)
                             }
                         case *float64:
                             rowval = fmt.Sprintf("\"%s\":%f", colname, cell)
-                            if fDebug {
+                            if fDebugMax {
                                 dbgval = fmt.Sprintf("%d: *float64", k)
                             }
                         }
-                        if fDebug {
+                        if fDebugMax {
                             fmt.Printf("%s %s\n", dbgval, rowval)
                         }
                         if colname != "" {
@@ -692,6 +693,9 @@ func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int 
 
             }
         }
+        if fDebug {
+			fmt.Printf("** %d Results so far **\n", results)
+		}
     }
 
 	return results
