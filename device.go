@@ -266,7 +266,7 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
 			// Cancel the command
 		    isValid, cmd := getCommand(id)
 		    if isValid {
-                s += fmt.Sprintf("'%s' will not be sent to %d %s", cmd, id, WordsFromNumber(id))
+                s += fmt.Sprintf("'%s' will not be sent to %d %s", cmd.Command, id, WordsFromNumber(id))
 				cancelCommand(id)
 			} else {
                 s += fmt.Sprintf("Nothing pending for %d %s", id, WordsFromNumber(id))
