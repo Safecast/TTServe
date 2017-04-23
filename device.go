@@ -232,10 +232,7 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
 		// Skip if this device isn't within a supplied list or range
         id := sortedDevices[i].deviceid
 
-		found := true
-		if devices != nil || ranges != nil {
-			found = false
-		}
+		found := false
 		
         if !found && devices != nil {
             for _, did := range devices {
@@ -264,7 +261,7 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
 		if s != "" {
 			s += "\n"
 		}
-		s += fmt.Sprintf("Sending to %d", id)
+		s += fmt.Sprintf("Sending '%s' to %d %s", command, id, WordsFromNumber(id))
 
     }
 
