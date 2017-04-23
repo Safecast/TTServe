@@ -306,13 +306,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
                 sendToSafecastOps("Unrecognized subcommand of 'send'", SLACK_MSG_REPLY)
             }
         } else {
-            found, deviceID := WordsToNumber(args[1])
-            if !found {
-                sendToSafecastOps("Invalid Device ID.", SLACK_MSG_REPLY)
-            } else {
-                sendToSafecastOps(fmt.Sprintf("Sending to %d: %s", deviceID, messageAfterSecondWord), SLACK_MSG_REPLY)
-                sendCommand(user, deviceID, messageAfterSecondWord)
-            }
+			go sendSafecastDeviceCommand(user, args[1], messageAfterSecondWord)
         }
 
     case "clear-logs":

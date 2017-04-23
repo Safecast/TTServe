@@ -209,6 +209,73 @@ func refreshDeviceSummaryLabels() {
 
 }
 
+// Send a command to a list of known devices
+func sendSafecastDeviceCommand(user string, devicelist string, command string) {
+	
+    // Get the device list if one was specified
+    valid, _, devices, ranges, _ := DeviceList(user, devicelist)
+    if !valid {
+        devices = nil
+    }
+
+    // First, age out the expired devices and recompute when last seen
+    sendExpiredSafecastDevicesToSlack()
+
+    // Next sort the device list
+    sortedDevices := seenDevices
+    sort.Sort(ByDeviceKey(sortedDevices))
+
+    // Finally, sweep over all these devices in sorted order
+	s := ""
+    for i := 0; i < len(sortedDevices); i++ {
+
+		// Skip if this device isn't within a supplied list or range
+        id := sortedDevices[i].deviceid
+
+		found := true
+		if devices != nil || ranges != nil {
+			found = false
+		}
+		
+        if !found && devices != nil {
+            for _, did := range devices {
+                if did == id {
+                    found = true
+                    break
+                }
+            }
+        }
+
+        if !found && ranges != nil {
+            for _, r := range ranges {
+                if id >= r.Low && id <= r.High {
+                    found = true
+                    break
+                }
+            }
+        }
+
+        if !found {
+            continue
+        }
+
+		// Send the command
+		//		sendCommand(user, id, command)
+		if s != "" {
+			s += "\n"
+		}
+		s += fmt.Sprintf("Sending to %d", id)
+
+    }
+
+	// Done
+	if s == "" {
+		s = "Device(s) not found"
+	}	
+    sendToSafecastOps(s, SLACK_MSG_REPLY)
+		
+}
+
 // Get a summary of devices that are older than this many minutes ago
 func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist string, fOffline bool, fDetails bool) {
 
