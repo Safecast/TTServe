@@ -268,16 +268,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         if len(args) != 2 {
             sendToSafecastOps("Command format: cancel <deviceID>", SLACK_MSG_REPLY)
         } else {
-            found, deviceID := WordsToNumber(args[1])
-            if !found {
-                sendToSafecastOps("Invalid Device ID.", SLACK_MSG_REPLY)
-            } else {
-                if cancelCommand(deviceID) {
-                    sendToSafecastOps("Cancelled.", SLACK_MSG_REPLY)
-                } else {
-                    sendToSafecastOps("Not found.", SLACK_MSG_REPLY)
-                }
-            }
+			go sendSafecastDeviceCommand(user, args[1], "")
         }
 
     case "reboot-all":

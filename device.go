@@ -211,7 +211,7 @@ func refreshDeviceSummaryLabels() {
 
 // Send a command to a list of known devices
 func sendSafecastDeviceCommand(user string, devicelist string, command string) {
-	
+
     // Get the device list if one was specified
     valid, _, devices, ranges, _ := DeviceList(user, devicelist)
     if !valid {
@@ -226,14 +226,14 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
     sort.Sort(ByDeviceKey(sortedDevices))
 
     // Finally, sweep over all these devices in sorted order
-	s := ""
+    s := ""
     for i := 0; i < len(sortedDevices); i++ {
 
-		// Skip if this device isn't within a supplied list or range
+        // Skip if this device isn't within a supplied list or range
         id := sortedDevices[i].deviceid
 
-		found := false
-		
+        found := false
+
         if !found && devices != nil {
             for _, did := range devices {
                 if did == id {
@@ -256,27 +256,40 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
             continue
         }
 
-		if s != "" {
-			s += "\n"
-		}
+        if s != "" {
+            s += "\n"
+        }
 
-		// Don't send to devices that we cannot
-		devicetype := SafecastDeviceType(id)
-		if devicetype != "" {
-			s += fmt.Sprintf("Cannot send to %d which is a %s device", id, devicetype)
-		} else {
-			s += fmt.Sprintf("Sending '%s' to %d %s", command, id, WordsFromNumber(id))
-			//		sendCommand(user, id, command)
-		}
+        // The null command means cancel
+        if command == "" {
+
+			// Cancel the command
+		    isValid, cmd := getCommand(id)
+		    if isValid {
+                s += fmt.Sprintf("'%s' will not be sent to %d %s", cmd, id, WordsFromNumber(id))
+				// cancelCommand(id)
+			}
+
+        } else {
+
+            // Don't send to devices that we cannot
+            devicetype := SafecastDeviceType(id)
+            if devicetype != "" {
+                s += fmt.Sprintf("Cannot send to %d which is a %s device", id, devicetype)
+            } else {
+                s += fmt.Sprintf("Sending '%s' to %d %s", command, id, WordsFromNumber(id))
+                // sendCommand(user, id, command)
+            }
+        }
 
     }
 
-	// Done
-	if s == "" {
-		s = "Device(s) not found"
-	}	
+    // Done
+    if s == "" {
+        s = "Device(s) not found"
+    }
     sendToSafecastOps(s, SLACK_MSG_REPLY)
-		
+
 }
 
 // Get a summary of devices that are older than this many minutes ago
@@ -300,20 +313,20 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
     s := header
     for i := 0; i < len(sortedDevices); i++ {
 
-		// Skip if the online state doesn't match
+        // Skip if the online state doesn't match
         isOffline := sortedDevices[i].minutesAgo > (2 * 60)
         if isOffline != fOffline {
             continue
         }
 
-		// Skip if this device isn't within a supplied list or range
+        // Skip if this device isn't within a supplied list or range
         id := sortedDevices[i].deviceid
 
-		found := true
-		if devices != nil || ranges != nil {
-			found = false
-		}
-		
+        found := true
+        if devices != nil || ranges != nil {
+            found = false
+        }
+
         if !found && devices != nil {
             for _, did := range devices {
                 if did == id {
@@ -336,7 +349,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
             continue
         }
 
-		// Add it to the summary
+        // Add it to the summary
         if s != "" {
             s += fmt.Sprintf("\n")
         }
@@ -394,15 +407,15 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 
     }
 
-	// None
-	if s == header {
-		if fOffline {
-			s = "All devices are currently online."
-		} else {
-			s = "All devices are currently offline."
-		}
-	}
-	
+    // None
+    if s == header {
+        if fOffline {
+            s = "All devices are currently online."
+        } else {
+            s = "All devices are currently offline."
+        }
+    }
+
     // Send it to Slack
     sendToSafecastOps(s, SLACK_MSG_REPLY)
 
