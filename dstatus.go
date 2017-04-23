@@ -403,6 +403,9 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
         if sc.Dev.CommsPowerFails != nil {
             value.Dev.CommsPowerFails = sc.Dev.CommsPowerFails
         }
+        if sc.Dev.OvercurrentEvents != nil {
+            value.Dev.OvercurrentEvents = sc.Dev.OvercurrentEvents
+        }
         if sc.Dev.CommsAntFails != nil {
             value.Dev.CommsAntFails = sc.Dev.CommsAntFails
         }

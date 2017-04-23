@@ -37,6 +37,7 @@ type MeasurementStat struct {
     ErrorsLora          uint32
     ErrorsFona          uint32
     ErrorsCommsPowerFails uint32
+    ErrorsOvercurrentEvents uint32
     ErrorsCommsAntFails uint32
     ErrorsGeiger        uint32
     ErrorsMax01         uint32
@@ -146,6 +147,8 @@ type MeasurementDataset struct {
     ThisErrorsFona      uint32
     PrevErrorsCommsPowerFails uint32
     ThisErrorsCommsPowerFails uint32
+    PrevErrorsOvercurrentEvents uint32
+    ThisErrorsOvercurrentEvents uint32
     PrevErrorsCommsAntFails uint32
     ThisErrorsCommsAntFails uint32
     PrevErrorsGeiger    uint32
@@ -340,6 +343,9 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
         if sd.Dev.CommsPowerFails != nil {
             stat.ErrorsCommsPowerFails = *sd.Dev.CommsPowerFails
+        }
+        if sd.Dev.OvercurrentEvents != nil {
+            stat.ErrorsOvercurrentEvents = *sd.Dev.OvercurrentEvents
         }
         if sd.Dev.CommsAntFails != nil {
             stat.ErrorsCommsAntFails = *sd.Dev.CommsAntFails
@@ -773,6 +779,10 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.ThisErrorsCommsPowerFails = stat.ErrorsCommsPowerFails
         ds.AnyErrors = true
     }
+    if stat.ErrorsOvercurrentEvents > ds.ThisErrorsOvercurrentEvents {
+        ds.ThisErrorsOvercurrentEvents = stat.ErrorsOvercurrentEvents
+        ds.AnyErrors = true
+    }
     if stat.ErrorsCommsAntFails > ds.ThisErrorsCommsAntFails {
         ds.ThisErrorsCommsAntFails = stat.ErrorsCommsAntFails
         ds.AnyErrors = true
@@ -1081,6 +1091,8 @@ func AggregateErrors(ds *MeasurementDataset) {
     ds.ThisErrorsFona = 0
     ds.PrevErrorsCommsPowerFails += ds.ThisErrorsCommsPowerFails
     ds.ThisErrorsCommsPowerFails = 0
+    ds.PrevErrorsOvercurrentEvents += ds.ThisErrorsOvercurrentEvents
+    ds.ThisErrorsOvercurrentEvents = 0
     ds.PrevErrorsCommsAntFails += ds.ThisErrorsCommsAntFails
     ds.ThisErrorsCommsAntFails = 0
     ds.PrevErrorsGeiger += ds.ThisErrorsGeiger
@@ -1439,6 +1451,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         }
         if ds.PrevErrorsTwi > 0 || ds.ErrorsTwiInfo != "" {
             s += fmt.Sprintf("  Twi          %d %s\n", ds.PrevErrorsTwi, ds.ErrorsTwiInfo)
+        }
+        if ds.PrevErrorsOvercurrentEvents > 0 {
+            s += fmt.Sprintf("  Overcurrent  %d\n", ds.PrevErrorsOvercurrentEvents)
         }
     }
     s += fmt.Sprintf("\n")

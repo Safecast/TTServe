@@ -249,6 +249,9 @@ func SafecastLogToInflux(sd SafecastData) bool {
         if sd.Dev.CommsPowerFails != nil {
             fields["dev_comms_power_fails"] = *sd.Dev.CommsPowerFails
         }
+        if sd.Dev.OvercurrentEvents != nil {
+            fields["dev_overcurrent_events"] = *sd.Dev.OvercurrentEvents
+        }
         if sd.Dev.CommsAntFails != nil {
             fields["dev_comms_ant_fails"] = *sd.Dev.CommsAntFails
         }

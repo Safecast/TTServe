@@ -123,6 +123,7 @@ type Dev struct {
     ErrorsConnectService *uint32 `json:"dev_err_con_service,omitempty"`
     ErrorsConnectGateway *uint32 `json:"dev_err_con_gateway,omitempty"`
     CommsAntFails *uint32	`json:"dev_comms_ant_fails,omitempty"`
+    OvercurrentEvents *uint32	`json:"dev_overcurrent_events,omitempty"`
 }
 
 // Gateway-supplied metadata

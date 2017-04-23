@@ -166,6 +166,10 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         dev.CommsPowerFails = msg.StatsCommsPowerFails
         dodev = true
     }
+    if msg.StatsOvercurrentEvents != nil {
+        dev.OvercurrentEvents = msg.StatsOvercurrentEvents
+        dodev = true
+    }
     if msg.StatsCommsAntFails != nil {
         dev.CommsAntFails = msg.StatsCommsAntFails
         dodev = true
