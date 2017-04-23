@@ -267,7 +267,7 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
 		    isValid, cmd := getCommand(id)
 		    if isValid {
                 s += fmt.Sprintf("'%s' will not be sent to %d %s", cmd, id, WordsFromNumber(id))
-				// cancelCommand(id)
+				cancelCommand(id)
 			} else {
                 s += fmt.Sprintf("Nothing pending for %d %s", id, WordsFromNumber(id))
 			}
@@ -276,11 +276,11 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
 
             // Don't send to devices that we cannot
             devicetype := SafecastDeviceType(id)
-            if devicetype != "" {
-                s += fmt.Sprintf("Cannot send to %d which is a %s device", id, devicetype)
-            } else {
+            if devicetype == "" {
                 s += fmt.Sprintf("Sending '%s' to %d %s", command, id, WordsFromNumber(id))
-                // sendCommand(user, id, command)
+                sendCommand(user, id, command)
+            } else {
+                s += fmt.Sprintf("Cannot send to %d which is a %s device", id, devicetype)
             }
         }
 
