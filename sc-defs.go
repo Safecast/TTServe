@@ -47,6 +47,9 @@ type Pms struct {
     Pm01_0 *float32			`json:"pms_pm01_0,omitempty"`
     Pm02_5 *float32			`json:"pms_pm02_5,omitempty"`
     Pm10_0 *float32			`json:"pms_pm10_0,omitempty"`
+    Std01_0 *float32		`json:"pms_std01_0,omitempty"`
+    Std02_5 *float32		`json:"pms_std02_5,omitempty"`
+    Std10_0 *float32		`json:"pms_std10_0,omitempty"`
     Count00_30 *uint32		`json:"pms_c00_30,omitempty"`
     Count00_50 *uint32		`json:"pms_c00_50,omitempty"`
     Count01_00 *uint32		`json:"pms_c01_00,omitempty"`
@@ -61,6 +64,9 @@ type Opc struct {
     Pm01_0 *float32			`json:"opc_pm01_0,omitempty"`
     Pm02_5 *float32			`json:"opc_pm02_5,omitempty"`
     Pm10_0 *float32			`json:"opc_pm10_0,omitempty"`
+    Std01_0 *float32		`json:"opc_std01_0,omitempty"`
+    Std02_5 *float32		`json:"opc_std02_5,omitempty"`
+    Std10_0 *float32		`json:"opc_std10_0,omitempty"`
     Count00_38 *uint32		`json:"opc_c00_38,omitempty"`
     Count00_54 *uint32		`json:"opc_c00_54,omitempty"`
     Count01_00 *uint32		`json:"opc_c01_00,omitempty"`

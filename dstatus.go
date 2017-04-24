@@ -222,6 +222,18 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
             value.Pms.Pm10_0 = sc.Pms.Pm10_0
             ChangedPms = true
         }
+        if sc.Pms.Std01_0 != nil && (value.Pms.Std01_0 == nil || *value.Pms.Std01_0 != *sc.Pms.Std01_0) {
+            value.Pms.Std01_0 = sc.Pms.Std01_0
+            ChangedPms = true
+        }
+        if sc.Pms.Std02_5 != nil && (value.Pms.Std02_5 == nil || *value.Pms.Std02_5 != *sc.Pms.Std02_5) {
+            value.Pms.Std02_5 = sc.Pms.Std02_5
+            ChangedPms = true
+        }
+        if sc.Pms.Std10_0 != nil && (value.Pms.Std10_0 == nil || *value.Pms.Std10_0 != *sc.Pms.Std10_0) {
+            value.Pms.Std10_0 = sc.Pms.Std10_0
+            ChangedPms = true
+        }
         if sc.Pms.Count00_30 != nil && (value.Pms.Count00_30 == nil || *value.Pms.Count00_30 != *sc.Pms.Count00_30) {
             value.Pms.Count00_30 = sc.Pms.Count00_30
             ChangedPms = true
@@ -266,6 +278,18 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
         }
         if sc.Opc.Pm10_0 != nil && (value.Opc.Pm10_0 == nil || *value.Opc.Pm10_0 != *sc.Opc.Pm10_0) {
             value.Opc.Pm10_0 = sc.Opc.Pm10_0
+            ChangedOpc = true
+        }
+        if sc.Opc.Std01_0 != nil && (value.Opc.Std01_0 == nil || *value.Opc.Std01_0 != *sc.Opc.Std01_0) {
+            value.Opc.Std01_0 = sc.Opc.Std01_0
+            ChangedOpc = true
+        }
+        if sc.Opc.Std02_5 != nil && (value.Opc.Std02_5 == nil || *value.Opc.Std02_5 != *sc.Opc.Std02_5) {
+            value.Opc.Std02_5 = sc.Opc.Std02_5
+            ChangedOpc = true
+        }
+        if sc.Opc.Std10_0 != nil && (value.Opc.Std10_0 == nil || *value.Opc.Std10_0 != *sc.Opc.Std10_0) {
+            value.Opc.Std10_0 = sc.Opc.Std10_0
             ChangedOpc = true
         }
         if sc.Opc.Count00_38 != nil && (value.Opc.Count00_38 == nil || *value.Opc.Count00_38 != *sc.Opc.Count00_38) {

@@ -147,6 +147,15 @@ func SafecastLogToInflux(sd SafecastData) bool {
         if sd.Pms.Pm10_0 != nil {
             fields["pms_pm10_0"] = *sd.Pms.Pm10_0
         }
+        if sd.Pms.Std01_0 != nil {
+            fields["pms_std01_0"] = *sd.Pms.Std01_0
+        }
+        if sd.Pms.Std02_5 != nil {
+            fields["pms_std02_5"] = *sd.Pms.Std02_5
+        }
+        if sd.Pms.Std10_0 != nil {
+            fields["pms_std10_0"] = *sd.Pms.Std10_0
+        }
         if sd.Pms.Count00_30 != nil {
             fields["pms_c00_30"] = *sd.Pms.Count00_30
         }
@@ -179,6 +188,15 @@ func SafecastLogToInflux(sd SafecastData) bool {
         }
         if sd.Opc.Pm10_0 != nil {
             fields["opc_pm10_0"] = *sd.Opc.Pm10_0
+        }
+        if sd.Opc.Std01_0 != nil {
+            fields["opc_std01_0"] = *sd.Opc.Std01_0
+        }
+        if sd.Opc.Std02_5 != nil {
+            fields["opc_std02_5"] = *sd.Opc.Std02_5
+        }
+        if sd.Opc.Std10_0 != nil {
+            fields["opc_std10_0"] = *sd.Opc.Std10_0
         }
         if sd.Opc.Count00_38 != nil {
             fields["opc_c00_38"] = *sd.Opc.Count00_38

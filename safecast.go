@@ -6,7 +6,7 @@
 package main
 
 import (
-	"os"
+    "os"
     "io"
     "io/ioutil"
     "net/http"
@@ -71,13 +71,13 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     // Generate the fields common to all uploads to safecast
     sd := SafecastData{}
     did := uint32(msg.GetDeviceId())
-	sd.DeviceId = &did
-	
+    sd.DeviceId = &did
+
     // CapturedAt
     if msg.CapturedAt != nil {
         sd.CapturedAt = msg.CapturedAt
     } else if msg.CapturedAtDate != nil && msg.CapturedAtTime != nil && msg.CapturedAtOffset != nil {
-		when := getWhenFromOffset(msg.GetCapturedAtDate(), msg.GetCapturedAtTime(), msg.GetCapturedAtOffset())
+        when := getWhenFromOffset(msg.GetCapturedAtDate(), msg.GetCapturedAtTime(), msg.GetCapturedAtOffset())
         sd.CapturedAt = &when
     }
 
@@ -85,16 +85,16 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     if msg.Latitude != nil || msg.Longitude != nil || msg.MotionBeganOffset != nil {
         var loc Loc
         if msg.Latitude != nil && msg.Longitude != nil {
-			// 11 digits is 3m accuracy
+            // 11 digits is 3m accuracy
             Olc := olc.Encode(float64(msg.GetLatitude()), float64(msg.GetLongitude()), 11)
             loc.Olc = &Olc
         }
         if msg.Latitude != nil {
-			lat := msg.GetLatitude()
+            lat := msg.GetLatitude()
             loc.Lat = &lat
         }
         if msg.Longitude != nil {
-			lon := msg.GetLongitude()
+            lon := msg.GetLongitude()
             loc.Lon = &lon
         }
         if msg.Altitude != nil {
@@ -102,8 +102,8 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
             loc.Alt = &alt
         }
         if msg.MotionBeganOffset != nil && msg.CapturedAtDate != nil && msg.CapturedAtTime != nil {
-			when := getWhenFromOffset(msg.GetCapturedAtDate(), msg.GetCapturedAtTime(), msg.GetMotionBeganOffset())
-	        loc.MotionBegan = &when
+            when := getWhenFromOffset(msg.GetCapturedAtDate(), msg.GetCapturedAtTime(), msg.GetMotionBeganOffset())
+            loc.MotionBegan = &when
         }
         sd.Loc = &loc
     }
@@ -413,6 +413,21 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     }
 
     if dopms {
+        if msg.PmsStd01_0 != nil {
+            Std01_0 := float32(msg.GetPmsStd01_0())
+            pms.Std01_0 = &Std01_0
+        }
+        if msg.PmsStd02_5 != nil {
+            Std02_5 := float32(msg.GetPmsStd02_5())
+            pms.Std02_5 = &Std02_5
+        }
+        if msg.PmsStd10_0 != nil {
+            Std10_0 := float32(msg.GetPmsStd10_0())
+            pms.Std10_0 = &Std10_0
+        }
+    }
+
+    if dopms {
         if msg.PmsC00_30 != nil {
             pms.Count00_30 = msg.PmsC00_30
         }
@@ -449,6 +464,21 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         opc.Pm02_5 = msg.OpcPm02_5
         opc.Pm10_0 = msg.OpcPm10_0
         doopc = true
+    }
+
+    if doopc {
+        if msg.OpcStd01_0 != nil {
+            Std01_0 := float32(msg.GetOpcStd01_0())
+            opc.Std01_0 = &Std01_0
+        }
+        if msg.OpcStd02_5 != nil {
+            Std02_5 := float32(msg.GetOpcStd02_5())
+            opc.Std02_5 = &Std02_5
+        }
+        if msg.OpcStd10_0 != nil {
+            Std10_0 := float32(msg.GetOpcStd10_0())
+            opc.Std10_0 = &Std10_0
+        }
     }
 
     if doopc {
@@ -707,12 +737,12 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
             respstr := string(buf)
             if strings.Contains(respstr, "<head>") {
                 fmt.Printf("*** %s response is HTML (%d bytes) rather than JSON ***\n", domain, len(respstr))
-			    filename := SafecastDirectory() + TTServerLogPath + "/" + domain + ".txt"
-		        fd, e := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
-				if e == nil {
-			        fd.WriteString(respstr)
-			        fd.Close()
-				}
+                filename := SafecastDirectory() + TTServerLogPath + "/" + domain + ".txt"
+                fd, e := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+                if e == nil {
+                    fd.WriteString(respstr)
+                    fd.Close()
+                }
             } else {
                 response = respstr
             }
