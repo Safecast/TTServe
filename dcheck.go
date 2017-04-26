@@ -445,7 +445,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
         if sd.Env.Humid != nil {
             val := *sd.Env.Humid
-            if val < 0 || val > 100 {
+            if val < 0 || val > 110 {
                 stat.EnvWarning = true
             }
             stat.EnvH = float64(val)
@@ -468,7 +468,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         if sd.Dev.Humid != nil {
             stat.hasEnc = true
             val := *sd.Dev.Humid
-            if val < 0 || val > 100 {
+            if val < 0 || val > 110 {
                 stat.EncWarning = true
             }
             stat.EncH = float64(val)
