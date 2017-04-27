@@ -402,29 +402,33 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     var pms Pms
     var dopms = false
 
-    if msg.PmsPm01_0 != nil && msg.PmsPm02_5 != nil && msg.PmsPm10_0 != nil {
+    if msg.PmsPm01_0 != nil {
         Pm01_0 := float32(msg.GetPmsPm01_0())
         pms.Pm01_0 = &Pm01_0
+        dopms = true
+    }
+    if msg.PmsPm02_5 != nil {
         Pm02_5 := float32(msg.GetPmsPm02_5())
         pms.Pm02_5 = &Pm02_5
+        dopms = true
+    }
+    if msg.PmsPm10_0 != nil {
         Pm10_0 := float32(msg.GetPmsPm10_0())
         pms.Pm10_0 = &Pm10_0
         dopms = true
     }
 
-    if dopms {
-        if msg.PmsStd01_0 != nil {
-            Std01_0 := float32(msg.GetPmsStd01_0())
-            pms.Std01_0 = &Std01_0
-        }
-        if msg.PmsStd02_5 != nil {
-            Std02_5 := float32(msg.GetPmsStd02_5())
-            pms.Std02_5 = &Std02_5
-        }
-        if msg.PmsStd10_0 != nil {
-            Std10_0 := float32(msg.GetPmsStd10_0())
-            pms.Std10_0 = &Std10_0
-        }
+    if msg.PmsStd01_0 != nil {
+        pms.Std01_0 = msg.PmsStd01_0
+        dopms = true
+    }
+    if msg.PmsStd02_5 != nil {
+        pms.Std02_5 = msg.PmsStd02_5
+        dopms = true
+    }
+    if msg.PmsStd10_0 != nil {
+        pms.Std10_0 = msg.PmsStd10_0
+        dopms = true
     }
 
     if dopms {
@@ -459,26 +463,30 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     var opc Opc
     var doopc = false
 
-    if msg.OpcPm01_0 != nil && msg.OpcPm02_5 != nil && msg.OpcPm10_0 != nil {
+    if msg.OpcPm01_0 != nil {
         opc.Pm01_0 = msg.OpcPm01_0
+        doopc = true
+    }
+    if msg.OpcPm02_5 != nil {
         opc.Pm02_5 = msg.OpcPm02_5
+        doopc = true
+    }
+    if msg.OpcPm10_0 != nil {
         opc.Pm10_0 = msg.OpcPm10_0
         doopc = true
     }
 
-    if doopc {
-        if msg.OpcStd01_0 != nil {
-            Std01_0 := float32(msg.GetOpcStd01_0())
-            opc.Std01_0 = &Std01_0
-        }
-        if msg.OpcStd02_5 != nil {
-            Std02_5 := float32(msg.GetOpcStd02_5())
-            opc.Std02_5 = &Std02_5
-        }
-        if msg.OpcStd10_0 != nil {
-            Std10_0 := float32(msg.GetOpcStd10_0())
-            opc.Std10_0 = &Std10_0
-        }
+    if msg.OpcStd01_0 != nil {
+        opc.Std01_0 = msg.OpcStd01_0
+        doopc = true
+    }
+    if msg.OpcStd02_5 != nil {
+        opc.Std02_5 = msg.OpcStd02_5
+        doopc = true
+    }
+    if msg.OpcStd10_0 != nil {
+        opc.Std10_0 = msg.OpcStd10_0
+        doopc = true
     }
 
     if doopc {
