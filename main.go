@@ -165,6 +165,7 @@ func main() {
 	
     // Spawn timer tasks, assuming the role of one of them
     go timer12h()
+    go timer1m()
     go timer15m()
     timer1m()
 

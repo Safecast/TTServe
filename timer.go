@@ -46,14 +46,29 @@ func timer15m() {
         // Sleep
         time.Sleep(15 * time.Minute)
 
-        // Post Safecast errors
-        sendSafecastCommsErrorsToSlack(15)
-
         // Post long TTN outages
         if ThisServerServesMQQT {
             MqqtSubscriptionNotifier()
         }
 
+    }
+
+}
+
+// General periodic housekeeping
+func timer1h() {
+    for {
+
+        // Sleep
+        time.Sleep(60 * time.Minute)
+
+        // Post Safecast errors, but only on the monitor process.  We only do this to prevent
+		// noise, and under the assumption that if it happens to one instance it is happening to
+		// all of them.
+        if ThisServerIsMonitor {
+	        sendSafecastCommsErrorsToSlack(60)
+		}
+		
     }
 
 }
