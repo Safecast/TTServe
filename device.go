@@ -14,9 +14,6 @@ import (
     "strconv"
 )
 
-// Warning behavior
-const deviceWarningAfterMinutes = 90
-
 // Describes every device that has sent us a message
 type seenDevice struct {
     deviceid            uint32
@@ -61,7 +58,7 @@ func trackDevice(DeviceId uint32, whenSeen time.Time) {
         if dev.deviceid == seenDevices[i].deviceid {
             // Only pay attention to things that have truly recently come or gone
             minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
-            if minutesAgo < deviceWarningAfterMinutes {
+            if minutesAgo < deviceWarningAfterMinutes(dev.deviceid) {
                 seenDevices[i].everRecentlySeen = true
                 // Notify when the device comes back
                 if seenDevices[i].notifiedAsUnseen {
@@ -93,7 +90,7 @@ func trackDevice(DeviceId uint32, whenSeen time.Time) {
     if !found {
         dev.seen = whenSeen
         minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
-        dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes
+        dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes(dev.deviceid)
         dev.notifiedAsUnseen = false
         dev.label = SafecastDeviceType(dev.deviceid)
         seenDevices = append(seenDevices, dev)
@@ -172,12 +169,12 @@ func sendExpiredSafecastDevicesToSlack() {
     trackAllDevices()
 
     // Compute an expiration time
-    expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes) * time.Minute))
 
     // Sweep through all devices that we've seen
     for i := 0; i < len(seenDevices); i++ {
 
         // Update when we've last seen the device
+        expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes(seenDevices[i].deviceid)) * time.Minute))
         seenDevices[i].minutesAgo = int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
 
         // Notify Slack once and only once when a device has expired
@@ -263,14 +260,14 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
         // The null command means cancel
         if command == "" {
 
-			// Cancel the command
-		    isValid, cmd := getCommand(id)
-		    if isValid {
+            // Cancel the command
+            isValid, cmd := getCommand(id)
+            if isValid {
                 s += fmt.Sprintf("'%s' will not be sent to %d %s", cmd.Command, id, WordsFromNumber(id))
-				cancelCommand(id)
-			} else {
+                cancelCommand(id)
+            } else {
                 s += fmt.Sprintf("Nothing pending for %d %s", id, WordsFromNumber(id))
-			}
+            }
 
         } else {
 
@@ -449,5 +446,19 @@ func generateTTNCTLDeviceRegistrationScript() {
     } else {
         sendToSafecastOps("None found.", SLACK_MSG_REPLY)
     }
+
+}
+
+// Get the number of minutes after which to expire a device
+func deviceWarningAfterMinutes(deviceId uint32) int64 {
+
+	switch SafecastDeviceType(deviceId) {
+	case "pointcast":
+		fallthrough
+	case "safecast-air":
+        return 20
+	}
+
+    return 90
 
 }

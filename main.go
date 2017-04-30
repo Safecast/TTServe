@@ -167,6 +167,7 @@ func main() {
     go timer12h()
     go timer1m()
     go timer15m()
+    go timer5m()
     timer1m()
 
 }

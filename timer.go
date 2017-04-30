@@ -32,7 +32,7 @@ func timer1m() {
 }
 
 // General periodic housekeeping
-func timer15m() {
+func timer5m() {
     for {
 
         // On the monitor role, track expired devices.
@@ -42,6 +42,16 @@ func timer15m() {
             sendExpiredSafecastGatewaysToSlack()
             sendExpiredSafecastServersToSlack()
         }
+		
+        // Sleep
+        time.Sleep(5 * time.Minute)
+
+    }
+}
+
+// General periodic housekeeping
+func timer15m() {
+    for {
 
         // Sleep
         time.Sleep(15 * time.Minute)

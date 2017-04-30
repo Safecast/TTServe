@@ -59,7 +59,7 @@ func trackGateway(GatewayId string, whenSeen time.Time) {
         if dev.gatewayid == seenGateways[i].gatewayid {
             // Only pay attention to things that have truly recently come or gone
             minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
-            if minutesAgo < deviceWarningAfterMinutes {
+            if minutesAgo < gatewayWarningAfterMinutes {
                 seenGateways[i].everRecentlySeen = true
                 // Notify when the device comes back
                 if seenGateways[i].notifiedAsUnseen {
@@ -91,7 +91,7 @@ func trackGateway(GatewayId string, whenSeen time.Time) {
     if !found {
         dev.seen = whenSeen
         minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
-        dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes
+        dev.everRecentlySeen = minutesAgo < gatewayWarningAfterMinutes
         dev.notifiedAsUnseen = false
         seenGateways = append(seenGateways, dev)
     }
@@ -131,7 +131,7 @@ func sendExpiredSafecastGatewaysToSlack() {
     trackAllGateways()
 
     // Compute an expiration time
-    expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes) * time.Minute))
+    expiration := time.Now().Add(-(time.Duration(gatewayWarningAfterMinutes) * time.Minute))
 
     // Sweep through all gateways that we've seen
     for i := 0; i < len(seenGateways); i++ {

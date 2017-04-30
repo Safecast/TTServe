@@ -59,7 +59,7 @@ func trackServer(ServerId string, whenSeen time.Time) {
         if dev.serverid == seenServers[i].serverid {
             // Only pay attention to things that have truly recently come or gone
             minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
-            if minutesAgo < deviceWarningAfterMinutes {
+            if minutesAgo < serverWarningAfterMinutes {
                 seenServers[i].everRecentlySeen = true
                 // Notify when the device comes back
                 if seenServers[i].notifiedAsUnseen {
@@ -91,7 +91,7 @@ func trackServer(ServerId string, whenSeen time.Time) {
     if !found {
         dev.seen = whenSeen
         minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
-        dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes
+        dev.everRecentlySeen = minutesAgo < serverWarningAfterMinutes
         dev.notifiedAsUnseen = false
         seenServers = append(seenServers, dev)
     }
@@ -131,7 +131,7 @@ func sendExpiredSafecastServersToSlack() {
     trackAllServers()
 
     // Compute an expiration time
-    expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes) * time.Minute))
+    expiration := time.Now().Add(-(time.Duration(serverWarningAfterMinutes) * time.Minute))
 
     // Sweep through all servers that we've seen
     for i := 0; i < len(seenServers); i++ {
