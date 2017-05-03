@@ -437,6 +437,7 @@ func generateTTNCTLDeviceRegistrationScript() {
         deveui, _, _, _ := SafecastGetDeviceStatusSummary(id)
         if deveui != "" {
             s += fmt.Sprintf("ttnctl devices register %s\n", strings.ToLower(deveui))
+            s += fmt.Sprintf("ttnctl device set %s --app-key 5CB50DDCF44CEADA6A27DA8BC6607E6A\n", strings.ToLower(deveui))
         }
     }
 
