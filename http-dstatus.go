@@ -7,6 +7,7 @@ package main
 
 import (
 	"os"
+	"strings"
     "io/ioutil"
     "net/http"
     "fmt"
@@ -41,12 +42,17 @@ func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
 // Method to generate the web page version of a device summary
 func GenerateDeviceSummaryWebPage(rw http.ResponseWriter, contents []byte) {
 
-	// Read the web page
+	// Read the web page template
     page, err := ioutil.ReadFile("./device.html")
 	if err != nil {
 		io.WriteString(rw, "error reading page\n")
 		return
 	}
 
-	io.WriteString(rw, string(page))
+	// Replace the placeholder in the HTML file
+	output := strings.Replace(string(page), "{\"abc\":\"def\"}", string(contents), 1)
+
+	// Return the output
+	io.WriteString(rw, output)
+
 }
