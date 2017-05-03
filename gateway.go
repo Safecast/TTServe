@@ -18,6 +18,7 @@ const gatewayWarningAfterMinutes = 90
 
 // Describes every device that has sent us a message
 type seenGateway struct {
+	label				string
     gatewayid           string
     seen                time.Time
     everRecentlySeen    bool
@@ -73,7 +74,11 @@ func trackGateway(GatewayId string, whenSeen time.Time) {
                     case minutesAgo >= 120:
                         message = fmt.Sprintf("~%d hours", hoursAgo)
                     }
-                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s has returned after %s away", seenGateways[i].gatewayid, message), SLACK_MSG_UNSOLICITED_OPS)
+					if seenGateways[i].label != "" {
+	                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s \"%s\" has returned after %s away", seenGateways[i].gatewayid, seenGateways[i].label, message), SLACK_MSG_UNSOLICITED_OPS)
+					} else {
+	                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s has returned after %s away", seenGateways[i].gatewayid, message), SLACK_MSG_UNSOLICITED_OPS)
+					}
                 }
                 // Mark as having been seen on the latest date of any file having that time
                 seenGateways[i].notifiedAsUnseen = false
@@ -89,6 +94,7 @@ func trackGateway(GatewayId string, whenSeen time.Time) {
 
     // Add a new array entry if necessary
     if !found {
+        _, dev.label = SafecastGetGatewaySummary(dev.gatewayid, "", false)
         dev.seen = whenSeen
         minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
         dev.everRecentlySeen = minutesAgo < gatewayWarningAfterMinutes
@@ -143,9 +149,11 @@ func sendExpiredSafecastGatewaysToSlack() {
         if !seenGateways[i].notifiedAsUnseen && seenGateways[i].everRecentlySeen {
             if seenGateways[i].seen.Before(expiration) {
                 seenGateways[i].notifiedAsUnseen = true
-                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s hasn't been seen for %d minutes",
-                    seenGateways[i].gatewayid,
-                    seenGateways[i].minutesAgo), SLACK_MSG_UNSOLICITED_OPS)
+				if seenGateways[i].label != "" {
+	                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s \"%s\" hasn't been seen for %d minutes", seenGateways[i].gatewayid, seenGateways[i].label, seenGateways[i].minutesAgo), SLACK_MSG_UNSOLICITED_OPS)
+				} else {
+	                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s hasn't been seen for %d minutes", seenGateways[i].gatewayid, seenGateways[i].minutesAgo), SLACK_MSG_UNSOLICITED_OPS)
+				}
             }
         }
     }
@@ -170,7 +178,7 @@ func sendSafecastGatewaySummaryToSlack(header string, fDetails bool) {
         gatewayID := sortedGateways[i].gatewayid
 
         // Emit info about the device
-        summary := SafecastGetGatewaySummary(gatewayID, "    ", fDetails)
+        summary, _ := SafecastGetGatewaySummary(gatewayID, "    ", fDetails)
         if summary != "" {
             if s != "" {
                 s += fmt.Sprintf("\n")

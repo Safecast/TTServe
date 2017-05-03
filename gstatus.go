@@ -167,12 +167,12 @@ func SafecastWriteGatewayStatus(ttg TTGateReq, IP string) {
 }
 
 // Get summary of a device
-func SafecastGetGatewaySummary(GatewayId string, bol string, fDetails bool) (Summary string) {
+func SafecastGetGatewaySummary(GatewayId string, bol string, fDetails bool) (Summary string, Label string) {
 
     // Read the file
     isAvail, _, value := SafecastReadGatewayStatus(GatewayId)
     if !isAvail {
-        return ""
+        return "", ""
     }
 
     // Get the label
@@ -224,6 +224,6 @@ func SafecastGetGatewaySummary(GatewayId string, bol string, fDetails bool) (Sum
     }
 
     // Done
-    return s
+    return s, label
 
 }
