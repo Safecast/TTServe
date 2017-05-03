@@ -7,6 +7,7 @@ package main
 
 import (
 	"os"
+    "io/ioutil"
     "net/http"
     "fmt"
     "io"
@@ -39,5 +40,13 @@ func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
 
 // Method to generate the web page version of a device summary
 func GenerateDeviceSummaryWebPage(rw http.ResponseWriter, contents []byte) {
-	io.WriteString(rw, "Got it.\n")
+
+	// Read the web page
+    page, err := ioutil.ReadFile("./device.html")
+	if err != nil {
+		io.WriteString(rw, "error reading page\n")
+		return
+	}
+
+	io.WriteString(rw, string(page))
 }
