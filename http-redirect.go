@@ -54,7 +54,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         if len(str1) == 1 {
             body = []byte("")
         } else {
-	        str2 := str1[len(str1)-1]
+            str2 := str1[len(str1)-1]
             str3 := "unit=cpm&" + str2
             str4 := strings.Replace(str3, "lat=", "latitude=", 1)
             str5 := strings.Replace(str4, "lon=", "longitude=", 1)
@@ -79,14 +79,14 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         }
     }
 
-	// Clean up the json.  Specifically, Device ID 100049 puts a newline into
-	// the devietype_id string literal, which is choked on by the JSON parser
-	clean_body_str := string(body)
+    // Clean up the json.  Specifically, Device ID 100049 puts a newline into
+    // the devietype_id string literal, which is choked on by the JSON parser
+    clean_body_str := string(body)
     clean_body_str = strings.Replace(clean_body_str, "\n", "", -1)
     clean_body_str = strings.Replace(clean_body_str, "\r", "", -1)
     clean_body_str = strings.Replace(clean_body_str, "\\r", "", -1)
     clean_body_str = strings.Replace(clean_body_str, "\":\" ", "\":\"", -1)
-	clean_body := []byte(clean_body_str)
+    clean_body := []byte(clean_body_str)
 
     // Decode the request with custom marshaling
     sdV1, sdV1Emit, err = SafecastV1Decode(bytes.NewReader(clean_body))
@@ -95,6 +95,22 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Eliminate a bit of the noise caused by load balancer health checks
         if isReal && req.RequestURI != "/" && req.RequestURI != "/favicon.ico" {
+
+            // See if this is nothing but a device ID
+            devname := req.RequestURI[len("/"):]
+            valid, deviceId := WordsToNumber(devname)
+            if valid {
+                file := fmt.Sprintf("%s%s/%d.json", SafecastDirectory(), TTDeviceStatusPath,  deviceId)
+                contents, err := ioutil.ReadFile(file)
+                if err == nil {
+                    GenerateDeviceSummaryWebPage(rw, contents)
+                    return
+                }
+                io.WriteString(rw, fmt.Sprintf("Unknown device: %s\n", devname))
+                return
+            }
+
+            // Process it as an unknown URL
             if err == io.EOF {
                 fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", logTime(), RequestURI, remoteAddr)
             } else {
@@ -103,21 +119,12 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
             if len(clean_body) != 0 {
                 fmt.Printf("%s\n", string(clean_body))
             }
+
         }
 
-		// See if this is nothing but a device ID
-		devname := req.RequestURI[len("/"):]
-		valid, deviceId := WordsToNumber(devname)
-		if valid {
-		    file := fmt.Sprintf("%s%s/%d.json", SafecastDirectory(), TTDeviceStatusPath,  deviceId)
-	        contents, err := ioutil.ReadFile(file)
-			if err == nil {
-				GenerateDeviceSummaryWebPage(rw, contents)
-				return
-			}
-		}
-        io.WriteString(rw, fmt.Sprintf("Unknown device: %s\n", devname))
+        io.WriteString(rw, fmt.Sprintf("Live Free or Die.\n"))
         return
+
     }
 
     // A real request
@@ -162,9 +169,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // Convert to current data format
     deviceID, deviceType, sd := SafecastReformat(sdV1, isTestMeasurement)
     if deviceID == 0 {
-	    requestor, _ := getRequestorIPv4(req)
-	    transportStr := deviceType+":" + requestor
-	    fmt.Printf("\n%s ** Ignoring message with DeviceID == 0 from %s:\n%s\n", logTime(), transportStr, string(clean_body))
+        requestor, _ := getRequestorIPv4(req)
+        transportStr := deviceType+":" + requestor
+        fmt.Printf("\n%s ** Ignoring message with DeviceID == 0 from %s:\n%s\n", logTime(), transportStr, string(clean_body))
         return
     }
 
