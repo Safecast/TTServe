@@ -36,3 +36,8 @@ func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
     io.Copy(rw, fd)
 
 }
+
+// Method to generate the web page version of a device summary
+func GenerateDeviceSummaryWebPage(rw http.ResponseWriter, contents []byte) {
+	io.WriteString(rw, "Got it.\n")
+}

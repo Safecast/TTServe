@@ -92,6 +92,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     sdV1, sdV1Emit, err = SafecastV1Decode(bytes.NewReader(clean_body))
     if err != nil {
         stats.Count.HTTP++
+
         // Eliminate a bit of the noise caused by load balancer health checks
         if isReal && req.RequestURI != "/" && req.RequestURI != "/favicon.ico" {
             if err == io.EOF {
@@ -103,7 +104,18 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
                 fmt.Printf("%s\n", string(clean_body))
             }
         }
-        io.WriteString(rw, fmt.Sprintf("Live Free or Die.\n"))
+
+		// See if this is nothing but a device ID
+		devname := req.RequestURI[len("/"):]
+		valid, deviceId := WordsToNumber(devname)
+		if valid {
+		    file := fmt.Sprintf("%s%s/%d.json", SafecastDirectory(), TTDeviceStatusPath,  deviceId)
+	        contents, err := ioutil.ReadFile(file)
+			if err == nil {
+				GenerateDeviceSummaryWebPage(rw, contents)
+			}
+		}
+        io.WriteString(rw, fmt.Sprintf("Unknown device: %s\n", devname))
         return
     }
 
