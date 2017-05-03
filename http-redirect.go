@@ -113,6 +113,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	        contents, err := ioutil.ReadFile(file)
 			if err == nil {
 				GenerateDeviceSummaryWebPage(rw, contents)
+				return
 			}
 		}
         io.WriteString(rw, fmt.Sprintf("Unknown device: %s\n", devname))
