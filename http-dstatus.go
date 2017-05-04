@@ -22,20 +22,16 @@ func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
     rw.Header().Set("Content-Type", "application/json")
 
     // Log it
-    filename := req.RequestURI[len(TTServerTopicDeviceStatus):]
-	devicenum := strings.Split(filename, ".")
-	if len(devicenum) < 1 {
-		return;
-	}
-	valid, deviceid := WordsToNumber(devicenum[0])
+    device := req.RequestURI[len(TTServerTopicDeviceStatus):]
+	valid, deviceid := WordsToNumber(device)
 	if !valid {
 		return;
 	}
-	filename = fmt.Sprintf("%d.json", deviceid)
+	filename := fmt.Sprintf("%d.json", deviceid)
     fmt.Printf("%s Device information request for %s\n", logTime(), filename)
 
     // Open the file
-    file := SafecastDirectory() + TTDeviceStatusPath + "/" + filename + ".json"
+    file := SafecastDirectory() + TTDeviceStatusPath + "/" + filename
     fd, err := os.Open(file)
     if err != nil {
         io.WriteString(rw, errorString(err))
