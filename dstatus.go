@@ -29,11 +29,11 @@ type SafecastDeviceStatus struct {
 // Get the current value
 func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv SafecastDeviceStatus) {
     valueEmpty := SafecastDeviceStatus{}
-	did := uint32(deviceId)
+    did := uint32(deviceId)
     valueEmpty.DeviceId = &did
 
     // Generate the filename, which we'll use twice
-    filename := SafecastDirectory() + TTDeviceStatusPath + "/" + fmt.Sprintf("%d", deviceId) + ".json"
+    filename := SafecastGetDeviceStatusFilePath(deviceId)
 
     // If the file doesn't exist, don't even try
     _, err := os.Stat(filename)
@@ -484,109 +484,109 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
             }
         }
         if sc.Dev.ErrorsPms != nil {
-			if value.Dev.ErrorsPms == nil ||
-				(value.Dev.ErrorsPms != nil && *sc.Dev.ErrorsPms > *value.Dev.ErrorsPms) {
-				value.Dev.ErrorsPms = sc.Dev.ErrorsPms
-			}
+            if value.Dev.ErrorsPms == nil ||
+                (value.Dev.ErrorsPms != nil && *sc.Dev.ErrorsPms > *value.Dev.ErrorsPms) {
+                value.Dev.ErrorsPms = sc.Dev.ErrorsPms
+            }
         }
         if sc.Dev.ErrorsBme0 != nil {
-			if value.Dev.ErrorsBme0 == nil ||
-				(value.Dev.ErrorsBme0 != nil && *sc.Dev.ErrorsBme0 > *value.Dev.ErrorsBme0) {
-				value.Dev.ErrorsBme0 = sc.Dev.ErrorsBme0
-			}
+            if value.Dev.ErrorsBme0 == nil ||
+                (value.Dev.ErrorsBme0 != nil && *sc.Dev.ErrorsBme0 > *value.Dev.ErrorsBme0) {
+                value.Dev.ErrorsBme0 = sc.Dev.ErrorsBme0
+            }
         }
         if sc.Dev.ErrorsBme1 != nil {
-			if value.Dev.ErrorsBme1 == nil ||
-				(value.Dev.ErrorsBme1 != nil && *sc.Dev.ErrorsBme1 > *value.Dev.ErrorsBme1) {
-				value.Dev.ErrorsBme1 = sc.Dev.ErrorsBme1
-			}
+            if value.Dev.ErrorsBme1 == nil ||
+                (value.Dev.ErrorsBme1 != nil && *sc.Dev.ErrorsBme1 > *value.Dev.ErrorsBme1) {
+                value.Dev.ErrorsBme1 = sc.Dev.ErrorsBme1
+            }
         }
         if sc.Dev.ErrorsLora != nil {
-			if value.Dev.ErrorsLora == nil ||
-				(value.Dev.ErrorsLora != nil && *sc.Dev.ErrorsLora > *value.Dev.ErrorsLora) {
-				value.Dev.ErrorsLora = sc.Dev.ErrorsLora
-			}
+            if value.Dev.ErrorsLora == nil ||
+                (value.Dev.ErrorsLora != nil && *sc.Dev.ErrorsLora > *value.Dev.ErrorsLora) {
+                value.Dev.ErrorsLora = sc.Dev.ErrorsLora
+            }
         }
         if sc.Dev.ErrorsFona != nil {
-			if value.Dev.ErrorsFona == nil ||
-				(value.Dev.ErrorsFona != nil && *sc.Dev.ErrorsFona > *value.Dev.ErrorsFona) {
-				value.Dev.ErrorsFona = sc.Dev.ErrorsFona
-			}
+            if value.Dev.ErrorsFona == nil ||
+                (value.Dev.ErrorsFona != nil && *sc.Dev.ErrorsFona > *value.Dev.ErrorsFona) {
+                value.Dev.ErrorsFona = sc.Dev.ErrorsFona
+            }
         }
         if sc.Dev.ErrorsGeiger != nil {
-			if value.Dev.ErrorsGeiger == nil ||
-				(value.Dev.ErrorsGeiger != nil && *sc.Dev.ErrorsGeiger > *value.Dev.ErrorsGeiger) {
-				value.Dev.ErrorsGeiger = sc.Dev.ErrorsGeiger
-			}
+            if value.Dev.ErrorsGeiger == nil ||
+                (value.Dev.ErrorsGeiger != nil && *sc.Dev.ErrorsGeiger > *value.Dev.ErrorsGeiger) {
+                value.Dev.ErrorsGeiger = sc.Dev.ErrorsGeiger
+            }
         }
         if sc.Dev.ErrorsMax01 != nil {
-			if value.Dev.ErrorsMax01 == nil ||
-				(value.Dev.ErrorsMax01 != nil && *sc.Dev.ErrorsMax01 > *value.Dev.ErrorsMax01) {
-				value.Dev.ErrorsMax01 = sc.Dev.ErrorsMax01
-			}
+            if value.Dev.ErrorsMax01 == nil ||
+                (value.Dev.ErrorsMax01 != nil && *sc.Dev.ErrorsMax01 > *value.Dev.ErrorsMax01) {
+                value.Dev.ErrorsMax01 = sc.Dev.ErrorsMax01
+            }
         }
         if sc.Dev.ErrorsUgps != nil {
-			if value.Dev.ErrorsUgps == nil ||
-				(value.Dev.ErrorsUgps != nil && *sc.Dev.ErrorsUgps > *value.Dev.ErrorsUgps) {
-				value.Dev.ErrorsUgps = sc.Dev.ErrorsUgps
-			}
+            if value.Dev.ErrorsUgps == nil ||
+                (value.Dev.ErrorsUgps != nil && *sc.Dev.ErrorsUgps > *value.Dev.ErrorsUgps) {
+                value.Dev.ErrorsUgps = sc.Dev.ErrorsUgps
+            }
         }
         if sc.Dev.ErrorsTwi != nil {
-			if value.Dev.ErrorsTwi == nil ||
-				(value.Dev.ErrorsTwi != nil && *sc.Dev.ErrorsTwi > *value.Dev.ErrorsTwi) {
-				value.Dev.ErrorsTwi = sc.Dev.ErrorsTwi
-			}
+            if value.Dev.ErrorsTwi == nil ||
+                (value.Dev.ErrorsTwi != nil && *sc.Dev.ErrorsTwi > *value.Dev.ErrorsTwi) {
+                value.Dev.ErrorsTwi = sc.Dev.ErrorsTwi
+            }
         }
         if sc.Dev.ErrorsTwiInfo != nil {
             value.Dev.ErrorsTwiInfo = sc.Dev.ErrorsTwiInfo
         }
         if sc.Dev.ErrorsLis != nil {
-			if value.Dev.ErrorsLis == nil ||
-				(value.Dev.ErrorsLis != nil && *sc.Dev.ErrorsLis > *value.Dev.ErrorsLis) {
-				value.Dev.ErrorsLis = sc.Dev.ErrorsLis
-			}
+            if value.Dev.ErrorsLis == nil ||
+                (value.Dev.ErrorsLis != nil && *sc.Dev.ErrorsLis > *value.Dev.ErrorsLis) {
+                value.Dev.ErrorsLis = sc.Dev.ErrorsLis
+            }
         }
         if sc.Dev.ErrorsSpi != nil {
-			if value.Dev.ErrorsSpi == nil ||
-				(value.Dev.ErrorsSpi != nil && *sc.Dev.ErrorsSpi > *value.Dev.ErrorsSpi) {
-				value.Dev.ErrorsSpi = sc.Dev.ErrorsSpi
-			}
+            if value.Dev.ErrorsSpi == nil ||
+                (value.Dev.ErrorsSpi != nil && *sc.Dev.ErrorsSpi > *value.Dev.ErrorsSpi) {
+                value.Dev.ErrorsSpi = sc.Dev.ErrorsSpi
+            }
         }
         if sc.Dev.ErrorsConnectLora != nil {
-			if value.Dev.ErrorsConnectLora == nil ||
-				(value.Dev.ErrorsConnectLora != nil && *sc.Dev.ErrorsConnectLora > *value.Dev.ErrorsConnectLora) {
-				value.Dev.ErrorsConnectLora = sc.Dev.ErrorsConnectLora
-			}
+            if value.Dev.ErrorsConnectLora == nil ||
+                (value.Dev.ErrorsConnectLora != nil && *sc.Dev.ErrorsConnectLora > *value.Dev.ErrorsConnectLora) {
+                value.Dev.ErrorsConnectLora = sc.Dev.ErrorsConnectLora
+            }
         }
         if sc.Dev.ErrorsConnectFona != nil {
-			if value.Dev.ErrorsConnectFona == nil ||
-				(value.Dev.ErrorsConnectFona != nil && *sc.Dev.ErrorsConnectFona > *value.Dev.ErrorsConnectFona) {
-				value.Dev.ErrorsConnectFona = sc.Dev.ErrorsConnectFona
-			}
+            if value.Dev.ErrorsConnectFona == nil ||
+                (value.Dev.ErrorsConnectFona != nil && *sc.Dev.ErrorsConnectFona > *value.Dev.ErrorsConnectFona) {
+                value.Dev.ErrorsConnectFona = sc.Dev.ErrorsConnectFona
+            }
         }
         if sc.Dev.ErrorsConnectWireless != nil {
-			if value.Dev.ErrorsConnectWireless == nil ||
-				(value.Dev.ErrorsConnectWireless != nil && *sc.Dev.ErrorsConnectWireless > *value.Dev.ErrorsConnectWireless) {
-				value.Dev.ErrorsConnectWireless = sc.Dev.ErrorsConnectWireless
-			}
+            if value.Dev.ErrorsConnectWireless == nil ||
+                (value.Dev.ErrorsConnectWireless != nil && *sc.Dev.ErrorsConnectWireless > *value.Dev.ErrorsConnectWireless) {
+                value.Dev.ErrorsConnectWireless = sc.Dev.ErrorsConnectWireless
+            }
         }
         if sc.Dev.ErrorsConnectGateway != nil {
-			if value.Dev.ErrorsConnectGateway == nil ||
-				(value.Dev.ErrorsConnectGateway != nil && *sc.Dev.ErrorsConnectGateway > *value.Dev.ErrorsConnectGateway) {
-				value.Dev.ErrorsConnectGateway = sc.Dev.ErrorsConnectGateway
-			}
+            if value.Dev.ErrorsConnectGateway == nil ||
+                (value.Dev.ErrorsConnectGateway != nil && *sc.Dev.ErrorsConnectGateway > *value.Dev.ErrorsConnectGateway) {
+                value.Dev.ErrorsConnectGateway = sc.Dev.ErrorsConnectGateway
+            }
         }
         if sc.Dev.ErrorsConnectData != nil {
-			if value.Dev.ErrorsConnectData == nil ||
-				(value.Dev.ErrorsConnectData != nil && *sc.Dev.ErrorsConnectData > *value.Dev.ErrorsConnectData) {
-				value.Dev.ErrorsConnectData = sc.Dev.ErrorsConnectData
-			}
+            if value.Dev.ErrorsConnectData == nil ||
+                (value.Dev.ErrorsConnectData != nil && *sc.Dev.ErrorsConnectData > *value.Dev.ErrorsConnectData) {
+                value.Dev.ErrorsConnectData = sc.Dev.ErrorsConnectData
+            }
         }
         if sc.Dev.ErrorsConnectService != nil {
-			if value.Dev.ErrorsConnectService == nil ||
-				(value.Dev.ErrorsConnectService != nil && *sc.Dev.ErrorsConnectService > *value.Dev.ErrorsConnectService) {
-				value.Dev.ErrorsConnectService = sc.Dev.ErrorsConnectService
-			}
+            if value.Dev.ErrorsConnectService == nil ||
+                (value.Dev.ErrorsConnectService != nil && *sc.Dev.ErrorsConnectService > *value.Dev.ErrorsConnectService) {
+                value.Dev.ErrorsConnectService = sc.Dev.ErrorsConnectService
+            }
         }
 
     }
@@ -674,7 +674,7 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
     }
 
     // Write it to the file until it's written correctly, to allow for concurrency
-    filename := SafecastDirectory() + TTDeviceStatusPath + "/" + fmt.Sprintf("%d", *sc.DeviceId) + ".json"
+    filename := SafecastGetDeviceStatusFilePath(*sc.DeviceId)
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
 
     for {
@@ -704,10 +704,10 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
 func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label string, Gps string, Summary string) {
 
     // Default the label
-	label := ""
-	if false {
-	    label = SafecastDeviceType(DeviceId)
-	}
+    label := ""
+    if false {
+        label = SafecastDeviceType(DeviceId)
+    }
 
     // Read the file
     isAvail, _, value := SafecastReadDeviceStatus(DeviceId)
@@ -790,5 +790,12 @@ func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label strin
 
     // Done
     return ttnDevEui, label, gps, s
+
+}
+
+// Generate a device status filename
+func SafecastGetDeviceStatusFilePath(DeviceId uint32) string {
+
+    return SafecastDirectory() + TTDeviceStatusPath + "/" + time.Now().UTC().Format("2006-01-") + fmt.Sprintf("%d", DeviceId) + ".json"
 
 }

@@ -27,11 +27,10 @@ func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
 	if !valid {
 		return;
 	}
-	filename := fmt.Sprintf("%d.json", deviceid)
-    fmt.Printf("%s Device information request for %s\n", logTime(), filename)
+    fmt.Printf("%s Device information request for %d\n", logTime(), deviceid)
 
     // Open the file
-    file := SafecastDirectory() + TTDeviceStatusPath + "/" + filename
+	file := SafecastGetDeviceStatusFilePath(deviceid)
     fd, err := os.Open(file)
     if err != nil {
         io.WriteString(rw, errorString(err))

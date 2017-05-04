@@ -113,7 +113,12 @@ func trackAllDevices() {
                 // Extract device ID from filename
                 Str0 := file.Name()
                 Str1 := strings.Split(Str0, ".")[0]
-                i64, _ := strconv.ParseUint(Str1, 10, 32)
+				Str2 := strings.Split(Str1, "-")
+				Str3 := Str2[0]
+				if len(Str2) != 1 {
+					Str3 = Str2[len(Str2)-1]
+				}
+				i64, _ := strconv.ParseUint(Str3, 10, 32)
                 deviceID := uint32(i64)
 
                 // Track the device

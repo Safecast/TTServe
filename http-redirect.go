@@ -100,7 +100,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
             devname := req.RequestURI[len("/"):]
             valid, deviceId := WordsToNumber(devname)
             if valid {
-                file := fmt.Sprintf("%s%s/%d.json", SafecastDirectory(), TTDeviceStatusPath,  deviceId)
+				file := SafecastGetDeviceStatusFilePath(deviceId)
                 contents, err := ioutil.ReadFile(file)
                 if err == nil {
                     GenerateDeviceSummaryWebPage(rw, contents)
