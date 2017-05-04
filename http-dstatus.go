@@ -23,6 +23,15 @@ func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Log it
     filename := req.RequestURI[len(TTServerTopicDeviceStatus):]
+	devicenum := strings.Split(filename, ".")
+	if len(devicenum) < 1 {
+		return;
+	}
+	valid, deviceid := WordsToNumber(devicenum[0])
+	if !valid {
+		return;
+	}
+	filename = fmt.Sprintf("%d.json", deviceid)
     fmt.Printf("%s Device information request for %s\n", logTime(), filename)
 
     // Open the file
