@@ -278,6 +278,10 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
         dev.ErrorsSpi = msg.ErrorsSpi
         dodev = true
     }
+    if msg.ErrorsMtu != nil {
+        dev.ErrorsMtu = msg.ErrorsMtu
+        dodev = true
+    }
     if msg.ErrorsConnectLora != nil {
         dev.ErrorsConnectLora = msg.ErrorsConnectLora
         dodev = true

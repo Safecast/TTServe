@@ -44,6 +44,7 @@ type MeasurementStat struct {
     ErrorsUgps          uint32
     ErrorsLis           uint32
     ErrorsSpi           uint32
+    ErrorsMtu           uint32
     ErrorsTwi           uint32
     ErrorsTwiInfo       string
     ErrorsConnectLora   uint32
@@ -161,6 +162,8 @@ type MeasurementDataset struct {
     ThisErrorsLis       uint32
     PrevErrorsSpi       uint32
     ThisErrorsSpi       uint32
+    PrevErrorsMtu       uint32
+    ThisErrorsMtu       uint32
     PrevErrorsTwi       uint32
     ThisErrorsTwi       uint32
     ErrorsTwiInfo       string
@@ -364,6 +367,9 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
         if sd.Dev.ErrorsSpi != nil {
             stat.ErrorsSpi = *sd.Dev.ErrorsSpi
+        }
+        if sd.Dev.ErrorsMtu != nil {
+            stat.ErrorsMtu = *sd.Dev.ErrorsMtu
         }
         if sd.Dev.ErrorsTwi != nil {
             stat.ErrorsTwi = *sd.Dev.ErrorsTwi
@@ -825,6 +831,10 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         ds.ThisErrorsSpi = stat.ErrorsSpi
         ds.AnyErrors = true
     }
+    if stat.ErrorsMtu > ds.ThisErrorsMtu {
+        ds.ThisErrorsMtu = stat.ErrorsMtu
+        ds.AnyErrors = true
+    }
     if stat.ErrorsTwi > ds.ThisErrorsTwi {
         ds.ThisErrorsTwi = stat.ErrorsTwi
         ds.AnyErrors = true
@@ -1123,6 +1133,8 @@ func AggregateErrors(ds *MeasurementDataset) {
     ds.ThisErrorsLis = 0
     ds.PrevErrorsSpi += ds.ThisErrorsSpi
     ds.ThisErrorsSpi = 0
+    ds.PrevErrorsMtu += ds.ThisErrorsMtu
+    ds.ThisErrorsMtu = 0
     ds.PrevErrorsTwi += ds.ThisErrorsTwi
     ds.ThisErrorsTwi = 0
     ds.PrevErrorsConnectLora += ds.ThisErrorsConnectLora
@@ -1466,6 +1478,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         }
         if ds.PrevErrorsSpi > 0 {
             s += fmt.Sprintf("  Spi          %d\n", ds.PrevErrorsSpi)
+        }
+        if ds.PrevErrorsMtu > 0 {
+            s += fmt.Sprintf("  Mtu          %d\n", ds.PrevErrorsMtu)
         }
         if ds.PrevErrorsTwi > 0 || ds.ErrorsTwiInfo != "" {
             s += fmt.Sprintf("  Twi          %d %s\n", ds.PrevErrorsTwi, ds.ErrorsTwiInfo)

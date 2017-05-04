@@ -552,6 +552,12 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
                 value.Dev.ErrorsSpi = sc.Dev.ErrorsSpi
             }
         }
+        if sc.Dev.ErrorsMtu != nil {
+            if value.Dev.ErrorsMtu == nil ||
+                (value.Dev.ErrorsMtu != nil && *sc.Dev.ErrorsMtu > *value.Dev.ErrorsMtu) {
+                value.Dev.ErrorsMtu = sc.Dev.ErrorsMtu
+            }
+        }
         if sc.Dev.ErrorsConnectLora != nil {
             if value.Dev.ErrorsConnectLora == nil ||
                 (value.Dev.ErrorsConnectLora != nil && *sc.Dev.ErrorsConnectLora > *value.Dev.ErrorsConnectLora) {

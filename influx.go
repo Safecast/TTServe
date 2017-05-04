@@ -360,6 +360,9 @@ func SafecastLogToInflux(sd SafecastData) bool {
         if sd.Dev.ErrorsSpi != nil {
             fields["dev_err_spi"] = *sd.Dev.ErrorsSpi
         }
+        if sd.Dev.ErrorsMtu != nil {
+            fields["dev_err_mtu"] = *sd.Dev.ErrorsMtu
+        }
         if sd.Dev.ErrorsConnectLora != nil {
             fields["dev_err_con_lora"] = *sd.Dev.ErrorsConnectLora
         }
