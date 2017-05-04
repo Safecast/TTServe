@@ -110,17 +110,20 @@ func trackAllDevices() {
 
             if !file.IsDir() {
 
-                // Extract device ID from filename
+				// ONLY pay attention to files from the current year/month
+				deviceID := uint32(0)
                 Str0 := file.Name()
-                Str1 := strings.Split(Str0, ".")[0]
+				Str1 := strings.Split(Str0, ".")[0]
 				Str2 := strings.Split(Str1, "-")
-				Str3 := Str2[0]
-				if len(Str2) != 1 {
-					Str3 = Str2[len(Str2)-1]
+				if len(Str2) == 3 {
+					yr, _ := strconv.ParseUint(Str2[0], 10, 32)
+					mo, _ := strconv.ParseUint(Str2[1], 10, 32)
+					if int(yr) == time.Now().Year() && int(mo) == int(time.Now().Month()) {
+						i64, _ := strconv.ParseUint(Str2[2], 10, 32)
+						deviceID = uint32(i64)
+					}
 				}
-				i64, _ := strconv.ParseUint(Str3, 10, 32)
-                deviceID := uint32(i64)
-
+				
                 // Track the device
                 if deviceID != 0 {
                     trackDevice(deviceID, file.ModTime())
