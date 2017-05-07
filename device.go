@@ -440,18 +440,26 @@ func generateTTNCTLDeviceRegistrationScript() {
 
     // Sweep over devices and generate the TTNCTL commands, newest first
     s := ""
+	devicesRegistered := 0
     for i := 0; i < len(sortedDevices); i++ {
         id := sortedDevices[i].deviceid
         deveui, _, _, _ := SafecastGetDeviceStatusSummary(id)
         if deveui != "" {
             s += fmt.Sprintf("ttnctl devices register %s\n", strings.ToLower(deveui))
             s += fmt.Sprintf("ttnctl device set %s --app-key 5CB50DDCF44CEADA6A27DA8BC6607E6A --dev-eui %s\n", strings.ToLower(deveui), strings.ToLower(deveui))
+			devicesRegistered++
+			if devicesRegistered % 10 == 0 {
+		        sendToSafecastOps(s, SLACK_MSG_REPLY)
+				s = ""
+			}
         }
     }
 
     // Send it to Slack
-    if s != "" {
-        sendToSafecastOps(s, SLACK_MSG_REPLY)
+    if devicesRegistered != 0 {
+		if s != "" {
+	        sendToSafecastOps(s, SLACK_MSG_REPLY)
+		}
     } else {
         sendToSafecastOps("None found.", SLACK_MSG_REPLY)
     }
