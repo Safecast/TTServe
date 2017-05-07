@@ -465,7 +465,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 // Just a debug function that traverses a Response, which took me forever to figure out
 func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int {
 	buf := make([]byte, 8192)
-    fDebug := true
+    fDebug := false
     fDebugMax := false
 	results := 0
 	firstrow := true
