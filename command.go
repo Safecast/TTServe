@@ -571,7 +571,7 @@ func Command(user string, message string) string {
 			if s != "" {
 				s += "\n"
 			}
-			s += newArg0 + " " + newMessageAfterFirstArg
+			s += CommandParse(user, newArg0, ObjReport, newMessageAfterFirstArg)
 		}
 		if s == "" {
 			s = "No device specified"
