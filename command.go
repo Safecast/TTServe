@@ -399,7 +399,7 @@ func CommandParse(user string, command string, objtype string, message string) s
             }
             CommandObjSet(user, objtype, objname, result)
         } else if objtype == ObjReport {
-            valid, result, _, _, _, _, _ := ReportVerify(user, messageAfterSecondArg)
+            valid, result, _, _, _, _, _, _ := ReportVerify(user, messageAfterSecondArg)
             if !valid {
                 return result
             }
@@ -806,7 +806,7 @@ func MarkVerify(mark string, reference string, fBackwards bool) (rValid bool, rO
 }
 
 // Verify a report or transform it
-func ReportVerify(user string, report string) (rValid bool, rResult string, rDeviceList []uint32, rDeviceRange []Range, rPlusCodeList []string, rFrom string, rTo string) {
+func ReportVerify(user string, report string) (rValid bool, rResult string, device_arg string, rDeviceList []uint32, rDeviceRange []Range, rPlusCodeList []string, rFrom string, rTo string) {
 
     // Break up into its parts
     args := strings.Split(report, " ")
@@ -818,7 +818,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, rDev
         return
     }
 
-    device_arg := args[0]
+    device_arg = args[0]
     from_arg := args[1]
     to_arg := ""
     if len(args) > 2 {
@@ -913,7 +913,7 @@ func ReportRun(user string, csv bool, report string) (success bool, result strin
     }
 
     // Validate and expand the report
-    valid, result, devices, ranges, pluscodes, from, to := ReportVerify(user, report)
+    valid, result, device_arg, devices, ranges, pluscodes, from, to := ReportVerify(user, report)
     if !valid {
         return false, result, ""
     }
@@ -957,6 +957,6 @@ func ReportRun(user string, csv bool, report string) (success bool, result strin
     }
 
     // Done
-    return true, fmt.Sprintf("%d rows of data are <%s|here>, @%s.", numrows, result, user), filename
+    return true, fmt.Sprintf("%d rows of data for %s are <%s|here>, @%s.", numrows, device_arg, result, user), filename
 
 }
