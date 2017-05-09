@@ -524,9 +524,14 @@ func Command(user string, message string) string {
     if len(args) > 1 {
         messageAfterFirstArg = strings.Join(args[1:], " ")
     }
+    messageAfterSecondArg := ""
+    if len(args) > 2 {
+        messageAfterSecondArg = strings.Join(args[2:], " ")
+    }
 
     // Dispatch command
-    switch strings.ToLower(args[0]) {
+	command := strings.ToLower(args[0])
+    switch command {
 
     case "devices":
         fallthrough
@@ -540,13 +545,38 @@ func Command(user string, message string) string {
 
     case "run":
         fallthrough
-    case "reports":
-        fallthrough
     case "check":
         fallthrough
     case "report":
         return CommandParse(user, args[0], ObjReport, messageAfterFirstArg)
 
+    case "checkall":
+        fallthrough
+    case "reportall": 
+		devicelist := ""
+		if len(args) > 1 {
+			devicelist = args[1]
+		}
+	    valid, _, devices, _, _ := DeviceList(user, devicelist)
+	    if !valid {
+	        return "Invalid device list"
+	    }
+		s := ""
+		for _, device := range devices {
+			newArg0 := "check"
+			if command != "checkall" {
+				newArg0 = "report"
+			}
+			newMessageAfterFirstArg := fmt.Sprintf("%d %s", device, messageAfterSecondArg)
+			if s != "" {
+				s += "\n"
+			}
+			s += newArg0 + " " + newMessageAfterFirstArg
+		}
+		if s == "" {
+			s = "No device specified"
+		}
+		return s
     }
 
     return "Unrecognized command"

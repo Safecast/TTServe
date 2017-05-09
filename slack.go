@@ -156,6 +156,8 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
     case "check":
         fallthrough
+    case "checkall":
+        fallthrough
     case "device":
         fallthrough
     case "devices":
@@ -166,7 +168,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         fallthrough
     case "report":
         fallthrough
-    case "reports":
+    case "reportall":
         go sendCommandToSlack(user, message)
 
     case "online":
