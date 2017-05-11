@@ -4,6 +4,7 @@
 
 package main
 
+// TTGateReq is the heartbeat data structure passed from TTGATE to TTSERVE
 type TTGateReq struct {
 
 	// Message info
@@ -18,7 +19,7 @@ type TTGateReq struct {
 	Latitude			float32		`json:"gateway_latitude,omitempty"`
 	Altitude			int32		`json:"gateway_altitude,omitempty"`
 	Location			string		`json:"gateway_location,omitempty"`
-	GatewayId			string		`json:"gateway_id,omitempty"`
+	GatewayID			string		`json:"gateway_id,omitempty"`
 	GatewayName			string		`json:"gateway_name,omitempty"`
 	GatewayRegion		string		`json:"gateway_region,omitempty"`
 	MessagesReceived	uint32		`json:"gateway_msgs_received,omitempty"`

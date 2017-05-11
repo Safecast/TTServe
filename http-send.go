@@ -87,8 +87,8 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         // Figure out the transport based upon whether or not a gateway ID was included
         requestor, _ := getRequestorIPv4(req)
         Transport := "lora-http:" + requestor
-        if ttg.GatewayId != "" {
-            Transport = "lora:"+ttg.GatewayId
+        if ttg.GatewayID != "" {
+            Transport = "lora:"+ttg.GatewayID
         }
 
         // Use the TTGateReq to initialize a new AppReq

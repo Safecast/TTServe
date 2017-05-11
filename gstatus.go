@@ -28,13 +28,13 @@ type SafecastGatewayStatus struct {
 }
 
 // Get the current value
-func SafecastReadGatewayStatus(gatewayId string) (isAvail bool, isReset bool, sv SafecastGatewayStatus) {
+func SafecastReadGatewayStatus(gatewayID string) (isAvail bool, isReset bool, sv SafecastGatewayStatus) {
     valueEmpty := SafecastGatewayStatus{}
     valueEmpty.UpdatedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
-    valueEmpty.Ttg.GatewayId = gatewayId
+    valueEmpty.Ttg.GatewayID = gatewayID
 
     // Generate the filename, which we'll use twice
-    filename := SafecastDirectory() + TTGatewayStatusPath + "/" + gatewayId + ".json"
+    filename := SafecastDirectory() + TTGatewayStatusPath + "/" + gatewayID + ".json"
 
     // If the file doesn't exist, don't even try
     _, err := os.Stat(filename)
@@ -93,7 +93,7 @@ func SafecastWriteGatewayStatus(ttg TTGateReq, IP string) {
     // If the value isn't available it's because of a nonrecoverable  error.
     // If it was reset, try waiting around a bit until it is fixed.
     for i:=0; i<5; i++ {
-        isAvail, isReset, rvalue := SafecastReadGatewayStatus(ttg.GatewayId)
+        isAvail, isReset, rvalue := SafecastReadGatewayStatus(ttg.GatewayID)
         value = rvalue
         if !isAvail {
             return
@@ -139,7 +139,7 @@ func SafecastWriteGatewayStatus(ttg TTGateReq, IP string) {
     }
 
     // Write it to the file
-    filename := SafecastDirectory() + TTGatewayStatusPath + "/" + ttg.GatewayId + ".json"
+    filename := SafecastDirectory() + TTGatewayStatusPath + "/" + ttg.GatewayID + ".json"
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
 
 
@@ -158,7 +158,7 @@ func SafecastWriteGatewayStatus(ttg TTGateReq, IP string) {
         time.Sleep(time.Duration(random(1, 6)) * time.Second)
 
         // Do an integrity check, and re-write the value if necessary
-        _, isEmpty, _ := SafecastReadGatewayStatus(ttg.GatewayId)
+        _, isEmpty, _ := SafecastReadGatewayStatus(ttg.GatewayID)
         if !isEmpty {
             break
         }
@@ -167,10 +167,10 @@ func SafecastWriteGatewayStatus(ttg TTGateReq, IP string) {
 }
 
 // Get summary of a device
-func SafecastGetGatewaySummary(GatewayId string, bol string, fDetails bool) (Summary string, Label string) {
+func SafecastGetGatewaySummary(GatewayID string, bol string, fDetails bool) (Summary string, Label string) {
 
     // Read the file
-    isAvail, _, value := SafecastReadGatewayStatus(GatewayId)
+    isAvail, _, value := SafecastReadGatewayStatus(GatewayID)
     if !isAvail {
         return "", ""
     }
