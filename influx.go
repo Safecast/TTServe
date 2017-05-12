@@ -727,7 +727,7 @@ func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int 
 }
 
 // Perform a query, returning either an URL to results or an error message
-func InfluxQuery(the_user string, the_query string, is_csv bool) (success bool, numresults int, result string, resultfilename string) {
+func InfluxQuery(the_user string, the_device string, the_query string, is_csv bool) (success bool, numresults int, result string, resultfilename string) {
 
 	// Request for influx query
 	fmt.Printf("\n*** %s requested query '%s'\n", the_user, the_query)
@@ -758,7 +758,7 @@ func InfluxQuery(the_user string, the_query string, is_csv bool) (success bool, 
     }
 
 	// Generate the filename
-    file := time.Now().UTC().Format("2006-01-02-150405") + "-" + the_user
+    file := time.Now().UTC().Format("2006-01-02") + "-" + the_device + "-" + the_user
 	if is_csv {
 		file = file + ".csv"
 	} else {
