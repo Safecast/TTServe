@@ -21,7 +21,7 @@ import (
 )
 
 // Debugging
-const v1UploadDebug bool = false
+const v1UploadDebug bool = true
 const verboseTransactions bool = false
 
 // Synchronous vs asynchronous V1 API requests
