@@ -131,6 +131,7 @@ type Dev struct {
     CommsAntFails *uint32	`json:"dev_comms_ant_fails,omitempty"`
     OvercurrentEvents *uint32	`json:"dev_overcurrent_events,omitempty"`
     ErrorsMtu *uint32		`json:"dev_err_mtu,omitempty"`
+    Seqno *uint32			`json:"dev_seqno,omitempty"`
 }
 
 // Gateway-supplied metadata
