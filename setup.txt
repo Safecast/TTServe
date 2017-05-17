@@ -5,7 +5,8 @@
 ##
 ## TO CREATE A NEW INSTANCE
 ##
-## 1. Create the instance of UBUNTU using default settings so that it has a public IP address, using safecastdev key
+## 1. Create the instance of UBUNTU Server 16.04LTS, t2.micro using default settings
+##    so that it has a public IP address, and using safecastdev key
 ## 2. Assign the correct security group, i.e.
 ##    In Actions / Networking / Change Security Groups, select the TTSERVE security group and Assign Security Groups
 ## 3. Add the instance to both the 80 and 8080 load balancer Target Groups
