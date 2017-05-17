@@ -65,9 +65,9 @@ func main() {
 		os.Exit(0)
     }
 
-	TTServeInstanceID = stats.AWSInstance.InstanceId
+	TTServeInstanceID = stats.AWSInstance.InstanceID
 	ServerLog(fmt.Sprintf("*** STARTUP\n"))
-	fmt.Printf("\n%s *** AWS %s %s\n", logTime(), stats.AWSInstance.Region, stats.AWSInstance.InstanceId)
+	fmt.Printf("\n%s *** AWS %s %s\n", LogTime(), stats.AWSInstance.Region, stats.AWSInstance.InstanceID)
 
 	// Init our utility packages, but only after we've got our server instance ID
 	UtilInit()
@@ -120,31 +120,31 @@ func main() {
 
     // Init our web request inbound server
 	if ThisServerServesHTTP {
-	    go HttpInboundHandler()
+	    go HTTPInboundHandler()
 		stats.Services = "HTTP"
 	}
 
     // Init our UDP single-sample upload request inbound server
     if ThisServerServesUDP {
-        go UdpInboundHandler()
+        go UDPInboundHandler()
 		stats.Services += ", UDP"
     }
 
     // Init our TCP server
     if ThisServerServesTCP {
-        go TcpInboundHandler()
+        go TCPInboundHandler()
 		stats.Services += ", TCP"
     }
 
     // Init our FTP server
     if ThisServerServesFTP {
-        go FtpInboundHandler()
+        go FTPInboundHandler()
 		stats.Services += ", FTP"
     }
 
     // Spawn the TTNhandlers
     if ThisServerServesMQQT {
-        go MqqtInboundHandler()
+        go MQQTInboundHandler()
 		stats.Services += ", MQQT"
     }
 
@@ -181,10 +181,10 @@ func signalHandler() {
     for {
         switch <-ch {
         case syscall.SIGINT:
-            fmt.Printf("*** Exiting %s because of SIGNAL \n", logTime())
+            fmt.Printf("*** Exiting %s because of SIGNAL \n", LogTime())
             os.Exit(0)
         case syscall.SIGTERM:
-			FtpStop()
+			FTPStop()
             break
         }
     }

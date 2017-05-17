@@ -7,19 +7,20 @@ import (
     "net"
 )
 
+// AWSInstanceIdentity is a structure returned by a query to AWS
 type AWSInstanceIdentity struct {
 	DevPayProductCodes		string  `json:"devpayProductCodes,omitempty"`
-    PrivateIp				net.IP  `json:"privateIp,omitempty"`
+    PrivateIP				net.IP  `json:"privateIp,omitempty"`
 	Region					string  `json:"region,omitempty"`
-	KernelId				string  `json:"kernelId,omitempty"`
-	RamdiskId				string  `json:"ramdiskId,omitempty"`
+	KernelID				string  `json:"kernelId,omitempty"`
+	RamdiskID				string  `json:"ramdiskId,omitempty"`
 	AvailabilityZone		string  `json:"availabilityZone,omitempty"`
-	AccountId				string  `json:"accountId,omitempty"`
+	AccountID				string  `json:"accountId,omitempty"`
 	Version					string  `json:"version,omitempty"`
-	InstanceId				string  `json:"instanceId,omitempty"`
+	InstanceID				string  `json:"instanceId,omitempty"`
 	BillingProducts			string  `json:"billingProducts,omitempty"`
 	Architecture			string  `json:"architecture,omitempty"`
-	ImageId					string  `json:"imageId,omitempty"`
+	ImageID					string  `json:"imageId,omitempty"`
 	PendingTime				string  `json:"pendingTime,omitempty"`
 	InstanceType			string  `json:"instanceType,omitempty"`
 }

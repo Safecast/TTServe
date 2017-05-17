@@ -88,7 +88,7 @@ func csvAppend(fd *os.File, sd *SafecastData, first bool) {
         }
     }
 
-    s = s + fmt.Sprintf(",%d", *sd.DeviceId)
+    s = s + fmt.Sprintf(",%d", *sd.DeviceID)
 
     if sd.Lnd != nil && sd.Lnd.U7318 != nil {
         s = s + fmt.Sprintf(",%f", *sd.Lnd.U7318)

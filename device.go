@@ -26,10 +26,10 @@ type seenDevice struct {
 var seenDevices []seenDevice
 
 // Class used to sort seen devices
-type ByDeviceKey []seenDevice
-func (a ByDeviceKey) Len() int      { return len(a) }
-func (a ByDeviceKey) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ByDeviceKey) Less(i, j int) bool {
+type byDeviceKey []seenDevice
+func (a byDeviceKey) Len() int      { return len(a) }
+func (a byDeviceKey) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a byDeviceKey) Less(i, j int) bool {
     // Primary:
     // By capture time, most recent last (so that the most recent is nearest your attention, at the bottom in Slack)
     if a[i].seen.Before(a[j].seen) {
@@ -48,9 +48,9 @@ func (a ByDeviceKey) Less(i, j int) bool {
 }
 
 // Keep track of all devices that have logged data via ttserve
-func trackDevice(DeviceId uint32, whenSeen time.Time) {
+func trackDevice(DeviceID uint32, whenSeen time.Time) {
     var dev seenDevice
-    dev.deviceid = DeviceId
+    dev.deviceid = DeviceID
 
     // Attempt to update the existing entry if we can find it
     found := false
@@ -72,7 +72,7 @@ func trackDevice(DeviceId uint32, whenSeen time.Time) {
                     case minutesAgo >= 120:
                         message = fmt.Sprintf("~%d hours", hoursAgo)
                     }
-                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after %s away", seenDevices[i].deviceid, message), SLACK_MSG_UNSOLICITED_OPS)
+                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after %s away", seenDevices[i].deviceid, message), SlackMsgUnsolicitedOps)
                 }
                 // Mark as having been seen on the latest date of any file having that time
                 seenDevices[i].notifiedAsUnseen = false;
@@ -150,7 +150,7 @@ func sendHelloToNewDevices() {
         if deviceID > 1048576 {
 
             // Read the current value, or a blank value structure if it's blank
-            _, _, value := SafecastReadDeviceStatus(deviceID)
+            _, _, value := ReadDeviceStatus(deviceID)
 
             // Check to see if it has a required stats field
             if value.Dev == nil || value.Dev.AppVersion == nil {
@@ -159,7 +159,7 @@ func sendHelloToNewDevices() {
                 isValid, _ := getCommand(deviceID)
                 if !isValid {
 
-                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Sending hello to newly-detected device %d", deviceID), SLACK_MSG_UNSOLICITED_OPS)
+                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Sending hello to newly-detected device %d", deviceID), SlackMsgUnsolicitedOps)
                     sendCommand("New device detected", deviceID, "hello")
 
                 }
@@ -191,7 +191,7 @@ func sendExpiredSafecastDevicesToSlack() {
                 seenDevices[i].notifiedAsUnseen = true
                 sendToSafecastOps(fmt.Sprintf("** Warning **  Device %d hasn't been seen for %d minutes",
                     seenDevices[i].deviceid,
-                    seenDevices[i].minutesAgo), SLACK_MSG_UNSOLICITED_OPS)
+                    seenDevices[i].minutesAgo), SlackMsgUnsolicitedOps)
             }
         }
     }
@@ -205,11 +205,11 @@ func refreshDeviceSummaryLabels() {
 
     // Next sort the device list
     sortedDevices := seenDevices
-    sort.Sort(ByDeviceKey(sortedDevices))
+    sort.Sort(byDeviceKey(sortedDevices))
 
     // Sweep over all these devices in sorted order, refreshing label
     for i := 0; i < len(sortedDevices); i++ {
-        _, sortedDevices[i].label, _, _ = SafecastGetDeviceStatusSummary(sortedDevices[i].deviceid)
+        _, sortedDevices[i].label, _, _ = GetDeviceStatusSummary(sortedDevices[i].deviceid)
     }
 
 }
@@ -228,7 +228,7 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
 
     // Next sort the device list
     sortedDevices := seenDevices
-    sort.Sort(ByDeviceKey(sortedDevices))
+    sort.Sort(byDeviceKey(sortedDevices))
 
     // Finally, sweep over all these devices in sorted order
     s := ""
@@ -295,7 +295,7 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
     if s == "" {
         s = "Device(s) not found"
     }
-    sendToSafecastOps(s, SLACK_MSG_REPLY)
+    sendToSafecastOps(s, SlackMsgReply)
 
 }
 
@@ -313,7 +313,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 
     // Next sort the device list
     sortedDevices := seenDevices
-    sort.Sort(ByDeviceKey(sortedDevices))
+    sort.Sort(byDeviceKey(sortedDevices))
 
     // Finally, sweep over all these devices in sorted order,
     // generating a single large text string to be sent as a Slack message
@@ -365,7 +365,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
         gps := ""
         summary := ""
         if fDetails {
-            _, label, gps, summary = SafecastGetDeviceStatusSummary(id)
+            _, label, gps, summary = GetDeviceStatusSummary(id)
             // Refresh cached label
             sortedDevices[i].label = label
         }
@@ -393,7 +393,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
             s = fmt.Sprintf("%s %s ago", s, AgoMinutes(uint32(sortedDevices[i].minutesAgo)))
         }
 
-        sn, _ := SafecastDeviceIDToSN(id)
+        sn, _ := DeviceIDToSN(id)
         if sn != 0 {
             s += fmt.Sprintf(" #%d", sn)
         }
@@ -424,7 +424,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
     }
 
     // Send it to Slack
-    sendToSafecastOps(s, SLACK_MSG_REPLY)
+    sendToSafecastOps(s, SlackMsgReply)
 
 }
 
@@ -436,20 +436,20 @@ func generateTTNCTLDeviceRegistrationScript() {
 
     // Next sort the device list
     sortedDevices := seenDevices
-    sort.Sort(ByDeviceKey(sortedDevices))
+    sort.Sort(byDeviceKey(sortedDevices))
 
     // Sweep over devices and generate the TTNCTL commands, newest first
     s := ""
 	devicesRegistered := 0
     for i := 0; i < len(sortedDevices); i++ {
         id := sortedDevices[i].deviceid
-        deveui, _, _, _ := SafecastGetDeviceStatusSummary(id)
+        deveui, _, _, _ := GetDeviceStatusSummary(id)
         if deveui != "" {
             s += fmt.Sprintf("ttnctl devices register %s\n", strings.ToLower(deveui))
             s += fmt.Sprintf("ttnctl device set %s --app-eui 70B3D57EF0003810 --app-key 5CB50DDCF44CEADA6A27DA8BC6607E6A --dev-eui %s --override\n", strings.ToLower(deveui), strings.ToLower(deveui))
 			devicesRegistered++
 			if devicesRegistered % 10 == 0 {
-		        sendToSafecastOps(s, SLACK_MSG_REPLY)
+		        sendToSafecastOps(s, SlackMsgReply)
 				s = ""
 			}
         }
@@ -458,18 +458,18 @@ func generateTTNCTLDeviceRegistrationScript() {
     // Send it to Slack
     if devicesRegistered != 0 {
 		if s != "" {
-	        sendToSafecastOps(s, SLACK_MSG_REPLY)
+	        sendToSafecastOps(s, SlackMsgReply)
 		}
     } else {
-        sendToSafecastOps("None found.", SLACK_MSG_REPLY)
+        sendToSafecastOps("None found.", SlackMsgReply)
     }
 
 }
 
 // Get the number of minutes after which to expire a device
-func deviceWarningAfterMinutes(deviceId uint32) int64 {
+func deviceWarningAfterMinutes(deviceID uint32) int64 {
 
-	switch SafecastDeviceType(deviceId) {
+	switch SafecastDeviceType(deviceID) {
 	case "pointcast":
 		fallthrough
 	case "safecast-air":

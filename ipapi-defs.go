@@ -7,6 +7,7 @@ import (
     "net"
 )
 
+// IPInfoData is the data structure returned by IP-API
 type IPInfoData struct {
     IP           net.IP  `json:"query,omitempty"`
 	Message		 string  `json:"message,omitempty"`

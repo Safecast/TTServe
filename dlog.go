@@ -12,30 +12,30 @@ import (
     "encoding/json"
 )
 
-// Construct path of a log file
-func SafecastDeviceLogFilename(DeviceId uint32, Extension string) string {
+// DeviceLogFilename constructs path of a log file
+func DeviceLogFilename(DeviceID uint32, Extension string) string {
     directory := SafecastDirectory()
     prefix := time.Now().UTC().Format("2006-01-")
-	devstr := fmt.Sprintf("%d", DeviceId)
+	devstr := fmt.Sprintf("%d", DeviceID)
     file := directory + TTDeviceLogPath + "/" + prefix + devstr + Extension
     return file
 }
 
-// Write to logs.
+// WriteToLogs writes logs.
 // Note that we don't do this with a goroutine because the serialization is helpful
 // in log-ordering for buffered I/O messages where there are a huge batch of readings
 // that are updated in sequence very quickly.
-func SafecastWriteToLogs(sd SafecastData) {
-    go SafecastLogToInflux(sd)
-    go SafecastWriteDeviceStatus(sd)
-    go SafecastJSONDeviceLog(sd)
-    go SafecastCSVDeviceLog(sd)
+func WriteToLogs(sd SafecastData) {
+    go LogToInflux(sd)
+    go WriteDeviceStatus(sd)
+    go JSONDeviceLog(sd)
+    go CSVDeviceLog(sd)
 }
 
-// Write the value to the log
-func SafecastJSONDeviceLog(sd SafecastData) {
+// JSONDeviceLog writes the value to the log
+func JSONDeviceLog(sd SafecastData) {
 
-    file := SafecastDeviceLogFilename(*sd.DeviceId, ".json")
+    file := DeviceLogFilename(*sd.DeviceID, ".json")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
@@ -77,11 +77,11 @@ func SafecastJSONDeviceLog(sd SafecastData) {
 
 }
 
-// Write the value to the log
-func SafecastCSVDeviceLog(sd SafecastData) {
+// CSVDeviceLog writes the value to the log
+func CSVDeviceLog(sd SafecastData) {
 
 	// Open the file for append
-    filename := SafecastDeviceLogFilename(*sd.DeviceId, ".csv")
+    filename := DeviceLogFilename(*sd.DeviceID, ".csv")
 	fd, err := csvOpen(filename)
     if err != nil {
         fmt.Printf("Logging: Can't open %s: %s\n", filename, err)
@@ -96,28 +96,28 @@ func SafecastCSVDeviceLog(sd SafecastData) {
 
 }
 
-// Clear the logs
-func SafecastDeleteLogs(DeviceId uint32) string {
+// DeleteLogs clears the logs
+func DeleteLogs(DeviceID uint32) string {
 
-	filename := fmt.Sprintf("%d", DeviceId)
+	filename := fmt.Sprintf("%d", DeviceID)
 
-    json_filename := TTDeviceLogPath + "/" + fmt.Sprintf("%s%s.json", time.Now().UTC().Format("2006-01-"), filename)
-    csv_filename := TTDeviceLogPath + "/" + fmt.Sprintf("%s%s.csv", time.Now().UTC().Format("2006-01-"), filename)
+    jsonFilename := TTDeviceLogPath + "/" + fmt.Sprintf("%s%s.json", time.Now().UTC().Format("2006-01-"), filename)
+    csvFilename := TTDeviceLogPath + "/" + fmt.Sprintf("%s%s.csv", time.Now().UTC().Format("2006-01-"), filename)
 
 	deleted := false
-    err := os.Remove(SafecastDirectory() + json_filename)
+    err := os.Remove(SafecastDirectory() + jsonFilename)
 	if err == nil {
 		deleted = true
 	}
-    err = os.Remove(SafecastDirectory() + csv_filename)
+    err = os.Remove(SafecastDirectory() + csvFilename)
 	if err == nil {
 		deleted = true
 	}
 
 	if !deleted {
-		return fmt.Sprintf("Nothing for %d to be cleared.", DeviceId)
+		return fmt.Sprintf("Nothing for %d to be cleared.", DeviceID)
 	}
 
-	return fmt.Sprintf("Device logs for %d have been deleted.", DeviceId)
+	return fmt.Sprintf("Device logs for %d have been deleted.", DeviceID)
 
 }

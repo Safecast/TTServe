@@ -27,10 +27,10 @@ type seenServer struct {
 var seenServers []seenServer
 
 // Class used to sort seen devices
-type ByServerKey []seenServer
-func (a ByServerKey) Len() int      { return len(a) }
-func (a ByServerKey) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ByServerKey) Less(i, j int) bool {
+type byServerKey []seenServer
+func (a byServerKey) Len() int      { return len(a) }
+func (a byServerKey) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a byServerKey) Less(i, j int) bool {
     // Primary:
     // By capture time, most recent last (so that the most recent is nearest your attention, at the bottom in Slack)
     if a[i].seen.Before(a[j].seen) {
@@ -49,9 +49,9 @@ func (a ByServerKey) Less(i, j int) bool {
 }
 
 // Keep track of all devices that have logged data via ttserve
-func trackServer(ServerId string, whenSeen time.Time) {
+func trackServer(ServerID string, whenSeen time.Time) {
     var dev seenServer
-    dev.serverid = ServerId
+    dev.serverid = ServerID
 
     // Attempt to update the existing entry if we can find it
     found := false
@@ -73,7 +73,7 @@ func trackServer(ServerId string, whenSeen time.Time) {
                     case minutesAgo >= 120:
                         message = fmt.Sprintf("~%d hours", hoursAgo)
                     }
-                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Server %s has returned after %s away", seenServers[i].serverid, message), SLACK_MSG_UNSOLICITED_OPS)
+                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Server %s has returned after %s away", seenServers[i].serverid, message), SlackMsgUnsolicitedOps)
                 }
                 // Mark as having been seen on the latest date of any file having that time
                 seenServers[i].notifiedAsUnseen = false
@@ -145,7 +145,7 @@ func sendExpiredSafecastServersToSlack() {
                 seenServers[i].notifiedAsUnseen = true
                 sendToSafecastOps(fmt.Sprintf("** Warning **  Server %s hasn't been seen for %d minutes",
                     seenServers[i].serverid,
-                    seenServers[i].minutesAgo), SLACK_MSG_UNSOLICITED_OPS)
+                    seenServers[i].minutesAgo), SlackMsgUnsolicitedOps)
             }
         }
     }
@@ -159,7 +159,7 @@ func sendSafecastServerSummaryToSlack(header string, fDetails bool) {
 
     // Next sort the device list
     sortedServers := seenServers
-    sort.Sort(ByServerKey(sortedServers))
+    sort.Sort(byServerKey(sortedServers))
 
     // Build the summary string
     s := header
@@ -170,7 +170,7 @@ func sendSafecastServerSummaryToSlack(header string, fDetails bool) {
         serverID := sortedServers[i].serverid
 
         // Emit info about the device
-        summary := SafecastGetServerSummary(serverID, "    ")
+        summary := GetServerSummary(serverID, "    ")
         if summary != "" {
             if s != "" {
                 s += fmt.Sprintf("\n")
@@ -188,6 +188,6 @@ func sendSafecastServerSummaryToSlack(header string, fDetails bool) {
     if s == "" {
         s = "No servers have recently reported"
     }
-    sendToSafecastOps(s, SLACK_MSG_REPLY)
+    sendToSafecastOps(s, SlackMsgReply)
 
 }

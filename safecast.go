@@ -29,16 +29,16 @@ const v1UploadAsyncFakeResults bool = false
 const v1UploadFakeResult string ="{\"id\":00000001}"
 
 // For dealing with transaction timeouts
-var httpTransactionsInProgress int = 0
-var httpTransactions = 0
+var httpTransactionsInProgress int
+var httpTransactions int
 const httpTransactionsRecorded = 500
 var httpTransactionDurations[httpTransactionsRecorded] int
 var httpTransactionTimes[httpTransactionsRecorded] time.Time
 var httpTransactionErrorTime string
-var httpTransactionErrorUrl string
+var httpTransactionErrorURL string
 var httpTransactionErrorString string
-var httpTransactionErrors = 0
-var httpTransactionErrorFirst bool = true
+var httpTransactionErrors int
+var httpTransactionErrorFirst = true
 
 // Checksums of recently-processed messages
 type receivedMessage struct {
@@ -47,37 +47,37 @@ type receivedMessage struct {
 }
 var recentlyReceived [25]receivedMessage
 
-// Process an inbound Safecast message, as an asynchronous goroutine
+// SendSafecastMessage processes an inbound Safecast message as an asynchronous goroutine
 func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint32) {
 
     // Discard it if it's a duplicate
     if isDuplicate(checksum) {
-        fmt.Printf("%s DISCARDING duplicate message\n", logTime())
+        fmt.Printf("%s DISCARDING duplicate message\n", LogTime())
         return
     }
 
     // Process stamps by adding or removing fields from the message
     if !stampSetOrApply(&msg) {
-        fmt.Printf("%s DISCARDING un-stampable message\n", logTime())
+        fmt.Printf("%s DISCARDING un-stampable message\n", LogTime())
         return
     }
 
     // This is the ONLY required field
     if msg.DeviceId == nil {
-        fmt.Printf("%s DISCARDING message with no DeviceId\n", logTime())
+        fmt.Printf("%s DISCARDING message with no DeviceId\n", LogTime())
         return
     }
 
     // Generate the fields common to all uploads to safecast
     sd := SafecastData{}
     did := uint32(msg.GetDeviceId())
-    sd.DeviceId = &did
+    sd.DeviceID = &did
 
     // CapturedAt
     if msg.CapturedAt != nil {
         sd.CapturedAt = msg.CapturedAt
     } else if msg.CapturedAtDate != nil && msg.CapturedAtTime != nil && msg.CapturedAtOffset != nil {
-        when := getWhenFromOffset(msg.GetCapturedAtDate(), msg.GetCapturedAtTime(), msg.GetCapturedAtOffset())
+        when := GetWhenFromOffset(msg.GetCapturedAtDate(), msg.GetCapturedAtTime(), msg.GetCapturedAtOffset())
         sd.CapturedAt = &when
     }
 
@@ -102,7 +102,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
             loc.Alt = &alt
         }
         if msg.MotionBeganOffset != nil && msg.CapturedAtDate != nil && msg.CapturedAtTime != nil {
-            when := getWhenFromOffset(msg.GetCapturedAtDate(), msg.GetCapturedAtTime(), msg.GetMotionBeganOffset())
+            when := GetWhenFromOffset(msg.GetCapturedAtDate(), msg.GetCapturedAtTime(), msg.GetMotionBeganOffset())
             loc.MotionBegan = &when
         }
         sd.Loc = &loc
@@ -530,27 +530,27 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     var dolnd = false
 
     if msg.Lnd_7318U != nil {
-        var cpm float32 = float32(msg.GetLnd_7318U())
+        var cpm = float32(msg.GetLnd_7318U())
         lnd.U7318 = &cpm
         dolnd = true
     }
     if msg.Lnd_7318C != nil {
-        var cpm float32 = float32(msg.GetLnd_7318C())
+        var cpm = float32(msg.GetLnd_7318C())
         lnd.C7318 = &cpm
         dolnd = true
     }
     if msg.Lnd_7128Ec != nil {
-        var cpm float32 = float32(msg.GetLnd_7128Ec())
+        var cpm = float32(msg.GetLnd_7128Ec())
         lnd.EC7128 = &cpm
         dolnd = true
     }
     if msg.Lnd_712U != nil {
-        var cpm float32 = float32(msg.GetLnd_712U())
+        var cpm = float32(msg.GetLnd_712U())
         lnd.U712 = &cpm
         dolnd = true
     }
     if msg.Lnd_78017W != nil {
-        var cpm float32 = float32(msg.GetLnd_78017W())
+        var cpm = float32(msg.GetLnd_78017W())
         lnd.W78017 = &cpm
         dolnd = true
     }
@@ -567,49 +567,49 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint
     sd.Service.Handler = &TTServeInstanceID
 
     // Log as accurately as we can with regard to what came in
-    SafecastWriteToLogs(sd)
+    WriteToLogs(sd)
 
     // Upload
-    SafecastUpload(sd)
+    Upload(sd)
 
 }
 
 // Begin transaction and return the transaction ID
 func beginTransaction(version string,  message1 string, message2 string) int {
-    httpTransactionsInProgress += 1
-    httpTransactions += 1
+    httpTransactionsInProgress++
+    httpTransactions++
     transaction := httpTransactions % httpTransactionsRecorded
     httpTransactionTimes[transaction] = time.Now()
     if verboseTransactions {
-        fmt.Printf("%s >>> %s [%d] %s %s\n", logTime(), version, transaction, message1, message2)
+        fmt.Printf("%s >>> %s [%d] %s %s\n", LogTime(), version, transaction, message1, message2)
     }
     return transaction
 }
 
 // End transaction and issue warnings
 func endTransaction(transaction int, url string, errstr string) {
-    httpTransactionsInProgress -= 1
+    httpTransactionsInProgress--
     duration := int(time.Now().Sub(httpTransactionTimes[transaction]) / time.Second)
     httpTransactionDurations[transaction] = duration
 
     if errstr != "" {
         httpTransactionErrors = httpTransactionErrors + 1
         if httpTransactionErrorFirst {
-            httpTransactionErrorTime = logTime()
-            httpTransactionErrorUrl = url
+            httpTransactionErrorTime = LogTime()
+            httpTransactionErrorURL = url
             httpTransactionErrorString = errstr
             httpTransactionErrorFirst = false
         }
         if verboseTransactions {
-            fmt.Printf("%s <<<    [%d] *** ERROR\n", logTime(), transaction)
+            fmt.Printf("%s <<<    [%d] *** ERROR\n", LogTime(), transaction)
         }
         ServerLog(fmt.Sprintf("After %d seconds, error uploading to %s %s\n", duration, url, errstr))
     } else {
         if verboseTransactions {
             if duration < 5 {
-                fmt.Printf("%s <<<    [%d]\n", logTime(), transaction)
+                fmt.Printf("%s <<<    [%d]\n", LogTime(), transaction)
             } else {
-                fmt.Printf("%s <<<    [%d] completed after %d seconds\n", logTime(), transaction, duration)
+                fmt.Printf("%s <<<    [%d] completed after %d seconds\n", LogTime(), transaction, duration)
             }
         }
     }
@@ -626,18 +626,18 @@ func endTransaction(transaction int, url string, errstr string) {
         if httpTransactionDurations[theCount] > theMax {
             theMax = httpTransactionDurations[theCount]
         }
-        theCount += 1
+        theCount++
     }
     theMean := theTotal / theCount
 
     // Output to console every time we are in a "slow mode"
     if theMin > 5 {
-        fmt.Printf("%s Safecast Upload Statistics\n", logTime())
-        fmt.Printf("%s *** %d total uploads since restart\n", logTime(), httpTransactions)
+        fmt.Printf("%s Safecast Upload Statistics\n", LogTime())
+        fmt.Printf("%s *** %d total uploads since restart\n", LogTime(), httpTransactions)
         if httpTransactionsInProgress > 0 {
-            fmt.Printf("%s *** %d uploads still in progress\n", logTime(), httpTransactionsInProgress)
+            fmt.Printf("%s *** %d uploads still in progress\n", LogTime(), httpTransactionsInProgress)
         }
-        fmt.Printf("%s *** Last %d: min=%ds, max=%ds, avg=%ds\n", logTime(), theCount, theMin, theMax, theMean)
+        fmt.Printf("%s *** Last %d: min=%ds, max=%ds, avg=%ds\n", LogTime(), theCount, theMin, theMax, theMean)
 
     }
 
@@ -650,7 +650,7 @@ func endTransaction(transaction int, url string, errstr string) {
         } else {
             s = fmt.Sprintf("HTTP Upload: of the previous %d uploads, min=%ds, max=%ds, avg=%ds", theCount, theMin, theMax, theMean)
         }
-        sendToSafecastOps(s, SLACK_MSG_UNSOLICITED_OPS)
+        sendToSafecastOps(s, SlackMsgUnsolicitedOps)
     }
 
 }
@@ -683,13 +683,13 @@ func isDuplicate(checksum uint32) bool {
 func sendSafecastCommsErrorsToSlack(PeriodMinutes uint32) {
     if httpTransactionErrors != 0 {
         sendToSafecastOps(fmt.Sprintf("** Warning **  In the %d mins after %s UTC there were errors uploading to %s:%s",
-            PeriodMinutes, httpTransactionErrorTime, httpTransactionErrorUrl, httpTransactionErrorString), SLACK_MSG_UNSOLICITED_OPS)
+            PeriodMinutes, httpTransactionErrorTime, httpTransactionErrorURL, httpTransactionErrorString), SlackMsgUnsolicitedOps)
         httpTransactionErrors = 0
         httpTransactionErrorFirst = true
     }
 }
 
-// Upload a Safecast data structure to the Safecast service
+// SafecastV1Upload uploads a Safecast data structure to the Safecast service
 func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value string) (fSuccess bool, result string) {
 
     if v1UploadAsyncFakeResults {
@@ -702,6 +702,7 @@ func SafecastV1Upload(body []byte, url string, isDev bool, unit string, value st
 }
 
 
+// Perform the body of the upload
 func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value string) (fSuccess bool, result string) {
 
     // Preset result in case of failure
@@ -718,14 +719,14 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
     // Figure out the correct request URI
     str := strings.SplitAfter(url, "?")
     query := str[len(str)-1]
-    requestUri := fmt.Sprintf(SafecastV1UploadPattern, domain, query)
+    requestURI := fmt.Sprintf(SafecastV1UploadPattern, domain, query)
     if v1UploadDebug {
-        fmt.Printf("****** '%s'\n%s\n", requestUri, string(body))
+        fmt.Printf("****** '%s'\n%s\n", requestURI, string(body))
     }
 
     // Perform the transaction
     transaction := beginTransaction(v1str, unit, value)
-    req, _ := http.NewRequest("POST", requestUri, bytes.NewBuffer(body))
+    req, _ := http.NewRequest("POST", requestURI, bytes.NewBuffer(body))
     req.Header.Set("User-Agent", "TTSERVE")
     req.Header.Set("Content-Type", "application/json")
     httpclient := &http.Client{
@@ -785,7 +786,7 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
 
 }
 
-// Generate a hasn of the data structure elements that came from the device
+// HashSafecastData returns the MD5 hash of the data structure elements that came from the device
 func HashSafecastData(sd SafecastData) string {
 
     // Remove everything that is not generated by the device
@@ -805,8 +806,8 @@ func HashSafecastData(sd SafecastData) string {
 
 }
 
-// Upload a Safecast data structure to the Safecast service, either serially or massively in parallel
-func SafecastUpload(sd SafecastData) bool {
+// Upload uploads a Safecast data structure to the Safecast service, either serially or massively in parallel
+func Upload(sd SafecastData) bool {
 
     // Upload to all URLs
     for _, url := range SafecastUploadURLs {
@@ -819,7 +820,7 @@ func SafecastUpload(sd SafecastData) bool {
 // Upload a Safecast data structure to the Safecast service
 func doUploadToSafecast(sd SafecastData, url string) bool {
 
-    var CapturedAt string = ""
+    var CapturedAt string
     if sd.CapturedAt != nil {
         CapturedAt = *sd.CapturedAt
     }

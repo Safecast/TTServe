@@ -14,8 +14,8 @@ import (
     "encoding/json"
 )
 
-// Kick off UDP single-upload request server
-func UdpInboundHandler() {
+// UDPInboundHandler kicks off UDP single-upload request server
+func UDPInboundHandler() {
 
     fmt.Printf("Now handling inbound UDP on %s\n", TTServerUDPPort)
 
@@ -55,11 +55,11 @@ func UdpInboundHandler() {
 
 }
 
-// Upload a Safecast data structure the load balancer for the web service
+// UploadToWebLoadBalancer uploads a UDP packet via a Safecast data structure the load balancer for the web service
 func UploadToWebLoadBalancer(data []byte, datalen int, transport string) {
 
     if true {
-        fmt.Printf("\n%s Received %d-byte payload from %s, routing to HTTP load balancer\n", logTime(), datalen, transport)
+        fmt.Printf("\n%s Received %d-byte payload from %s, routing to HTTP load balancer\n", LogTime(), datalen, transport)
     }
 
     url := "http://" + TTServerHTTPAddress + TTServerHTTPPort + TTServerTopicSend

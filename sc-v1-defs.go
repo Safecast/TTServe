@@ -15,66 +15,69 @@ import (
 	"strings"
 )
 
-type SafecastDataV1ToParse struct {
+type safecastDataV1ToParse struct {
     CapturedAtRaw	interface{} `json:"captured_at,omitempty"`
-    DeviceTypeIdRaw	interface{} `json:"devicetype_id,omitempty"`
+    DeviceTypeIDRaw	interface{} `json:"devicetype_id,omitempty"`
     LocationNameRaw	interface{} `json:"location_name,omitempty"`
     UnitRaw			interface{} `json:"unit,omitempty"`
-    ChannelIdRaw	interface{} `json:"channel_id,omitempty"`
-    DeviceIdRaw		interface{} `json:"device_id,omitempty"`
-    OriginalIdRaw	interface{} `json:"original_id,omitempty"`
-    SensorIdRaw		interface{} `json:"sensor_id,omitempty"`
-    StationIdRaw	interface{} `json:"station_id,omitempty"`
-    UserIdRaw		interface{} `json:"user_id,omitempty"`
-    IdRaw			interface{} `json:"id,omitempty"`
+    ChannelIDRaw	interface{} `json:"channel_id,omitempty"`
+    DeviceIDRaw		interface{} `json:"device_id,omitempty"`
+    OriginalIDRaw	interface{} `json:"original_id,omitempty"`
+    SensorIDRaw		interface{} `json:"sensor_id,omitempty"`
+    StationIDRaw	interface{} `json:"station_id,omitempty"`
+    UserIDRaw		interface{} `json:"user_id,omitempty"`
+    IDRaw			interface{} `json:"id,omitempty"`
     HeightRaw		interface{} `json:"height,omitempty"`
     ValueRaw		interface{} `json:"value,omitempty"`
     LatitudeRaw		interface{} `json:"latitude,omitempty"`
     LongitudeRaw	interface{} `json:"longitude,omitempty"`
 }
 
+// SafecastDataV1ToEmit is the data structure used to send things back to V1 Safecast devices
 type SafecastDataV1ToEmit struct {
     CapturedAt		*string  `json:"captured_at,omitempty"`
-    DeviceTypeId	*string  `json:"devicetype_id,omitempty"`
+    DeviceTypeID	*string  `json:"devicetype_id,omitempty"`
     LocationName	*string  `json:"location_name,omitempty"`
     Unit			*string  `json:"unit,omitempty"`
-    ChannelId		*string  `json:"channel_id,omitempty"`
-    DeviceId		*string  `json:"device_id,omitempty"`
-    OriginalId		*string  `json:"original_id,omitempty"`
-    SensorId		*string  `json:"sensor_id,omitempty"`
-    StationId		*string  `json:"station_id,omitempty"`
-    UserId			*string  `json:"user_id,omitempty"`
-    Id				*string  `json:"id,omitempty"`
+    ChannelID		*string  `json:"channel_id,omitempty"`
+    DeviceID		*string  `json:"device_id,omitempty"`
+    OriginalID		*string  `json:"original_id,omitempty"`
+    SensorID		*string  `json:"sensor_id,omitempty"`
+    StationID		*string  `json:"station_id,omitempty"`
+    UserID			*string  `json:"user_id,omitempty"`
+    ID				*string  `json:"id,omitempty"`
     Height			*string  `json:"height,omitempty"`
     Value			*string  `json:"value,omitempty"`
     Latitude		*string  `json:"latitude,omitempty"`
     Longitude		*string  `json:"longitude,omitempty"`
 }
 
+// SafecastDataV1 is the "loose" JSON data structure used by all V1 safecast devices
 type SafecastDataV1 struct {
     CapturedAt		*string  `json:"captured_at,omitempty"`
-    DeviceTypeId	*string  `json:"devicetype_id,omitempty"`
+    DeviceTypeID	*string  `json:"devicetype_id,omitempty"`
     LocationName	*string  `json:"location_name,omitempty"`
     Unit			*string  `json:"unit,omitempty"`
-    ChannelId		*uint32  `json:"channel_id,omitempty"`
-    DeviceId		*uint32  `json:"device_id,omitempty"`
-    OriginalId		*uint32  `json:"original_id,omitempty"`
-    SensorId		*uint32  `json:"sensor_id,omitempty"`
-    StationId		*uint32  `json:"station_id,omitempty"`
-    UserId			*uint32  `json:"user_id,omitempty"`
-    Id				*uint32  `json:"id,omitempty"`
+    ChannelID		*uint32  `json:"channel_id,omitempty"`
+    DeviceID		*uint32  `json:"device_id,omitempty"`
+    OriginalID		*uint32  `json:"original_id,omitempty"`
+    SensorID		*uint32  `json:"sensor_id,omitempty"`
+    StationID		*uint32  `json:"station_id,omitempty"`
+    UserID			*uint32  `json:"user_id,omitempty"`
+    ID				*uint32  `json:"id,omitempty"`
     Height			*float32 `json:"height,omitempty"`
     Value			*float32 `json:"value,omitempty"`
     Latitude		*float32 `json:"latitude,omitempty"`
     Longitude		*float32 `json:"longitude,omitempty"`
 }
 
+// SafecastV1Decode converts a loosely-formatted message to a structured safecast object
 func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToEmit, err error) {
 
 	// Create a new instance, and decode the I/O stream into the fields as well
 	// as the interfaces{}, which, when queried, can supply us not only with values
 	// but also with type information.
-	in := new(SafecastDataV1ToParse)
+	in := new(safecastDataV1ToParse)
 	out = new(SafecastDataV1)
 	emit = new(SafecastDataV1ToEmit)
 	err = json.NewDecoder(r).Decode(in)
@@ -88,10 +91,10 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 		out.CapturedAt = &t
 		emit.CapturedAt = &t
 	}
-	switch t := in.DeviceTypeIdRaw.(type) {
+	switch t := in.DeviceTypeIDRaw.(type) {
 	case string:
-		out.DeviceTypeId = &t
-		emit.DeviceTypeId = &t
+		out.DeviceTypeID = &t
+		emit.DeviceTypeID = &t
 	}
 	switch t := in.LocationNameRaw.(type) {
 	case string:
@@ -105,116 +108,116 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	}
 	
 	// Now go through each Raw interface and unpack the value into the corresponding non-Raw field
-	switch t := in.ChannelIdRaw.(type) {
+	switch t := in.ChannelIDRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        out.ChannelId = &u32
-			emit.ChannelId = &t
+	        out.ChannelID = &u32
+			emit.ChannelID = &t
 	    }
 	case float64:
 		u32 := uint32(t)
-		out.ChannelId = &u32
+		out.ChannelID = &u32
 		str := fmt.Sprintf("%v", t)
-		emit.ChannelId = &str
+		emit.ChannelID = &str
 	}
 
-	switch t := in.DeviceIdRaw.(type) {
+	switch t := in.DeviceIDRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        out.DeviceId = &u32
-			emit.DeviceId = &t
+	        out.DeviceID = &u32
+			emit.DeviceID = &t
 	    }
 	case float64:
 		u32 := uint32(t)
-		out.DeviceId = &u32
+		out.DeviceID = &u32
 		str := fmt.Sprintf("%v", t)
-		emit.DeviceId = &str
+		emit.DeviceID = &str
 	}
 
-	switch t := in.OriginalIdRaw.(type) {
+	switch t := in.OriginalIDRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        out.OriginalId = &u32
-			emit.OriginalId = &t
+	        out.OriginalID = &u32
+			emit.OriginalID = &t
 	    }
 	case float64:
 		u32 := uint32(t)
-		out.OriginalId = &u32
+		out.OriginalID = &u32
 		str := fmt.Sprintf("%v", t)
-		emit.OriginalId = &str
+		emit.OriginalID = &str
 	}
 
-	switch t := in.SensorIdRaw.(type) {
+	switch t := in.SensorIDRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        out.SensorId = &u32
-			emit.SensorId = &t
+	        out.SensorID = &u32
+			emit.SensorID = &t
 	    }
 	case float64:
 		u32 := uint32(t)
-		out.SensorId = &u32
+		out.SensorID = &u32
 		str := fmt.Sprintf("%v", t)
-		emit.SensorId = &str
+		emit.SensorID = &str
 	}
 
-	switch t := in.StationIdRaw.(type) {
+	switch t := in.StationIDRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        out.StationId = &u32
-			emit.StationId = &t
+	        out.StationID = &u32
+			emit.StationID = &t
 	    }
 	case float64:
 		u32 := uint32(t)
-		out.StationId = &u32
+		out.StationID = &u32
 		str := fmt.Sprintf("%v", t)
-		emit.StationId = &str
+		emit.StationID = &str
 	}
 
-	switch t := in.UserIdRaw.(type) {
+	switch t := in.UserIDRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        out.UserId = &u32
-			emit.UserId = &t
+	        out.UserID = &u32
+			emit.UserID = &t
 	    }
 	case float64:
 		u32 := uint32(t)
-		out.UserId = &u32
+		out.UserID = &u32
 		str := fmt.Sprintf("%v", t)
-		emit.UserId = &str
+		emit.UserID = &str
 	}
 
-	switch t := in.IdRaw.(type) {
+	switch t := in.IDRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
 	    u64, err := strconv.ParseUint(t, 10, 32)
 	    if err == nil {
 			u32 := uint32(u64)
-	        out.Id = &u32
-			emit.Id = &t
+	        out.ID = &u32
+			emit.ID = &t
 	    }
 	case float64:
 		u32 := uint32(t)
-		out.Id = &u32
+		out.ID = &u32
 		str := fmt.Sprintf("%v", t)
-		emit.Id = &str
+		emit.ID = &str
 	}
 
 	switch t := in.HeightRaw.(type) {

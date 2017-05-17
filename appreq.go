@@ -12,7 +12,7 @@ import (
     "github.com/safecast/ttproto/golang"
 )
 
-// Common app request
+// IncomingAppReq is the common request format that we process as a goroutine
 type IncomingAppReq struct {
     Payload []byte
     GwLongitude   *float32
@@ -27,7 +27,7 @@ type IncomingAppReq struct {
     SeqNo         int
 }
 
-// Process an app request synchronously, WITHOUT an inner goroutine.
+// AppReqProcess handles an app request synchronously, WITHOUT an inner goroutine.
 // This is important for sequencing of certain incoming requests
 func AppReqProcess(AppReq IncomingAppReq) {
     // Unmarshal the message
@@ -48,19 +48,19 @@ func AppReqProcess(AppReq IncomingAppReq) {
 
     // Display info about the received message
     if msg.RelayDevice1 != nil {
-        fmt.Printf("%s RELAYED thru hop #1 %d\n", logTime(), msg.GetRelayDevice1())
+        fmt.Printf("%s RELAYED thru hop #1 %d\n", LogTime(), msg.GetRelayDevice1())
     }
     if msg.RelayDevice2 != nil {
-        fmt.Printf("%s RELAYED thru hop #2 %d\n", logTime(), msg.GetRelayDevice2())
+        fmt.Printf("%s RELAYED thru hop #2 %d\n", LogTime(), msg.GetRelayDevice2())
     }
     if msg.RelayDevice3 != nil {
-        fmt.Printf("%s RELAYED thru hop #3 %d\n", logTime(), msg.GetRelayDevice3())
+        fmt.Printf("%s RELAYED thru hop #3 %d\n", LogTime(), msg.GetRelayDevice3())
     }
     if msg.RelayDevice4 != nil {
-        fmt.Printf("%s RELAYED thru hop #4 %d\n", logTime(), msg.GetRelayDevice4())
+        fmt.Printf("%s RELAYED thru hop #4 %d\n", LogTime(), msg.GetRelayDevice4())
     }
     if msg.RelayDevice5 != nil {
-        fmt.Printf("%s RELAYED thru hop #5 %d\n", logTime(), msg.GetRelayDevice5())
+        fmt.Printf("%s RELAYED thru hop #5 %d\n", LogTime(), msg.GetRelayDevice5())
     }
 
     // Compute the checksum on a payload normalized by removing all the relay information
@@ -97,26 +97,26 @@ func AppReqProcess(AppReq IncomingAppReq) {
     }
 }
 
-// Process a payload buffer by either placing it onto a queue, or in the case of a PB array
-// by processing it directly.  As such, if there is any ambiguity about whether or not the
+// AppReqPushPayload handles a payload buffer by either placing it onto a queue, or in the case of
+// a PB array by processing it directly.  As such, if there is any ambiguity about whether or not the
 // payload is an array, it is best to invoke this as a goroutine.
 func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
-    var AppReq IncomingAppReq = req
+    var AppReq = req
 
-    buf_format := buf[0]
-    buf_length := len(buf)
+    bufFormat := buf[0]
+    bufLength := len(buf)
 
-    switch (buf_format) {
+    switch (bufFormat) {
 
-    case BUFF_FORMAT_PB_ARRAY: {
+    case BuffFormatPBArray: {
 
-        if !validBulkPayload(buf, buf_length) {
-            fmt.Printf("\n%s Received INVALID %d-byte payload from %s %s\n", logTime(), buf_length, from, AppReq.SvTransport)
+        if !validBulkPayload(buf, bufLength) {
+            fmt.Printf("\n%s Received INVALID %d-byte payload from %s %s\n", LogTime(), bufLength, from, AppReq.SvTransport)
             return
         }
 
         // Loop over the various things in the buffer
-        UploadedAt := nowInUTC()
+        UploadedAt := NowInUTC()
         count := int(buf[1])
         lengthArrayOffset := 2
         payloadOffset := lengthArrayOffset + count
@@ -130,9 +130,9 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
             AppReq.Payload = buf[payloadOffset:payloadOffset+length]
 
             if count == 1 {
-                fmt.Printf("\n%s Received %d-byte payload from %s %s\n", logTime(), len(AppReq.Payload), from, AppReq.SvTransport)
+                fmt.Printf("\n%s Received %d-byte payload from %s %s\n", LogTime(), len(AppReq.Payload), from, AppReq.SvTransport)
             } else {
-                fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", logTime(), len(AppReq.Payload), i+1, count, from, AppReq.SvTransport)
+                fmt.Printf("\n%s Received %d-byte (%d/%d) payload from %s %s\n", LogTime(), len(AppReq.Payload), i+1, count, from, AppReq.SvTransport)
             }
 
             // Process the AppReq synchronously, because they must be done in-order
@@ -146,17 +146,17 @@ func AppReqPushPayload(req IncomingAppReq, buf []byte, from string) {
     }
 
     default: {
-        isAscii := true
+        isASCII := true
         for i:=0; i<len(buf); i++ {
             if buf[i] > 0x7f || (buf[i] < ' ' && buf[i] != '\r' && buf[i] != '\n' && buf[i] != '\t') {
-                isAscii = false
+                isASCII = false
                 break
             }
         }
-        if isAscii {
-            fmt.Printf("\n%s Received unrecognized %d-byte payload from %s:\n%s\n", logTime(), buf_length, AppReq.SvTransport, buf)
+        if isASCII {
+            fmt.Printf("\n%s Received unrecognized %d-byte payload from %s:\n%s\n", LogTime(), bufLength, AppReq.SvTransport, buf)
         } else {
-            fmt.Printf("\n%s Received unrecognized %d-byte payload from %s:\n%v\n", logTime(), buf_length, AppReq.SvTransport, buf)
+            fmt.Printf("\n%s Received unrecognized %d-byte payload from %s:\n%v\n", LogTime(), bufLength, AppReq.SvTransport, buf)
         }
     }
     }
@@ -172,34 +172,34 @@ func validBulkPayload(buf []byte, length int) (bool) {
     }
 
     // Enough room for the count field in header?
-    header_length := 2
-    if length < header_length {
-        fmt.Printf("%s *** Invalid header ***\n", logTime())
+    headerLength := 2
+    if length < headerLength {
+        fmt.Printf("%s *** Invalid header ***\n", LogTime())
         return false
     }
 
     // A count of at least 1?
     count := int(buf[1])
     if count == 0 {
-        fmt.Printf("%s *** Invalid count ***\n", logTime())
+        fmt.Printf("%s *** Invalid count ***\n", LogTime())
         return false
     }
 
     // Enough room for the length array?
-    header_length += count
-    if length < header_length {
-        fmt.Printf("%s *** Invalid header ***\n", logTime())
+    headerLength += count
+    if length < headerLength {
+        fmt.Printf("%s *** Invalid header ***\n", LogTime())
         return false
     }
 
     // Enough room for payloads?
-    total_length := header_length
+    totalLength := headerLength
     lengthArrayOffset := 2
     for i:=0; i<count; i++ {
-        total_length += int(buf[lengthArrayOffset+i])
+        totalLength += int(buf[lengthArrayOffset+i])
     }
-    if length < total_length {
-        fmt.Printf("%s *** Invalid payload ***\n", logTime())
+    if length < totalLength {
+        fmt.Printf("%s *** Invalid payload ***\n", LogTime())
         return false
     }
 
@@ -211,17 +211,17 @@ func validBulkPayload(buf []byte, length int) (bool) {
 // the payload is of a type where we know that the client is listening for a reply.  If
 // this is not a replyable payload or if the device ID is not found, we guarantee that
 // 0 is returned for the device ID.
-func getReplyDeviceIdFromPayload(buf []byte) (deviceID uint32) {
+func getReplyDeviceIDFromPayload(buf []byte) (deviceID uint32) {
 
-    buf_format := buf[0]
-    buf_length := len(buf)
+    bufFormat := buf[0]
+    bufLength := len(buf)
 
-    switch (buf_format) {
+    switch (bufFormat) {
 
-    case BUFF_FORMAT_PB_ARRAY: {
+    case BuffFormatPBArray: {
 
         // Validate
-        if !validBulkPayload(buf, buf_length) {
+        if !validBulkPayload(buf, bufLength) {
             return 0
         }
 
@@ -244,7 +244,7 @@ func getReplyDeviceIdFromPayload(buf []byte) (deviceID uint32) {
             }
 
             // Extract the device ID
-            DeviceId := TelecastDeviceId(msg)
+            DeviceID := TelecastDeviceID(msg)
 
             // Look at reply type, and exit if a reply is expected
             if msg.ReplyType != nil {
@@ -253,7 +253,7 @@ func getReplyDeviceIdFromPayload(buf []byte) (deviceID uint32) {
 
                     // A reply is expected
                 case ttproto.Telecast_ALLOWED:
-                    return DeviceId
+                    return DeviceID
 
                 }
 

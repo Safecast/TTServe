@@ -19,7 +19,7 @@ func inboundWebDeviceLogHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Log it
     filename := req.RequestURI[len(TTServerTopicDeviceLog):]
-    fmt.Printf("%s LOG request for %s\n", logTime(), filename)
+    fmt.Printf("%s LOG request for %s\n", LogTime(), filename)
 
 	// Break down the components of what's requested
 	components := strings.Split(filename, ".")
@@ -33,7 +33,7 @@ func inboundWebDeviceLogHandler(rw http.ResponseWriter, req *http.Request) {
     file := SafecastDirectory() + TTDeviceLogPath + "/" + filename
     fd, err := os.Open(file)
     if err != nil {
-        io.WriteString(rw, errorString(err))
+        io.WriteString(rw, ErrorString(err))
         return
     }
     defer fd.Close()

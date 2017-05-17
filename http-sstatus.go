@@ -24,13 +24,13 @@ func inboundWebServerStatusHandler(rw http.ResponseWriter, req *http.Request) {
         filename := req.RequestURI[len(TTServerTopicServerStatus):]
         if filename != "" {
 
-            fmt.Printf("%s Server information request for %s\n", logTime(), filename)
+            fmt.Printf("%s Server information request for %s\n", LogTime(), filename)
 
             // Open the file
             file := SafecastDirectory() + TTServerStatusPath + "/" + filename + ".json"
             fd, err := os.Open(file)
             if err != nil {
-                io.WriteString(rw, errorString(err))
+                io.WriteString(rw, ErrorString(err))
                 return
             }
             defer fd.Close()

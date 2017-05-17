@@ -13,20 +13,24 @@ import (
     "encoding/json"
 )
 
-// The data structure for the "Server Status" files
-type SafecastServerStatus struct {
+// Statics for the summary
+var lastCount TTServeCounts
+var firstSummary = true
+
+// ServerStatus is the data structure for the "Server Status" files
+type ServerStatus struct {
     UpdatedAt  string           `json:"when_updated,omitempty"`
     Tts         TTServeStatus   `json:"current_values,omitempty"`
 }
 
-// Get the current value
-func SafecastReadServerStatus(serverId string) (isAvail bool, isReset bool, sv SafecastServerStatus) {
-    valueEmpty := SafecastServerStatus{}
+// ReadServerStatus gets the current value
+func ReadServerStatus(serverID string) (isAvail bool, isReset bool, sv ServerStatus) {
+    valueEmpty := ServerStatus{}
     valueEmpty.UpdatedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
     valueEmpty.Tts = stats
 
     // Generate the filename, which we'll use twice
-    filename := SafecastDirectory() + TTServerStatusPath + "/" + serverId + ".json"
+    filename := SafecastDirectory() + TTServerStatusPath + "/" + serverID + ".json"
 
     // If the file doesn't exist, don't even try
     _, err := os.Stat(filename)
@@ -45,7 +49,7 @@ func SafecastReadServerStatus(serverId string) (isAvail bool, isReset bool, sv S
     }
 
     // Unmarshal
-    valueToRead := SafecastServerStatus{}
+    valueToRead := ServerStatus{}
     err = json.Unmarshal(contents, &valueToRead)
     if err != nil {
         // Malformed JSON
@@ -58,11 +62,11 @@ func SafecastReadServerStatus(serverId string) (isAvail bool, isReset bool, sv S
 }
 
 
-// Save the current value into the file
-func SafecastWriteServerStatus() {
+// WriteServerStatus saves the current value into the file
+func WriteServerStatus() {
 
     // Read the current value
-    isAvail, _, value := SafecastReadServerStatus(TTServeInstanceID)
+    isAvail, _, value := ReadServerStatus(TTServeInstanceID)
     if !isAvail {
         return
     }
@@ -119,16 +123,14 @@ func SafecastWriteServerStatus() {
 
 }
 
-// Get a running total of server stats
-var lastCount TTServeCounts
-var firstSummary = true
-func SafecastSummarizeStatsDelta() string {
+// SummarizeStatsDelta gets a running total of server stats
+func SummarizeStatsDelta() string {
 
     // First, make sure that they're up to date on the service
-    SafecastWriteServerStatus()
+    WriteServerStatus()
 
     // Read them
-    isAvail, isReset, value := SafecastReadServerStatus(TTServeInstanceID)
+    isAvail, isReset, value := ReadServerStatus(TTServeInstanceID)
     if !isAvail || isReset {
         return ""
     }
@@ -169,11 +171,11 @@ func SafecastSummarizeStatsDelta() string {
 
 }
 
-// Get summary of a server
-func SafecastGetServerSummary(ServerId string, bol string) string {
+// GetServerSummary gets a summary of a server's status
+func GetServerSummary(ServerID string, bol string) string {
 
     // Read the file
-    isAvail, _, value := SafecastReadServerStatus(ServerId)
+    isAvail, _, value := ReadServerStatus(ServerID)
     if !isAvail {
         return ""
     }
@@ -185,7 +187,7 @@ func SafecastGetServerSummary(ServerId string, bol string) string {
     s += fmt.Sprintf("alive for %s", Ago(value.Tts.Started))
 
 	// If this is the current server, point that out
-	if ServerId == TTServeInstanceID {
+	if ServerID == TTServeInstanceID {
 		s += " *"
 	}
 

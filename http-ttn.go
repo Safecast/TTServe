@@ -18,7 +18,7 @@ import (
 func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
     var AppReq IncomingAppReq
     var ttn UplinkMessage
-    var ReplyToDeviceId uint32 = 0
+    var ReplyToDeviceID uint32
 
     stats.Count.HTTP++
 
@@ -53,17 +53,17 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 	AppReq.SvTransport = "ttn-http:" + ttn.DevID
 
 	// Get the reply device ID
-    ReplyToDeviceId = getReplyDeviceIdFromPayload(ttn.PayloadRaw)
+    ReplyToDeviceID = getReplyDeviceIDFromPayload(ttn.PayloadRaw)
 		
     // Push it to be processed
     go AppReqPushPayload(AppReq, ttn.PayloadRaw, "TTN")
     stats.Count.HTTPTTN++
 
     // Outbound message processing
-    if ReplyToDeviceId != 0 {
+    if ReplyToDeviceID != 0 {
 
         // See if there's an outbound message waiting for this device.
-        isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)
+        isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
         if isAvailable {
             jmsg := &DownlinkMessage{}
             jmsg.DevID = ttn.DevID
@@ -77,7 +77,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 				var err error
 				var resp *http.Response
 				
-                url := fmt.Sprintf(ttnDownlinkURL, ttnAppId, ttnProcessId, ServiceConfig.TtnAppAccessKey)
+                url := fmt.Sprintf(ttnDownlinkURL, ttnAppID, ttnProcessID, ServiceConfig.TtnAppAccessKey)
 
 				// Retry several times in case of failure
 				for i:=0; i<3; i++ {
@@ -97,10 +97,10 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 
                 if err != nil {
                     fmt.Printf("\n*** HTTPS POST error: %v\n\n", err)
-                    sendToSafecastOps(fmt.Sprintf("Error transmitting command to device %d: %s\n", ReplyToDeviceId, errorString(err)), SLACK_MSG_UNSOLICITED_OPS)
+                    sendToSafecastOps(fmt.Sprintf("Error transmitting command to device %d: %s\n", ReplyToDeviceID, ErrorString(err)), SlackMsgUnsolicitedOps)
                 } else {
                     resp.Body.Close()
-                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED_OPS)
+                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID), SlackMsgUnsolicitedOps)
                 }
 
             }

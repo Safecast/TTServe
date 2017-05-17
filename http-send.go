@@ -45,7 +45,7 @@ func newAppReqFromGateway(ttg *TTGateReq, Transport string) IncomingAppReq {
 
 // Handle inbound HTTP requests from the gateway or directly from the device
 func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
-    var ReplyToDeviceId uint32 = 0
+    var ReplyToDeviceID uint32
     stats.Count.HTTP++
 
     body, err := ioutil.ReadAll(req.Body)
@@ -95,7 +95,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq := newAppReqFromGateway(&ttg, Transport)
 
         // Extract the device ID from the message, which we will need later
-        ReplyToDeviceId = getReplyDeviceIdFromPayload(ttg.Payload)
+        ReplyToDeviceID = getReplyDeviceIDFromPayload(ttg.Payload)
 
         // Process it
         go AppReqPushPayload(AppReq, ttg.Payload, "Lora gateway")
@@ -119,7 +119,7 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         AppReq.SvTransport = "device-http:" + requestor
 
         // Extract the device ID from the message, which we will need later
-        ReplyToDeviceId = getReplyDeviceIdFromPayload(buf)
+        ReplyToDeviceID = getReplyDeviceIDFromPayload(buf)
 
 		// Push it
         go AppReqPushPayload(AppReq, buf, "device directly")
@@ -137,16 +137,16 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Outbound message processing
-    if ReplyToDeviceId != 0 {
+    if ReplyToDeviceID != 0 {
 
         // See if there's an outbound message waiting for this device.
-        isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)
+        isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
         if isAvailable {
 
             // Responses for now are always hex-encoded for easy device processing
             hexPayload := hex.EncodeToString(payload)
             io.WriteString(rw, hexPayload)
-            sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED_OPS)
+            sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID), SlackMsgUnsolicitedOps)
         }
 
     }

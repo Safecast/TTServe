@@ -11,8 +11,8 @@ import (
     "fmt"
 )
 
-// Kick off inbound messages coming from all sources, then serve HTTP
-func HttpInboundHandler() {
+// HTTPInboundHandler kicks off inbound messages coming from all sources, then serve HTTP
+func HTTPInboundHandler() {
 
     // Spin up functions only available on the monitor role, of which there is only one
     if ThisServerIsMonitor {

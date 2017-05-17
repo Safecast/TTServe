@@ -16,12 +16,12 @@ import (
 const quoteTextInCSV bool = false
 
 const (
-    SafecastDb = "safecast"
-    SafecastDataPoint = "data"
+    safecastDb = "safecast"
+    safecastDataPoint = "data"
 )
 
 // Get client config parameters
-func InfluxConfig() influx.HTTPConfig {
+func influxConfig() influx.HTTPConfig {
     var clcfg influx.HTTPConfig
     clcfg.Addr = fmt.Sprintf("https://%s:8086", ServiceConfig.InfluxHost)
     clcfg.Username = ServiceConfig.InfluxUsername
@@ -29,11 +29,11 @@ func InfluxConfig() influx.HTTPConfig {
     return clcfg
 }
 
-// Log the specific safecast data point to influx
-func SafecastLogToInflux(sd SafecastData) bool {
+// LogToInflux logs the specific safecast data point to influx
+func LogToInflux(sd SafecastData) bool {
 
     // Open the client
-    cl, clerr := influx.NewHTTPClient(InfluxConfig())
+    cl, clerr := influx.NewHTTPClient(influxConfig())
     if clerr == nil {
         defer cl.Close()
     } else {
@@ -43,7 +43,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 
     // Create a new batch
     bpcfg := influx.BatchPointsConfig{}
-    bpcfg.Database = SafecastDb
+    bpcfg.Database = safecastDb
     bp, bperr := influx.NewBatchPoints(bpcfg)
     if bperr != nil {
         fmt.Printf("Influx batch points creation error: %v\n", bperr)
@@ -51,7 +51,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
     }
 
     // Create the tags and fields structures from which a point will be made
-    var setMeasurementTime bool = false
+    var setMeasurementTime bool
     var measurementTime time.Time
     tags := map[string]string{}
     fields := map[string]interface{}{}
@@ -68,9 +68,9 @@ func SafecastLogToInflux(sd SafecastData) bool {
         }
     }
 
-    if sd.DeviceId != nil {
-        tags["device_str"] = fmt.Sprintf("%d", *sd.DeviceId)
-        fields["device"] = *sd.DeviceId
+    if sd.DeviceID != nil {
+        tags["device_str"] = fmt.Sprintf("%d", *sd.DeviceID)
+        fields["device"] = *sd.DeviceID
     }
 
     if sd.Loc != nil {
@@ -436,9 +436,9 @@ func SafecastLogToInflux(sd SafecastData) bool {
     var mperr error
     var pt *influx.Point
     if setMeasurementTime {
-        pt, mperr = influx.NewPoint(SafecastDataPoint, tags, fields, measurementTime)
+        pt, mperr = influx.NewPoint(safecastDataPoint, tags, fields, measurementTime)
     } else {
-        pt, mperr = influx.NewPoint(SafecastDataPoint, tags, fields)
+        pt, mperr = influx.NewPoint(safecastDataPoint, tags, fields)
     }
     if mperr != nil {
         fmt.Printf("Influx point creation error: %v\n", mperr)
@@ -466,7 +466,7 @@ func SafecastLogToInflux(sd SafecastData) bool {
 }
 
 // Just a debug function that traverses a Response, which took me forever to figure out
-func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int {
+func resultsToFile(response *influx.Response, fCSV bool, fd *os.File) int {
 	buf := make([]byte, 8192)
     fDebug := false
     fDebugMax := false
@@ -729,17 +729,17 @@ func InfluxResultsToFile(response *influx.Response, fCSV bool, fd *os.File) int 
 	
 }
 
-// Perform a query, returning either an URL to results or an error message
-func InfluxQuery(the_user string, the_device string, the_query string, is_csv bool) (success bool, numresults int, result string, resultfilename string) {
+// InfluxQuery performs a query, returning either an URL to results or an error message
+func InfluxQuery(theUser string, theDevice string, theQuery string, isCSV bool) (success bool, numresults int, result string, resultfilename string) {
 
 	// Request for influx query
-	fmt.Printf("\n*** %s requested query '%s'\n", the_user, the_query)
+	fmt.Printf("\n*** %s requested query '%s'\n", theUser, theQuery)
 	
     // Remap unicode characters (such as single quotes) to ASCII equivalents
-    the_query = RemapCommonUnicodeToASCII(the_query)
+    theQuery = RemapCommonUnicodeToASCII(theQuery)
 
     // Open the client
-    cl, clerr := influx.NewHTTPClient(InfluxConfig())
+    cl, clerr := influx.NewHTTPClient(influxConfig())
     if clerr == nil {
         defer cl.Close()
     } else {
@@ -747,7 +747,7 @@ func InfluxQuery(the_user string, the_device string, the_query string, is_csv bo
     }
 
     // Perform the query
-    q := influx.NewQuery("SELECT " + the_query, SafecastDb, "ns")
+    q := influx.NewQuery("SELECT " + theQuery, safecastDb, "ns")
     q.Chunked = true
     q.ChunkSize = 100
     response, qerr := cl.Query(q)
@@ -761,8 +761,8 @@ func InfluxQuery(the_user string, the_device string, the_query string, is_csv bo
     }
 
 	// Generate the filename
-    file := time.Now().UTC().Format("2006-01-02") + "-" + the_device + "-" + the_user
-	if is_csv {
+    file := time.Now().UTC().Format("2006-01-02") + "-" + theDevice + "-" + theUser
+	if isCSV {
 		file = file + ".csv"
 	} else {
 		file = file + ".json"
@@ -772,7 +772,7 @@ func InfluxQuery(the_user string, the_device string, the_query string, is_csv bo
     // Create the output file
 	var fd *os.File
 	var err error
-	if is_csv {
+	if isCSV {
 		fd, err = csvNew(filename)
 	} else {
 		fd, err = jsonNew(filename)
@@ -782,10 +782,10 @@ func InfluxQuery(the_user string, the_device string, the_query string, is_csv bo
     }
 
     // Convert to CSV
-    rows := InfluxResultsToFile(response, is_csv, fd)
+    rows := resultsToFile(response, isCSV, fd)
 
 	// Close the file
-	if is_csv {
+	if isCSV {
 		csvClose(fd)
 	} else {
 		jsonClose(fd)

@@ -27,13 +27,13 @@ func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
 	if !valid {
 		return;
 	}
-    fmt.Printf("%s Device information request for %d\n", logTime(), deviceid)
+    fmt.Printf("%s Device information request for %d\n", LogTime(), deviceid)
 
     // Open the file
-	file := SafecastGetDeviceStatusFilePath(deviceid)
+	file := GetDeviceStatusFilePath(deviceid)
     fd, err := os.Open(file)
     if err != nil {
-        io.WriteString(rw, errorString(err))
+        io.WriteString(rw, ErrorString(err))
         return
     }
     defer fd.Close()
@@ -43,7 +43,7 @@ func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-// Method to generate the web page version of a device summary
+// GenerateDeviceSummaryWebPage generates the web page version of a device summary
 func GenerateDeviceSummaryWebPage(rw http.ResponseWriter, contents []byte) {
 
 	// Read the web page template

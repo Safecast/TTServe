@@ -16,8 +16,8 @@ import (
     "encoding/json"
 )
 
-// The data structure for the "Device Status" files
-type SafecastDeviceStatus struct {
+// DeviceStatus is the data structure for the "Device Status" files
+type DeviceStatus struct {
     SafecastData            `json:"current_values,omitempty"`
     LocationHistory         [5]SafecastData `json:"location_history,omitempty"`
     GeigerHistory           [5]SafecastData `json:"geiger_history,omitempty"`
@@ -26,14 +26,14 @@ type SafecastDeviceStatus struct {
     IPInfo                  IPInfoData      `json:"transport_ip_info,omitempty"`
 }
 
-// Get the current value
-func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv SafecastDeviceStatus) {
-    valueEmpty := SafecastDeviceStatus{}
-    did := uint32(deviceId)
-    valueEmpty.DeviceId = &did
+// ReadDeviceStatus gets the current value
+func ReadDeviceStatus(deviceID uint32) (isAvail bool, isReset bool, sv DeviceStatus) {
+    valueEmpty := DeviceStatus{}
+    did := uint32(deviceID)
+    valueEmpty.DeviceID = &did
 
     // Generate the filename, which we'll use twice
-    filename := SafecastGetDeviceStatusFilePath(deviceId)
+    filename := GetDeviceStatusFilePath(deviceID)
 
     // If the file doesn't exist, don't even try
     _, err := os.Stat(filename)
@@ -52,7 +52,7 @@ func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv S
         // Read the file and unmarshall if no error
         contents, errRead := ioutil.ReadFile(filename)
         if errRead == nil {
-            valueToRead := SafecastDeviceStatus{}
+            valueToRead := DeviceStatus{}
             errRead = json.Unmarshal(contents, &valueToRead)
             if errRead == nil {
                 return true, false, valueToRead
@@ -79,13 +79,13 @@ func SafecastReadDeviceStatus(deviceId uint32) (isAvail bool, isReset bool, sv S
 
 }
 
-// Save the last value in a file
-func SafecastWriteDeviceStatus(sc SafecastData) {
+// WriteDeviceStatus saves the last value in a file
+func WriteDeviceStatus(sc SafecastData) {
     var ChangedLoc = false
     var ChangedPms = false
     var ChangedOpc = false
     var ChangedGeiger = false
-    var value SafecastDeviceStatus
+    var value DeviceStatus
 
     // Delay a random amount just in case we get called very quickly
     // with two sequential values by the same device.  While no guarantee,
@@ -96,7 +96,7 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
     // of load balancing.  This simply reduces the possibility of
     // file corruption due to multiple concurrent writers.  (The corruption
     // is self-correcting, but it's still good to avoid.)
-    sleepSeconds := random(0, 30)
+    sleepSeconds := Random(0, 30)
     time.Sleep(time.Duration(sleepSeconds) * time.Second)
 
     // Use the supplied upload time as our modification time
@@ -109,7 +109,7 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
     // If the value isn't available it's because of a nonrecoverable  error.
     // If it was reset, try waiting around a bit until it is fixed.
     for i:=0; i<5; i++ {
-        isAvail, isReset, rvalue := SafecastReadDeviceStatus(uint32(*sc.DeviceId))
+        isAvail, isReset, rvalue := ReadDeviceStatus(uint32(*sc.DeviceID))
         value = rvalue
         if !isAvail {
             return
@@ -117,7 +117,7 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
         if !isReset {
             break
         }
-        time.Sleep(time.Duration(random(1, 6)) * time.Second)
+        time.Sleep(time.Duration(Random(1, 6)) * time.Second)
     }
 
     // Update the current values, but only if modified
@@ -599,7 +599,7 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
 
     // Calculate a time of the shuffle, allowing for the fact that our preferred time
     // CapturedAt may not be available.
-    now := nowInUTC()
+    now := NowInUTC()
     ShuffledAt := &now
     if value.CapturedAt != nil {
         ShuffledAt = value.CapturedAt
@@ -611,7 +611,7 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
             value.LocationHistory[i] = value.LocationHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceId = value.DeviceId
+        new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Loc = value.Loc
         value.LocationHistory[0] = new
@@ -623,7 +623,7 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
             value.PmsHistory[i] = value.PmsHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceId = value.DeviceId
+        new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Pms = value.Pms
         value.PmsHistory[0] = new
@@ -635,7 +635,7 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
             value.OpcHistory[i] = value.OpcHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceId = value.DeviceId
+        new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Opc = value.Opc
         value.OpcHistory[0] = new
@@ -647,7 +647,7 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
             value.GeigerHistory[i] = value.GeigerHistory[i-1]
         }
         new := SafecastData{}
-        new.DeviceId = value.DeviceId
+        new.DeviceID = value.DeviceID
         new.CapturedAt = ShuffledAt
         new.Lnd = value.Lnd
         value.GeigerHistory[0] = new
@@ -680,7 +680,7 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
     }
 
     // Write it to the file until it's written correctly, to allow for concurrency
-    filename := SafecastGetDeviceStatusFilePath(*sc.DeviceId)
+    filename := GetDeviceStatusFilePath(*sc.DeviceID)
     valueJSON, _ := json.MarshalIndent(value, "", "    ")
 
     for {
@@ -695,10 +695,10 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
         fd.Close()
 
         // Delay, to increase the chance that we will catch a concurrent update/overwrite
-        time.Sleep(time.Duration(random(1, 6)) * time.Second)
+        time.Sleep(time.Duration(Random(1, 6)) * time.Second)
 
         // Do an integrity check, and re-write the value if necessary
-        _, isEmpty, _ := SafecastReadDeviceStatus(uint32(*sc.DeviceId))
+        _, isEmpty, _ := ReadDeviceStatus(uint32(*sc.DeviceID))
         if !isEmpty {
             break
         }
@@ -706,17 +706,17 @@ func SafecastWriteDeviceStatus(sc SafecastData) {
 
 }
 
-// Get summary of a device
-func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label string, Gps string, Summary string) {
+// GetDeviceStatusSummary gets a summary of a device
+func GetDeviceStatusSummary(DeviceID uint32) (DevEui string, Label string, Gps string, Summary string) {
 
     // Default the label
     label := ""
     if false {
-        label = SafecastDeviceType(DeviceId)
+        label = SafecastDeviceType(DeviceID)
     }
 
     // Read the file
-    isAvail, _, value := SafecastReadDeviceStatus(DeviceId)
+    isAvail, _, value := ReadDeviceStatus(DeviceID)
     if !isAvail {
         return "", label, "", ""
     }
@@ -799,9 +799,9 @@ func SafecastGetDeviceStatusSummary(DeviceId uint32) (DevEui string, Label strin
 
 }
 
-// Generate a device status filename
-func SafecastGetDeviceStatusFilePath(DeviceId uint32) string {
+// GetDeviceStatusFilePath generates a device status filename in the local file store
+func GetDeviceStatusFilePath(DeviceID uint32) string {
 
-    return SafecastDirectory() + TTDeviceStatusPath + "/" + time.Now().UTC().Format("2006-01-") + fmt.Sprintf("%d", DeviceId) + ".json"
+    return SafecastDirectory() + TTDeviceStatusPath + "/" + time.Now().UTC().Format("2006-01-") + fmt.Sprintf("%d", DeviceID) + ".json"
 
 }

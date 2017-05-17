@@ -19,13 +19,13 @@ func inboundWebQueryResultsHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Log it
     filename := req.RequestURI[len(TTServerTopicQueryResults):]
-    fmt.Printf("%s Query results request for %s\n", logTime(), filename)
+    fmt.Printf("%s Query results request for %s\n", LogTime(), filename)
 
     // Open the file
     file := SafecastDirectory() + TTInfluxQueryPath + "/" + filename
     fd, err := os.Open(file)
     if err != nil {
-        io.WriteString(rw, errorString(err))
+        io.WriteString(rw, ErrorString(err))
         return
     }
     defer fd.Close()

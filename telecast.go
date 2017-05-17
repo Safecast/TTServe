@@ -25,8 +25,8 @@ type safecastCommand struct {
     IssuedBy              string `json:"issued_by,omitempty"`
 }
 
-// Get a Telecast Device ID number for this message
-func TelecastDeviceId (msg *ttproto.Telecast) uint32 {
+// TelecastDeviceID gets a Telecast Device ID number for this message
+func TelecastDeviceID (msg *ttproto.Telecast) uint32 {
     if msg.DeviceId != nil {
         return msg.GetDeviceId()
     }
@@ -75,15 +75,15 @@ func sendTelecastOutboundSummaryToSlack() {
     }
 
     // Send it to Slack
-    sendToSafecastOps(s, SLACK_MSG_REPLY)
+    sendToSafecastOps(s, SlackMsgReply)
 
 }
 
-// Process inbound telecast message
+// SendTelecastMessage tasks a telecast message and sends it to a different telecast-capable device
 func SendTelecastMessage(msg ttproto.Telecast, devEui string) {
 
     // Keep track of devices from whom we've received message
-    deviceID := TelecastDeviceId(&msg)
+    deviceID := TelecastDeviceID(&msg)
 
     // Unpack the message arguments
     message := msg.GetMessage()
@@ -101,7 +101,7 @@ func SendTelecastMessage(msg ttproto.Telecast, devEui string) {
     case "/hello":
         fallthrough
     case "/hi":
-        fmt.Printf("%s Telecast \"Hello\" message\n", logTime())
+        fmt.Printf("%s Telecast \"Hello\" message\n", LogTime())
         if argRest == "" {
             sendCommand("", deviceID, "@server: Hello.")
         } else {
@@ -110,17 +110,17 @@ func SendTelecastMessage(msg ttproto.Telecast, devEui string) {
 
         // Handle an inbound upstream-only ping (blank message) by just ignoring it
     case "":
-        fmt.Printf("%s Telecast \"Ping\" message\n", logTime())
+        fmt.Printf("%s Telecast \"Ping\" message\n", LogTime())
 
 
     }
 
 }
 
-// Construct the path of a command file
-func SafecastCommandFilename(DeviceId uint32) string {
+// SafecastCommandFilename constructs the path of a command file
+func SafecastCommandFilename(DeviceID uint32) string {
     directory := SafecastDirectory()
-    file := directory + TTServerCommandPath + "/" + fmt.Sprintf("%d", DeviceId) + ".json"
+    file := directory + TTServerCommandPath + "/" + fmt.Sprintf("%d", DeviceID) + ".json"
     return file
 }
 
@@ -179,7 +179,7 @@ func getCommand(deviceID uint32) (isValid bool, command safecastCommand) {
 
 }
 
-// See if there is an outbound payload waiting for this device.
+// TelecastOutboundPayload checks if there is an outbound payload waiting for this device.
 // If so, fetch it, clear it out, and return it.
 func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte) {
 
@@ -205,7 +205,7 @@ func TelecastOutboundPayload(deviceID uint32) (isAvailable bool, payload []byte)
     }
 
 	// Use the new wire format
-	header := []byte{BUFF_FORMAT_PB_ARRAY, 1}
+	header := []byte{BuffFormatPBArray, 1}
 	header = append(header, byte(len(tdata)))
 	command := append(header, tdata...)
 

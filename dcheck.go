@@ -16,9 +16,9 @@ import (
 //          - makes sure it got at least some data from each kind of sensor
 //          - does some simple range check on each data value
 
-// Stats about a single measurement
+// MeasurementStat contains information about a single measurement
 type MeasurementStat struct {
-    DeviceId            uint32
+    DeviceID            uint32
     Valid               bool
     Test                bool
     Firmware            string
@@ -94,9 +94,9 @@ type MeasurementStat struct {
     Pms100              float64
 }
 
-// Stats about all measurements
+// MeasurementDataset contains stats about all measurements
 type MeasurementDataset struct {
-    DeviceId            []uint32
+    DeviceID            []uint32
     Firmware            string
     MultiFirmware       bool
     OldestUpload        time.Time
@@ -252,6 +252,7 @@ type MeasurementDataset struct {
     HiEncP              float64
 }
 
+// NewMeasurementDataset begins a new measurement by creating the object to record data
 func NewMeasurementDataset() MeasurementDataset {
     ds := MeasurementDataset{}
     ds.LoraModule = "unidentified lora module"
@@ -261,7 +262,7 @@ func NewMeasurementDataset() MeasurementDataset {
 
 }
 
-// Check an individual measurement
+// CheckMeasurement verifies an individual measurement
 func CheckMeasurement(sd SafecastData) MeasurementStat {
     stat := MeasurementStat{}
 
@@ -272,8 +273,8 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
     stat.Valid = true
 
 	// Device ID
-	if sd.DeviceId != nil {
-		stat.DeviceId = *sd.DeviceId
+	if sd.DeviceID != nil {
+		stat.DeviceID = *sd.DeviceID
 	}
 	
     // Process service-related stats
@@ -607,7 +608,7 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
 
 }
 
-// Check an individual measurement
+// AggregateMeasurementIntoDataset checks an individual measurement
 func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementStat) {
 
     // Only record valid stats
@@ -620,16 +621,16 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
     }
 
 	// Device ID
-	if stat.DeviceId != 0 {
+	if stat.DeviceID != 0 {
 		foundDevice := false
-        for _, d := range ds.DeviceId {
-			if d == stat.DeviceId {
+        for _, d := range ds.DeviceID {
+			if d == stat.DeviceID {
 				foundDevice = true
 				break
 			}
 		}
 		if !foundDevice {
-            ds.DeviceId = append(ds.DeviceId, stat.DeviceId)
+            ds.DeviceID = append(ds.DeviceID, stat.DeviceID)
 		}
 	}
 	
@@ -913,7 +914,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
             ds.Boots++
 
             // Aggregate and reset error totals
-            AggregateErrors(ds)
+            aggregateErrors(ds)
 
         }
         ds.PrevUptimeMinutes = stat.UptimeMinutes
@@ -1102,7 +1103,7 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
 }
 
 // Aggregate the error counts
-func AggregateErrors(ds *MeasurementDataset) {
+func aggregateErrors(ds *MeasurementDataset) {
 
     // Add errors to running totals from prior boots
     ds.PrevErrorsOpc += ds.ThisErrorsOpc
@@ -1156,23 +1157,23 @@ func AggregateErrors(ds *MeasurementDataset) {
 
 }
 
-// Wrap up the aggregation
+// AggregationCompleted wraps up the aggregation
 func AggregationCompleted(ds *MeasurementDataset) {
 
     // Wrap up the final error counts
-    AggregateErrors(ds)
+    aggregateErrors(ds)
 
 }
 
-// Check an individual measurement
+// GenerateDatasetSummary returns a summary of the entire measured/checked dataset
 func GenerateDatasetSummary(ds MeasurementDataset) string {
     s := ""
 
     // High-level stats
     s += fmt.Sprintf("Checkup:\n")
-	if len(ds.DeviceId) != 0 {
+	if len(ds.DeviceID) != 0 {
 	    s += fmt.Sprintf("  id ")
-        for i, d := range ds.DeviceId {
+        for i, d := range ds.DeviceID {
 			if i != 0 {
 				s += ","
 			}
@@ -1507,7 +1508,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
     }
 
 	// That's all if we've measured more than one device
-	if len(ds.DeviceId) != 1 {
+	if len(ds.DeviceID) != 1 {
 		return s
 	}
 

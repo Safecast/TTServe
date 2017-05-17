@@ -21,14 +21,15 @@ type sheetRow struct {
 var sheet []sheetRow
 
 // Statics
-var everRetrieved bool = false
+var everRetrieved bool
 var lastRetrieved time.Time
-var failedRecently bool = false
+var failedRecently bool
 var lastError string
 
-func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
-    var fRetrieve bool = false
-    var sheetData string = ""
+// DeviceIDToSN converts a Safecast device ID to its manufacturing serial number
+func DeviceIDToSN(DeviceID uint32) (uint32, string) {
+    var fRetrieve bool
+    var sheetData string
 
 	// Retrieve if never yet retrieved
     if sheet == nil {
@@ -85,7 +86,7 @@ func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
         }
 
         // Cache the data for future iterations
-        fmt.Printf("\n%s *** Refreshed %d entries from Google Sheets\n", logTime(), len(splitContents))
+        fmt.Printf("\n%s *** Refreshed %d entries from Google Sheets\n", LogTime(), len(splitContents))
         everRetrieved = true
         lastRetrieved = time.Now()
         failedRecently = false;
@@ -93,18 +94,18 @@ func SafecastDeviceIDToSN(DeviceId uint32) (uint32, string) {
     }
 
     // Iterate over the rows to find the device
-    deviceIdFound := false;
+    deviceIDFound := false;
     snFound := uint32(0)
     for _, r := range sheet {
-        if r.deviceid == DeviceId {
-            deviceIdFound = true
+        if r.deviceid == DeviceID {
+            deviceIDFound = true
             snFound = r.sn
             break
         }
     }
 
 	// Done
-    if !deviceIdFound {
+    if !deviceIDFound {
         lastError = "Device ID not found"
         return 0, lastError
     }

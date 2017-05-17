@@ -23,37 +23,38 @@ const (
 	ReportHelp = "report <show, set, delete, run>\nreport <report-name>\nreport <device> <from> [<to>]\n    <device> is device name/number or device list name\n    <from> is UTC datetime or NNh/NNm *ago* or mark name\n    <to> is UTC datetime or NNh/NNm *duration* or mark name"
 )
 
-type Object struct {
+type commandObject struct {
     Name                string          `json:"obj_name,omitempty"`
     Type                string          `json:"obj_type,omitempty"`
     Value               string          `json:"obj_value,omitempty"`
 }
-type State struct {
+type commandState struct {
     User                string          `json:"user,omitempty"`
-    Objects             []Object        `json:"objects,omitempty"`
+    Objects             []commandObject        `json:"objects,omitempty"`
 }
-var CachedState []State
+var cachedState []commandState
 
-type Range struct {
+// DeviceRange is a span of DeviceIDs
+type DeviceRange struct {
 	Low		uint32
 	High	uint32
 }
 
 // Statics
-var   CommandStateLastModified time.Time
+var commandStateLastModified time.Time
 
 // Refresh the command cache
-func CommandCacheRefresh() {
-    var RefreshedState []State
+func commandCacheRefresh() {
+    var RefreshedState []commandState
 
     // Exit if nothing needs refreshing
     LastModified := ControlFileTime(TTServerCommandStateControlFile, "")
-    if LastModified == CommandStateLastModified {
+    if LastModified == commandStateLastModified {
         return
     }
 
     // Make sure that we only do this once per modification, even if errors
-    CommandStateLastModified = LastModified
+    commandStateLastModified = LastModified
 
     // Iterate over all files in the directory, loading their contents
     files, err := ioutil.ReadDir(SafecastDirectory() + TTCommandStatePath)
@@ -74,7 +75,7 @@ func CommandCacheRefresh() {
             }
 
             // Parse the JSON, and ignore it if nonparse-sable
-            value := State{}
+            value := commandState{}
             err = json.Unmarshal(contents, &value)
             if err != nil {
                 continue
@@ -88,24 +89,24 @@ func CommandCacheRefresh() {
     }
 
     // Replace the cached state
-    CachedState = RefreshedState
+    cachedState = RefreshedState
 
 }
 
 // Find a named object
-func CommandObjGet(user string, objtype string, objname string) (bool, string) {
+func commandObjGet(user string, objtype string, objname string) (bool, string) {
 
     // Refresh, just for good measure
-    CommandCacheRefresh()
+    commandCacheRefresh()
 
     // Handle global queries
     if strings.HasPrefix(objname, "=") {
         objname = strings.Replace(objname, "=", "", 1)
-        return CommandObjGet("", objtype, objname)
+        return commandObjGet("", objtype, objname)
     }
 
     // Loop over all user state objjects
-    for _, s := range CachedState {
+    for _, s := range cachedState {
 
         // Skip if not relevant
         if s.User != user {
@@ -130,7 +131,7 @@ func CommandObjGet(user string, objtype string, objname string) (bool, string) {
 
     // See if it's there as a global
     if user != "" {
-        return CommandObjGet("", objtype, objname)
+        return commandObjGet("", objtype, objname)
     }
 
     // No luck
@@ -139,21 +140,21 @@ func CommandObjGet(user string, objtype string, objname string) (bool, string) {
 }
 
 // Find a named object
-func CommandObjList(user string, objtype string, objname string) string {
+func commandObjList(user string, objtype string, objname string) string {
 
     // Refresh, just for good measure
-    CommandCacheRefresh()
+    commandCacheRefresh()
 
     if strings.HasPrefix(objname, "=") {
         objname = strings.Replace(objname, "=", "", 1)
-        return CommandObjList("", objtype, objname)
+        return commandObjList("", objtype, objname)
     }
 
     // Init output buffer
     out := ""
 
     // Loop over all user state objjects
-    for _, s := range CachedState {
+    for _, s := range cachedState {
 
         // Skip if not relevant
         if s.User != user && s.User != "" {
@@ -224,7 +225,7 @@ func CommandObjList(user string, objtype string, objname string) string {
 }
 
 // Update state
-func CommandStateUpdate(s State) {
+func commandStateUpdate(s commandState) {
 
     // Marshall the state
     contents, _ := json.MarshalIndent(s, "", "    ")
@@ -245,26 +246,26 @@ func CommandStateUpdate(s State) {
         fd.Close()
 
         // Update the control file time
-        CommandStateLastModified = ControlFileTime(TTServerCommandStateControlFile, "state update")
+        commandStateLastModified = ControlFileTime(TTServerCommandStateControlFile, "state update")
 
     }
 
 }
 
 // Find a named object
-func CommandObjSet(user string, objtype string, objname string, objval string) bool {
+func commandObjSet(user string, objtype string, objname string, objval string) bool {
 
     // Refresh, just for good measure
-    CommandCacheRefresh()
+    commandCacheRefresh()
 
     // Handle global queries
     if strings.HasPrefix(objname, "=") {
         objname = strings.Replace(objname, "=", "", 1)
-        return CommandObjSet("", objtype, objname, objval)
+        return commandObjSet("", objtype, objname, objval)
     }
 
     // Loop over all user state objjects
-    for i, s := range CachedState {
+    for i, s := range cachedState {
 
         // Skip if not relevant
         if s.User != user {
@@ -281,18 +282,18 @@ func CommandObjSet(user string, objtype string, objname string, objval string) b
 
             // Update or remove the element
             if objval != "" {
-                CachedState[i].Objects[j].Value = objval
+                cachedState[i].Objects[j].Value = objval
             } else {
                 if len(s.Objects) == 1 {
-                    CachedState[i].Objects = nil
+                    cachedState[i].Objects = nil
                 } else  {
-                    CachedState[i].Objects[j] = CachedState[i].Objects[len(s.Objects)-1]
-                    CachedState[i].Objects = CachedState[i].Objects[:len(s.Objects)-1]
+                    cachedState[i].Objects[j] = cachedState[i].Objects[len(s.Objects)-1]
+                    cachedState[i].Objects = cachedState[i].Objects[:len(s.Objects)-1]
                 }
             }
 
             // Update it
-            CommandStateUpdate(CachedState[i])
+            commandStateUpdate(cachedState[i])
             return true
 
         }
@@ -303,36 +304,36 @@ func CommandObjSet(user string, objtype string, objname string, objval string) b
         }
 
         // Append the new object
-        o := Object{}
+        o := commandObject{}
         o.Name = objname
         o.Type = objtype
         o.Value = objval
-        CachedState[i].Objects = append(CachedState[i].Objects, o)
+        cachedState[i].Objects = append(cachedState[i].Objects, o)
 
         // Update it
-        CommandStateUpdate(CachedState[i])
+        commandStateUpdate(cachedState[i])
         return true
 
     }
 
     // If we couldn't find the user state, add it
-    o := Object{}
+    o := commandObject{}
     o.Name = objname
     o.Type = objtype
     o.Value = objval
-    s := State{}
+    s := commandState{}
     s.User = user
     s.Objects = append(s.Objects, o)
-    CachedState = append(CachedState, s)
+    cachedState = append(cachedState, s)
 
     // Update it
-    CommandStateUpdate(CachedState[len(CachedState)-1])
+    commandStateUpdate(cachedState[len(cachedState)-1])
     return true
 
 }
 
 // Parse a command and execute it
-func CommandParse(user string, command string, objtype string, message string) string {
+func commandParse(user string, command string, objtype string, message string) string {
 
     args := strings.Split(message, " ")
     messageAfterFirstArg := ""
@@ -355,7 +356,7 @@ func CommandParse(user string, command string, objtype string, message string) s
     case "list":
         fallthrough
     case "show":
-        return CommandObjList(user, objtype, objname)
+        return commandObjList(user, objtype, objname)
 
     case "run":
         if objtype != ObjReport {
@@ -366,7 +367,7 @@ func CommandParse(user string, command string, objtype string, message string) s
 
     case "add":
         if objtype == ObjDevice {
-            found, value := CommandObjGet(user, objtype, objname)
+            found, value := commandObjGet(user, objtype, objname)
             if !found {
                 value = ""
             }
@@ -374,9 +375,9 @@ func CommandParse(user string, command string, objtype string, message string) s
                 if d == "" {
                     continue
                 }
-				valid, result, _ := RangeVerify(d)
+				valid, result, _ := rangeVerify(d)
 				if !valid {
-	                valid, result, _ = DeviceVerify(d)
+	                valid, result, _ = deviceVerify(d)
 				}
                 if !valid {
                     return result
@@ -387,32 +388,32 @@ func CommandParse(user string, command string, objtype string, message string) s
                     value = value + "," + result
                 }
             }
-            CommandObjSet(user, objtype, objname, value)
-            return(CommandObjList(user, objtype, objname))
+            commandObjSet(user, objtype, objname, value)
+            return(commandObjList(user, objtype, objname))
         }
         fallthrough
     case "set":
         if objtype == ObjMark {
-            valid, result, _ := MarkVerify(messageAfterSecondArg, nowInUTC(), false)
+            valid, result, _ := markVerify(messageAfterSecondArg, NowInUTC(), false)
             if !valid {
                 return result
             }
-            CommandObjSet(user, objtype, objname, result)
+            commandObjSet(user, objtype, objname, result)
         } else if objtype == ObjReport {
-            valid, result, _, _, _, _, _, _ := ReportVerify(user, messageAfterSecondArg)
+            valid, result, _, _, _, _, _, _ := reportVerify(user, messageAfterSecondArg)
             if !valid {
                 return result
             }
-            CommandObjSet(user, objtype, objname, result)
+            commandObjSet(user, objtype, objname, result)
         } else if objtype == ObjDevice {
             value := ""
             for _, d := range strings.Split(messageAfterSecondArg, " ") {
                 if d == "" {
                     continue
                 }
-				valid, result, _ := RangeVerify(d)
+				valid, result, _ := rangeVerify(d)
 				if !valid {
-	                valid, result, _ = DeviceVerify(d)
+	                valid, result, _ = deviceVerify(d)
 				}
                 if !valid {
                     return result
@@ -423,14 +424,14 @@ func CommandParse(user string, command string, objtype string, message string) s
                     value = value + "," + result
                 }
             }
-            CommandObjSet(user, objtype, objname, value)
+            commandObjSet(user, objtype, objname, value)
         }
 
-        return(CommandObjList(user, objtype, objname))
+        return(commandObjList(user, objtype, objname))
 
     case "remove":
         if objtype == ObjDevice {
-            found, value := CommandObjGet(user, objtype, objname)
+            found, value := commandObjGet(user, objtype, objname)
             if !found {
                 return fmt.Sprintf("Device list %s not found.", objname)
             }
@@ -451,15 +452,15 @@ func CommandParse(user string, command string, objtype string, message string) s
             if newvalue == value {
                 return fmt.Sprintf("Device list %s does not contain %s", objname, messageAfterSecondArg)
             }
-            CommandObjSet(user, objtype, objname, newvalue)
+            commandObjSet(user, objtype, objname, newvalue)
             if newvalue == "" {
                 return fmt.Sprintf("%s deleted.", objname)
             }
-            return(CommandObjList(user, objtype, objname))
+            return(commandObjList(user, objtype, objname))
         }
         fallthrough
     case "delete":
-        if (!CommandObjSet(user, objtype, objname, "")) {
+        if (!commandObjSet(user, objtype, objname, "")) {
             return fmt.Sprintf("%s not found.", objname)
         }
         return fmt.Sprintf("%s deleted.", objname)
@@ -511,12 +512,12 @@ func CommandParse(user string, command string, objtype string, message string) s
 
 // Do the command and report output to Safecast, usable as a goroutine
 func sendCommandToSlack(user string, message string) {
-    response := Command(user, message)
-    sendToSafecastOps(response, SLACK_MSG_REPLY)
+    response := command(user, message)
+    sendToSafecastOps(response, SlackMsgReply)
 }
 
 // Process a command that will modify the cache and the on-disk state
-func Command(user string, message string) string {
+func command(user string, message string) string {
 
     // Process the command arguments
     args := strings.Split(message, " ")
@@ -536,19 +537,19 @@ func Command(user string, message string) string {
     case "devices":
         fallthrough
     case "device":
-        return CommandParse(user, args[0], ObjDevice, messageAfterFirstArg)
+        return commandParse(user, args[0], ObjDevice, messageAfterFirstArg)
 
     case "marks":
         fallthrough
     case "mark":
-        return CommandParse(user, args[0], ObjMark, messageAfterFirstArg)
+        return commandParse(user, args[0], ObjMark, messageAfterFirstArg)
 
     case "run":
         fallthrough
     case "check":
         fallthrough
     case "report":
-        return CommandParse(user, args[0], ObjReport, messageAfterFirstArg)
+        return commandParse(user, args[0], ObjReport, messageAfterFirstArg)
 
     case "checkall":
         fallthrough
@@ -571,7 +572,7 @@ func Command(user string, message string) string {
 			if s != "" {
 				s += "\n"
 			}
-			s += CommandParse(user, newArg0, ObjReport, newMessageAfterFirstArg)
+			s += commandParse(user, newArg0, ObjReport, newMessageAfterFirstArg)
 		}
 		if s == "" {
 			s = "No device specified"
@@ -584,7 +585,7 @@ func Command(user string, message string) string {
 }
 
 // Parse the plus code pttern
-func PlusCodePattern(code string) string {
+func plusCodePattern(code string) string {
 
 	// Turn it into a pattern by replacing the + wildcard with a single-char wildcard
 	code = strings.Replace(code, "+", ".", 1)
@@ -627,7 +628,7 @@ func PlusCodePattern(code string) string {
 }
 
 // See if this string is a location query specifier
-func PlusCode(code string) bool {
+func plusCode(code string) bool {
     if strings.Contains(code, "+") {
         return true
     }
@@ -635,36 +636,36 @@ func PlusCode(code string) bool {
 }
 
 // Look up a number from two or three simple words
-func RangeVerify(what string) (bool, string, Range) {
-	var r Range
+func rangeVerify(what string) (bool, string, DeviceRange) {
+	var r DeviceRange
 	
     parts := strings.Split(what, "-")
     if len(parts) != 2 {
-		return false, "Not a device range", Range{}
+		return false, "Not a device range", DeviceRange{}
 	}
 
     // See if low part parses cleanly as a number
     i64, err := strconv.ParseUint(parts[0], 10, 32)
     if err != nil {
-		return false, "Not a device range", Range{}
+		return false, "Not a device range", DeviceRange{}
 	}
 	r.Low = uint32(i64)
 
     // See if high part parses cleanly as a number
     i64, err = strconv.ParseUint(parts[1], 10, 32)
     if err != nil {
-		return false, "Not a device range", Range{}
+		return false, "Not a device range", DeviceRange{}
 	}
 	r.High = uint32(i64)
 
 	return true, what, r
 }
 
-// Get a list of devices
-func DeviceList(user string, devicelist string) (rValid bool, rResult string, rExpanded []uint32, rExpandedRange []Range, rExpandedPlusCodes []string) {
+// DeviceList gets a list of devices
+func DeviceList(user string, devicelist string) (rValid bool, rResult string, rExpanded []uint32, rExpandedRange []DeviceRange, rExpandedplusCodes []string) {
 
-	isrange, _, r := RangeVerify(devicelist)
-    isdevice, result, deviceid := DeviceVerify(devicelist)
+	isrange, _, r := rangeVerify(devicelist)
+    isdevice, result, deviceid := deviceVerify(devicelist)
 
 	if isrange {
 
@@ -676,18 +677,18 @@ func DeviceList(user string, devicelist string) (rValid bool, rResult string, rE
         if deviceid != 0 {
             rExpanded = append(rExpanded, deviceid)
         } else {
-            rExpandedPlusCodes = append(rExpandedPlusCodes, result)
+            rExpandedplusCodes = append(rExpandedplusCodes, result)
         }
 
     } else {
 
         // Expand the list
-        valid, result := CommandObjGet(user, ObjDevice, devicelist)
+        valid, result := commandObjGet(user, ObjDevice, devicelist)
         if valid {
             for _, d := range strings.Split(result, ",") {
 
-				isrange, _, r := RangeVerify(d)
-			    isdevice, result, deviceid := DeviceVerify(d)
+				isrange, _, r := rangeVerify(d)
+			    isdevice, result, deviceid := deviceVerify(d)
 
 				if isrange {
 
@@ -699,7 +700,7 @@ func DeviceList(user string, devicelist string) (rValid bool, rResult string, rE
                     if deviceid != 0 {
                         rExpanded = append(rExpanded, deviceid)
                     } else {
-                        rExpandedPlusCodes = append(rExpandedPlusCodes, result)
+                        rExpandedplusCodes = append(rExpandedplusCodes, result)
                     }
 
                 }
@@ -722,11 +723,11 @@ func DeviceList(user string, devicelist string) (rValid bool, rResult string, rE
 }
 
 // Verify a device to be added to the device list
-func DeviceVerify(device string) (rValid bool, rResult string, rDeviceId uint32) {
+func deviceVerify(device string) (rValid bool, rResult string, rDeviceID uint32) {
 
     valid, deviceid := WordsToNumber(device)
     if !valid {
-        if PlusCode(device) {
+        if plusCode(device) {
             return true, device, 0
         }
         if device == "" {
@@ -739,11 +740,11 @@ func DeviceVerify(device string) (rValid bool, rResult string, rDeviceId uint32)
 }
 
 // Verify a mark or transform it
-func MarkVerify(mark string, reference string, fBackwards bool) (rValid bool, rOriginal string, rExpanded string) {
+func markVerify(mark string, reference string, fBackwards bool) (rValid bool, rOriginal string, rExpanded string) {
 
     // If nothing is specified, just return the reference
     if mark == "" {
-        return true, nowInUTC(), reference
+        return true, NowInUTC(), reference
     }
 
     // If not, see if this is just a number of days/hrs/mins
@@ -806,7 +807,7 @@ func MarkVerify(mark string, reference string, fBackwards bool) (rValid bool, rO
 }
 
 // Verify a report or transform it
-func ReportVerify(user string, report string) (rValid bool, rResult string, device_arg string, rDeviceList []uint32, rDeviceRange []Range, rPlusCodeList []string, rFrom string, rTo string) {
+func reportVerify(user string, report string) (rValid bool, rResult string, deviceArg string, rDeviceList []uint32, rDeviceRange []DeviceRange, rplusCodeList []string, rFrom string, rTo string) {
 
     // Break up into its parts
     args := strings.Split(report, " ")
@@ -818,19 +819,19 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, devi
         return
     }
 
-    device_arg = args[0]
-    from_arg := args[1]
-    to_arg := ""
+    deviceArg = args[0]
+    fromArg := args[1]
+    toArg := ""
     if len(args) > 2 {
-        to_arg = args[2]
+        toArg = args[2]
     }
 
     // See if device is a valid device ID
-    valid, result, devicelist, devicerange, pluscodelist := DeviceList(user, device_arg)
+    valid, result, devicelist, devicerange, pluscodelist := DeviceList(user, deviceArg)
     if valid {
         rDeviceList = devicelist
 		rDeviceRange = devicerange
-        rPlusCodeList = pluscodelist
+        rplusCodeList = pluscodelist
     } else {
         rValid = false
         rResult = result
@@ -839,52 +840,52 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, devi
 
 
     // See if the next arg is a mark
-    valid, _, result = MarkVerify(from_arg, nowInUTC(), true)
+    valid, _, result = markVerify(fromArg, NowInUTC(), true)
     if valid {
         rFrom = result
     } else {
 
         // See if it's a mark name
-        valid, result := CommandObjGet(user, ObjMark, from_arg)
+        valid, result := commandObjGet(user, ObjMark, fromArg)
         if valid {
-            valid, _, result = MarkVerify(result, nowInUTC(), true)
+            valid, _, result = markVerify(result, NowInUTC(), true)
             if valid {
                 rFrom = result
             }
         }
         if !valid {
             rValid = false
-            rResult = fmt.Sprintf("%s is neither a date or a mark name", from_arg)
+            rResult = fmt.Sprintf("%s is neither a date or a mark name", fromArg)
             return
         }
 
     }
 
     // We're done if there's no final arg
-    if to_arg == "" {
+    if toArg == "" {
         rValid = true
-        rTo = nowInUTC()
+        rTo = NowInUTC()
         rResult = report
         return
     }
 
     // Validate the to arg
-	valid, _, result = MarkVerify(to_arg, rFrom, false)
+	valid, _, result = markVerify(toArg, rFrom, false)
     if valid {
         rTo = result
     } else {
 
         // See if it's a mark name
-        valid, result := CommandObjGet(user, ObjMark, to_arg)
+        valid, result := commandObjGet(user, ObjMark, toArg)
         if valid {
-            valid, _, result = MarkVerify(result, rFrom, false)
+            valid, _, result = markVerify(result, rFrom, false)
             if valid {
                 rTo = result
             }
         }
         if !valid {
             rValid = false
-            rResult = fmt.Sprintf("%s is neither a date or a mark name", to_arg)
+            rResult = fmt.Sprintf("%s is neither a date or a mark name", toArg)
             return
         }
 
@@ -897,7 +898,7 @@ func ReportVerify(user string, report string) (rValid bool, rResult string, devi
 
 }
 
-// Run a report or transform it
+// ReportRun runs a report
 func ReportRun(user string, csv bool, report string) (success bool, result string, filename string) {
 	
     // See if there is only one arg which is the report name
@@ -905,7 +906,7 @@ func ReportRun(user string, csv bool, report string) (success bool, result strin
 		if report == "" {
 			return false, ReportHelp, ""
 		}
-        found, value := CommandObjGet(user, ObjReport, report)
+        found, value := commandObjGet(user, ObjReport, report)
         if !found {
             return false, fmt.Sprintf("Report %s not found.", report), ""
         }
@@ -913,7 +914,7 @@ func ReportRun(user string, csv bool, report string) (success bool, result strin
     }
 
     // Validate and expand the report
-    valid, result, device_arg, devices, ranges, pluscodes, from, to := ReportVerify(user, report)
+    valid, result, deviceArg, devices, ranges, pluscodes, from, to := reportVerify(user, report)
     if !valid {
         return false, result, ""
     }
@@ -943,7 +944,7 @@ func ReportRun(user string, csv bool, report string) (success bool, result strin
             sql += " OR "
         }
 		first = false
-        sql += fmt.Sprintf("loc_olc =~ /%s/", PlusCodePattern(s))
+        sql += fmt.Sprintf("loc_olc =~ /%s/", plusCodePattern(s))
     }
     sql += " )"
 
@@ -951,12 +952,12 @@ func ReportRun(user string, csv bool, report string) (success bool, result strin
     sql += fmt.Sprintf(" AND ( time >= '%s' AND time < '%s' )", from, to)
 
     // Execute the query
-    success, numrows, result, filename := InfluxQuery(user, device_arg, sql, csv)
+    success, numrows, result, filename := InfluxQuery(user, deviceArg, sql, csv)
     if !success {
         return false, result, ""
     }
 
     // Done
-    return true, fmt.Sprintf("%d rows of data for %s are <%s|here>, @%s.", numrows, device_arg, result, user), filename
+    return true, fmt.Sprintf("%d rows of data for %s are <%s|here>, @%s.", numrows, deviceArg, result, user), filename
 
 }

@@ -4,6 +4,7 @@
 
 package main
 
+// TTServeConfig is the service configuration file format
 type TTServeConfig struct {
 
 	// TTN

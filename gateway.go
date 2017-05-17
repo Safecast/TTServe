@@ -28,10 +28,10 @@ type seenGateway struct {
 var seenGateways []seenGateway
 
 // Class used to sort seen devices
-type ByGatewayKey []seenGateway
-func (a ByGatewayKey) Len() int      { return len(a) }
-func (a ByGatewayKey) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ByGatewayKey) Less(i, j int) bool {
+type byGatewayKey []seenGateway
+func (a byGatewayKey) Len() int      { return len(a) }
+func (a byGatewayKey) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a byGatewayKey) Less(i, j int) bool {
     // Primary:
     // By capture time, most recent last (so that the most recent is nearest your attention, at the bottom in Slack)
     if a[i].seen.Before(a[j].seen) {
@@ -50,9 +50,9 @@ func (a ByGatewayKey) Less(i, j int) bool {
 }
 
 // Keep track of all devices that have logged data via ttserve
-func trackGateway(GatewayId string, whenSeen time.Time) {
+func trackGateway(GatewayID string, whenSeen time.Time) {
     var dev seenGateway
-    dev.gatewayid = GatewayId
+    dev.gatewayid = GatewayID
 
     // Attempt to update the existing entry if we can find it
     found := false
@@ -75,9 +75,9 @@ func trackGateway(GatewayId string, whenSeen time.Time) {
                         message = fmt.Sprintf("~%d hours", hoursAgo)
                     }
 					if seenGateways[i].label != "" {
-	                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s \"%s\" has returned after %s away", seenGateways[i].gatewayid, seenGateways[i].label, message), SLACK_MSG_UNSOLICITED_OPS)
+	                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s \"%s\" has returned after %s away", seenGateways[i].gatewayid, seenGateways[i].label, message), SlackMsgUnsolicitedOps)
 					} else {
-	                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s has returned after %s away", seenGateways[i].gatewayid, message), SLACK_MSG_UNSOLICITED_OPS)
+	                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s has returned after %s away", seenGateways[i].gatewayid, message), SlackMsgUnsolicitedOps)
 					}
                 }
                 // Mark as having been seen on the latest date of any file having that time
@@ -94,7 +94,7 @@ func trackGateway(GatewayId string, whenSeen time.Time) {
 
     // Add a new array entry if necessary
     if !found {
-        _, dev.label = SafecastGetGatewaySummary(dev.gatewayid, "", false)
+        _, dev.label = GetGatewaySummary(dev.gatewayid, "", false)
         dev.seen = whenSeen
         minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
         dev.everRecentlySeen = minutesAgo < gatewayWarningAfterMinutes
@@ -150,9 +150,9 @@ func sendExpiredSafecastGatewaysToSlack() {
             if seenGateways[i].seen.Before(expiration) {
                 seenGateways[i].notifiedAsUnseen = true
 				if seenGateways[i].label != "" {
-	                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s \"%s\" hasn't been seen for %d minutes", seenGateways[i].gatewayid, seenGateways[i].label, seenGateways[i].minutesAgo), SLACK_MSG_UNSOLICITED_OPS)
+	                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s \"%s\" hasn't been seen for %d minutes", seenGateways[i].gatewayid, seenGateways[i].label, seenGateways[i].minutesAgo), SlackMsgUnsolicitedOps)
 				} else {
-	                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s hasn't been seen for %d minutes", seenGateways[i].gatewayid, seenGateways[i].minutesAgo), SLACK_MSG_UNSOLICITED_OPS)
+	                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s hasn't been seen for %d minutes", seenGateways[i].gatewayid, seenGateways[i].minutesAgo), SlackMsgUnsolicitedOps)
 				}
             }
         }
@@ -167,7 +167,7 @@ func sendSafecastGatewaySummaryToSlack(header string, fDetails bool) {
 
     // Next sort the device list
     sortedGateways := seenGateways
-    sort.Sort(ByGatewayKey(sortedGateways))
+    sort.Sort(byGatewayKey(sortedGateways))
 
     // Build the summary string
     s := header
@@ -178,7 +178,7 @@ func sendSafecastGatewaySummaryToSlack(header string, fDetails bool) {
         gatewayID := sortedGateways[i].gatewayid
 
         // Emit info about the device
-        summary, _ := SafecastGetGatewaySummary(gatewayID, "    ", fDetails)
+        summary, _ := GetGatewaySummary(gatewayID, "    ", fDetails)
         if summary != "" {
             if s != "" {
                 s += fmt.Sprintf("\n")
@@ -194,6 +194,6 @@ func sendSafecastGatewaySummaryToSlack(header string, fDetails bool) {
     if s == "" {
         s = "No gateways have recently reported"
     }
-    sendToSafecastOps(s, SLACK_MSG_REPLY)
+    sendToSafecastOps(s, SlackMsgReply)
 
 }

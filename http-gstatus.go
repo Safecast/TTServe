@@ -34,9 +34,9 @@ func inboundWebGatewayUpdateHandler(rw http.ResponseWriter, req *http.Request) {
         return
     }
 
-    fmt.Printf("\n%s Received gateway update for %s %s (%s)\n", logTime(), ttg.GatewayID, ttg.GatewayName, ttg.GatewayRegion)
+    fmt.Printf("\n%s Received gateway update for %s %s (%s)\n", LogTime(), ttg.GatewayID, ttg.GatewayName, ttg.GatewayRegion)
     requestor, _ := getRequestorIPv4(req)
-    go SafecastWriteGatewayStatus(ttg, requestor)
+    go WriteGatewayStatus(ttg, requestor)
     stats.Count.HTTPGUpdate++
 }
 
@@ -52,13 +52,13 @@ func inboundWebGatewayStatusHandler(rw http.ResponseWriter, req *http.Request) {
         filename := req.RequestURI[len(TTServerTopicGatewayStatus):]
         if filename != "" {
 
-            fmt.Printf("%s Gateway information request for %s\n", logTime(), filename)
+            fmt.Printf("%s Gateway information request for %s\n", LogTime(), filename)
 
             // Open the file
             file := SafecastDirectory() + TTGatewayStatusPath + "/" + filename + ".json"
             fd, err := os.Open(file)
             if err != nil {
-                io.WriteString(rw, errorString(err))
+                io.WriteString(rw, ErrorString(err))
                 return
             }
             defer fd.Close()

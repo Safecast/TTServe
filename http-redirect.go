@@ -26,7 +26,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     var err error
 
     // Remember when it was uploaded to us
-    UploadedAt := nowInUTC()
+    UploadedAt := NowInUTC()
 
     // Process the request URI, looking for things that will indicate "dev"
     method := req.Method
@@ -81,15 +81,15 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Clean up the json.  Specifically, Device ID 100049 puts a newline into
     // the devietype_id string literal, which is choked on by the JSON parser
-    clean_body_str := string(body)
-    clean_body_str = strings.Replace(clean_body_str, "\n", "", -1)
-    clean_body_str = strings.Replace(clean_body_str, "\r", "", -1)
-    clean_body_str = strings.Replace(clean_body_str, "\\r", "", -1)
-    clean_body_str = strings.Replace(clean_body_str, "\":\" ", "\":\"", -1)
-    clean_body := []byte(clean_body_str)
+    cleanBodyStr := string(body)
+    cleanBodyStr = strings.Replace(cleanBodyStr, "\n", "", -1)
+    cleanBodyStr = strings.Replace(cleanBodyStr, "\r", "", -1)
+    cleanBodyStr = strings.Replace(cleanBodyStr, "\\r", "", -1)
+    cleanBodyStr = strings.Replace(cleanBodyStr, "\":\" ", "\":\"", -1)
+    cleanBody := []byte(cleanBodyStr)
 
     // Decode the request with custom marshaling
-    sdV1, sdV1Emit, err = SafecastV1Decode(bytes.NewReader(clean_body))
+    sdV1, sdV1Emit, err = SafecastV1Decode(bytes.NewReader(cleanBody))
     if err != nil {
         stats.Count.HTTP++
 
@@ -98,9 +98,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
             // See if this is nothing but a device ID
             devname := req.RequestURI[len("/"):]
-            valid, deviceId := WordsToNumber(devname)
+            valid, deviceID := WordsToNumber(devname)
             if valid {
-				file := SafecastGetDeviceStatusFilePath(deviceId)
+				file := GetDeviceStatusFilePath(deviceID)
                 contents, err := ioutil.ReadFile(file)
                 if err == nil {
                     GenerateDeviceSummaryWebPage(rw, contents)
@@ -112,12 +112,12 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
             // Process it as an unknown URL
             if err == io.EOF {
-                fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", logTime(), RequestURI, remoteAddr)
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored\n", LogTime(), RequestURI, remoteAddr)
             } else {
-                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", logTime(), RequestURI, remoteAddr, err)
+                fmt.Printf("\n%s HTTP request '%s' from %s ignored: %v\n", LogTime(), RequestURI, remoteAddr, err)
             }
-            if len(clean_body) != 0 {
-                fmt.Printf("%s\n", string(clean_body))
+            if len(cleanBody) != 0 {
+                fmt.Printf("%s\n", string(cleanBody))
             }
 
         }
@@ -143,7 +143,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         sdV1Emit.Value = &str
     }
     if sdV1.CapturedAt == nil {
-        capturedAt := nowInUTC()
+        capturedAt := NowInUTC()
         sdV1.CapturedAt = &capturedAt
         sdV1Emit.CapturedAt = &capturedAt
     }
@@ -154,7 +154,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // If debugging, display it
     if redirectDebug {
         fmt.Printf("\n\n*** Redirect %s test:%v %s\n", method, isTestMeasurement, req.RequestURI)
-        fmt.Printf("*** Redirect received:\n%s\n", string(clean_body))
+        fmt.Printf("*** Redirect received:\n%s\n", string(cleanBody))
         fmt.Printf("*** Redirect decoded to V1:\n%s\n", sdV1EmitJSON)
     }
 
@@ -171,7 +171,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     if deviceID == 0 {
         requestor, _ := getRequestorIPv4(req)
         transportStr := deviceType+":" + requestor
-        fmt.Printf("\n%s ** Ignoring message with DeviceID == 0 from %s:\n%s\n", logTime(), transportStr, string(clean_body))
+        fmt.Printf("\n%s ** Ignoring message with DeviceID == 0 from %s:\n%s\n", LogTime(), transportStr, string(cleanBody))
         return
     }
 
@@ -189,13 +189,13 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     svc.Transport = &transportStr
     sd.Service = &svc
 
-    fmt.Printf("\n%s Received payload for %d from %s\n", logTime(), *sd.DeviceId, transportStr)
-    fmt.Printf("%s\n", clean_body)
+    fmt.Printf("\n%s Received payload for %d from %s\n", LogTime(), *sd.DeviceID, transportStr)
+    fmt.Printf("%s\n", cleanBody)
 
     // If the data doesn't have anything useful in it, optimize it completely away.  This is
     // observed to happen for Safecast Air from time to time
     if sd.Opc == nil && sd.Pms == nil && sd.Env == nil && sd.Lnd == nil && sd.Bat == nil && sd.Dev == nil {
-        fmt.Printf("%s *** Ignoring because message contains no data\n", logTime())
+        fmt.Printf("%s *** Ignoring because message contains no data\n", LogTime())
         return
     }
 
@@ -207,14 +207,14 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     sd.Service.Handler = &TTServeInstanceID
 
     // Post to V2
-    SafecastUpload(sd)
-    SafecastWriteToLogs(sd)
+    Upload(sd)
+    WriteToLogs(sd)
     stats.Count.HTTPRedirect++
 
     // It is an error if there is a pending outbound payload for this device, so remove it and report it
     isAvailable, _ := TelecastOutboundPayload(deviceID)
     if isAvailable {
-        go sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", deviceID), SLACK_MSG_UNSOLICITED_OPS)
+        go sendToSafecastOps(fmt.Sprintf("%d is not capable of processing commands (cancelled)\n", deviceID), SlackMsgUnsolicitedOps)
     }
 
 }

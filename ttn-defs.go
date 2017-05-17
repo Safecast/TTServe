@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-// DataUpAppReq represents the actual payloads sent to application on uplink
 // UplinkMessage represents an application-layer uplink message
 type UplinkMessage struct {
 	AppID          string                 `json:"app_id,omitempty"`
@@ -35,6 +34,7 @@ type Metadata struct {
 	LocationMetadata
 }
 
+// GatewayMetadata contains metadata of a TTN gateway
 type GatewayMetadata struct {
 	GtwID      string   `json:"gtw_id,omitempty"`
 	GtwTrusted bool     `json:"gtw_trusted,omitempty"`

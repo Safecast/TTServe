@@ -14,23 +14,23 @@ import (
 )
 
 // Statics
-var ttnEverConnected bool = false
-var ttnFullyConnected bool = false
-var ttnOutages uint16 = 0
+var ttnEverConnected = false
+var ttnFullyConnected = false
+var ttnOutages uint16
 var ttnMqttClient MQTT.Client
-var ttnLastConnected string = "(never)"
+var ttnLastConnected = "(never)"
 var ttnLastDisconnectedTime time.Time
-var ttnLastDisconnected string = "(never)"
+var ttnLastDisconnected = "(never)"
 var ttnUpQ chan MQTT.Message
 
-// Handle inbound pulled from TTN's upstream mqtt message queue
-func MqqtInboundHandler() {
+// MQQTInboundHandler handles inbound pulled from TTN's upstream mqtt message queue
+func MQQTInboundHandler() {
 
     // Set up our internal message queues
     ttnUpQ = make(chan MQTT.Message, 5)
 
     // Now that the queue is created, monitor it
-    go MqqtSubscriptionMonitor()
+    go mqqtSubscriptionMonitor()
 
     // Dequeue and process the messages as they're enqueued
     for msg := range ttnUpQ {
@@ -61,19 +61,19 @@ func MqqtInboundHandler() {
             }
 
             AppReq.SvTransport = "ttn-mqqt:" + AppReq.TTNDevID
-            fmt.Printf("\n%s Received %d-byte payload from %s\n", logTime(), len(AppReq.Payload), AppReq.SvTransport)
-            AppReq.SvUploadedAt = nowInUTC()
+            fmt.Printf("\n%s Received %d-byte payload from %s\n", LogTime(), len(AppReq.Payload), AppReq.SvTransport)
+            AppReq.SvUploadedAt = NowInUTC()
 			go AppReqPushPayload(AppReq, AppReq.Payload, "device via ttn")
             stats.Count.MQQTTTN++
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.
-            deviceID := getReplyDeviceIdFromPayload(AppReq.Payload)
+            deviceID := getReplyDeviceIDFromPayload(AppReq.Payload)
             if deviceID != 0 {
                 isAvailable, payload := TelecastOutboundPayload(deviceID)
                 if isAvailable {
                     ttnOutboundPublish(AppReq.TTNDevID, payload)
-                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", deviceID), SLACK_MSG_UNSOLICITED_OPS)
+                    sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", deviceID), SlackMsgUnsolicitedOps)
                 }
             }
         }
@@ -92,23 +92,23 @@ func ttnOutboundPublish(devEui string, payload []byte) {
         if jerr != nil {
             fmt.Printf("j marshaling error: ", jerr)
         }
-        topic := ttnAppId + "/devices/" + devEui + "/down"
+        topic := ttnAppID + "/devices/" + devEui + "/down"
         fmt.Printf("Send %s: %s\n", topic, jdata)
         ttnMqttClient.Publish(topic, 0, false, jdata)
     }
 }
 
-// Notify Slack if there is an outage
-func MqqtSubscriptionNotifier() {
+// MQQTSubscriptionNotifier notifies Slack if there is an outage
+func MQQTSubscriptionNotifier() {
     if ttnEverConnected {
         if !ttnFullyConnected {
             minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
             if minutesOffline > 15 {
-                sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected), SLACK_MSG_UNSOLICITED_OPS)
+                sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected), SlackMsgUnsolicitedOps)
             }
         } else {
             if ttnOutages > 1 {
-                sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m", ttnOutages), SLACK_MSG_UNSOLICITED_OPS)
+                sendToSafecastOps(fmt.Sprintf("TTN has had %d brief outages in the past 15m", ttnOutages), SlackMsgUnsolicitedOps)
                 ttnOutages = 0
             }
         }
@@ -116,14 +116,14 @@ func MqqtSubscriptionNotifier() {
 }
 
 // Subscribe to TTN inbound messages, then monitor connection status
-func MqqtSubscriptionMonitor() {
+func mqqtSubscriptionMonitor() {
 
     for {
 
         // Allocate and set up the options
         mqttOpts := MQTT.NewClientOptions()
         mqttOpts.AddBroker(ttnServer)
-        mqttOpts.SetUsername(ttnAppId)
+        mqttOpts.SetUsername(ttnAppID)
         mqttOpts.SetPassword(ServiceConfig.TtnAppAccessKey)
 
         // Do NOT automatically reconnect upon failure
@@ -134,9 +134,9 @@ func MqqtSubscriptionMonitor() {
         onMqConnectionLost := func (client MQTT.Client, err error) {
             ttnFullyConnected = false
             ttnLastDisconnectedTime = time.Now()
-            ttnLastDisconnected = logTime()
+            ttnLastDisconnected = LogTime()
             ttnOutages = ttnOutages+1
-            fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", logTime(), err)
+            fmt.Printf("\n%s *** TTN Connection Lost: %v\n\n", LogTime(), err)
             sendToTTNOps(fmt.Sprintf("Connection lost from this server to %s: %v\n", ttnServer, err))
         }
         mqttOpts.SetConnectionLostHandler(onMqConnectionLost)
@@ -155,19 +155,19 @@ func MqqtSubscriptionMonitor() {
                 fmt.Printf("Error subscribing to topic %s\n", ttnTopic, token.Error())
                 ttnFullyConnected = false
                 ttnLastDisconnectedTime = time.Now()
-                ttnLastDisconnected = logTime()
+                ttnLastDisconnected = LogTime()
             } else {
                 // Successful subscription
                 ttnFullyConnected = true
-                ttnLastConnected = logTime()
+                ttnLastConnected = LogTime()
                 if ttnEverConnected {
                     minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
                     // Don't bother reporting quick outages, generally caused by server restarts
                     if minutesOffline >= 5 {
-                        sendToSafecastOps(fmt.Sprintf("TTN returned (%d-minute outage began at %s UTC)", minutesOffline, ttnLastDisconnected), SLACK_MSG_UNSOLICITED_OPS)
+                        sendToSafecastOps(fmt.Sprintf("TTN returned (%d-minute outage began at %s UTC)", minutesOffline, ttnLastDisconnected), SlackMsgUnsolicitedOps)
                     }
                     sendToTTNOps(fmt.Sprintf("Connection restored from this server to %s\n", ttnServer))
-                    fmt.Printf("\n%s *** TTN Connection Restored\n\n", logTime())
+                    fmt.Printf("\n%s *** TTN Connection Restored\n\n", LogTime())
                 } else {
                     ttnEverConnected = true
                     fmt.Printf("TTN Connection Established\n")
@@ -192,12 +192,12 @@ func MqqtSubscriptionMonitor() {
                 time.Sleep(60 * time.Second)
                 if ttnFullyConnected {
                     if false {
-                        fmt.Printf("\n%s TTN Alive\n", logTime())
+                        fmt.Printf("\n%s TTN Alive\n", LogTime())
                     }
                     consecutiveFailures = 0
                 } else {
-                    fmt.Printf("\n%s TTN *** UNREACHABLE ***\n", logTime())
-                    consecutiveFailures += 1
+                    fmt.Printf("\n%s TTN *** UNREACHABLE ***\n", LogTime())
+                    consecutiveFailures++
                 }
             }
 
@@ -210,7 +210,7 @@ func MqqtSubscriptionMonitor() {
         fmt.Printf("\n***\n")
         fmt.Printf("*** Last time connection was successfully made: %s\n", ttnLastConnected)
         fmt.Printf("*** Last time connection was lost: %s\n", ttnLastDisconnected)
-        fmt.Printf("*** Now attempting to reconnect: %s\n", logTime())
+        fmt.Printf("*** Now attempting to reconnect: %s\n", LogTime())
         fmt.Printf("***\n\n")
 
     }

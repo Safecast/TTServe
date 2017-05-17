@@ -12,8 +12,8 @@ import (
     "bufio"
 )
 
-// Kick off TCP single-upload request server
-func TcpInboundHandler() {
+// TCPInboundHandler kicks off TCP single-upload request server
+func TCPInboundHandler() {
 
     fmt.Printf("Now handling inbound TCP on %s\n", TTServerTCPPort)
 
@@ -43,25 +43,25 @@ func TcpInboundHandler() {
         rdconn := bufio.NewReader(conn)
 
         // Read the payload buffer format
-        payload_format_len := 1
-        payload_format := make([]byte, payload_format_len)
-        n, err := io.ReadFull(rdconn, payload_format)
+        payloadFormatLen := 1
+        payloadFormat := make([]byte, payloadFormatLen)
+        n, err := io.ReadFull(rdconn, payloadFormat)
         if err != nil {
             fmt.Printf("\nTCP: can't read format: \n%v\n", err)
             conn.Close()
             continue
         }
-        if n != payload_format_len {
-            fmt.Printf("\nTCP: can't read format: %d/%d\n", n, payload_format_len)
+        if n != payloadFormatLen {
+            fmt.Printf("\nTCP: can't read format: %d/%d\n", n, payloadFormatLen)
             conn.Close()
             continue
         }
-        if payload_format[0] != BUFF_FORMAT_PB_ARRAY {
-            fmt.Printf("\n%s TCP request from %s ignored\n", logTime(), ipv4(conn.RemoteAddr().String()))
+        if payloadFormat[0] != BuffFormatPBArray {
+            fmt.Printf("\n%s TCP request from %s ignored\n", LogTime(), ipv4(conn.RemoteAddr().String()))
 			buf1 := make([]byte, 1024)
 			n, err := rdconn.Read(buf1)
             if err == nil || err == io.EOF || err == io.ErrUnexpectedEOF {
-                buf2 := append(payload_format, buf1[:n]...)
+                buf2 := append(payloadFormat, buf1[:n]...)
                 b := make([]byte, len(buf2))
                 var bl int
 				var ch, chPrev byte
@@ -89,84 +89,84 @@ func TcpInboundHandler() {
         }
 
         // Read the number of array entries
-        payload_count_len := 1
-        payload_count := make([]byte, payload_count_len)
-        n, err = io.ReadFull(rdconn, payload_count)
+        payloadCountLen := 1
+        payloadCount := make([]byte, payloadCountLen)
+        n, err = io.ReadFull(rdconn, payloadCount)
         if err != nil {
             fmt.Printf("\nTCP: can't read count: \n%v\n", err)
             conn.Close()
             continue
         }
-        if n != payload_count_len {
-            fmt.Printf("\nTCP: can't read count: %d/%d\n", n, payload_count_len)
+        if n != payloadCountLen {
+            fmt.Printf("\nTCP: can't read count: %d/%d\n", n, payloadCountLen)
             conn.Close()
             continue
         }
-        if payload_count[0] == 0 {
-            fmt.Printf("\nTCP: unsupported count: %d\n", payload_count[0])
+        if payloadCount[0] == 0 {
+            fmt.Printf("\nTCP: unsupported count: %d\n", payloadCount[0])
             conn.Close()
             continue
         }
 
         // Read the length array
-        payload_entry_lengths_len := int(payload_count[0])
-        payload_entry_lengths := make([]byte, payload_entry_lengths_len)
-        n, err = io.ReadFull(rdconn, payload_entry_lengths)
+        payloadEntryLengthsLen := int(payloadCount[0])
+        payloadEntryLengths := make([]byte, payloadEntryLengthsLen)
+        n, err = io.ReadFull(rdconn, payloadEntryLengths)
         if err != nil {
             fmt.Printf("\nTCP: can't read entry_lengths: \n%v\n", err)
             conn.Close()
             continue
         }
-        if n != int(payload_entry_lengths_len) {
-            fmt.Printf("\nTCP: can't read entry_lengths: %d/%d\n", n, payload_entry_lengths_len)
+        if n != int(payloadEntryLengthsLen) {
+            fmt.Printf("\nTCP: can't read entry_lengths: %d/%d\n", n, payloadEntryLengthsLen)
             conn.Close()
             continue
         }
 
         // Read the entries
-        payload_entries_len := 0
-        for i:=0; i<int(payload_entry_lengths_len); i++ {
-            payload_entries_len += int(payload_entry_lengths[i])
+        payloadEntriesLen := 0
+        for i:=0; i<int(payloadEntryLengthsLen); i++ {
+            payloadEntriesLen += int(payloadEntryLengths[i])
         }
-        payload_entries := make([]byte, payload_entries_len)
-        n, err = io.ReadFull(rdconn, payload_entries)
+        payloadEntries := make([]byte, payloadEntriesLen)
+        n, err = io.ReadFull(rdconn, payloadEntries)
         if err != nil {
             fmt.Printf("\nTCP: can't read entries: \n%v\n", err)
             conn.Close()
             continue
         }
-        if n != payload_entries_len {
-            fmt.Printf("\nTCP: can't read entries: %d/%d\n", n, payload_entries_len)
+        if n != payloadEntriesLen {
+            fmt.Printf("\nTCP: can't read entries: %d/%d\n", n, payloadEntriesLen)
             conn.Close()
             continue
         }
 
         // Combine all that we've read
-        payload := append(payload_format, payload_count...)
-        payload = append(payload, payload_entry_lengths...)
-        payload = append(payload, payload_entries...)
+        payload := append(payloadFormat, payloadCount...)
+        payload = append(payload, payloadEntryLengths...)
+        payload = append(payload, payloadEntries...)
 
         // Initialize a new AppReq
         AppReq := IncomingAppReq{}
         AppReq.SvTransport = "device-tcp:" + ipv4(conn.RemoteAddr().String())
 
         // Get the reply device ID
-        ReplyToDeviceId := getReplyDeviceIdFromPayload(payload)
+        ReplyToDeviceID := getReplyDeviceIDFromPayload(payload)
 
         // Push it to be processed
         go AppReqPushPayload(AppReq, payload, "device directly")
         stats.Count.TCP++
 
         // Is there a device ID to reply to?
-        if ReplyToDeviceId != 0 {
+        if ReplyToDeviceID != 0 {
 
             // See if there's an outbound message waiting for this device.
-            isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceId)
+            isAvailable, payload := TelecastOutboundPayload(ReplyToDeviceID)
             if isAvailable {
 
                 // Responses are binary on TCP
                 conn.Write(payload)
-                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceId), SLACK_MSG_UNSOLICITED_OPS)
+                sendToSafecastOps(fmt.Sprintf("Device %d picked up its pending command\n", ReplyToDeviceID), SlackMsgUnsolicitedOps)
             }
 
         }

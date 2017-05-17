@@ -22,19 +22,19 @@ func inboundWebServerLogHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Log it
     fn := req.RequestURI[len(TTServerTopicServerLog):]
-    fmt.Printf("%s instance information request for %s\n", logTime(), fn)
+    fmt.Printf("%s instance information request for %s\n", LogTime(), fn)
 
 	// Crack the secret
     Str := strings.Split(fn, "$")
 	if len(Str) != 2 {
-	    fmt.Printf("%s Badly formatted instance request\n", logTime())
+	    fmt.Printf("%s Badly formatted instance request\n", LogTime())
         io.WriteString(rw, "No such server instance.")
 		return
 	}		
     secret := Str[0]
     filename := Str[1]
 	if secret != ServerLogSecret() {
-	    fmt.Printf("%s Ssecret %s != %s\n", logTime(), secret, ServerLogSecret())
+	    fmt.Printf("%s Ssecret %s != %s\n", LogTime(), secret, ServerLogSecret())
         io.WriteString(rw, "This link to server log has expired.")
 		return
 	}		
@@ -43,7 +43,7 @@ func inboundWebServerLogHandler(rw http.ResponseWriter, req *http.Request) {
     file := SafecastDirectory() + TTServerLogPath + "/" + filename
     fd, err := os.Open(file)
     if err != nil {
-        io.WriteString(rw, errorString(err))
+        io.WriteString(rw, ErrorString(err))
         return
     }
     defer fd.Close()

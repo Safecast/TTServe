@@ -18,11 +18,11 @@ func timer1m() {
         ControlFileCheck()
 
         // Write out current status to the file system
-        SafecastWriteServerStatus()
+        WriteServerStatus()
 
 		// Stir the random pot
-		for i:=0; i<random(1,10); i++ {
-			random(0, 12345)
+		for i:=0; i<Random(1,10); i++ {
+			Random(0, 12345)
 		}
 		
         // Sleep
@@ -58,7 +58,7 @@ func timer15m() {
 
         // Post long TTN outages
         if ThisServerServesMQQT {
-            MqqtSubscriptionNotifier()
+            MQQTSubscriptionNotifier()
         }
 
     }
@@ -88,7 +88,7 @@ func timer12h() {
     for {
 
         // Update/output stats, returning "" on first iteration and when nothing has changed)
-        summary := SafecastSummarizeStatsDelta()
+        summary := SummarizeStatsDelta()
         if summary != "" {
             ServerLog(fmt.Sprintf("%s\n", summary))
         }
@@ -104,14 +104,14 @@ func timer12h() {
     }
 }
 
-// Do a restart after a random delay
+// RandomRestart does a restart of this instance after a random delay
 func RandomRestart() {
 
 	// Stagger the instances so that we don't have a complete outage
-	minutes := time.Duration(random(3, 15))
+	minutes := time.Duration(Random(3, 15))
 
     // To ensure a best-efforts sequencing in log, impose a delay in proportion to sequencing
-		sendToSafecastOps(fmt.Sprintf("** %s will restart in %d minutes **", TTServeInstanceID, minutes), SLACK_MSG_UNSOLICITED_OPS)
+		sendToSafecastOps(fmt.Sprintf("** %s will restart in %d minutes **", TTServeInstanceID, minutes), SlackMsgUnsolicitedOps)
     time.Sleep(minutes * time.Minute)
 
     // Log
@@ -122,7 +122,7 @@ func RandomRestart() {
 
 }
 
-// Check to see if we should restart
+// ControlFileCheck checks to see if we should restart
 func ControlFileCheck() {
 
     // Exit if we're the monitor process
@@ -138,7 +138,7 @@ func ControlFileCheck() {
 
 }
 
-// Get the modified time of a special file
+// ControlFileTime gets the modified time of a special file
 func ControlFileTime(controlfilename string, message string) (restartTime time.Time) {
 
     filename := SafecastDirectory() + TTServerControlPath + "/" + controlfilename

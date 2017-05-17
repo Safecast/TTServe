@@ -20,9 +20,9 @@ import (
 // Debugging
 const debugStamp = false
 
-// Stamp versions.  Unlike the client, the support
+// StampVersion1 is the first stamp version we introduced.  Unlike the client, the support
 // for downlevel stamp version must be kept here forever.
-const STAMP_VERSION_1 = 1
+const StampVersion1 = 1
 
 // Cache file format
 type stampFile struct {
@@ -52,50 +52,50 @@ var cachedDevices []cachedDevice
 var substituteCapturedAt string
 
 // Construct the path of a command file
-func stampFilename(DeviceId uint32) string {
+func stampFilename(DeviceID uint32) string {
     directory := SafecastDirectory()
-    file := directory + TTDeviceStampPath + "/" + fmt.Sprintf("%d", DeviceId) + ".json"
+    file := directory + TTDeviceStampPath + "/" + fmt.Sprintf("%d", DeviceID) + ".json"
     return file
 }
 
 // Set or apply the stamp
 func stampSetOrApply(message *ttproto.Telecast) (isValidMessage bool) {
-    var CacheEntry int = 0
+    var CacheEntry int
 
     // Device ID is required here, but that doesn't mean it's not a valid message
     if message.DeviceId == nil {
         return true
     }
-    DeviceId := message.GetDeviceId()
+    DeviceID := message.GetDeviceId()
 
     // Find or create the cache entry for this device
     found := false
     for CacheEntry = 0; CacheEntry < len(cachedDevices); CacheEntry++ {
-        if DeviceId == cachedDevices[CacheEntry].deviceid {
+        if DeviceID == cachedDevices[CacheEntry].deviceid {
             found = true
             break
         }
     }
     if !found {
         var entry cachedDevice
-        entry.deviceid = DeviceId
+        entry.deviceid = DeviceID
         entry.valid = false
         cachedDevices = append(cachedDevices, entry)
         CacheEntry = len(cachedDevices)-1
         if debugStamp {
-            fmt.Printf("Added new device cache entry for never-before seen %d: %d\n", DeviceId, CacheEntry)
+            fmt.Printf("Added new device cache entry for never-before seen %d: %d\n", DeviceID, CacheEntry)
         }
     }
 
     // If this is a "set stamp" operation, do it
     if message.StampVersion != nil {
-        return(stampSet(message, DeviceId, CacheEntry))
+        return(stampSet(message, DeviceID, CacheEntry))
     }
 
 
     // If this isn't a "stamp this message" operation, exit
     if message.Stamp != nil {
-        return(stampApply(message, DeviceId, CacheEntry))
+        return(stampApply(message, DeviceID, CacheEntry))
     }
 
     // Neither a stamper or a stampee
@@ -104,7 +104,7 @@ func stampSetOrApply(message *ttproto.Telecast) (isValidMessage bool) {
 }
 
 // Set or apply the stamp
-func stampSet(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isValidMessage bool) {
+func stampSet(message *ttproto.Telecast, DeviceID uint32, CacheEntry int) (isValidMessage bool) {
 
     // Regardless of whatever else happens, we need to invalidate the cache
     cachedDevices[CacheEntry].valid = false
@@ -120,7 +120,7 @@ func stampSet(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isVal
         fmt.Printf("*** Unrecognized stamp version: %d ***\n", sf.Version)
     }
 
-    case STAMP_VERSION_1: {
+    case StampVersion1: {
 
         if message.Stamp == nil || message.CapturedAtDate == nil || message.CapturedAtTime == nil {
             fmt.Printf("*** Warning - badly formatted v%d stamp ***\n", sf.Version)
@@ -149,7 +149,7 @@ func stampSet(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isVal
 
             sfJSON, _ := json.Marshal(sf)
 
-            file := stampFilename(DeviceId)
+            file := stampFilename(DeviceID)
             fd, err := os.OpenFile(file, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
             if err != nil {
                 fmt.Printf("error creating file %s: %s\n", file, err)
@@ -165,7 +165,7 @@ func stampSet(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isVal
 
                 // Done
                 if debugStamp {
-                    fmt.Printf("Saved and cached new stamp for %d\n%s\n", DeviceId, string(sfJSON))
+                    fmt.Printf("Saved and cached new stamp for %d\n%s\n", DeviceID, string(sfJSON))
                 }
 
             }
@@ -183,13 +183,13 @@ func stampSet(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isVal
 }
 
 // Set or apply the stamp
-func stampApply(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isValidMessage bool) {
+func stampApply(message *ttproto.Telecast, DeviceID uint32, CacheEntry int) (isValidMessage bool) {
 
     // If there's no valid cache entry, or if the cache entry is wrong, refresh the cache
     if !cachedDevices[CacheEntry].valid || (cachedDevices[CacheEntry].valid && cachedDevices[CacheEntry].cache.Stamp != message.GetStamp()) {
 
         // Read the file and delete it
-        file, err := ioutil.ReadFile(stampFilename(DeviceId))
+        file, err := ioutil.ReadFile(stampFilename(DeviceID))
         if err != nil {
             cachedDevices[CacheEntry].valid = false
         } else {
@@ -207,7 +207,7 @@ func stampApply(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isV
 
                 // Done
                 if debugStamp {
-                    fmt.Printf("Read stamp for %d from file\n", DeviceId)
+                    fmt.Printf("Read stamp for %d from file\n", DeviceID)
                 }
 
             }
@@ -218,7 +218,7 @@ func stampApply(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isV
 
     // If there's still no valid cache entry, we need to discard this reading
     if !cachedDevices[CacheEntry].valid {
-        fmt.Printf("*** No cached stamp for %d when one is needed ***\n", DeviceId)
+        fmt.Printf("*** No cached stamp for %d when one is needed ***\n", DeviceID)
         return false
     }
 
@@ -232,7 +232,7 @@ func stampApply(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isV
             return false
         }
 
-        case STAMP_VERSION_1: {
+        case StampVersion1: {
 
             // Location is best set to last known good rather than nothing at all
             if message.Latitude == nil || message.Longitude == nil {
@@ -260,7 +260,7 @@ func stampApply(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isV
             }
 
             // Time is best set to current time rather than nothing at all
-            substituteCapturedAt := nowInUTC()
+            substituteCapturedAt := NowInUTC()
             message.CapturedAt = &substituteCapturedAt
             message.CapturedAtDate = nil
             message.CapturedAtTime = nil
@@ -289,7 +289,7 @@ func stampApply(message *ttproto.Telecast, DeviceId uint32, CacheEntry int) (isV
         return false
     }
 
-    case STAMP_VERSION_1: {
+    case StampVersion1: {
 
         // Set Location
         if message.Latitude == nil || message.Longitude == nil {

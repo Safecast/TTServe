@@ -17,8 +17,8 @@ import (
     "encoding/json"
 )
 
-// The data structure for the "Gateway Status" files
-type SafecastGatewayStatus struct {
+// GatewayStatus is The data structure for the "Gateway Status" files
+type GatewayStatus struct {
     UpdatedAt   string      `json:"when_updated,omitempty"`
     Ttg         TTGateReq   `json:"current_values,omitempty"`
 	// for backward compatibility - you can remove after 2017-04
@@ -27,9 +27,9 @@ type SafecastGatewayStatus struct {
 	IPInfo		IPInfoData	`json:"gateway_location,omitempty"`
 }
 
-// Get the current value
-func SafecastReadGatewayStatus(gatewayID string) (isAvail bool, isReset bool, sv SafecastGatewayStatus) {
-    valueEmpty := SafecastGatewayStatus{}
+// ReadGatewayStatus gets the current value
+func ReadGatewayStatus(gatewayID string) (isAvail bool, isReset bool, sv GatewayStatus) {
+    valueEmpty := GatewayStatus{}
     valueEmpty.UpdatedAt = time.Now().UTC().Format("2006-01-02T15:04:05Z")
     valueEmpty.Ttg.GatewayID = gatewayID
 
@@ -53,7 +53,7 @@ func SafecastReadGatewayStatus(gatewayID string) (isAvail bool, isReset bool, sv
         // Read the file and unmarshall if no error
         contents, errRead := ioutil.ReadFile(filename)
         if errRead == nil {
-            valueToRead := SafecastGatewayStatus{}
+            valueToRead := GatewayStatus{}
             errRead = json.Unmarshal(contents, &valueToRead)
             if errRead == nil {
 				// Backward compatbility with old field names
@@ -85,15 +85,15 @@ func SafecastReadGatewayStatus(gatewayID string) (isAvail bool, isReset bool, sv
 
 }
 
-// Save the last value in a file
-func SafecastWriteGatewayStatus(ttg TTGateReq, IP string) {
-    var value SafecastGatewayStatus
+// WriteGatewayStatus saves the last value in a file
+func WriteGatewayStatus(ttg TTGateReq, IP string) {
+    var value GatewayStatus
 
     // Read the current value, or a blank value structure if it's blank.
     // If the value isn't available it's because of a nonrecoverable  error.
     // If it was reset, try waiting around a bit until it is fixed.
     for i:=0; i<5; i++ {
-        isAvail, isReset, rvalue := SafecastReadGatewayStatus(ttg.GatewayID)
+        isAvail, isReset, rvalue := ReadGatewayStatus(ttg.GatewayID)
         value = rvalue
         if !isAvail {
             return
@@ -101,7 +101,7 @@ func SafecastWriteGatewayStatus(ttg TTGateReq, IP string) {
         if !isReset {
             break
         }
-        time.Sleep(time.Duration(random(1, 6)) * time.Second)
+        time.Sleep(time.Duration(Random(1, 6)) * time.Second)
     }
 
     // Copy over all the values directly.  If someday we need to aggregate
@@ -155,10 +155,10 @@ func SafecastWriteGatewayStatus(ttg TTGateReq, IP string) {
         fd.Close()
 
         // Delay, to increase the chance that we will catch a concurrent update/overwrite
-        time.Sleep(time.Duration(random(1, 6)) * time.Second)
+        time.Sleep(time.Duration(Random(1, 6)) * time.Second)
 
         // Do an integrity check, and re-write the value if necessary
-        _, isEmpty, _ := SafecastReadGatewayStatus(ttg.GatewayID)
+        _, isEmpty, _ := ReadGatewayStatus(ttg.GatewayID)
         if !isEmpty {
             break
         }
@@ -166,11 +166,11 @@ func SafecastWriteGatewayStatus(ttg TTGateReq, IP string) {
 
 }
 
-// Get summary of a device
-func SafecastGetGatewaySummary(GatewayID string, bol string, fDetails bool) (Summary string, Label string) {
+// GetGatewaySummary gets summary of a device
+func GetGatewaySummary(GatewayID string, bol string, fDetails bool) (Summary string, Label string) {
 
     // Read the file
-    isAvail, _, value := SafecastReadGatewayStatus(GatewayID)
+    isAvail, _, value := ReadGatewayStatus(GatewayID)
     if !isAvail {
         return "", ""
     }

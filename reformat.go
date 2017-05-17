@@ -12,7 +12,7 @@ import (
     "github.com/google/open-location-code/go"
 )
 
-// Get the type of a device AS NUMBERED in our
+// SafecastDeviceType returns the type of a Safecast device AS NUMBERED in our
 // V2 address space
 func SafecastDeviceType(deviceid uint32) string {
 
@@ -41,7 +41,7 @@ func SafecastDeviceType(deviceid uint32) string {
 	
 }
 
-// Get the type of a device AS NATIVELY NUMBERED
+// SafecastV1DeviceType returns the type of a device AS NATIVELY NUMBERED
 // by pointcast, safecast-air, or ngeigie devices
 func SafecastV1DeviceType(deviceid uint32) (devicetype string, v2DeviceID uint32) {
 
@@ -69,59 +69,59 @@ func SafecastV1DeviceType(deviceid uint32) (devicetype string, v2DeviceID uint32
 
 }
 
-// Reformat a special V1 payload to Current
+// SafecastReformat reformats a special V1 payload to Current
 func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint32, devtype string, data SafecastData) {
     var sd SafecastData
-	var v1DeviceId uint32
+	var v1DeviceID uint32
 
     // Required field
-    if v1.DeviceId == nil {
+    if v1.DeviceID == nil {
         fmt.Printf("*** Reformat: Missing Device ID\n")
         return 0, "", sd
     }
 
 	// Fetch the V1 device ID and place it into a var so we can manipulate it
-	v1DeviceId = *v1.DeviceId
+	v1DeviceID = *v1.DeviceID
 
 	// Catch attempts to use DeviceID == 0 by placing it into somewhere we can watch.
 	// We're putting this here 2017-04-12 because we're observing that nGeigie Device #40
 	// is occasionally sending:
 	// {"longitude":"140.9917","latitude":"37.5635","device_id":"0","value":"0",
 	//  "unit":"cpm","height":"5","devicetype_id":"Pointcast V1"}
-	if v1DeviceId == 0 {
+	if v1DeviceID == 0 {
         return 0, "", sd
 	}
 
 	// Special-case a single nGeigie that had been partially converted to Pointcast firmware,
 	// a bug fix we put in on 2017-04-13 at Rob's guidance.
-	if v1DeviceId == 48 {
-		v1DeviceId = 40
+	if v1DeviceID == 48 {
+		v1DeviceID = 40
 	}
 	
     // Detect what range it is within, and process the conversion differently,
 	// rejecting non-reformattable devices
-    devicetype, v2DeviceId := SafecastV1DeviceType(v1DeviceId)
+    devicetype, v2DeviceID := SafecastV1DeviceType(v1DeviceID)
     if devicetype == "" {
-        fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", v1DeviceId)
+        fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", v1DeviceID)
         return 0, "", sd
     }
 
 	// THIS is where we determine sensor types based on device ID
 	tubeType := "unknown"
-	if v2DeviceId == 100 || v2DeviceId == 63 || v2DeviceId == 54 {
+	if v2DeviceID == 100 || v2DeviceID == 63 || v2DeviceID == 54 {
 		tubeType = "U712"
-	} else if v2DeviceId == 78 {
+	} else if v2DeviceID == 78 {
 		tubeType = "W78017"
 	} else if devicetype == "ngeigie" {
 		tubeType = "U7318"
-	} else if devicetype == "pointcast" && v1DeviceId % 10 == 1 {
+	} else if devicetype == "pointcast" && v1DeviceID % 10 == 1 {
 		tubeType = "U7318"
-	} else if devicetype == "pointcast" && v1DeviceId % 10 == 2 {
+	} else if devicetype == "pointcast" && v1DeviceID % 10 == 2 {
 		tubeType = "EC7128"
 	}
 
 	// Device ID
-    sd.DeviceId = &v2DeviceId
+    sd.DeviceID = &v2DeviceID
 
     // Captured
     if v1.CapturedAt != nil {
@@ -184,7 +184,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             var lnd Lnd
             cpm := *v1.Value
 			// Special case for missing tube on this sensor
-			if v1DeviceId == 1001 && cpm == 0 {
+			if v1DeviceID == 1001 && cpm == 0 {
 		        return 0, "", sd
 			}
 			switch tubeType {
@@ -201,7 +201,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
                 lnd.W78017 = &cpm
 	            sd.Lnd = &lnd
 			default:
-                fmt.Printf("*** Reformat: Received CPM for unrecognized device %d\n", *sd.DeviceId)
+                fmt.Printf("*** Reformat: Received CPM for unrecognized device %d\n", *sd.DeviceID)
             }
 
         case "status":
@@ -219,8 +219,8 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
 
             unrecognized := ""
             status := ""
-            if v1.DeviceTypeId != nil {
-                status = *v1.DeviceTypeId
+            if v1.DeviceTypeID != nil {
+                status = *v1.DeviceTypeID
             }
             fields := strings.Split(status, ",")
             for v := range fields {
@@ -262,7 +262,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
                         dodev = true
                     }
                 case "Last failure":
-                    var LastFailure string = field[1]
+                    var LastFailure = field[1]
                     dev.LastFailure = &LastFailure
                     dodev = true
                 default:
@@ -293,7 +293,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
             }
 
         default:
-            fmt.Printf("*** Reformat Warning ***\n*** %s id=%d Unit %s = Value %f UNRECOGNIZED\n", devicetype, v1DeviceId, *v1.Unit, *v1.Value)
+            fmt.Printf("*** Reformat Warning ***\n*** %s id=%d Unit %s = Value %f UNRECOGNIZED\n", devicetype, v1DeviceID, *v1.Unit, *v1.Value)
 
         }
     }
@@ -307,6 +307,6 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
         sd.Dev.Test = &isTestMeasurement
     }
 
-    return uint32(*sd.DeviceId), devicetype, sd
+    return uint32(*sd.DeviceID), devicetype, sd
 
 }

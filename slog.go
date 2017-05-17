@@ -13,14 +13,14 @@ import (
     "strings"
 )
 
-// Get the current log file name for the current instance
+// ServerLogFilename gets the current log file name for the current instance
 func ServerLogFilename(extension string) string {
     prefix := time.Now().UTC().Format("2006-01-")
     filename := prefix + TTServeInstanceID + extension
     return filename
 }
 
-// A secret that only allows the URLs from the Slack command to function
+// ServerLogSecret gets secret that only allows the URLs from the Slack command to function
 func ServerLogSecret() string {
     timestr := ControlFileTime(TTServerSlackCommandControlFile,"").Format(logDateFormat)
     checksum := crc32.ChecksumIEEE([]byte(timestr))
@@ -28,13 +28,13 @@ func ServerLogSecret() string {
     return checkstr
 }
 
-// Log a string to the instance's log file
+// ServerLog logs a string to the instance's log file
 func ServerLog(sWithoutDate string) {
 
     // Add a standard header unless it begins with a newline
     s := sWithoutDate
     if !strings.HasPrefix(sWithoutDate, "\n") {
-        s = fmt.Sprintf("%s %s", logTime(), sWithoutDate)
+        s = fmt.Sprintf("%s %s", LogTime(), sWithoutDate)
     }
 
     // Print it to the console

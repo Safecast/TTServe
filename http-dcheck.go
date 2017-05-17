@@ -27,7 +27,7 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 	timeRange := time.Now().UTC().Format("2006-01")
     filename := fmt.Sprintf("%s/%s-%s.json", TTDeviceLogPath, timeRange, deviceidstr)
 
-    fmt.Printf("%s LOG ANALYSIS request for %s\n", logTime(), filename)
+    fmt.Printf("%s LOG ANALYSIS request for %s\n", LogTime(), filename)
 
 	// Check it
 	success, s := CheckJSON(SafecastDirectory() + filename)
@@ -40,13 +40,13 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-// Check a JSON file
+// CheckJSON performs a standard check on a JSON file
 func CheckJSON(infile string) (success bool, result string) {
 	
 	// Read the log
     contents, err := ioutil.ReadFile(infile)
     if err != nil {
-        return false, errorString(err)
+        return false, ErrorString(err)
     }
 
 	// Begin taking stats

@@ -14,7 +14,7 @@ import (
     "strings"
 )
 
-// Initialize package
+// UtilInit initializes the utility package
 func UtilInit() {
 
     // Initialize the random number generator
@@ -22,12 +22,12 @@ func UtilInit() {
 
 }
 
-// Get a random number in a range
-func random(min, max int) int {
+// Random gets a random number in a range
+func Random(min, max int) int {
     return rand.Intn(max - min) + min
 }
 
-// Get path of the safecast directory
+// SafecastDirectory gets the path of the root safecast file system folder shared among instances
 func SafecastDirectory() string {
     directory := os.Args[1]
     if directory == "" {
@@ -37,20 +37,20 @@ func SafecastDirectory() string {
     return(directory)
 }
 
-// Get the current time in log format
-func logTime() string {
+// LogTime gets the current time in log format
+func LogTime() string {
     return time.Now().Format(logDateFormat)
 }
 
-// Get the current time in UTC as a string
-func nowInUTC() string {
+// NowInUTC gets the current time in UTC as a string formatted for log files
+func NowInUTC() string {
     return time.Now().UTC().Format("2006-01-02T15:04:05Z")
 }
 
-// How long ago, readably, given a count of minutes
+// AgoMinutes returns, readably, a duration given a count of minutes
 func AgoMinutes(minutesAgo uint32) string {
-    var hoursAgo uint32 = minutesAgo / 60
-    var daysAgo uint32 = hoursAgo / 24
+    var hoursAgo = minutesAgo / 60
+    var daysAgo = hoursAgo / 24
     minutesAgo -= hoursAgo * 60
     hoursAgo -= daysAgo * 24
     s := ""
@@ -76,13 +76,13 @@ func AgoMinutes(minutesAgo uint32) string {
     return s
 }
 
-// How long ago, readably, given a time
+// Ago is like AgoMinutes, but with a time.Time
 func Ago(when time.Time) string {
     return AgoMinutes(uint32(int64(time.Now().Sub(when) / time.Minute)))
 }
 
-// Take a GPS-formatted base date and time, plus offset, and return a UTC string
-func getWhenFromOffset(baseDate uint32, baseTime uint32, offset uint32) string {
+// GetWhenFromOffset takes a GPS-formatted base date and time, plus offset, and returns a UTC string
+func GetWhenFromOffset(baseDate uint32, baseTime uint32, offset uint32) string {
     var i64 uint64
     s := fmt.Sprintf("%06d%06d", baseDate, baseTime)
     i64, _ = strconv.ParseUint(fmt.Sprintf("%c%c", s[0], s[1]), 10, 32)
@@ -102,8 +102,8 @@ func getWhenFromOffset(baseDate uint32, baseTime uint32, offset uint32) string {
     return tafter.UTC().Format("2006-01-02T15:04:05Z")
 }
 
-// Function to clean up an error string to eliminate the filename
-func errorString(err error) string {
+// ErrorString cleans up an error string to eliminate the filename so that it can be logged without PII
+func ErrorString(err error) string {
     errString := fmt.Sprintf("%s", err)
     s0 := strings.Split(errString, ":")
     s1 := s0[len(s0)-1]
@@ -111,7 +111,7 @@ func errorString(err error) string {
     return s2
 }
 
-// Function to convert common UTF-8 strings to ASCII, where ASCII is required
+// RemapCommonUnicodeToASCII converts common UTF-8 strings to ASCII, where ASCII is required
 func RemapCommonUnicodeToASCII(str string) string {
     Conversions := []string{
         "\\u2000", " ",  // EN QUAD

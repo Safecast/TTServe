@@ -13,14 +13,16 @@ import (
     "encoding/json"
 )
 
+// TTNMQQTMode defines the MQQT vs mq-over-HTTP operating mode.
 // As of 2017-02 we're now operating in "HTTP Integration" TTN mode, largely
 // so that we can serve incoming requests through our load balancer rather than
 // having a single server that pulls MQQT requests.
+// 
 const TTNMQQTMode = false
 
 // TTN service info
-const ttnAppId string = "ttserve"
-const ttnProcessId string = "ttserve"
+const ttnAppID string = "ttserve"
+const ttnProcessID string = "ttserve"
 const ttnServer string = "tcp://eu.thethings.network:1883"
 const ttnTopic string = "+/devices/+/up"
 const ttnDownlinkURL = "https://integrations.thethingsnetwork.org/ttn-eu/api/v2/down/%s/%s?key=%s"
@@ -29,91 +31,161 @@ const ttnDownlinkURL = "https://integrations.thethingsnetwork.org/ttn-eu/api/v2/
 const sheetsSolarcastTracker = "https://docs.google.com/spreadsheets/d/1lvB_0XFFSwON4PQFoC8NdDv6INJTCw2f_KBZuMTZhZA/export?format=csv"
 
 // Safecast service info
+
+// SafecastV1UploadDomainDev is developer API server
 const SafecastV1UploadDomainDev = "dev.safecast.org"
+// SafecastV1UploadDomain is production API server
 const SafecastV1UploadDomain = "api.safecast.org"
+// SafecastV1UploadPattern is the pattern of the URL for both
 const SafecastV1UploadPattern = "http://%s/measurements.json?%s"
+// SafecastUploadURLs are the places we should upload V2 measurements
 var SafecastUploadURLs = [...]string {
     "http://ingest.safecast.org/v1/measurements",
 }
 
 // Slack service info
-const SLACK_OPS_NONE =     -1
-const SLACK_OPS_SAFECAST =  0
-var SlackCommandSource = SLACK_OPS_NONE
 
+// SlackOpsNone means "no ops channel specified"
+const SlackOpsNone =     -1
+// SlackOpsSafecast means the #ops channel in the safecast slack
+const SlackOpsSafecast =  0
+
+// SlackCommandTime is the time a slack command was issued
 var SlackCommandTime time.Time
 
-const SLACK_MSG_UNSOLICITED_ALL =   0
-const SLACK_MSG_UNSOLICITED_OPS =   1
-const SLACK_MSG_REPLY =             2
+// SlackCommandSource means the ID of the channel that originated a command
+var SlackCommandSource = SlackOpsNone
 
-// Our configuration, read out of a file for security reasons
+// SlackMsgUnsolicitedAll means to send a message to all safecast channels
+const SlackMsgUnsolicitedAll =   0
+// SlackMsgUnsolicitedOps means to reply just to the safecast ops channel
+const SlackMsgUnsolicitedOps =   1
+// SlackMsgReply means to reply to the SlackCommandSource
+const SlackMsgReply =            2
+
+// ServiceConfig is our configuration, read out of a file for security reasons
 var ServiceConfig TTServeConfig
 
 // Paths for the file system shared among all TTSERVE instances
+
+// TTConfigPath (here for golint)
 const TTConfigPath = "/config/config.json"
+// TTDeviceLogPath (here for golint)
 const TTDeviceLogPath = "/device-log"
+// TTDeviceStampPath (here for golint)
 const TTDeviceStampPath = "/device-stamp"
+// TTCommandStatePath (here for golint)
 const TTCommandStatePath = "/command-state"
+// TTDeviceStatusPath (here for golint)
 const TTDeviceStatusPath = "/device-status"
+// TTInfluxQueryPath (here for golint)
 const TTInfluxQueryPath = "/influx-query"
+// TTServerLogPath (here for golint)
 const TTServerLogPath = "/server-log"
+// TTServerStatusPath (here for golint)
 const TTServerStatusPath = "/server-status"
+// TTGatewayStatusPath (here for golint)
 const TTGatewayStatusPath = "/gateway-status"
+// TTServerCommandPath (here for golint)
 const TTServerCommandPath = "/command"
+// TTServerControlPath (here for golint)
 const TTServerControlPath = "/control"
+// TTServerBuildPath (here for golint)
 const TTServerBuildPath = "/build"
+// TTServerFTPCertPath (here for golint)
 const TTServerFTPCertPath = "/cert/ftp"
+// TTServerCommandStateControlFile (here for golint)
 const TTServerCommandStateControlFile = "command_state.txt"
+// TTServerSlackCommandControlFile (here for golint)
 const TTServerSlackCommandControlFile = "slack_command.txt"
+// TTServerRestartAllControlFile (here for golint)
 const TTServerRestartAllControlFile = "restart_all.txt"
+
+// TTServeInstanceID is the AWS instance ID for the current instance
 var TTServeInstanceID = ""
 
 // TTSERVE's address and ports
+
+// TTServerHTTPAddress (here for golint)
 const TTServerHTTPAddress = "tt.safecast.org"
+// TTServerUDPAddress (here for golint)
 const TTServerUDPAddress = "tt-udp.safecast.org"
-var   TTServerUDPAddressIPv4 = ""                   // Looked up dynamically
+// TTServerUDPAddressIPv4 (here for golint)
+var TTServerUDPAddressIPv4 = ""						// Looked up dynamically
+// TTServerFTPAddress (here for golint)
 const TTServerFTPAddress = "tt-ftp.safecast.org"
+// TTServerFTPAddressIPv4 (here for golint)
 var   TTServerFTPAddressIPv4 = ""                   // Looked up dynamically
+// TTServerHTTPPort (here for golint)
 const TTServerHTTPPort string = ":80"
+// TTServerHTTPPortAlternate (here for golint)
 const TTServerHTTPPortAlternate string = ":8080"
+// TTServerUDPPort (here for golint)
 const TTServerUDPPort string = ":8081"
+// TTServerTCPPort (here for golint)
 const TTServerTCPPort string = ":8082"
+// TTServerFTPPort (here for golint)
 const TTServerFTPPort int = 8083                    // plus 8084 plus the entire passive range
+// TTServerTopicSend (here for golint)
 const TTServerTopicSend string = "/send"
+// TTServerTopicRoot1 (here for golint)
 const TTServerTopicRoot1 string = "/index.html"
+// TTServerTopicRoot2 (here for golint)
 const TTServerTopicRoot2 string = "/index.htm"
+// TTServerTopicQueryResults (here for golint)
 const TTServerTopicQueryResults string = "/query-results/"
+// TTServerTopicDeviceLog (here for golint)
 const TTServerTopicDeviceLog string = "/device-log/"
+// TTServerTopicDeviceCheck (here for golint)
 const TTServerTopicDeviceCheck string = "/check/"
+// TTServerTopicDeviceStatus (here for golint)
 const TTServerTopicDeviceStatus string = "/device/"
+// TTServerTopicServerLog (here for golint)
 const TTServerTopicServerLog string = "/server-log/"
+// TTServerTopicServerStatus (here for golint)
 const TTServerTopicServerStatus string = "/server/"
+// TTServerTopicGatewayUpdate (here for golint)
 const TTServerTopicGatewayUpdate string = "/gateway"
+// TTServerTopicGatewayStatus (here for golint)
 const TTServerTopicGatewayStatus string = "/gateway/"
+// TTServerTopicGithub (here for golint)
 const TTServerTopicGithub string = "/github"
+// TTServerTopicSlack (here for golint)
 const TTServerTopicSlack string = "/slack"
+// TTServerTopicTTN (here for golint)
 const TTServerTopicTTN string = "/ttn"
+// TTServerTopicRedirect1 (here for golint)
 const TTServerTopicRedirect1 string = "/scripts/"
+// TTServerTopicRedirect2 (here for golint)
 const TTServerTopicRedirect2 string = "/"
-var   ThisServerAddressIPv4 = ""                    // Looked up dynamically
+
+// ThisServerAddressIPv4 is looked up dynamically
+var ThisServerAddressIPv4 = ""
 
 // Dynamically computed state about this particular server
+
+// ThisServerServesUDP (here for golint)
 var   ThisServerServesUDP = false
+// ThisServerServesFTP (here for golint)
 var   ThisServerServesFTP = false
+// ThisServerServesMQQT (here for golint)
 var   ThisServerServesMQQT = false
+// ThisServerIsMonitor (here for golint)
 var   ThisServerIsMonitor = false
+// ThisServerBootTime (here for golint)
 var   ThisServerBootTime time.Time
+// AllServersSlackRestartRequestTime (here for golint)
 var   AllServersSlackRestartRequestTime time.Time
+// AllServersGithubRestartRequestTime (here for golint)
 var   AllServersGithubRestartRequestTime time.Time
 
-// Payload buffer format
-const BUFF_FORMAT_PB_ARRAY byte  =  0
+// BuffFormatPBArray is the payload buffer format
+const BuffFormatPBArray byte  =  0
 
 // Log-related
 const logDateFormat string = "2006-01-02 15:04:05"
 
-// Global Server Stats
+// TTServeCounts is our global statistics structure
 type TTServeCounts struct {
     Restarts        uint32          `json:"restarts,omitempty"`
     UDP             uint32          `json:"received_device_udp,omitempty"`
@@ -129,6 +201,8 @@ type TTServeCounts struct {
     HTTPTTN         uint32          `json:"received_ttn_http,omitempty"`
     MQQTTTN         uint32          `json:"received_ttn_mqqt,omitempty"`
 }
+
+// TTServeStatus is our global status
 type TTServeStatus struct {
     Started             time.Time       `json:"started,omitempty"`
     AddressIPv4         string          `json:"publicIp,omitempty"`
@@ -138,7 +212,7 @@ type TTServeStatus struct {
 }
 var stats TTServeStatus
 
-// Get the current value
+// ServiceReadConfig gets the current value of the service config
 func ServiceReadConfig() TTServeConfig {
 
     // Read the file and unmarshall if no error
