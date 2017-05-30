@@ -9,7 +9,6 @@ import (
     "os"
     "fmt"
     "time"
-    "math/rand"
     "encoding/json"
     influx "github.com/influxdata/influxdb/client/v2"
 )
@@ -52,8 +51,6 @@ func LogToInflux(sd SafecastData) bool {
     }
 
     // Create the tags and fields structures from which a point will be made
-    var setMeasurementTime bool
-    var measurementTime time.Time
     tags := map[string]string{}
     fields := map[string]interface{}{}
 
@@ -64,11 +61,6 @@ func LogToInflux(sd SafecastData) bool {
         t, e := time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
         if e == nil {
             fields["when_captured_num"] = t.UnixNano()
-            setMeasurementTime = true
-            measurementTime = t
-			// This is a critical line of code, so that we never lose data when multiple
-			// measurements arrive at exactly the same time.
-			measurementTime.Add(time.Duration(rand.Int63n(1000000000)) * time.Nanosecond)
         }
     }
 
@@ -419,13 +411,6 @@ func LogToInflux(sd SafecastData) bool {
             t, e := time.Parse("2006-01-02T15:04:05Z", *sd.Service.UploadedAt)
             if e == nil {
                 fields["service_uploaded_num"] = t.UnixNano()
-                if !setMeasurementTime {
-                    setMeasurementTime = true
-                    measurementTime = t
-					// This is a critical line of code, so that we never lose data when multiple
-					// measurements arrive at exactly the same time.
-					measurementTime.Add(time.Duration(rand.Int63n(1000000000)) * time.Nanosecond)
-                }
             }
         }
         if sd.Service.Transport != nil {
@@ -442,11 +427,7 @@ func LogToInflux(sd SafecastData) bool {
     // Make a new point
     var mperr error
     var pt *influx.Point
-    if setMeasurementTime {
-        pt, mperr = influx.NewPoint(safecastDataPoint, tags, fields, measurementTime)
-    } else {
-        pt, mperr = influx.NewPoint(safecastDataPoint, tags, fields)
-    }
+    pt, mperr = influx.NewPoint(safecastDataPoint, tags, fields)
     if mperr != nil {
         fmt.Printf("Influx point creation error: %v\n", mperr)
         return false
