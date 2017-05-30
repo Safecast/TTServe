@@ -40,21 +40,8 @@ var httpTransactionErrorString string
 var httpTransactionErrors int
 var httpTransactionErrorFirst = true
 
-// Checksums of recently-processed messages
-type receivedMessage struct {
-    checksum            uint32
-    seen                time.Time
-}
-var recentlyReceived [25]receivedMessage
-
 // SendSafecastMessage processes an inbound Safecast message as an asynchronous goroutine
-func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast, checksum uint32) {
-
-    // Discard it if it's a duplicate
-    if isDuplicate(checksum) {
-        fmt.Printf("%s DISCARDING duplicate message\n", LogTime())
-        return
-    }
+func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
 
     // Process stamps by adding or removing fields from the message
     if !stampSetOrApply(&msg) {
@@ -652,30 +639,6 @@ func endTransaction(transaction int, url string, errstr string) {
         }
         sendToSafecastOps(s, SlackMsgUnsolicitedOps)
     }
-
-}
-
-// Check to see if this is a duplicate of a message we've recently seen
-func isDuplicate(checksum uint32) bool {
-
-    // Sweep through all recent messages, looking for a duplicate in the past minute
-    for i := 0; i < len(recentlyReceived); i++ {
-        if recentlyReceived[i].checksum == checksum {
-            if int64(time.Now().Sub(recentlyReceived[i].seen) / time.Second) < 60 {
-                return true
-            }
-        }
-    }
-
-    // Shift them all down
-    for i := len(recentlyReceived)-1; i > 0; i-- {
-        recentlyReceived[i] = recentlyReceived[i-1]
-    }
-
-    // Insert this new one
-    recentlyReceived[0].checksum = checksum
-    recentlyReceived[0].seen = time.Now().UTC()
-    return false
 
 }
 

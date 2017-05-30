@@ -7,7 +7,6 @@ package main
 
 import (
     "fmt"
-    "hash/crc32"
     "github.com/golang/protobuf/proto"
     "github.com/safecast/ttproto/golang"
 )
@@ -63,22 +62,9 @@ func AppReqProcess(AppReq IncomingAppReq) {
         fmt.Printf("%s RELAYED thru hop #5 %d\n", LogTime(), msg.GetRelayDevice5())
     }
 
-    // Compute the checksum on a payload normalized by removing all the relay information
-    msg.RelayDevice1 = nil
-    msg.RelayDevice2 = nil
-    msg.RelayDevice3 = nil
-    msg.RelayDevice4 = nil
-    msg.RelayDevice5 = nil
-    normalizedPayload, err := proto.Marshal(msg)
-    if err != nil {
-        fmt.Printf("*** PB marshaling error: ", err)
-        return
-    }
-    checksum := crc32.ChecksumIEEE(normalizedPayload)
-
     // Do various things based upon the message type
     if msg.DeviceType == nil {
-        SendSafecastMessage(AppReq, *msg, checksum)
+        SendSafecastMessage(AppReq, *msg)
     } else {
         switch msg.GetDeviceType() {
 
@@ -88,7 +74,7 @@ func AppReqProcess(AppReq IncomingAppReq) {
         case ttproto.Telecast_UNKNOWN_DEVICE_TYPE:
             fallthrough
         case ttproto.Telecast_SOLARCAST:
-            SendSafecastMessage(AppReq, *msg, checksum)
+            SendSafecastMessage(AppReq, *msg)
 
             // Handle messages from non-safecast devices
         default:
