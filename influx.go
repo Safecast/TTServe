@@ -9,6 +9,7 @@ import (
     "os"
     "fmt"
     "time"
+    "math/rand"
     "encoding/json"
     influx "github.com/influxdata/influxdb/client/v2"
 )
@@ -65,6 +66,9 @@ func LogToInflux(sd SafecastData) bool {
             fields["when_captured_num"] = t.UnixNano()
             setMeasurementTime = true
             measurementTime = t
+			// This is a critical line of code, so that we never lose data when multiple
+			// measurements arrive at exactly the same time.
+			measurementTime.Add(time.Duration(rand.Int63n(1000000000)) * time.Nanosecond)
         }
     }
 
@@ -418,6 +422,9 @@ func LogToInflux(sd SafecastData) bool {
                 if !setMeasurementTime {
                     setMeasurementTime = true
                     measurementTime = t
+					// This is a critical line of code, so that we never lose data when multiple
+					// measurements arrive at exactly the same time.
+					measurementTime.Add(time.Duration(rand.Int63n(1000000000)) * time.Nanosecond)
                 }
             }
         }
