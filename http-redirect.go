@@ -35,8 +35,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // See if this is a test measurement
-	//ozzie
-	fmt.Printf("%s\n", req.RequestURI)
     isTestMeasurement := strings.Contains(req.RequestURI, "test")
 
     // Get the remote address, and only add this to the count if it's likely from
@@ -154,6 +152,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     if sdV1.DeviceID != nil {
 	    devicetype, _ := SafecastV1DeviceType(*sdV1.DeviceID)
 		if devicetype == "safecast-air" {
+			fmt.Printf("*** %s\n", req.RequestURI)
 //			isTestMeasurement = true
 		}
 	}
