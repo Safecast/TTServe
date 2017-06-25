@@ -100,7 +100,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
             devname := req.RequestURI[len("/"):]
             valid, deviceID := WordsToNumber(devname)
             if valid {
-				file := GetDeviceStatusFilePath(deviceID)
+                file := GetDeviceStatusFilePath(deviceID)
                 contents, err := ioutil.ReadFile(file)
                 if err == nil {
                     GenerateDeviceSummaryWebPage(rw, contents)
@@ -148,14 +148,15 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         sdV1Emit.CapturedAt = &capturedAt
     }
 
-	// At Rob's request on 2017-06-24, route all Safecast Air devices to dev instead of prod
-    if sdV1.DeviceID != nil {
-	    devicetype, _ := SafecastV1DeviceType(*sdV1.DeviceID)
-		if devicetype == "safecast-air" {
-			fmt.Printf("*** DeviceID %d %t %s\n", *sdV1.DeviceID, isTestMeasurement, req.RequestURI)
-//			isTestMeasurement = true
-		}
-	}
+    // Debugging on 2017-06-24 with Rob; feel free to delete after 2017-07-01 if it's still here
+    if (false) {
+        if sdV1.DeviceID != nil {
+            devicetype, _ := SafecastV1DeviceType(*sdV1.DeviceID)
+            if devicetype == "safecast-air" {
+                fmt.Printf("*** DeviceID %d %t %s\n", *sdV1.DeviceID, isTestMeasurement, req.RequestURI)
+            }
+        }
+    }
 
     // Convert it to text to emit
     sdV1EmitJSON, _ := json.Marshal(sdV1Emit)
