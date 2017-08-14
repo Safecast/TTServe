@@ -469,6 +469,11 @@ func generateTTNCTLDeviceRegistrationScript() {
 // Get the number of minutes after which to expire a device
 func deviceWarningAfterMinutes(deviceID uint32) int64 {
 
+	// On 2017-08-14 Ray changed to only warn very rarely, because it was getting
+	// far, far too noisy in the ops channel with lots of devices.
+	return 24*60
+	
+	// This is what the behavior was for months while we were debugging
 	switch SafecastDeviceType(deviceID) {
 	case "pointcast":
 		fallthrough
