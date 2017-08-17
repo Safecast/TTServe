@@ -63,17 +63,8 @@ func trackServer(ServerID string, whenSeen time.Time) {
                 seenServers[i].everRecentlySeen = true
                 // Notify when the device comes back
                 if seenServers[i].notifiedAsUnseen {
-                    minutesAgo := int64(time.Now().Sub(seenServers[i].seen) / time.Minute)
-                    hoursAgo := minutesAgo / 60
-                    daysAgo := hoursAgo / 24
-                    message := fmt.Sprintf("%d minutes", minutesAgo)
-                    switch {
-                    case daysAgo >= 2:
-                        message = fmt.Sprintf("~%d days", daysAgo)
-                    case minutesAgo >= 120:
-                        message = fmt.Sprintf("~%d hours", hoursAgo)
-                    }
-                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Server %s has returned after %s away", seenServers[i].serverid, message), SlackMsgUnsolicitedOps)
+                    message := AgoMinutes(uint32(time.Now().Sub(seenServers[i].seen) / time.Minute))
+                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Server %s has returned after %s", seenServers[i].serverid, message), SlackMsgUnsolicitedOps)
                 }
                 // Mark as having been seen on the latest date of any file having that time
                 seenServers[i].notifiedAsUnseen = false

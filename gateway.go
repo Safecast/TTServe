@@ -64,20 +64,11 @@ func trackGateway(GatewayID string, whenSeen time.Time) {
                 seenGateways[i].everRecentlySeen = true
                 // Notify when the device comes back
                 if seenGateways[i].notifiedAsUnseen {
-                    minutesAgo := int64(time.Now().Sub(seenGateways[i].seen) / time.Minute)
-                    hoursAgo := minutesAgo / 60
-                    daysAgo := hoursAgo / 24
-                    message := fmt.Sprintf("%d minutes", minutesAgo)
-                    switch {
-                    case daysAgo >= 2:
-                        message = fmt.Sprintf("~%d days", daysAgo)
-                    case minutesAgo >= 120:
-                        message = fmt.Sprintf("~%d hours", hoursAgo)
-                    }
+                    message := AgoMinutes(uint32(time.Now().Sub(seenGateways[i].seen) / time.Minute))
 					if seenGateways[i].label != "" {
-	                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s \"%s\" has returned after %s away", seenGateways[i].gatewayid, seenGateways[i].label, message), SlackMsgUnsolicitedOps)
+	                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s \"%s\" has returned after %s", seenGateways[i].gatewayid, seenGateways[i].label, message), SlackMsgUnsolicitedOps)
 					} else {
-	                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s has returned after %s away", seenGateways[i].gatewayid, message), SlackMsgUnsolicitedOps)
+	                    sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s has returned after %s", seenGateways[i].gatewayid, message), SlackMsgUnsolicitedOps)
 					}
                 }
                 // Mark as having been seen on the latest date of any file having that time
@@ -150,9 +141,9 @@ func sendExpiredSafecastGatewaysToSlack() {
             if seenGateways[i].seen.Before(expiration) {
                 seenGateways[i].notifiedAsUnseen = true
 				if seenGateways[i].label != "" {
-	                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s \"%s\" hasn't been seen for %d minutes", seenGateways[i].gatewayid, seenGateways[i].label, seenGateways[i].minutesAgo), SlackMsgUnsolicitedOps)
+	                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s \"%s\" hasn't been seen for %s", seenGateways[i].gatewayid, seenGateways[i].label, AgoMinutes(uint32(seenGateways[i].minutesAgo))), SlackMsgUnsolicitedOps)
 				} else {
-	                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s hasn't been seen for %d minutes", seenGateways[i].gatewayid, seenGateways[i].minutesAgo), SlackMsgUnsolicitedOps)
+	                sendToSafecastOps(fmt.Sprintf("** Warning **  Gateway %s hasn't been seen for %s", seenGateways[i].gatewayid, AgoMinutes(uint32(seenGateways[i].minutesAgo))), SlackMsgUnsolicitedOps)
 				}
             }
         }

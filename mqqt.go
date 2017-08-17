@@ -104,7 +104,7 @@ func MQQTSubscriptionNotifier() {
         if !ttnFullyConnected {
             minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
             if minutesOffline > 15 {
-                sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %d minutes (outage began at %s UTC)", minutesOffline, ttnLastDisconnected), SlackMsgUnsolicitedOps)
+                sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %s (outage began at %s UTC)", AgoMinutes(uint32(minutesOffline)), ttnLastDisconnected), SlackMsgUnsolicitedOps)
             }
         } else {
             if ttnOutages > 1 {
