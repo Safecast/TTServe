@@ -101,20 +101,20 @@ func trackAllDevices() {
 
             if !file.IsDir() {
 
-				// ONLY pay attention to files from the current year/month
-				deviceID := uint32(0)
+                // ONLY pay attention to files from the current year/month
+                deviceID := uint32(0)
                 Str0 := file.Name()
-				Str1 := strings.Split(Str0, ".")[0]
-				Str2 := strings.Split(Str1, "-")
-				if len(Str2) == 3 {
-					yr, _ := strconv.ParseUint(Str2[0], 10, 32)
-					mo, _ := strconv.ParseUint(Str2[1], 10, 32)
-					if int(yr) == time.Now().Year() && int(mo) == int(time.Now().Month()) {
-						i64, _ := strconv.ParseUint(Str2[2], 10, 32)
-						deviceID = uint32(i64)
-					}
-				}
-				
+                Str1 := strings.Split(Str0, ".")[0]
+                Str2 := strings.Split(Str1, "-")
+                if len(Str2) == 3 {
+                    yr, _ := strconv.ParseUint(Str2[0], 10, 32)
+                    mo, _ := strconv.ParseUint(Str2[1], 10, 32)
+                    if int(yr) == time.Now().Year() && int(mo) == int(time.Now().Month()) {
+                        i64, _ := strconv.ParseUint(Str2[2], 10, 32)
+                        deviceID = uint32(i64)
+                    }
+                }
+
                 // Track the device
                 if deviceID != 0 {
                     trackDevice(deviceID, file.ModTime())
@@ -263,7 +263,6 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
             isValid, cmd := getCommand(id)
             if isValid {
                 s += fmt.Sprintf("'%s' will not be sent to %d %s", cmd.Command, id, WordsFromNumber(id))
-                cancelCommand(id)
             } else {
                 s += fmt.Sprintf("Nothing pending for %d %s", id, WordsFromNumber(id))
             }
@@ -283,6 +282,24 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
     }
 
     // Done
+    if s == "" {
+
+        // If device was not found and we're trying to cancel, do it anyway because
+        // the device may have gone away by now and isn't in the sorted list.
+        if command == "" {
+            if devices != nil {
+                for _, did := range devices {
+                    isValid, cmd := getCommand(did)
+                    if isValid {
+                        s += fmt.Sprintf("'%s' will not be sent to %d %s", cmd.Command, did, WordsFromNumber(did))
+                    } else {
+                        s += fmt.Sprintf("Nothing pending for %d %s", did, WordsFromNumber(did))
+                    }
+                }
+            }
+        }
+    }
+
     if s == "" {
         s = "Device(s) not found"
     }
@@ -431,26 +448,26 @@ func generateTTNCTLDeviceRegistrationScript() {
 
     // Sweep over devices and generate the TTNCTL commands, newest first
     s := ""
-	devicesRegistered := 0
+    devicesRegistered := 0
     for i := 0; i < len(sortedDevices); i++ {
         id := sortedDevices[i].deviceid
         deveui, _, _, _ := GetDeviceStatusSummary(id)
         if deveui != "" {
             s += fmt.Sprintf("ttnctl devices register %s\n", strings.ToLower(deveui))
             s += fmt.Sprintf("ttnctl device set %s --app-eui 70B3D57EF0003810 --app-key 5CB50DDCF44CEADA6A27DA8BC6607E6A --dev-eui %s --override\n", strings.ToLower(deveui), strings.ToLower(deveui))
-			devicesRegistered++
-			if devicesRegistered % 10 == 0 {
-		        sendToSafecastOps(s, SlackMsgReply)
-				s = ""
-			}
+            devicesRegistered++
+            if devicesRegistered % 10 == 0 {
+                sendToSafecastOps(s, SlackMsgReply)
+                s = ""
+            }
         }
     }
 
     // Send it to Slack
     if devicesRegistered != 0 {
-		if s != "" {
-	        sendToSafecastOps(s, SlackMsgReply)
-		}
+        if s != "" {
+            sendToSafecastOps(s, SlackMsgReply)
+        }
     } else {
         sendToSafecastOps("None found.", SlackMsgReply)
     }
@@ -460,17 +477,17 @@ func generateTTNCTLDeviceRegistrationScript() {
 // Get the number of minutes after which to expire a device
 func deviceWarningAfterMinutes(deviceID uint32) int64 {
 
-	// On 2017-08-14 Ray changed to only warn very rarely, because it was getting
-	// far, far too noisy in the ops channel with lots of devices.
-	return 24*60
-	
-	// This is what the behavior was for months while we were debugging
-	switch SafecastDeviceType(deviceID) {
-	case "pointcast":
-		fallthrough
-	case "safecast-air":
+    // On 2017-08-14 Ray changed to only warn very rarely, because it was getting
+    // far, far too noisy in the ops channel with lots of devices.
+    return 24*60
+
+    // This is what the behavior was for months while we were debugging
+    switch SafecastDeviceType(deviceID) {
+    case "pointcast":
+        fallthrough
+    case "safecast-air":
         return 20
-	}
+    }
 
     return 90
 
