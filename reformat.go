@@ -131,9 +131,11 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
 		t, err := time.Parse("2006-1-2T15:4:5Z", *v1.CapturedAt)
 		if err != nil {
 	        sd.CapturedAt = v1.CapturedAt
+			fmt.Printf("captured:'%s' err:%s\n", *sd.CapturedAt, err)
 		} else {
 			s := t.UTC().Format("2006-01-02T15:04:05Z")
 			sd.CapturedAt = &s
+			fmt.Printf("converted from '%s' to '%s'\n", *v1.CapturedAt, *sd.CapturedAt)
 		}
     }
 
