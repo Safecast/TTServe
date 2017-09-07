@@ -7,6 +7,7 @@ package main
 
 import (
     "fmt"
+	"time"
     "strings"
     "strconv"
     "github.com/google/open-location-code/go"
@@ -125,7 +126,15 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
 
     // Captured
     if v1.CapturedAt != nil {
-        sd.CapturedAt = v1.CapturedAt
+
+		// Correct for badly formatted safecast-air data of the form 2017-9-7T2:3:4Z
+		t, err := time.Parse("2006-1-2T15:4:5Z", *v1.CapturedAt)
+		if err != nil {
+	        sd.CapturedAt = v1.CapturedAt
+		} else {
+			s := t.UTC().Format("2006-01-02T15:04:05Z")
+			sd.CapturedAt = &s
+		}
     }
 
     // Loc
