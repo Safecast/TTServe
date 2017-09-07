@@ -125,6 +125,7 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
     sd.DeviceID = &v2DeviceID
 
     // Captured
+	fmt.Printf("*** Reformat Captured\n")
     if v1.CapturedAt != nil {
 
 		// Correct for badly formatted safecast-air data of the form 2017-9-7T2:3:4Z
