@@ -776,7 +776,7 @@ func doSolarcastV1Upload(sdV1Emit *SafecastDataV1ToEmit) {
 
 	// Marshal to text
     sdV1EmitJSON, _ := json.Marshal(sdV1Emit)
-	fmt.Printf("\n$$$$$\n%v\n$$$$$\n", sdV1EmitJSON);
+	fmt.Printf("\n$$$$$\n%s\n$$$$$\n", sdV1EmitJSON);
 	
 }
 
