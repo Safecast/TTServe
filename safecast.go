@@ -23,6 +23,7 @@ import (
 // Debugging
 const v1UploadDebug bool = false
 const v1UploadSolarcast bool = true
+const v1UploadSolarcastDebug bool = true
 const verboseTransactions bool = false
 
 // Synchronous vs asynchronous V1 API requests
@@ -772,10 +773,33 @@ func HashSafecastData(sd SafecastData) string {
 
 // Do a single solarcast v1 upload
 func doSolarcastV1Upload(sdV1Emit *SafecastDataV1ToEmit) {
-	// http://api.safecast.org/measurements.json?api_key=z3sHhgousVDDrCVXhzMT
-	// Marshal to text
+
     sdV1EmitJSON, _ := json.Marshal(sdV1Emit)
-	fmt.Printf("\n$$$$$\n%s\n$$$$$\n", sdV1EmitJSON);
+
+	if v1UploadSolarcastDebug {
+		fmt.Printf("$$$ Uploading Solarcast to V1 service:\n%s\n", sdV1EmitJSON);
+	}
+
+	requestURI := "http://api.safecast.org/measurements.json?api_key=z3sHhgousVDDrCVXhzMT"
+    req, _ := http.NewRequest("POST", requestURI, bytes.NewBuffer(sdV1EmitJSON))
+    req.Header.Set("User-Agent", "TTSERVE")
+    req.Header.Set("Content-Type", "application/json")
+    httpclient := &http.Client{
+        Timeout: time.Second * 15,
+    }
+    resp, err := httpclient.Do(req)
+    if err == nil {
+        buf, err := ioutil.ReadAll(resp.Body)
+        if err == nil {
+			if v1UploadSolarcastDebug {
+				fmt.Printf("$$$ V1 service response:\n%s\n", string(buf));
+			}
+        resp.Body.Close()
+		}
+	}
+
+	// Don't overload the server
+	time.Sleep(1 * time.Second)
 	
 }
 

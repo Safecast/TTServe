@@ -36,20 +36,20 @@ type safecastDataV1ToParse struct {
 // SafecastDataV1ToEmit is the data structure used to send things back to V1 Safecast devices
 type SafecastDataV1ToEmit struct {
     CapturedAt		*string  `json:"captured_at,omitempty"`
-    DeviceTypeID	*string  `json:"devicetype_id,omitempty"`
-    LocationName	*string  `json:"location_name,omitempty"`
-    Unit			*string  `json:"unit,omitempty"`
-    ChannelID		*string  `json:"channel_id,omitempty"`
     DeviceID		*string  `json:"device_id,omitempty"`
+    Value			*string  `json:"value,omitempty"`
+    Unit			*string  `json:"unit,omitempty"`
+    Latitude		*string  `json:"latitude,omitempty"`
+    Longitude		*string  `json:"longitude,omitempty"`
+    Height			*string  `json:"height,omitempty"`
+    LocationName	*string  `json:"location_name,omitempty"`
+    ChannelID		*string  `json:"channel_id,omitempty"`
     OriginalID		*string  `json:"original_id,omitempty"`
     SensorID		*string  `json:"sensor_id,omitempty"`
     StationID		*string  `json:"station_id,omitempty"`
     UserID			*string  `json:"user_id,omitempty"`
     ID				*string  `json:"id,omitempty"`
-    Height			*string  `json:"height,omitempty"`
-    Value			*string  `json:"value,omitempty"`
-    Latitude		*string  `json:"latitude,omitempty"`
-    Longitude		*string  `json:"longitude,omitempty"`
+    DeviceTypeID	*string  `json:"devicetype_id,omitempty"`
 }
 
 // SafecastDataV1 is the "loose" JSON data structure used by all V1 safecast devices
