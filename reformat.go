@@ -341,15 +341,15 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	}
 	if sd.Loc != nil {
 		if sd.Loc.Lat != nil {
-			value := fmt.Sprintf("%f", sd.Loc.Lat)
+			value := fmt.Sprintf("%f", *sd.Loc.Lat)
 			sd1.Latitude = &value
 		}
 		if sd.Loc.Lon != nil {
-			value := fmt.Sprintf("%f", sd.Loc.Lon)
+			value := fmt.Sprintf("%f", *sd.Loc.Lon)
 			sd1.Longitude = &value
 		}
 		if sd.Loc.Alt != nil {
-			value := fmt.Sprintf("%f", sd.Loc.Alt)
+			value := fmt.Sprintf("%f", *sd.Loc.Alt)
 			sd1.Height = &value
 		}
 	}
@@ -361,6 +361,8 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 		return
 	}
 	deviceType, id := SafecastV1DeviceType(*sd.DeviceID)
+//ozzie
+	fmt.Printf("SafecastV1DeviceType(%d) -> '%s', %d\n", *sd.DeviceID, deviceType, id);
 	if deviceType != "" {
 		return
 	}
@@ -374,21 +376,21 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	// Generate the first geiger tube value
 	if (sd.Lnd != nil) {
 		if (sd.U7318 != nil) {
-			value := fmt.Sprintf("%f", sd.Lnd.U7318)
+			value := fmt.Sprintf("%f", *sd.Lnd.U7318)
 			sd1.Value = &value
 			unit := "cpm"
 			sd1.Unit = &unit
 			deviceType := "lnd_7318u"
 			sd1.DeviceTypeID = &deviceType
 		} else if (sd.U712 != nil) {
-			value := fmt.Sprintf("%f", sd.Lnd.U712)
+			value := fmt.Sprintf("%f", *sd.Lnd.U712)
 			sd1.Value = &value
 			unit := "cpm"
 			sd1.Unit = &unit
 			deviceType := "lnd_712u"
 			sd1.DeviceTypeID = &deviceType
 		} else if (sd.W78017 != nil) {
-			value := fmt.Sprintf("%f", sd.Lnd.W78017)
+			value := fmt.Sprintf("%f", *sd.Lnd.W78017)
 			sd1.Value = &value
 			unit := "cpm"
 			sd1.Unit = &unit
@@ -404,14 +406,14 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	// Generate the second geiger tube value
 	if (sd.Lnd != nil) {
 		if (sd.C7318 != nil) {
-			value := fmt.Sprintf("%f", sd.Lnd.C7318)
+			value := fmt.Sprintf("%f", *sd.Lnd.C7318)
 			sd2.Value = &value
 			unit := "cpm"
 			sd2.Unit = &unit
 			deviceType := "lnd_7318c"
 			sd2.DeviceTypeID = &deviceType
 		} else if (sd.EC7128 != nil) {
-			value := fmt.Sprintf("%f", sd.Lnd.EC7128)
+			value := fmt.Sprintf("%f", *sd.Lnd.EC7128)
 			sd2.Value = &value
 			unit := "cpm"
 			sd2.Unit = &unit
@@ -426,7 +428,7 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 
 	// Generate the temp value
 	if (sd.Env != nil && sd.Env.Temp != nil) {
-		value := fmt.Sprintf("%f", sd.Env.Temp)
+		value := fmt.Sprintf("%f", *sd.Env.Temp)
 		sd9.Value = &value
 		unit := "celcius"
 		sd9.Unit = &unit

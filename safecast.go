@@ -773,7 +773,7 @@ func HashSafecastData(sd SafecastData) string {
 
 // Do a single solarcast v1 upload
 func doSolarcastV1Upload(sdV1Emit *SafecastDataV1ToEmit) {
-
+	// http://api.safecast.org/measurements.json?api_key=z3sHhgousVDDrCVXhzMT
 	// Marshal to text
     sdV1EmitJSON, _ := json.Marshal(sdV1Emit)
 	fmt.Printf("\n$$$$$\n%s\n$$$$$\n", sdV1EmitJSON);
