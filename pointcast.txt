@@ -1,0 +1,35 @@
+2017-09-11 17:00:01 Received payload for 20005 from pointcast:107.161.164.166
+{"longitude":"-77.1250","latitude":"38.8129","device_id":"200059","value":"31.8","unit":"status","height":"36","devicetype_id":"DeviceID:20005,Temperature:31.8,Battery Voltage:4.01,Fails:330,Restarts:87,FreeRam:54284,Last failure:FAILsdcard,NTP count:2","captured_at":"2017-09-11T17:00:01Z"}
+
+{"longitude":"140.978431","latitude":"37.329250","device_id":"100099","value":"27.8","unit":"status","height":"67","devicetype_id":"DeviceID:10009,Temperature:27.8,Battery Voltage:4.46,Fails:67924,Restarts:16994,FreeRam:49844,Last failure:3G no start,NTP count:0"}
+
+2017-09-11 17:00:20 Received payload for 10013 from pointcast:54.250.252.64
+{"longitude":"140.995519","latitude":"37.495123","device_id":"100132","value":"24","unit":"cpm","height":"94"}
+
+2017-09-11 17:00:53 Received payload for 10018 from pointcast:54.250.252.97
+{"longitude":"139.625711","latitude":"35.615814","device_id":"100189","value":"32.1","unit":"celcius","height":"24"}
+
+2017-09-11 17:01:23 Received payload for 10014 from pointcast:107.161.164.166
+{"longitude":"139.742","latitude":"35.6617","device_id":"100141","value":"39","unit":"cpm","height":"100","devicetype_id":"Pointcast V1","captured_at":"2017-09-11T17:01:23Z"}
+
+2017-09-11 17:01:25 Received payload for 10014 from pointcast:107.161.164.166
+{"longitude":"139.742","latitude":"35.6617","device_id":"100149","value":"31","unit":"celcius","height":"100","captured_at":"2017-09-11T17:01:24Z"}
+
+2017-09-11 17:02:03 Received payload for 10017 from pointcast:220.221.205.46
+{"longitude":"140.797711","latitude":"37.644440","device_id":"100171","value":"129","unit":"cpm","height":"426","devicetype_id":"Pointcast V1"}
+
+2017-09-11 17:02:05 Received payload for 10017 from pointcast:220.221.205.46
+{"longitude":"140.797711","latitude":"37.644440","device_id":"100179","value":"32","unit":"celcius","height":"426"}
+
+2017-09-11 17:02:06 Received payload for 10024 from pointcast:124.26.168.208
+{"longitude":"140.398995","latitude":"37.545620","device_id":"100242","value":"17","unit":"cpm","height":"238","devicetype_id":"Pointcast V1"}
+
+2017-09-11 17:02:58 Received payload for 10002 from pointcast:122.212.234.10
+{"longitude":"139.727850","latitude":"35.659491","device_id":"100021","value":"13","unit":"cpm","height":"92","devicetype_id":"Pointcast V1"}
+
+2017-09-11 17:02:59 Received payload for 10002 from pointcast:122.212.234.10
+{"longitude":"139.727850","latitude":"35.659491","device_id":"100022","value":"28","unit":"cpm","height":"92","devicetype_id":"Pointcast V1"}
+
+2017-09-11 17:05:04 Received payload for 10020 from pointcast:54.250.252.98
+{"longitude":"140.986419","latitude":"37.496139","device_id":"100209","value":"26.1","unit":"status","height":"10","devicetype_id":"DeviceID:10020,Temperature:26.1,Battery Voltage:4.34,Fails:64309,Restarts:16102,FreeRam:49844,Last failure:no EPOCH,NTP count:0"}
+

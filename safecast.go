@@ -21,7 +21,9 @@ import (
 )
 
 // Debugging
-const v1UploadDebug bool = false
+//ozzie
+const v1UploadDebug bool = true
+const v1UploadSolarcast bool = true
 const verboseTransactions bool = false
 
 // Synchronous vs asynchronous V1 API requests
@@ -769,6 +771,32 @@ func HashSafecastData(sd SafecastData) string {
 
 }
 
+// Do a single solarcast v1 upload
+func doSolarcastV1Upload(sdV1Emit *SafecastDataV1ToEmit) {
+
+	// Marshal to text
+    sdV1EmitJSON, _ := json.Marshal(sdV1Emit)
+	fmt.Printf("\n$$$$$\n%v\n$$$$$\n", sdV1EmitJSON);
+	
+}
+
+// Process solarcast uploads to v1, for "realtime" support
+func doSolarcastV1Uploads(sd SafecastData) {
+	sd1, sd2, sd9, err := SafecastReformatToV1(sd)
+	if err != nil {
+		return
+	}
+	if sd1 != nil {
+		doSolarcastV1Upload(sd1)
+	}
+	if sd2 != nil {
+		doSolarcastV1Upload(sd2)
+	}
+	if sd9 != nil {
+		doSolarcastV1Upload(sd9)
+	}
+}
+
 // Upload uploads a Safecast data structure to the Safecast service, either serially or massively in parallel
 func Upload(sd SafecastData) bool {
 
@@ -777,6 +805,11 @@ func Upload(sd SafecastData) bool {
         go doUploadToSafecast(sd, url)
     }
 
+	// Upload Safecast data to the v1 production server
+	if v1UploadSolarcast {
+		go doSolarcastV1Uploads(sd)
+	}
+		
     return true
 }
 

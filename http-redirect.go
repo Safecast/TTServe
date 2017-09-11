@@ -177,7 +177,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     io.WriteString(rw, result)
 
     // Convert to current data format
-    deviceID, deviceType, sd := SafecastReformat(sdV1, isTestMeasurement)
+    deviceID, deviceType, sd := SafecastReformatFromV1(sdV1, isTestMeasurement)
     if deviceID == 0 {
         requestor, _ := getRequestorIPv4(req)
         transportStr := deviceType+":" + requestor

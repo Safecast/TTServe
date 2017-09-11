@@ -66,12 +66,18 @@ func SafecastV1DeviceType(deviceid uint32) (devicetype string, v2DeviceID uint32
         return "ngeigie", deviceid
     }
 
-    return "", deviceid
+	// Solarcast.  Return S/N as V1 device ID
+	sn, _ := DeviceIDToSN(deviceid)
+	if sn == 0 {
+		return "", deviceid
+	}
+	
+    return "", sn
 
 }
 
-// SafecastReformat reformats a special V1 payload to Current
-func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint32, devtype string, data SafecastData) {
+// SafecastReformatFromV1 reformats a special V1 payload to Current
+func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint32, devtype string, data SafecastData) {
     var sd SafecastData
 	var v1DeviceID uint32
 
@@ -319,4 +325,123 @@ func SafecastReformat(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint
 
     return uint32(*sd.DeviceID), devicetype, sd
 
+}
+
+// SafecastReformatToV1 reformats a special V1 payload to Current
+func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Data2 *SafecastDataV1ToEmit, v1Data9 *SafecastDataV1ToEmit, err error) {
+
+	// Start under the assumption that we will generate all three
+	sd1 := &SafecastDataV1ToEmit{}
+	sd2 := &SafecastDataV1ToEmit{}
+	sd9 := &SafecastDataV1ToEmit{}
+	
+	// Process the fields common to all outputs
+	if sd.CapturedAt != nil {
+		sd1.CapturedAt = sd.CapturedAt
+	}
+	if sd.Loc != nil {
+		if sd.Loc.Lat != nil {
+			value := fmt.Sprintf("%f", sd.Loc.Lat)
+			sd1.Latitude = &value
+		}
+		if sd.Loc.Lon != nil {
+			value := fmt.Sprintf("%f", sd.Loc.Lon)
+			sd1.Longitude = &value
+		}
+		if sd.Loc.Alt != nil {
+			value := fmt.Sprintf("%f", sd.Loc.Alt)
+			sd1.Height = &value
+		}
+	}
+	*sd2 = *sd1
+	*sd9 = *sd1
+	
+	// Generate the device IDs.  If this isn't a solarcast device, don't generate anything.
+	if sd.DeviceID == nil {
+		return
+	}
+	deviceType, id := SafecastV1DeviceType(*sd.DeviceID)
+	if deviceType != "" {
+		return
+	}
+	id1 := fmt.Sprintf("%d", id*10 + 1)
+	sd1.DeviceID = &id1
+	id2 := fmt.Sprintf("%d", id*10 + 2)
+	sd2.DeviceID = &id2
+	id9 := fmt.Sprintf("%d", id*10 + 9)
+	sd9.DeviceID = &id9
+
+	// Generate the first geiger tube value
+	if (sd.Lnd != nil) {
+		if (sd.U7318 != nil) {
+			value := fmt.Sprintf("%f", sd.Lnd.U7318)
+			sd1.Value = &value
+			unit := "cpm"
+			sd1.Unit = &unit
+			deviceType := "lnd_7318u"
+			sd1.DeviceTypeID = &deviceType
+		} else if (sd.U712 != nil) {
+			value := fmt.Sprintf("%f", sd.Lnd.U712)
+			sd1.Value = &value
+			unit := "cpm"
+			sd1.Unit = &unit
+			deviceType := "lnd_712u"
+			sd1.DeviceTypeID = &deviceType
+		} else if (sd.W78017 != nil) {
+			value := fmt.Sprintf("%f", sd.Lnd.W78017)
+			sd1.Value = &value
+			unit := "cpm"
+			sd1.Unit = &unit
+			deviceType := "lnd_78017w"
+			sd1.DeviceTypeID = &deviceType
+		} else {
+			sd1 = nil
+		}
+	} else {
+		sd1 = nil
+	}
+
+	// Generate the second geiger tube value
+	if (sd.Lnd != nil) {
+		if (sd.C7318 != nil) {
+			value := fmt.Sprintf("%f", sd.Lnd.C7318)
+			sd2.Value = &value
+			unit := "cpm"
+			sd2.Unit = &unit
+			deviceType := "lnd_7318c"
+			sd2.DeviceTypeID = &deviceType
+		} else if (sd.EC7128 != nil) {
+			value := fmt.Sprintf("%f", sd.Lnd.EC7128)
+			sd2.Value = &value
+			unit := "cpm"
+			sd2.Unit = &unit
+			deviceType := "lnd_7128ec"
+			sd2.DeviceTypeID = &deviceType
+		} else {
+			sd2 = nil
+		}
+	} else {
+		sd2 = nil
+	}
+
+	// Generate the temp value
+	if (sd.Env != nil && sd.Env.Temp != nil) {
+		value := fmt.Sprintf("%f", sd.Env.Temp)
+		sd9.Value = &value
+		unit := "celcius"
+		sd9.Unit = &unit
+		info := fmt.Sprintf("DeviceID:%d,Temperature:%f", id, *sd.Env.Temp)
+		if (sd.Bat != nil && sd.Bat.Voltage != nil) {
+			info += fmt.Sprintf(",Battery Voltage:%f", *sd.Bat.Voltage)
+		}
+		sd9.DeviceTypeID = &info
+	} else {
+		sd9 = nil
+	}
+
+	// Done
+	v1Data1 = sd1
+	v1Data2 = sd2
+	v1Data9 = sd9
+	return
 }
