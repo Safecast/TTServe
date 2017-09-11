@@ -21,8 +21,7 @@ import (
 )
 
 // Debugging
-//ozzie
-const v1UploadDebug bool = true
+const v1UploadDebug bool = false
 const v1UploadSolarcast bool = true
 const verboseTransactions bool = false
 

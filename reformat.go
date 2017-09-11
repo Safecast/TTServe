@@ -65,14 +65,8 @@ func SafecastV1DeviceType(deviceid uint32) (devicetype string, v2DeviceID uint32
     if deviceid > 0 && deviceid <= 999 {
         return "ngeigie", deviceid
     }
-
-	// Solarcast.  Return S/N as V1 device ID
-	sn, _ := DeviceIDToSN(deviceid)
-	if sn == 0 {
-		return "", deviceid
-	}
 	
-    return "", sn
+    return "", deviceid
 
 }
 
@@ -360,10 +354,14 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	if sd.DeviceID == nil {
 		return
 	}
-	deviceType, id := SafecastV1DeviceType(*sd.DeviceID)
-//ozzie
-	fmt.Printf("SafecastV1DeviceType(%d) -> '%s', %d\n", *sd.DeviceID, deviceType, id);
+	deviceType := SafecastDeviceType(*sd.DeviceID)
 	if deviceType != "" {
+		return
+	}
+
+	// Solarcast.  Return S/N as V1 device ID
+	id, _ := DeviceIDToSN(*sd.DeviceID)
+	if id == 0 {
 		return
 	}
 	id1 := fmt.Sprintf("%d", id*10 + 1)
