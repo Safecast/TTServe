@@ -111,7 +111,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 	tubeType := "unknown"
 	if v2DeviceID == 100 || v2DeviceID == 63 || v2DeviceID == 54 {
 		tubeType = "U712"
-	} else if v2DeviceID == 78 {
+	} else if v2DeviceID == 78 || v2DeviceID == 20105 {
 		tubeType = "W78017"
 	} else if devicetype == "ngeigie" {
 		tubeType = "U7318"
