@@ -749,6 +749,17 @@ func markVerify(mark string, reference string, fBackwards bool) (rValid bool, rO
 
     // If not, see if this is just a number of days/hrs/mins
 	minutesOffset := 0
+    if strings.HasSuffix(mark, "w") {
+        markval := strings.TrimSuffix(mark, "w")
+        i64, err := strconv.ParseInt(markval, 10, 32)
+        if err != nil {
+		    return false, fmt.Sprintf("Badly formatted number of weeks: %s", mark), ""
+        }
+		if i64 < 0 {
+			i64 = -i64
+		}
+		minutesOffset = int(i64) * 60 * 24 * 7
+    }
     if strings.HasSuffix(mark, "d") {
         markval := strings.TrimSuffix(mark, "d")
         i64, err := strconv.ParseInt(markval, 10, 32)
