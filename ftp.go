@@ -11,12 +11,11 @@ import (
     "io/ioutil"
     "os"
     "fmt"
-	ftp "github.com/fclairamb/ftpserver/server"
 )
 
 // Primary internal data structure
 var (
-    ftpServer *ftp.FtpServer
+    ftpServer *FtpServer
 )
 
 // FTPInboundHandler kicks off inbound messages coming from all sources, then serve HTTP
@@ -24,7 +23,7 @@ func FTPInboundHandler() {
 
     fmt.Printf("Now handling inbound FTP on :%d\n", TTServerFTPPort)
 
-    ftpServer = ftp.NewFtpServer(newFtpDriver())
+    ftpServer = NewFtpServer(newFtpDriver())
     err := ftpServer.ListenAndServe()
     if err != nil {
         fmt.Printf("Error listening on FTP: %s\n", err)
@@ -52,12 +51,12 @@ func newFtpDriver() *ftpDriver {
     return driver
 }
 
-func (driver *ftpDriver) WelcomeUser(cc ftp.ClientContext) (string, error) {
+func (driver *ftpDriver) WelcomeUser(cc ClientContext) (string, error) {
     cc.SetDebug(true)
     return "Welcome to TTSERVE", nil
 }
 
-func (driver *ftpDriver) AuthUser(cc ftp.ClientContext, user, pass string) (ftp.ClientHandlingDriver, error) {
+func (driver *ftpDriver) AuthUser(cc ClientContext, user, pass string) (ClientHandlingDriver, error) {
     if user == "bad" || pass == "bad" {
         return nil, errors.New("bad username or password")
     }
@@ -81,12 +80,12 @@ func (driver *ftpDriver) GetTLSConfig() (*tls.Config, error) {
     return driver.tlsConfig, nil
 }
 
-func (driver *ftpDriver) ChangeDirectory(cc ftp.ClientContext, directory string) error {
+func (driver *ftpDriver) ChangeDirectory(cc ClientContext, directory string) error {
     _, err := os.Stat(driver.baseDir + directory)
     return err
 }
 
-func (driver *ftpDriver) MakeDirectory(cc ftp.ClientContext, directory string) error {
+func (driver *ftpDriver) MakeDirectory(cc ClientContext, directory string) error {
 
     // Ftp NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
     return errors.New("MKDIR not implemented")
@@ -94,7 +93,7 @@ func (driver *ftpDriver) MakeDirectory(cc ftp.ClientContext, directory string) e
     return os.Mkdir(driver.baseDir+directory, 0777)
 }
 
-func (driver *ftpDriver) ListFiles(cc ftp.ClientContext) ([]os.FileInfo, error) {
+func (driver *ftpDriver) ListFiles(cc ClientContext) ([]os.FileInfo, error) {
 
     path := driver.baseDir + cc.Path()
 
@@ -103,11 +102,11 @@ func (driver *ftpDriver) ListFiles(cc ftp.ClientContext) ([]os.FileInfo, error) 
     return files, err
 }
 
-func (driver *ftpDriver) UserLeft(cc ftp.ClientContext) {
+func (driver *ftpDriver) UserLeft(cc ClientContext) {
 
 }
 
-func (driver *ftpDriver) OpenFile(cc ftp.ClientContext, path string, flag int) (ftp.FileStream, error) {
+func (driver *ftpDriver) OpenFile(cc ClientContext, path string, flag int) (FileStream, error) {
 
     path = driver.baseDir + path
 
@@ -125,17 +124,17 @@ func (driver *ftpDriver) OpenFile(cc ftp.ClientContext, path string, flag int) (
     return os.OpenFile(path, flag, 0666)
 }
 
-func (driver *ftpDriver) GetFileInfo(cc ftp.ClientContext, path string) (os.FileInfo, error) {
+func (driver *ftpDriver) GetFileInfo(cc ClientContext, path string) (os.FileInfo, error) {
     path = driver.baseDir + path
 
     return os.Stat(path)
 }
 
-func (driver *ftpDriver) CanAllocate(cc ftp.ClientContext, size int) (bool, error) {
+func (driver *ftpDriver) CanAllocate(cc ClientContext, size int) (bool, error) {
     return true, nil
 }
 
-func (driver *ftpDriver) ChmodFile(cc ftp.ClientContext, path string, mode os.FileMode) error {
+func (driver *ftpDriver) ChmodFile(cc ClientContext, path string, mode os.FileMode) error {
 
     // Ftp NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
     return errors.New("CHMOD not implemented")
@@ -144,7 +143,7 @@ func (driver *ftpDriver) ChmodFile(cc ftp.ClientContext, path string, mode os.Fi
     return os.Chmod(path, mode)
 }
 
-func (driver *ftpDriver) DeleteFile(cc ftp.ClientContext, path string) error {
+func (driver *ftpDriver) DeleteFile(cc ClientContext, path string) error {
 
     // Ftp NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
     return errors.New("RM not implemented")
@@ -153,7 +152,7 @@ func (driver *ftpDriver) DeleteFile(cc ftp.ClientContext, path string) error {
     return os.Remove(path)
 }
 
-func (driver *ftpDriver) RenameFile(cc ftp.ClientContext, from, to string) error {
+func (driver *ftpDriver) RenameFile(cc ClientContext, from, to string) error {
 
     // Ftp NOT IMPLEMENTED, because our FTP server is read-only root-only open-to-all
     return errors.New("MV not implemented")
@@ -163,8 +162,8 @@ func (driver *ftpDriver) RenameFile(cc ftp.ClientContext, from, to string) error
     return os.Rename(from, to)
 }
 
-func (driver *ftpDriver) GetSettings() *ftp.Settings {
-    config := &ftp.Settings{}
+func (driver *ftpDriver) GetSettings() *Settings {
+    config := &Settings{}
 	config.PublicHost = ThisServerAddressIPv4
     config.ListenHost = ""
     config.ListenPort = TTServerFTPPort
