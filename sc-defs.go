@@ -175,4 +175,8 @@ type SafecastData struct {
 	*Gateway				`json:",omitempty"`
 	*Service				`json:",omitempty"`
 
+	// For foreign devices (such as Notebox) that send data with a string identifier
+	// that needs to be hashed into a Safecast DeviceID before being ingested.
+    DeviceUID *string		`json:"device_uid,omitempty"`
+
 }

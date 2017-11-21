@@ -9,6 +9,7 @@ import (
     "io/ioutil"
     "net/http"
     "fmt"
+    "encoding/json"
 )
 
 // Handle inbound HTTP requests from Notebox's via the Notehub reporter task
@@ -35,8 +36,16 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
 
     }
 
+	// Parse it into an array of SafecastData structures
+	set := []SafecastData{}
+	err = json.Unmarshal(body, &set)
+	if err != nil {
+		fmt.Printf("*** %s cannot parse received this from %s: %s\n%s\n***\n", UploadedAt, remoteAddr, err, string(body))
+		return
+	}
+
 	// Display it
-	fmt.Printf("*** %s received this from %s\n%s\n***\n", UploadedAt, remoteAddr, string(body))
+	fmt.Printf("*** %s received this from %s\n%v\n***\n", UploadedAt, remoteAddr, set)
 
     // A real request
     stats.Count.HTTP++
