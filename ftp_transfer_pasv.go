@@ -12,8 +12,6 @@ import (
 	"net"
 	"strings"
 	"time"
-
-	"gopkg.in/inconshreveable/log15.v2"
 )
 
 // Active/Passive transfer connection handler
@@ -59,7 +57,7 @@ func (c *clientHandler) handlePASV() {
 	}
 
 	if err != nil {
-		log15.Error("Could not listen", "err", err)
+		fmt.Printf("Could not listen %s %s", "err", err)
 		return
 	}
 

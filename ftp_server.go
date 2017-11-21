@@ -11,8 +11,6 @@ import (
 	"net"
 	"sync"
 	"time"
-
-	"gopkg.in/inconshreveable/log15.v2"
 )
 
 // CommandDescription defines which function should be used and if it should be open to anyone or only logged in users
@@ -118,11 +116,11 @@ func (server *FtpServer) Listen() error {
 	)
 
 	if err != nil {
-		log15.Error("Cannot listen", "err", err)
+		fmt.Printf("Cannot listen %s %s", "err", err)
 		return err
 	}
 
-	log15.Info("Listening...", "address", server.Listener.Addr())
+	fmt.Printf("Listening... %s %s", "address", server.Listener.Addr())
 
 	return err
 }
@@ -133,7 +131,7 @@ func (server *FtpServer) Serve() {
 		connection, err := server.Listener.Accept()
 		if err != nil {
 			if server.Listener != nil {
-				log15.Error("Accept error", "err", err)
+				fmt.Printf("Accept error %s %s", "err", err)
 			}
 			break
 		}
@@ -149,7 +147,7 @@ func (server *FtpServer) ListenAndServe() error {
 		return err
 	}
 
-	log15.Info("Starting...")
+	fmt.Printf("Starting...")
 
 	server.Serve()
 
@@ -184,7 +182,7 @@ func (server *FtpServer) clientArrival(c *clientHandler) error {
 	server.connectionsByID[c.ID] = c
 	nb := len(server.connectionsByID)
 
-	log15.Info("FTP Client connected", "action", "ftp.connected", "id", c.ID, "src", c.conn.RemoteAddr(), "total", nb)
+	fmt.Printf("FTP Client connected %s %s %s %d %s %s %s %d", "action", "ftp.connected", "id", c.ID, "src", c.conn.RemoteAddr(), "total", nb)
 
 	if nb > server.Settings.MaxConnections {
 		return fmt.Errorf("Too many clients %d > %d", nb, server.Settings.MaxConnections)
@@ -200,5 +198,5 @@ func (server *FtpServer) clientDeparture(c *clientHandler) {
 
 	delete(server.connectionsByID, c.ID)
 
-	log15.Info("FTP Client disconnected", "action", "ftp.disconnected", "id", c.ID, "src", c.conn.RemoteAddr(), "total", len(server.connectionsByID))
+	fmt.Printf("FTP Client disconnected %s %s %s %d %s %s %s %d", "action", "ftp.disconnected", "id", c.ID, "src", c.conn.RemoteAddr(), "total", len(server.connectionsByID))
 }
