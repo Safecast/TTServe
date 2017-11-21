@@ -37,9 +37,9 @@ func HTTPInboundHandler() {
     http.HandleFunc(TTServerTopicGatewayStatus, inboundWebGatewayStatusHandler)
     http.HandleFunc(TTServerTopicGatewayUpdate, inboundWebGatewayUpdateHandler)
     http.HandleFunc(TTServerTopicSend, inboundWebSendHandler)
+    http.HandleFunc(TTServerTopicNotebox, inboundWebNoteboxHandler)
     http.HandleFunc(TTServerTopicRedirect1, inboundWebRedirectHandler)
     http.HandleFunc(TTServerTopicRedirect2, inboundWebRedirectHandler)
-    http.HandleFunc(TTServerTopicNotebox, inboundWebNoteboxHandler)
 
 	// Listen on the alternate HTTP port
     go func() {
