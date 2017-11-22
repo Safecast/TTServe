@@ -45,7 +45,7 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Display it
-	fmt.Printf("*** %s received this from %s\n%v\n***\n", UploadedAt, remoteAddr, set)
+	fmt.Printf("\n\n*** %s received this from %s\n%v\n%s\n***\n", UploadedAt, remoteAddr, set, body)
 
     // A real request
     stats.Count.HTTP++
