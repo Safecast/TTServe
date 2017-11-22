@@ -11,6 +11,7 @@ import (
     "fmt"
     "encoding/json"
 	"crypto/md5"
+    "github.com/google/open-location-code/go"
 )
 
 // Handle inbound HTTP requests from Notebox's via the Notehub reporter task
@@ -121,6 +122,20 @@ func ReformatFromNotebox(uploadedAt string, sd *SafecastData) (err error) {
 	}
 	sd.DeviceUID = nil
 	sd.DeviceID = &deviceID
+
+	// Convert olc to lat/lon
+	if sd.Loc != nil && sd.Loc.Olc != nil {
+		ca, err2 := olc.Decode(*sd.Loc.Olc)
+		if err2 != nil {
+			err = err2
+			return
+		}
+		lat64, lon64 := ca.Center()
+		lat32 := float32(lat64)
+		lon32 := float32(lon64)
+		sd.Loc.Lat = &lat32
+		sd.Loc.Lon = &lon32
+	}
 
 	// Done
 	return
