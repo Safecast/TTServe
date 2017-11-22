@@ -61,9 +61,9 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
         svc.Transport = &transportStr
         sd.Service = &svc
 
-        // If the data doesn't have anything useful in it, optimize it completely away.  This is
-        // observed to happen for Safecast Air from time to time
-        if sd.Opc == nil && sd.Pms == nil && sd.Env == nil && sd.Lnd == nil && sd.Bat == nil && sd.Dev == nil {
+        // If the data doesn't have anything useful in it, optimize it completely away.  This happens
+		// with data points that have nothing to do with Safecast but are stored in the notebox DB
+        if sd.Opc == nil && sd.Pms == nil && sd.Env == nil && sd.Lnd == nil && sd.Bat == nil {
             fmt.Printf("%s *** Ignoring because message contains no data\n", LogTime())
             return
         }
