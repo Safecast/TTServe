@@ -408,7 +408,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 			if info == "" {
 	            s += fmt.Sprintf(" #%d", sn)
 			} else {
-	            s += fmt.Sprintf(" #%d, %s", sn, info)
+	            s += fmt.Sprintf(" #%d (%s)", sn, info)
 			}
         }
         if label != "" {
