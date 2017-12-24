@@ -263,7 +263,7 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
             isValid, cmd := getCommand(id)
             if isValid {
                 s += fmt.Sprintf("'%s' will not be sent to %d %s", cmd.Command, id, WordsFromNumber(id))
-				cancelCommand(id)
+                cancelCommand(id)
             } else {
                 s += fmt.Sprintf("Nothing pending for %d %s", id, WordsFromNumber(id))
             }
@@ -291,7 +291,7 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
             if devices != nil {
                 for _, did := range devices {
                     isValid, cmd := getCommand(did)
-					cancelCommand(did)
+                    cancelCommand(did)
                     if isValid {
                         s += fmt.Sprintf("'%s' will not be sent to %d %s", cmd.Command, did, WordsFromNumber(did))
                     } else {
@@ -405,14 +405,17 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 
         sn, info, _ := DeviceIDToSN(id)
         if sn != 0 {
-			if info == "" {
-	            s += fmt.Sprintf(" #%d", sn)
-			} else {
-	            s += fmt.Sprintf(" #%d (%s)", sn, info)
-			}
+            if info == "" {
+                s += fmt.Sprintf(" #%d", sn)
+            } else {
+                s += fmt.Sprintf(" #%d (%s)", sn, info)
+            }
         }
-        if label != "" {
-            s += fmt.Sprintf(" \"%s\"", label)
+        // Too noisy.  Label is not super useful anymore.  Removed 2017-12-24 by Ray
+        if (false) {
+            if label != "" {
+                s += fmt.Sprintf(" \"%s\"", label)
+            }
         }
         if words != "" {
             s += fmt.Sprintf(" %s", words)
