@@ -17,6 +17,8 @@ import (
 type sheetRow struct {
     sn                  uint32
     deviceid            uint32
+    custodian           string
+    location            string
 }
 var sheet []sheetRow
 
@@ -27,61 +29,70 @@ var failedRecently bool
 var lastError string
 
 // DeviceIDToSN converts a Safecast device ID to its manufacturing serial number
-func DeviceIDToSN(DeviceID uint32) (uint32, string) {
+func DeviceIDToSN(DeviceID uint32) (sn uint32, info string, errstr string) {
     var fRetrieve bool
     var sheetData string
 
-	// Retrieve if never yet retrieved
+    // Retrieve if never yet retrieved
     if sheet == nil {
         fRetrieve = true
     }
 
-	// Cache for some time, for performance
+    // Cache for some time, for performance
     if everRetrieved && (time.Now().Sub(lastRetrieved) / time.Minute) > 15 {
         fRetrieve = true
         failedRecently = false
     }
 
-	// If we've got an error, make sure we don't thrash every time we come in here
+    // If we've got an error, make sure we don't thrash every time we come in here
     if fRetrieve && failedRecently {
-        return 0, lastError
+        return 0, "", lastError
     }
 
-	// Fetch and parse the sheet
+    // Fetch and parse the sheet
     if fRetrieve {
         rsp, err := http.Get(sheetsSolarcastTracker)
         if err != nil {
             lastError = fmt.Sprintf("%v", err)
             failedRecently = true;
-            return 0, lastError
+            return 0, "", lastError
         }
         defer rsp.Body.Close()
         buf, err := ioutil.ReadAll(rsp.Body)
         if err != nil {
             lastError = fmt.Sprintf("%v", err)
             failedRecently = true;
-            return 0, lastError
+            return 0, "", lastError
         }
 
-        // Parse the sheet
+        // Parse the sheet.  If the col numbers change, this must be changed
         sheetData = string(buf)
         sheet = nil
-
         splitContents := strings.Split(string(sheetData), "\n")
         for _, c := range splitContents {
+            var row sheetRow
             splitLine := strings.Split(c, ",")
-            if len(splitLine) >= 2 {
-                u64, err := strconv.ParseUint(splitLine[0], 10, 32)
-                if err == nil {
-                    var row sheetRow
-                    row.sn = uint32(u64)
-                    row.deviceid = 0
-                    u64, err := strconv.ParseUint(splitLine[1], 10, 32)
+            for col, val := range splitLine {
+                switch col {
+                case 0: // A
+                    u64, err := strconv.ParseUint(val, 10, 32)
+                    if err == nil {
+                        row.sn = uint32(u64)
+                    }
+                case 1: // B
+                    u64, err := strconv.ParseUint(val, 10, 32)
                     if err == nil {
                         row.deviceid = uint32(u64)
                     }
-                    sheet = append(sheet, row)
+                case 5: // F
+                    row.custodian = val
+                case 6: // G
+                    row.location = val
+
                 }
+            }
+            if row.sn != 0 && row.deviceid != 0 {
+                sheet = append(sheet, row)
             }
         }
 
@@ -98,22 +109,32 @@ func DeviceIDToSN(DeviceID uint32) (uint32, string) {
     snFound := uint32(0)
     for _, r := range sheet {
         if r.deviceid == DeviceID {
+
             deviceIDFound = true
             snFound = r.sn
+
+            // Craft an info string from the sheetRow
+            if (r.custodian == "" && r.location != "") {
+                info = fmt.Sprintf("%s", r.location)
+            } else if (r.custodian != "" && r.location == "") {
+                info = fmt.Sprintf("%s", r.custodian)
+            } else {
+                info = fmt.Sprintf("%s, %s", r.custodian, r.location)
+            }
+
             break
         }
     }
 
-	// Done
+    // Done
     if !deviceIDFound {
         lastError = "Device ID not found"
-        return 0, lastError
+        return 0, "", lastError
     }
     if snFound == 0 {
         lastError = "S/N not found for device"
-        return 0, lastError
+        return 0, "", lastError
     }
 
-    return snFound, ""
-
+    return snFound, info, ""
 }

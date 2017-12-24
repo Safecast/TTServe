@@ -360,7 +360,7 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	}
 
 	// Solarcast.  Return S/N as V1 device ID
-	id, _ := DeviceIDToSN(*sd.DeviceID)
+	id, _, _ := DeviceIDToSN(*sd.DeviceID)
 	if id == 0 {
 		return
 	}
