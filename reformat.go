@@ -13,6 +13,15 @@ import (
     "github.com/google/open-location-code/go"
 )
 
+// Determine if this is a Solarcast Nano
+func SafecastDeviceIsSolarcastNano(deviceid uint32) bool {
+	sn, _, _ := DeviceIDToSN(deviceid)
+	if sn >= 33000 && sn < 34000 {
+		return true
+	}
+	return false
+}
+
 // SafecastDeviceType returns the type of a Safecast device AS NUMBERED in our
 // V2 address space
 func SafecastDeviceType(deviceid uint32) string {
