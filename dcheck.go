@@ -1607,6 +1607,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         } else {
             s += fmt.Sprintf("   --   ")
         }
+        s += fmt.Sprintf("All sensors measured data.\n")
     }
     if ds.BatWarningCount == 0 && ds.EnvWarningCount == 0 && ds.EncWarningCount == 0 && ds.PmsWarningCount == 0 && ds.OpcWarningCount == 0 && ds.GeigerWarningCount == 0 {
         s += fmt.Sprintf("  PASS  ")
