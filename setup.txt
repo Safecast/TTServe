@@ -51,6 +51,10 @@ sudo apt-get install newrelic-sysmond
 sudo nrsysmond-config --set license_key=70e02ea3d9998dc1289ae8653d1978c9379cf0e5
 sudo systemctl start newrelic-sysmond
 
+## Add psql client
+sudo apt install postgresql-client-common
+sudo apt-get install postgresql-client
+
 ## Just make sure everything is up to date
 sudo apt-get upgrade -y
 
