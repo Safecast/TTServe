@@ -7,7 +7,6 @@ package main
 
 import (
     "fmt"
-    "time"
 )
 
 // Database info
@@ -23,15 +22,8 @@ func LogToDb(sd SafecastData) bool {
 		return false
 	}
 
-	// Create a unique ID for the record
-	randstr := fmt.Sprintf("%d", time.Now().UnixNano())
-	randstr += fmt.Sprintf(".%d", Random(0, 1000000000))
-	randstr += fmt.Sprintf(".%d", Random(0, 1000000000))
-	randstr += fmt.Sprintf(".%d", Random(0, 1000000000))
-	recordID := dbHashKey(randstr)
-
-	// Add the object
-	err = dbAddObject(dbTable, recordID, sd)
+	// Add the object with a unique ID
+	err = dbAddObject(dbTable, "", sd)
 	if err != nil {
 		fmt.Printf("db table error adding record to '%s': %s\n", dbTable, err)
 		return false

@@ -6,8 +6,9 @@
 package main
 
 import (
-	"io"
+    "io"
     "fmt"
+    "time"
     "strings"
     "strconv"
     "crypto/md5"
@@ -182,6 +183,15 @@ func dbDrop(tableName string) (err error) {
 
 // Add an object to the database
 func dbAddObject(tableName string, key string, object interface{}) (err error) {
+
+    // Create a unique ID for the record if not specified
+    if key == "" {
+        randstr := fmt.Sprintf("%d", time.Now().UnixNano())
+        randstr += fmt.Sprintf(".%d", Random(0, 1000000000))
+        randstr += fmt.Sprintf(".%d", Random(0, 1000000000))
+        randstr += fmt.Sprintf(".%d", Random(0, 1000000000))
+        key = dbHashKey(randstr)
+    }
 
     objJSON, err := json.Marshal(object)
     if err != nil {
@@ -465,7 +475,7 @@ func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *Db
                 if err == nil {
                     serial = i64
                 }
-				continue
+                continue
             }
             if raw != nil {
                 if columnsOutput != 0 {
@@ -585,9 +595,9 @@ func dbBuildQuery(appUID string, q *DbQuery) (query string, err error) {
     }
 
     // Debug to watch the queries go by
-	if (false) {
-	    fmt.Printf("QUERY: %s\n", query)
-	}
+    if (false) {
+        fmt.Printf("QUERY: %s\n", query)
+    }
 
     return
 
