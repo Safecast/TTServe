@@ -17,9 +17,9 @@ const dbTable = "data"
 func LogToDb(sd SafecastData) bool {
 
 	// Bail if the data table isn't provisioned
-	exists, err := dbTableExists(dbTable)
-	if (!exists) {
-		fmt.Printf("db table '%s' not provisioned: %s\n", dbTable, err)
+	err := dbValidateTable(dbTable, true)
+	if err != nil {
+		fmt.Printf("error opening table '%s': %s\n", dbTable, err)
 		return false
 	}
 
