@@ -150,8 +150,6 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         help += "     mark <subcommand> <markername> <args>\n"
         help += "     report <args> (type 'report' for more info)\n"
         help += "     check (same as 'report', but performs a value checkup)\n"
-        help += "Raw log database SQL query to CSV\n"
-        help += "     select <influx query>\n"
         go sendToSafecastOps(help, SlackMsgReply)
 
     case "check":
@@ -225,7 +223,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             }
         }
 
-    case "select":
+    case "iselect":
         if len(args) < 2 {
             sendToSafecastOps("Command format: SELECT <query>", SlackMsgReply)
         } else {

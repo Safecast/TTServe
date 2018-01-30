@@ -484,7 +484,7 @@ func commandParse(user string, command string, objtype string, message string) s
 
 		// Create the output file for the check
 	    file := time.Now().UTC().Format("2006-01-02-150405") + "-" + user + ".txt"
-	    outfile := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
+	    outfile := SafecastDirectory() + TTQueryPath + "/"  + file
 	    fd, err := os.OpenFile(outfile, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
 		if err != nil {
 			return fmt.Sprintf("Error creating output file: %s", err)

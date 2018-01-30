@@ -755,7 +755,7 @@ func InfluxQuery(theUser string, theDevice string, theQuery string, isCSV bool) 
 	} else {
 		file = file + ".json"
 	}
-    filename := SafecastDirectory() + TTInfluxQueryPath + "/"  + file
+    filename := SafecastDirectory() + TTQueryPath + "/"  + file
 
     // Create the output file
 	var fd *os.File

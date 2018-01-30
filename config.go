@@ -79,7 +79,7 @@ const TTCommandStatePath = "/command-state"
 // TTDeviceStatusPath (here for golint)
 const TTDeviceStatusPath = "/device-status"
 // TTInfluxQueryPath (here for golint)
-const TTInfluxQueryPath = "/influx-query"
+const TTQueryPath = "/query"
 // TTServerLogPath (here for golint)
 const TTServerLogPath = "/server-log"
 // TTServerStatusPath (here for golint)

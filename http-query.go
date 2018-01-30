@@ -22,7 +22,7 @@ func inboundWebQueryResultsHandler(rw http.ResponseWriter, req *http.Request) {
     fmt.Printf("%s Query results request for %s\n", LogTime(), filename)
 
     // Open the file
-    file := SafecastDirectory() + TTInfluxQueryPath + "/" + filename
+    file := SafecastDirectory() + TTQueryPath + "/" + filename
     fd, err := os.Open(file)
     if err != nil {
         io.WriteString(rw, ErrorString(err))
