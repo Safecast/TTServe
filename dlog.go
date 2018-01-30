@@ -27,6 +27,7 @@ func DeviceLogFilename(DeviceID uint32, Extension string) string {
 // that are updated in sequence very quickly.
 func WriteToLogs(sd SafecastData) {
     go LogToInflux(sd)
+    go LogToDb(sd)
     go WriteDeviceStatus(sd)
     go JSONDeviceLog(sd)
     go CSVDeviceLog(sd)

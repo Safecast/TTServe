@@ -20,4 +20,7 @@ type TTServeConfig struct {
 	InfluxUsername		string		`json:"influx_username,omitempty"`
 	InfluxPassword		string		`json:"influx_password,omitempty"`
 
+	// Postgres
+	SQLInfo				string		`json:"sqlinfo,omitempty"`
+
 }
