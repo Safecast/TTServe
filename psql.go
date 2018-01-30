@@ -498,7 +498,7 @@ func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *Db
 }
 
 // Build a SQL query from arguments
-func dbBuildQuery(appUID string, q *DbQuery) (query string, err error) {
+func dbBuildQuery(tableName string, q *DbQuery) (query string, err error) {
 
     // Break down the columns into []strings
     colField := []string{}
@@ -565,7 +565,7 @@ func dbBuildQuery(appUID string, q *DbQuery) (query string, err error) {
             query += colField[i] + " AS \"" + colDisplay[i] + "\""
         }
     }
-    query += " FROM " + appUID
+    query += " FROM " + tableName
     if q.Last != "" {
         clean := ""
         clean, err = filterLast(q.Last)

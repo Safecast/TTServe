@@ -218,8 +218,22 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
                 go sendSafecastDeviceSummaryToSlack(user, "== Offline ==", devicelist, true, fDetails)
                 time.Sleep(2 * time.Second)
                 go sendSafecastDeviceSummaryToSlack(user, "== Online ==", devicelist, false, fDetails)
-			} else {
+            } else {
                 sendToSafecastOps("Please use 'status <named-device-list>', using the 'device' command to manage lists. You may also use 'online' or 'offline' to see full status, but the output is *very* large.", SlackMsgReply)
+            }
+        }
+
+    case "q":
+        if len(args) < 2 {
+            sendToSafecastOps("Command format: Q <query>", SlackMsgReply)
+        } else {
+            // Unescape the string, which substitutes &gt for >
+            rawQuery := html.UnescapeString(messageAfterFirstWord)
+            fmt.Printf("\n%s *** Database query: \"%s\"\n", LogTime(), rawQuery)
+			// Perform the query
+            err = logQuery(rawQuery, true, user)
+            if err != nil {
+                fmt.Printf("QUERY ERROR: %s\n", err)
             }
         }
 
@@ -251,7 +265,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         if len(args) != 2 {
             sendToSafecastOps("Command format: cancel <deviceID>", SlackMsgReply)
         } else {
-			go sendSafecastDeviceCommand(user, args[1], "")
+            go sendSafecastDeviceCommand(user, args[1], "")
         }
 
     case "reboot-all":
@@ -280,7 +294,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
                 sendToSafecastOps("Unrecognized subcommand of 'send'", SlackMsgReply)
             }
         } else {
-			go sendSafecastDeviceCommand(user, args[1], messageAfterSecondWord)
+            go sendSafecastDeviceCommand(user, args[1], messageAfterSecondWord)
         }
 
     case "clear-logs-and-make-ray-sad":
