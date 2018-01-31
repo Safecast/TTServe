@@ -499,7 +499,6 @@ func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *Db
 
 // Build a SQL query from arguments
 func dbBuildQuery(tableName string, q *DbQuery) (query string, err error) {
-	fmt.Printf("ozzie buildquery: '%v'\n", q);
 
     // Break down the columns into []strings
     colField := []string{}

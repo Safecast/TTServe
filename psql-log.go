@@ -55,7 +55,7 @@ func logQuery(qstr string, isCSV bool, user string) error {
 	if err != nil {
 		fmt.Printf("QueryWriter error: %s\n", err)
 	}
-	fmt.Printf("QueryWriter response: %s\n", response)
+	fmt.Printf("QueryWriter response: %s file %s\n", response, file)
 
 	return nil
 }
