@@ -21,7 +21,7 @@ func logQuery(qstr string, isCSV bool, user string) error {
 	q := DbQuery{}
 	errParse := json.Unmarshal([]byte(qstr), &q)
 	if errParse != nil {
-		return fmt.Errorf("query format not recognized: %s\n", errParse)
+		return fmt.Errorf("query format not recognized: %s: %s\n", qstr, errParse)
 	}
 
 	sqlQuery, err := dbBuildQuery(dbTable, &q)
