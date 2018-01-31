@@ -21,12 +21,12 @@ func logQuery(qstr string, isCSV bool, user string) error {
 	q := DbQuery{}
 	errParse := json.Unmarshal([]byte(qstr), &q)
 	if errParse != nil {
-		return errParse
+		return fmt.Errorf("query format not recognized: %s\n", errParse)
 	}
 
 	sqlQuery, err := dbBuildQuery(dbTable, &q)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot build query: %s\n", err)
 	}
 
 	// Generate the filename
