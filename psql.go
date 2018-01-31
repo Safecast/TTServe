@@ -300,6 +300,8 @@ func dbHashKey(stringToHash string) (key string) {
 // Perform a query and output to an Writer response writer
 func dbQueryToWriter(writer io.Writer, query string, serialCol bool, q *DbQuery) (serial int64, response string, err error) {
 
+	fmt.Printf("ozzie raw sql:\n%s\n", query)
+
     // Special handling to display all tables
     var rows *sql.Rows
     rows, err = sqlDB.Query(query)
