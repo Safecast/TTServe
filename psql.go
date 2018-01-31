@@ -722,6 +722,11 @@ func filterIsIdent(ch rune, i int) bool {
 // Map an identifier to safe 'where' syntax
 func filterMapIdent(ident string, textify bool) (field string, label string, err error) {
 
+    sep := "->"
+    if textify {
+        sep = "->>"
+    }
+
     switch ident {
 
         // This is because this is so very common
@@ -743,7 +748,33 @@ func filterMapIdent(ident string, textify bool) (field string, label string, err
         field = dbFieldValue
 
     default:
-        if strings.HasPrefix(ident, ".") {
+        if strings.HasPrefix(ident, ".value.") {
+            s0 := strings.TrimPrefix(ident, ".value.")
+            s1 := strings.Split(s0, ".")
+            field = "(" + dbFieldValue + "->'value"
+            if len(s1) == 1 {
+                label = s1[0]
+                field += "'" + sep + "'"
+                field += s1[0]
+                field += "'"
+            } else if len(s1) == 2 {
+                label = s1[1]
+                field += "'->'"
+                field += s1[0]
+                field += "'->>'"
+                field += s1[1]
+                field += "'"
+            } else {
+                label = s1[len(s1)-1]
+                s2 := s1[:len(s1)-1]
+                field += "'->'"
+                field += strings.Join(s2, "'->'")
+                field += "'" + sep + "'"
+                field += s1[len(s1)-1]
+                field += "'"
+            }
+            field += ")"
+        } else if strings.HasPrefix(ident, ".") {
             err = fmt.Errorf("unrecognized keyword: %s", ident)
             return
         } else {
