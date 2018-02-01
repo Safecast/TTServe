@@ -68,6 +68,7 @@ func CheckJSON(infile string) (success bool, result string) {
         value := SafecastData{}
         err = json.Unmarshal([]byte(clean), &value)
 		if err != nil {
+			fmt.Printf("CHECK: error unmarshaling data: %s\n", err)
 			continue
 		}
 
