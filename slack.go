@@ -231,7 +231,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             rawQuery := html.UnescapeString(messageAfterFirstWord)
             fmt.Printf("\n%s *** Database query: \"%s\"\n", LogTime(), rawQuery)
 			// Perform the query
-            numRows, url, qerr := logQuery(rawQuery, true, user)
+            numRows, url, _, qerr := logQuery(rawQuery, true, user)
             if qerr != nil {
                 fmt.Printf("QUERY ERROR: %s\n", qerr)
                 sendToSafecastOps(fmt.Sprintf("Query error: %s", qerr), SlackMsgReply)

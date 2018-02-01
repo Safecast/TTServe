@@ -15,12 +15,15 @@ import (
     "encoding/json"
 )
 
+// Use Influx, or use PSQL
+const useInflux = false
+
 // Structures
 const (
     ObjDevice = "group"
     ObjMark = "mark"
     ObjReport = "report"
-	ReportHelp = "report <show, set, delete, run>\nreport <report-name>\nreport <device> <from> [<to>]\n    <device> is device name/number or device list name\n    <from> is UTC datetime or NNh/NNm *ago* or mark name\n    <to> is UTC datetime or NNh/NNm *duration* or mark name"
+    ReportHelp = "report <show, set, delete, run>\nreport <report-name>\nreport <device> <from> [<to>]\n    <device> is device name/number or device list name\n    <from> is UTC datetime or NNh/NNm *ago* or mark name\n    <to> is UTC datetime or NNh/NNm *duration* or mark name"
 )
 
 type commandObject struct {
@@ -36,8 +39,8 @@ var cachedState []commandState
 
 // DeviceRange is a span of DeviceIDs
 type DeviceRange struct {
-	Low		uint32
-	High	uint32
+    Low     uint32
+    High    uint32
 }
 
 // Statics
@@ -362,7 +365,7 @@ func commandParse(user string, command string, objtype string, message string) s
         if objtype != ObjReport {
             return fmt.Sprintf("%s is not a report.", objname)
         }
-		_, result, _ := ReportRun(user, true, messageAfterFirstArg)
+        _, result, _ := ReportRun(user, true, messageAfterFirstArg)
         return result
 
     case "add":
@@ -375,10 +378,10 @@ func commandParse(user string, command string, objtype string, message string) s
                 if d == "" {
                     continue
                 }
-				valid, result, _ := rangeVerify(d)
-				if !valid {
-	                valid, result, _ = deviceVerify(d)
-				}
+                valid, result, _ := rangeVerify(d)
+                if !valid {
+                    valid, result, _ = deviceVerify(d)
+                }
                 if !valid {
                     return result
                 }
@@ -411,10 +414,10 @@ func commandParse(user string, command string, objtype string, message string) s
                 if d == "" {
                     continue
                 }
-				valid, result, _ := rangeVerify(d)
-				if !valid {
-	                valid, result, _ = deviceVerify(d)
-				}
+                valid, result, _ := rangeVerify(d)
+                if !valid {
+                    valid, result, _ = deviceVerify(d)
+                }
                 if !valid {
                     return result
                 }
@@ -469,40 +472,39 @@ func commandParse(user string, command string, objtype string, message string) s
     // Unrecognized command.  It might just be a raw report
     if objtype == ObjReport {
 
-		// Run the report
-		if strings.ToLower(command) != "check" {
-			_, result, _ := ReportRun(user, true, message)
-	        return result
-		}
+        // Run the report
+        if strings.ToLower(command) != "check" {
+            _, result, _ := ReportRun(user, true, message)
+            return result
+        }
 
-		// Get the JSON
-		
+        // Get the JSON
         success, result, filename := ReportRun(user, false, message)
-		if !success {
-			return result
-		}
+        if !success {
+            return result
+        }
 
-		// Create the output file for the check
-	    file := time.Now().UTC().Format("2006-01-02-150405") + "-" + user + ".txt"
-	    outfile := SafecastDirectory() + TTQueryPath + "/"  + file
-	    fd, err := os.OpenFile(outfile, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
-		if err != nil {
-			return fmt.Sprintf("Error creating output file: %s", err)
-		}
-	    defer fd.Close()
+        // Create the output file for the check
+        file := time.Now().UTC().Format("2006-01-02-150405") + "-" + user + ".txt"
+        outfile := SafecastDirectory() + TTQueryPath + "/"  + file
+        fd, err := os.OpenFile(outfile, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+        if err != nil {
+            return fmt.Sprintf("Error creating output file: %s", err)
+        }
+        defer fd.Close()
 
-		// Perform the check
-		checksuccess, checkresults := CheckJSON(filename)
-		if !checksuccess {
-			return checkresults
-		}
+        // Perform the check
+        checksuccess, checkresults := CheckJSON(filename)
+        if !checksuccess {
+            return checkresults
+        }
 
-		// Write it to the file
-	    fd.WriteString(checkresults)
+        // Write it to the file
+        fd.WriteString(checkresults)
 
-		// Done
-	    url := fmt.Sprintf("http://%s%s%s", TTServerHTTPAddress, TTServerTopicQueryResults, file)
-		return fmt.Sprintf("Check results are <%s|here> and %s", url, result)
+        // Done
+        url := fmt.Sprintf("http://%s%s%s", TTServerHTTPAddress, TTServerTopicQueryResults, file)
+        return fmt.Sprintf("Check results are <%s|here> and %s", url, result)
 
     }
 
@@ -531,7 +533,7 @@ func command(user string, message string) string {
     }
 
     // Dispatch command
-	command := strings.ToLower(args[0])
+    command := strings.ToLower(args[0])
     switch command {
 
     case "devices":
@@ -553,31 +555,31 @@ func command(user string, message string) string {
 
     case "checkall":
         fallthrough
-    case "reportall": 
-		devicelist := ""
-		if len(args) > 1 {
-			devicelist = args[1]
-		}
-	    valid, _, devices, _, _ := DeviceList(user, devicelist)
-	    if !valid {
-	        return "Invalid device list"
-	    }
-		s := ""
-		for _, device := range devices {
-			newArg0 := "check"
-			if command != "checkall" {
-				newArg0 = "report"
-			}
-			newMessageAfterFirstArg := fmt.Sprintf("%d %s", device, messageAfterSecondArg)
-			if s != "" {
-				s += "\n"
-			}
-			s += commandParse(user, newArg0, ObjReport, newMessageAfterFirstArg)
-		}
-		if s == "" {
-			s = "No device specified"
-		}
-		return s
+    case "reportall":
+        devicelist := ""
+        if len(args) > 1 {
+            devicelist = args[1]
+        }
+        valid, _, devices, _, _ := DeviceList(user, devicelist)
+        if !valid {
+            return "Invalid device list"
+        }
+        s := ""
+        for _, device := range devices {
+            newArg0 := "check"
+            if command != "checkall" {
+                newArg0 = "report"
+            }
+            newMessageAfterFirstArg := fmt.Sprintf("%d %s", device, messageAfterSecondArg)
+            if s != "" {
+                s += "\n"
+            }
+            s += commandParse(user, newArg0, ObjReport, newMessageAfterFirstArg)
+        }
+        if s == "" {
+            s = "No device specified"
+        }
+        return s
     }
 
     return "Unrecognized command"
@@ -587,43 +589,43 @@ func command(user string, message string) string {
 // Parse the plus code pttern
 func plusCodePattern(code string) string {
 
-	// Turn it into a pattern by replacing the + wildcard with a single-char wildcard
-	code = strings.Replace(code, "+", ".", 1)
-	
-	// Extract the pattern, and exit if no pattern present
-	components := strings.Split(code, "~")
-	if len(components) != 2 {
-		return code
-	}
-	c := components[0]
+    // Turn it into a pattern by replacing the + wildcard with a single-char wildcard
+    code = strings.Replace(code, "+", ".", 1)
 
-	// Try to recognize the pattern
-	switch strings.ToLower(components[1]) {
+    // Extract the pattern, and exit if no pattern present
+    components := strings.Split(code, "~")
+    if len(components) != 2 {
+        return code
+    }
+    c := components[0]
 
-	default:
-		return c
-		
-	case "3m":
-		return c
-		
-	case "14m":
-		return c[0:11] + "*"
+    // Try to recognize the pattern
+    switch strings.ToLower(components[1]) {
 
-	case "275m":
-		return c[0:8] + "*"
+    default:
+        return c
 
-	case "5500m":
-		fallthrough
-	case "5.5km":
-		return c[0:6] + "*"
+    case "3m":
+        return c
 
-	case "110km":
-		return c[0:4] + "*"
+    case "14m":
+        return c[0:11] + "*"
 
-	case "2200km":
-		return c[0:2] + "*"
-		
-	}
+    case "275m":
+        return c[0:8] + "*"
+
+    case "5500m":
+        fallthrough
+    case "5.5km":
+        return c[0:6] + "*"
+
+    case "110km":
+        return c[0:4] + "*"
+
+    case "2200km":
+        return c[0:2] + "*"
+
+    }
 
 }
 
@@ -637,40 +639,40 @@ func plusCode(code string) bool {
 
 // Look up a number from two or three simple words
 func rangeVerify(what string) (bool, string, DeviceRange) {
-	var r DeviceRange
-	
+    var r DeviceRange
+
     parts := strings.Split(what, "-")
     if len(parts) != 2 {
-		return false, "Not a device range", DeviceRange{}
-	}
+        return false, "Not a device range", DeviceRange{}
+    }
 
     // See if low part parses cleanly as a number
     i64, err := strconv.ParseUint(parts[0], 10, 32)
     if err != nil {
-		return false, "Not a device range", DeviceRange{}
-	}
-	r.Low = uint32(i64)
+        return false, "Not a device range", DeviceRange{}
+    }
+    r.Low = uint32(i64)
 
     // See if high part parses cleanly as a number
     i64, err = strconv.ParseUint(parts[1], 10, 32)
     if err != nil {
-		return false, "Not a device range", DeviceRange{}
-	}
-	r.High = uint32(i64)
+        return false, "Not a device range", DeviceRange{}
+    }
+    r.High = uint32(i64)
 
-	return true, what, r
+    return true, what, r
 }
 
 // DeviceList gets a list of devices
 func DeviceList(user string, devicelist string) (rValid bool, rResult string, rExpanded []uint32, rExpandedRange []DeviceRange, rExpandedplusCodes []string) {
 
-	isrange, _, r := rangeVerify(devicelist)
+    isrange, _, r := rangeVerify(devicelist)
     isdevice, result, deviceid := deviceVerify(devicelist)
 
-	if isrange {
+    if isrange {
 
-		rExpandedRange = append(rExpandedRange, r)
-		
+        rExpandedRange = append(rExpandedRange, r)
+
     } else if isdevice {
 
         // Just a single device or plus code
@@ -687,16 +689,16 @@ func DeviceList(user string, devicelist string) (rValid bool, rResult string, rE
         if valid {
             for _, d := range strings.Split(result, ",") {
 
-				isrange, _, r := rangeVerify(d)
-			    isdevice, result, deviceid := deviceVerify(d)
+                isrange, _, r := rangeVerify(d)
+                isdevice, result, deviceid := deviceVerify(d)
 
-				if isrange {
+                if isrange {
 
-					rExpandedRange = append(rExpandedRange, r)
+                    rExpandedRange = append(rExpandedRange, r)
 
                 } else if isdevice {
-					
-			        // Append the device or plus code
+
+                    // Append the device or plus code
                     if deviceid != 0 {
                         rExpanded = append(rExpanded, deviceid)
                     } else {
@@ -748,70 +750,70 @@ func markVerify(mark string, reference string, fBackwards bool) (rValid bool, rO
     }
 
     // If not, see if this is just a number of days/hrs/mins
-	minutesOffset := 0
+    minutesOffset := 0
     if strings.HasSuffix(mark, "w") {
         markval := strings.TrimSuffix(mark, "w")
         i64, err := strconv.ParseInt(markval, 10, 32)
         if err != nil {
-		    return false, fmt.Sprintf("Badly formatted number of weeks: %s", mark), ""
+            return false, fmt.Sprintf("Badly formatted number of weeks: %s", mark), ""
         }
-		if i64 < 0 {
-			i64 = -i64
-		}
-		minutesOffset = int(i64) * 60 * 24 * 7
+        if i64 < 0 {
+            i64 = -i64
+        }
+        minutesOffset = int(i64) * 60 * 24 * 7
     }
     if strings.HasSuffix(mark, "d") {
         markval := strings.TrimSuffix(mark, "d")
         i64, err := strconv.ParseInt(markval, 10, 32)
         if err != nil {
-		    return false, fmt.Sprintf("Badly formatted number of days: %s", mark), ""
+            return false, fmt.Sprintf("Badly formatted number of days: %s", mark), ""
         }
-		if i64 < 0 {
-			i64 = -i64
-		}
-		minutesOffset = int(i64) * 60 * 24
+        if i64 < 0 {
+            i64 = -i64
+        }
+        minutesOffset = int(i64) * 60 * 24
     }
     if strings.HasSuffix(mark, "h") {
         markval := strings.TrimSuffix(mark, "h")
         i64, err := strconv.ParseInt(markval, 10, 32)
         if err != nil {
-		    return false, fmt.Sprintf("Badly formatted number of hours: %s", mark), ""
+            return false, fmt.Sprintf("Badly formatted number of hours: %s", mark), ""
         }
-		if i64 < 0 {
-			i64 = -i64
-		}
-		minutesOffset = int(i64) * 60
+        if i64 < 0 {
+            i64 = -i64
+        }
+        minutesOffset = int(i64) * 60
     }
     if strings.HasSuffix(mark, "m") {
         markval := strings.TrimSuffix(mark, "m")
         i64, err := strconv.ParseInt(markval, 10, 32)
         if err != nil {
-		    return false, fmt.Sprintf("Badly formatted number of minutes: %s", mark), ""
+            return false, fmt.Sprintf("Badly formatted number of minutes: %s", mark), ""
         }
-		if i64 < 0 {
-			i64 = -i64
-		}
-		minutesOffset = int(i64)
+        if i64 < 0 {
+            i64 = -i64
+        }
+        minutesOffset = int(i64)
     }
 
     // Verify that this is a UTC date
-	if minutesOffset == 0 {
-	    _, err := time.Parse("2006-01-02T15:04:05Z", mark)
-	    if err != nil {
-		    return false, fmt.Sprintf("Badly formatted UTC date: %s", mark), ""
-		}
+    if minutesOffset == 0 {
+        _, err := time.Parse("2006-01-02T15:04:05Z", mark)
+        if err != nil {
+            return false, fmt.Sprintf("Badly formatted UTC date: %s", mark), ""
+        }
         return true, mark, mark
-	}
+    }
 
-	// We need to offset the reference time by either a positive or negative amount of time
+    // We need to offset the reference time by either a positive or negative amount of time
     referenceTime, err := time.Parse("2006-01-02T15:04:05Z", reference)
     if err != nil {
-	    return false, fmt.Sprintf("Badly formatted UTC reference date: %s", reference), ""
-	}
+        return false, fmt.Sprintf("Badly formatted UTC reference date: %s", reference), ""
+    }
 
-	if fBackwards {
-		minutesOffset = -minutesOffset
-	}
+    if fBackwards {
+        minutesOffset = -minutesOffset
+    }
 
     return true, mark, referenceTime.UTC().Add(time.Duration(minutesOffset) * time.Minute).Format("2006-01-02T15:04:05Z")
 
@@ -841,7 +843,7 @@ func reportVerify(user string, report string) (rValid bool, rResult string, devi
     valid, result, devicelist, devicerange, pluscodelist := DeviceList(user, deviceArg)
     if valid {
         rDeviceList = devicelist
-		rDeviceRange = devicerange
+        rDeviceRange = devicerange
         rplusCodeList = pluscodelist
     } else {
         rValid = false
@@ -881,7 +883,7 @@ func reportVerify(user string, report string) (rValid bool, rResult string, devi
     }
 
     // Validate the to arg
-	valid, _, result = markVerify(toArg, rFrom, false)
+    valid, _, result = markVerify(toArg, rFrom, false)
     if valid {
         rTo = result
     } else {
@@ -911,12 +913,14 @@ func reportVerify(user string, report string) (rValid bool, rResult string, devi
 
 // ReportRun runs a report
 func ReportRun(user string, csv bool, report string) (success bool, result string, filename string) {
+	var err error
+	var numrows int
 	
     // See if there is only one arg which is the report name
     if !strings.Contains(report, " ") {
-		if report == "" {
-			return false, ReportHelp, ""
-		}
+        if report == "" {
+            return false, ReportHelp, ""
+        }
         found, value := commandObjGet(user, ObjReport, report)
         if !found {
             return false, fmt.Sprintf("Report %s not found.", report), ""
@@ -930,45 +934,97 @@ func ReportRun(user string, csv bool, report string) (success bool, result strin
         return false, result, ""
     }
 
-    // Generate base of query
-    sql := "* FROM data"
+	message := ""
+    if (useInflux) {
 
-    // Generate device filter, which is required
-    sql += " WHERE ( "
-	first := true
-    for _, d := range devices {
-        if !first {
-            sql += " OR "
-        }
-		first = false
-        sql += fmt.Sprintf("device = %d", d)
-    }
-    for _, r := range ranges {
-        if !first {
-            sql += " OR "
-        }
-		first = false
-		sql += fmt.Sprintf("( device >= %d AND device <= %d )", r.Low, r.High)
-    }
-    for _, s := range pluscodes {
-        if !first {
-            sql += " OR "
-        }
-		first = false
-        sql += fmt.Sprintf("loc_olc =~ /%s/", plusCodePattern(s))
-    }
-    sql += " )"
+        // Generate base of query
+        sql := "* FROM data"
 
-    // Generate time filter
-    sql += fmt.Sprintf(" AND ( time >= '%s' AND time < '%s' )", from, to)
+        // Generate device filter, which is required
+        sql += " WHERE ( "
+        first := true
+        for _, d := range devices {
+            if !first {
+                sql += " OR "
+            }
+            first = false
+            sql += fmt.Sprintf("device = %d", d)
+        }
+        for _, r := range ranges {
+            if !first {
+                sql += " OR "
+            }
+            first = false
+            sql += fmt.Sprintf("( device >= %d AND device <= %d )", r.Low, r.High)
+        }
+        for _, s := range pluscodes {
+            if !first {
+                sql += " OR "
+            }
+            first = false
+            sql += fmt.Sprintf("loc_olc =~ /%s/", plusCodePattern(s))
+        }
+        sql += " )"
 
-    // Execute the query
-    success, numrows, result, filename := InfluxQuery(user, deviceArg, sql, csv)
-    if !success {
-        return false, result, ""
+        // Generate time filter
+        sql += fmt.Sprintf(" AND ( time >= '%s' AND time < '%s' )", from, to)
+
+        // Execute the query
+        success, numrows, result, filename = InfluxQuery(user, deviceArg, sql, csv)
+        if !success {
+            return false, result, ""
+        }
+
+		message = fmt.Sprintf("%d rows of data for %s are <%s|here>, @%s.", numrows, deviceArg, result, user)
+
+    } else {
+
+        // Generate base of query
+        query := "{"
+
+        // Generate device filter, which is required
+		query += "\"where\":\"("
+        first := true
+        for _, d := range devices {
+            if !first {
+                query += " OR "
+            }
+            first = false
+            query += fmt.Sprintf(".value.device::bigint=%d", d)
+        }
+        for _, r := range ranges {
+            if !first {
+                query += " OR "
+            }
+            first = false
+            query += fmt.Sprintf("(.value.device::bigint>=%d AND .value.device::bigint<= %d)", r.Low, r.High)
+        }
+        query += ")"
+
+        // Generate time filter
+		t, _ := time.Parse("2006-01-02T15:04:05Z", from)
+		fromEpoch := t.Unix()
+		t, _ = time.Parse("2006-01-02T15:04:05Z", to)
+		toEpoch := t.Unix()
+        query += fmt.Sprintf(" AND (.modified>=to_timestamp(%d) AND .modified<to_timestamp(%d))", fromEpoch, toEpoch)
+
+		// End the "where"
+        query += "\""
+
+		// End the query
+        query += "}"
+		
+		numrows, result, filename, err = logQuery(query, false, user)
+		if err != nil {
+			message = fmt.Sprintf("report error: %s", err)
+			return false, message, ""
+		}
+
+		message = fmt.Sprintf("%d rows of data for %s are <%s|here>, @%s.", numrows, deviceArg, result, user)
+
     }
 
     // Done
-    return true, fmt.Sprintf("%d rows of data for %s are <%s|here>, @%s.", numrows, deviceArg, result, user), filename
+    return true, message, filename
 
 }
