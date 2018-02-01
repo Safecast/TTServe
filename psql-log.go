@@ -50,9 +50,9 @@ func logQuery(qstr string, isCSV bool, user string) error {
     // Generate the filename
     file := time.Now().UTC().Format("2006-01-02T15:04:05Z") + "-" + user
     if isCSV {
-        file = file + ".csv"
+        file = file + "." + q.Format
     } else {
-        file = file + ".json"
+        file = file + "." + q.Format
     }
     filename := SafecastDirectory() + TTQueryPath + "/"  + file
 
