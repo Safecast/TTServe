@@ -41,6 +41,15 @@ func logQuery(qstr string, isCSV bool, user string) error {
         }
     }
 
+	// If no columns specified, allow it in JSON (which dumps the whole thing), but not in CSV
+	if (q.Columns == "") {
+		if (q.Format == "json") {
+			q.Columns = ".value"
+		} else {
+	        return fmt.Errorf("columns to return must be specified using \"columns\" field")
+		}
+	}
+
     // Build a PSQL query
     sqlQuery, err := dbBuildQuery(dbTable, &q)
     if err != nil {
