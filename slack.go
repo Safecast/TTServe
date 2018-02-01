@@ -231,11 +231,13 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             rawQuery := html.UnescapeString(messageAfterFirstWord)
             fmt.Printf("\n%s *** Database query: \"%s\"\n", LogTime(), rawQuery)
 			// Perform the query
-            err = logQuery(rawQuery, true, user)
-            if err != nil {
-                fmt.Printf("QUERY ERROR: %s\n", err)
-                sendToSafecastOps(fmt.Sprintf("Query error: %s", err), SlackMsgReply)
-            }
+            numRows, url, qerr := logQuery(rawQuery, true, user)
+            if qerr != nil {
+                fmt.Printf("QUERY ERROR: %s\n", qerr)
+                sendToSafecastOps(fmt.Sprintf("Query error: %s", qerr), SlackMsgReply)
+            } else {
+                sendToSafecastOps(fmt.Sprintf("%d rows of data are <%s|here>, %s.", numRows, url, user), SlackMsgReply)
+			}
         }
 
     case "iselect":

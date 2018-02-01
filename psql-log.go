@@ -16,19 +16,20 @@ import (
 const dbTable = "data"
 
 // Query the log to a file
-func logQuery(qstr string, isCSV bool, user string) error {
+func logQuery(qstr string, isCSV bool, user string) (numResults int, url string, err error) {
 
     // Bail if the data table isn't provisioned
-    err := dbValidateTable(dbTable, true)
+    err = dbValidateTable(dbTable, true)
     if err != nil {
-        return err
+        return
     }
 
     // Unmarshal the text into a JSON query
     q := DbQuery{}
-    errParse := json.Unmarshal([]byte(qstr), &q)
-    if errParse != nil {
-        return fmt.Errorf("query format not recognized: %s: %s\n%v\n", qstr, errParse, []byte(qstr))
+    err = json.Unmarshal([]byte(qstr), &q)
+    if err != nil {
+        err = fmt.Errorf("query format not recognized: %s: %s\n%v\n", qstr, err, []byte(qstr))
+		return
     }
 
 	// If format not specified, take the default from method param
@@ -45,14 +46,16 @@ func logQuery(qstr string, isCSV bool, user string) error {
 		if (q.Format == "json") {
 			q.Columns = ".value"
 		} else {
-	        return fmt.Errorf("columns to return must be specified using \"columns\" field")
+	        err = fmt.Errorf("columns to return must be specified using \"columns\" field")
+			return
 		}
 	}
 
     // Build a PSQL query
-    sqlQuery, err := dbBuildQuery(dbTable, &q)
-    if err != nil {
-        return fmt.Errorf("cannot build query: %s\n", err)
+    sqlQuery, qerr := dbBuildQuery(dbTable, &q)
+    if qerr != nil {
+		err = fmt.Errorf("cannot build query: %s\n", qerr)
+        return 
     }
 
     // Generate the filename
@@ -62,6 +65,7 @@ func logQuery(qstr string, isCSV bool, user string) error {
     } else {
         file = file + "." + q.Format
     }
+    url = fmt.Sprintf("http://%s%s%s", TTServerHTTPAddress, TTServerTopicQueryResults, file)
     filename := SafecastDirectory() + TTQueryPath + "/"  + file
 
     // Create the output file
@@ -72,11 +76,12 @@ func logQuery(qstr string, isCSV bool, user string) error {
         fd, err = jsonNew(filename)
     }
     if err != nil {
-        return fmt.Errorf("cannot create file %s: %s", file, err)
+        err = fmt.Errorf("cannot create file %s: %s", file, err)
+		return
     }
 
     var response string
-    _, response, err = dbQueryToWriter(fd, sqlQuery, false, &q)
+    numResults, _, response, err = dbQueryToWriter(fd, sqlQuery, false, &q)
     if err != nil {
         fmt.Printf("QueryWriter error: %s\n", err)
     }
@@ -89,7 +94,7 @@ func logQuery(qstr string, isCSV bool, user string) error {
         jsonClose(fd)
     }
 
-    return err
+    return 
 }
 
 // LogToDb logs the specific safecast data point to the database

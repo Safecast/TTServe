@@ -299,7 +299,7 @@ func dbHashKey(stringToHash string) (key string) {
 }
 
 // Perform a query and output to an Writer response writer
-func dbQueryToWriter(writer io.Writer, query string, serialCol bool, q *DbQuery) (serial int64, response string, err error) {
+func dbQueryToWriter(writer io.Writer, query string, serialCol bool, q *DbQuery) (numRows int, serial int64, response string, err error) {
 
     // Special handling to display all tables
     var rows *sql.Rows
@@ -334,10 +334,10 @@ func dbQueryToWriter(writer io.Writer, query string, serialCol bool, q *DbQuery)
 
     // Dispatch based on format
     if q.Format == "" || strings.ToLower(q.Format) == "json" {
-        serial, err = dbQueryWriterInJSON(writer, rows, serialCol, q)
+        numRows, serial, err = dbQueryWriterInJSON(writer, rows, serialCol, q)
         return
     } else if strings.ToLower(q.Format) == "csv" {
-        serial, err = dbQueryWriterInCSV(writer, rows, serialCol, q)
+        numRows, serial, err = dbQueryWriterInCSV(writer, rows, serialCol, q)
         return
     }
 
@@ -347,7 +347,7 @@ func dbQueryToWriter(writer io.Writer, query string, serialCol bool, q *DbQuery)
 }
 
 // Do query to CSV
-func dbQueryWriterInCSV(writer io.Writer, rows *sql.Rows, serialCol bool, q *DbQuery) (serial int64, err error) {
+func dbQueryWriterInCSV(writer io.Writer, rows *sql.Rows, serialCol bool, q *DbQuery) (numRows int, serial int64, err error) {
 
     // Suppress the header if it's a count value
     if q.Count {
@@ -419,13 +419,14 @@ func dbQueryWriterInCSV(writer io.Writer, rows *sql.Rows, serialCol bool, q *DbQ
             columnsOutput++
         }
         io.WriteString(writer, "\n")
+		numRows++
     }
 
     return
 }
 
 // Do query to JSON
-func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *DbQuery) (serial int64, err error) {
+func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *DbQuery) (numRows int, serial int64, err error) {
 
     // Output the column names
     cols, err := rows.Columns()
@@ -458,14 +459,13 @@ func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *Db
     }
 
     // Iterate, outputing them
-    rowsOutput := 0
     for rows.Next() {
         columnsOutput = 0
         err = rows.Scan(dest...)
         if err != nil {
             break
         }
-        if rowsOutput != 0 {
+        if numRows != 0 {
             io.WriteString(writer, ",\n")
         }
         if (!isJustValue) {
@@ -498,10 +498,10 @@ func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *Db
         if (!isJustValue) {
             io.WriteString(writer, "}")
         }
-        rowsOutput++
+        numRows++
     }
 
-    if rowsOutput != 0 {
+    if numRows != 0 {
         io.WriteString(writer, "\n")
     }
     io.WriteString(writer, "]\n")
