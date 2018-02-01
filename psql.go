@@ -303,9 +303,7 @@ func dbQueryToWriter(writer io.Writer, query string, serialCol bool, q *DbQuery)
 
     // Special handling to display all tables
     var rows *sql.Rows
-    fmt.Printf("ozzie raw sql in:\n'%s'\n", query)
     rows, err = sqlDB.Query(query)
-    fmt.Printf("ozzie raw sql bck:\n'%s'\n", query)
     if err != nil {
         return
     }
