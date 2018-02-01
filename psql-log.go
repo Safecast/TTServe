@@ -37,24 +37,28 @@ func logQuery(qstr string, isCSV bool, user string) (numResults int, url string,
 		return
     }
 
-	// If format not specified, take the default from method param
-    if (q.Format == "") {
-        if (isCSV) {
-            q.Format = "csv"
-        } else {
-            q.Format = "json"
-        }
+	// Validate the format
+    if (isCSV && q.Format == "") {
+        q.Format = "csv"
+    } else {
+        q.Format = "json"
     }
-
+	switch (q.Format) {
+	case "csv":
+		isCSV = true
+	case "json":
+		isCSV = false
+	default:
+		err = fmt.Errorf("unrecognized query format: %s", q.Format)
+		return
+	}
+	
 	// If no columns specified, allow it in JSON (which dumps the whole thing), but not in CSV
 	if (q.Columns == "") {
-		if (q.Format == "json") {
-			q.Columns = ".value"
-		} else if (q.Format == "csv") {
+		if isCSV {
 			q.Columns = defaultCols
 		} else {
-	        err = fmt.Errorf("unrecognized output format")
-			return
+			q.Columns = ".value"
 		}
 	}
 
@@ -67,11 +71,7 @@ func logQuery(qstr string, isCSV bool, user string) (numResults int, url string,
 
     // Generate the filename
     file := time.Now().UTC().Format("2006-01-02-15-04-05") + "-" + user
-    if isCSV {
-        file = file + "." + q.Format
-    } else {
-        file = file + "." + q.Format
-    }
+    file = file + "." + q.Format
     url = fmt.Sprintf("http://%s%s%s", TTServerHTTPAddress, TTServerTopicQueryResults, file)
     filename = SafecastDirectory() + TTQueryPath + "/"  + file
 
