@@ -55,7 +55,7 @@ func jsonNew(filename string) (*os.File, error) {
 func jsonClose(fd *os.File) {
 
     // Write the header
-    fd.WriteString("\r\n]")
+    fd.WriteString("\r\n]\r\n")
 
     fd.Close()
 }

@@ -73,14 +73,14 @@ func logQuery(qstr string, isCSV bool, user string) (numResults int, url string,
     file := time.Now().UTC().Format("2006-01-02-15-04-05") + "-" + user
     file = file + "." + q.Format
     url = fmt.Sprintf("http://%s%s%s", TTServerHTTPAddress, TTServerTopicQueryResults, file)
-    filename = SafecastDirectory() + TTQueryPath + "/"  + file
+    filename = TTQueryPath + "/" + file
 
     // Create the output file
     var fd *os.File
     if isCSV {
-        fd, err = csvNew(filename)
+        fd, err = csvNew(SafecastDirectory() + filename)
     } else {
-        fd, err = jsonNew(filename)
+        fd, err = jsonNew(SafecastDirectory() + filename)
     }
     if err != nil {
         err = fmt.Errorf("cannot create file %s: %s", file, err)
