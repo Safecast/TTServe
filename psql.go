@@ -751,16 +751,15 @@ func filterMapIdent(ident string, textify bool) (field string, label string, err
         if strings.HasPrefix(ident, ".value.") {
             s0 := strings.TrimPrefix(ident, ".value.")
             s1 := strings.Split(s0, ".")
-//            field = "(" + dbFieldValue + "->'value"
-            field = "('" + dbFieldValue
+            field = "(" + dbFieldValue
             if len(s1) == 1 {
                 label = s1[0]
-                field += "'" + sep + "'"
+                field += sep + "'"
                 field += s1[0]
                 field += "'"
             } else if len(s1) == 2 {
                 label = s1[1]
-                field += "'->'"
+                field += "->'"
                 field += s1[0]
                 field += "'->>'"
                 field += s1[1]
@@ -768,7 +767,7 @@ func filterMapIdent(ident string, textify bool) (field string, label string, err
             } else {
                 label = s1[len(s1)-1]
                 s2 := s1[:len(s1)-1]
-                field += "'->'"
+                field += "->'"
                 field += strings.Join(s2, "'->'")
                 field += "'" + sep + "'"
                 field += s1[len(s1)-1]
