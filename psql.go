@@ -743,11 +743,16 @@ func filterMapIdent(ident string, textify bool) (field string, label string, err
         label = "modified"
         field = dbFieldModified
 
+    case ".value":
+        label = "value"
+        field = dbFieldValue
+
     default:
         if strings.HasPrefix(ident, ".value.") {
             s0 := strings.TrimPrefix(ident, ".value.")
             s1 := strings.Split(s0, ".")
-            field = "(" + dbFieldValue + "->'value"
+//            field = "(" + dbFieldValue + "->'value"
+            field = "(" + dbFieldValue
             if len(s1) == 1 {
                 label = s1[0]
                 field += "'" + sep + "'"

@@ -22,7 +22,7 @@ func logQuery(qstr string, isCSV bool, user string) error {
 	err := dbValidateTable(dbTable, true)
 	if err != nil {
 		fmt.Printf("error opening table '%s': %s\n", dbTable, err)
-		return false
+		return err
 	}
 
 	// Unmarshal the text into a JSON query
