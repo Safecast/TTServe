@@ -348,6 +348,8 @@ func dbQueryToWriter(writer io.Writer, query string, serialCol bool, q *DbQuery)
 // Do query to CSV
 func dbQueryWriterInCSV(writer io.Writer, rows *sql.Rows, serialCol bool, q *DbQuery) (serial int64, err error) {
 
+	io.WriteString(writer, "***begin\n")
+
     // Suppress the header if it's a count value
     if q.Count {
         q.NoHeader = true
@@ -382,6 +384,7 @@ func dbQueryWriterInCSV(writer io.Writer, rows *sql.Rows, serialCol bool, q *DbQ
     if !q.NoHeader {
         io.WriteString(writer, "\n")
     }
+	io.WriteString(writer, "***middle\n")
 
     // Create an array to contain the columns
     rawColArray := make([][]byte, len(cols))
@@ -419,6 +422,7 @@ func dbQueryWriterInCSV(writer io.Writer, rows *sql.Rows, serialCol bool, q *DbQ
         }
         io.WriteString(writer, "\n")
     }
+	io.WriteString(writer, "***end\n")
 
     return
 }
