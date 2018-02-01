@@ -234,6 +234,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
             err = logQuery(rawQuery, true, user)
             if err != nil {
                 fmt.Printf("QUERY ERROR: %s\n", err)
+                sendToSafecastOps(fmt.Sprintf("Query error: %s", err), SlackMsgReply)
             }
         }
 

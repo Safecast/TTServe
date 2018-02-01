@@ -21,7 +21,6 @@ func logQuery(qstr string, isCSV bool, user string) error {
     // Bail if the data table isn't provisioned
     err := dbValidateTable(dbTable, true)
     if err != nil {
-        fmt.Printf("error opening table '%s': %s\n", dbTable, err)
         return err
     }
 
@@ -90,7 +89,7 @@ func logQuery(qstr string, isCSV bool, user string) error {
         jsonClose(fd)
     }
 
-    return nil
+    return err
 }
 
 // LogToDb logs the specific safecast data point to the database
