@@ -1014,7 +1014,7 @@ func ReportRun(user string, csv bool, report string) (success bool, result strin
 		// End the query
         query += "}"
 		
-		numrows, result, filename, err = logQuery(query, false, user)
+		numrows, result, filename, err = logQuery(query, true, user)
 		if err != nil {
 			message = fmt.Sprintf("report error: %s", err)
 			return false, message, ""
