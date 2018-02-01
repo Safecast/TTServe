@@ -447,7 +447,7 @@ func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *Db
         }
     }
     isJustValue := (len(cols) == 1 && valueColumn == 0)
-	io.WriteString(writer, fmt.Sprintf("cols:%d valueColumn:%d, isJustValue:%t\n"))	//ozzie
+	io.WriteString(writer, fmt.Sprintf("cols:%d valueColumn:%d, isJustValue:%t\n", len(cols), valueColumn, isJustValue))	//ozzie
     io.WriteString(writer, "[\n")
 
     // Create an array to contain the columns
