@@ -578,6 +578,18 @@ func dbBuildQuery(tableName string, q *DbQuery) (query string, err error) {
         }
     }
     query += " FROM " + tableName
+    if q.Where != "" {
+        if q.Last != "" {
+            err = fmt.Errorf("'last' may not be used when 'where' is also used")
+            return
+        }
+        clean, _, err2 := filterExpression(q.Where)
+        if err2 != nil {
+            err = err2
+            return
+        }
+        query += fmt.Sprintf(" WHERE (%s)", clean)
+    }
     if q.Last != "" {
         clean := ""
         clean, err = filterLast(q.Last)
