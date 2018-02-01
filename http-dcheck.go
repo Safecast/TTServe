@@ -53,7 +53,8 @@ func CheckJSON(infile string) (success bool, result string) {
 	stats := NewMeasurementDataset()
 
 	// Split the contents into a number of slices based on the commas
-	splitContents := strings.Split(string(contents), "\n,")
+	ctmp := strings.Replace(string(contents), "\n,", ",\n", -1)
+	splitContents := strings.Split(ctmp, ",\n")
 	for _, c := range splitContents {
 
 		// Generate a clean json entry
