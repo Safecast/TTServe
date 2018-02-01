@@ -447,7 +447,7 @@ func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *Db
         }
     }
     isJustValue := (len(cols) == 1 && valueColumn == 0)
-	io.WriteString(writer, fmt.Sprintf("cols:%d valueColumn:%d, isJustValue:%t\n", len(cols), valueColumn, isJustValue))	//ozzie
+
     io.WriteString(writer, "[\n")
 
     // Create an array to contain the columns
@@ -469,29 +469,33 @@ func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *Db
             io.WriteString(writer, ",\n")
         }
         if (!isJustValue) {
-            io.WriteString(writer, fmt.Sprintf("%s", string(rawColArray[0])))
-        } else {
             io.WriteString(writer, "{")
-            for i, raw := range rawColArray {
-                // Do special processing for serial, in which we
-                // optimistically decode the first column to see if it
-                // is a number.  If so, the caller is interested in
-                // the very last value.
-                if serialCol && i == 0 {
-                    i64, err := strconv.ParseInt(string(raw), 10, 32)
-                    if err == nil {
-                        serial = i64
-                    }
-                    continue
+        }
+        for i, raw := range rawColArray {
+            // Do special processing for serial, in which we
+            // optimistically decode the first column to see if it
+            // is a number.  If so, the caller is interested in
+            // the very last value.
+            if serialCol && i == 0 {
+                i64, err := strconv.ParseInt(string(raw), 10, 32)
+                if err == nil {
+                    serial = i64
                 }
-                if raw != nil {
-                    if columnsOutput != 0 {
-                        io.WriteString(writer, ",")
-                    }
-                    io.WriteString(writer, fmt.Sprintf("\"%s\":%s", cols[i], string(raw)))
-                    columnsOutput++
-                }
+                continue
             }
+            if raw != nil {
+                if columnsOutput != 0 {
+                    io.WriteString(writer, ",")
+                }
+                if (isJustValue) {
+                    io.WriteString(writer, fmt.Sprintf("%s", string(raw)))
+                } else {
+                    io.WriteString(writer, fmt.Sprintf("\"%s\":%s", cols[i], string(raw)))
+                }
+                columnsOutput++
+            }
+        }
+        if (!isJustValue) {
             io.WriteString(writer, "}")
         }
         rowsOutput++
