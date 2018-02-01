@@ -37,7 +37,7 @@ const dbFieldSerial =       "serial"
 const dbFieldModified =     "modified"
 const dbFieldKey =          "key"
 const dbFieldValue =        "value"
-const dbColSeparator =		";"
+const dbColSeparator =      ";"
 
 // Database globals
 var sqlDB                   *sql.DB
@@ -303,9 +303,9 @@ func dbQueryToWriter(writer io.Writer, query string, serialCol bool, q *DbQuery)
 
     // Special handling to display all tables
     var rows *sql.Rows
-	fmt.Printf("ozzie raw sql in:\n'%s'\n", query)
+    fmt.Printf("ozzie raw sql in:\n'%s'\n", query)
     rows, err = sqlDB.Query(query)
-	fmt.Printf("ozzie raw sql bck:\n'%s'\n", query)
+    fmt.Printf("ozzie raw sql bck:\n'%s'\n", query)
     if err != nil {
         return
     }
@@ -446,6 +446,7 @@ func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *Db
             valueColumn = i
         }
     }
+    isJustValue := (len(cols) == 1 && valueColumn == 0)
 
     io.WriteString(writer, "[\n")
 
@@ -467,28 +468,32 @@ func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *Db
         if rowsOutput != 0 {
             io.WriteString(writer, ",\n")
         }
-        io.WriteString(writer, "{")
-        for i, raw := range rawColArray {
-            // Do special processing for serial, in which we
-            // optimistically decode the first column to see if it
-            // is a number.  If so, the caller is interested in
-            // the very last value.
-            if serialCol && i == 0 {
-                i64, err := strconv.ParseInt(string(raw), 10, 32)
-                if err == nil {
-                    serial = i64
+        if (!isJustValue) {
+            io.WriteString(writer, fmt.Sprintf("%s", string(rawColArray[0])))
+        } else {
+            io.WriteString(writer, "{")
+            for i, raw := range rawColArray {
+                // Do special processing for serial, in which we
+                // optimistically decode the first column to see if it
+                // is a number.  If so, the caller is interested in
+                // the very last value.
+                if serialCol && i == 0 {
+                    i64, err := strconv.ParseInt(string(raw), 10, 32)
+                    if err == nil {
+                        serial = i64
+                    }
+                    continue
                 }
-                continue
-            }
-            if raw != nil {
-                if columnsOutput != 0 {
-                    io.WriteString(writer, ",")
+                if raw != nil {
+                    if columnsOutput != 0 {
+                        io.WriteString(writer, ",")
+                    }
+                    io.WriteString(writer, fmt.Sprintf("\"%s\":%s", cols[i], string(raw)))
+                    columnsOutput++
                 }
-                io.WriteString(writer, fmt.Sprintf("\"%s\":%s", cols[i], string(raw)))
-                columnsOutput++
             }
+            io.WriteString(writer, "}")
         }
-        io.WriteString(writer, "}")
         rowsOutput++
     }
 
