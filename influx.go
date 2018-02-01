@@ -455,12 +455,12 @@ func LogToInflux(sd SafecastData) bool {
 
 // Just a debug function that traverses a Response, which took me forever to figure out
 func resultsToFile(response *influx.Response, fCSV bool, fd *os.File) int {
-	buf := make([]byte, 8192)
+    buf := make([]byte, 8192)
     fDebug := false
     fDebugMax := false
-	results := 0
-	firstrow := true
-	
+    results := 0
+    firstrow := true
+
     for _, result := range response.Results {
         // Ignore this
         if fDebug {
@@ -505,8 +505,8 @@ func resultsToFile(response *influx.Response, fCSV bool, fd *os.File) int {
                     fmt.Printf("%d: %d cols\n", i, len(v))
                 }
                 // Initialize JSON data structure
-				buflen := 0
-				buflen += copy(buf[buflen:], "{")
+                buflen := 0
+                buflen += copy(buf[buflen:], "{")
                 first := true
                 // Iterate over cells in the row
                 for k, cell := range v {
@@ -675,16 +675,16 @@ func resultsToFile(response *influx.Response, fCSV bool, fd *os.File) int {
                             if first {
                                 first = false
                             } else {
-								buflen += copy(buf[buflen:], ",")
-							}
-							buflen += copy(buf[buflen:], rowval)
+                                buflen += copy(buf[buflen:], ",")
+                            }
+                            buflen += copy(buf[buflen:], rowval)
                         }
                     }
 
                 }
 
                 // End the JSON structure
-				buflen += copy(buf[buflen:], "}")
+                buflen += copy(buf[buflen:], "}")
 
                 // Unmarshal it to Safecast data
                 sd := SafecastData{}
@@ -693,36 +693,36 @@ func resultsToFile(response *influx.Response, fCSV bool, fd *os.File) int {
                     fmt.Printf("\nError unmarshaling %s:\n%s\n", err, string(buf[0:buflen]))
                 } else {
 
-					// Append a row to the file
-					if fCSV {
-						csvAppend(fd, &sd, firstrow)
-					} else {
-						jsonAppend(fd, &sd, firstrow)
-					}
-					firstrow = false
-					
-					// Bump the number of successful results
-					results++
+                    // Append a row to the file
+                    if fCSV {
+                        csvAppend(fd, &sd, firstrow)
+                    } else {
+                        jsonAppend(fd, &sd, firstrow)
+                    }
+                    firstrow = false
+
+                    // Bump the number of successful results
+                    results++
 
                 }
 
             }
         }
         if fDebug {
-			fmt.Printf("** %d Results so far **\n", results)
-		}
+            fmt.Printf("** %d Results so far **\n", results)
+        }
     }
 
-	return results
-	
+    return results
+
 }
 
 // InfluxQuery performs a query, returning either an URL to results or an error message
 func InfluxQuery(theUser string, theDevice string, theQuery string, isCSV bool) (success bool, numresults int, result string, resultfilename string) {
 
-	// Request for influx query
-	fmt.Printf("\n*** %s requested query '%s'\n", theUser, theQuery)
-	
+    // Request for influx query
+    fmt.Printf("\n*** %s requested query '%s'\n", theUser, theQuery)
+
     // Remap unicode characters (such as single quotes) to ASCII equivalents
     theQuery = RemapCommonUnicodeToASCII(theQuery)
 
@@ -748,38 +748,43 @@ func InfluxQuery(theUser string, theDevice string, theQuery string, isCSV bool) 
         return false, 0, fmt.Sprintf("%v", response.Error()), ""
     }
 
-	// Generate the filename
+    // Generate the filename
     file := time.Now().UTC().Format("2006-01-02") + "-" + theDevice + "-" + theUser
-	if isCSV {
-		file = file + ".csv"
-	} else {
-		file = file + ".json"
-	}
+    if isCSV {
+        file = file + ".csv"
+    } else {
+        file = file + ".json"
+    }
     filename := SafecastDirectory() + TTQueryPath + "/"  + file
 
     // Create the output file
-	var fd *os.File
-	var err error
-	if isCSV {
-		fd, err = csvNew(filename)
-	} else {
-		fd, err = jsonNew(filename)
-	}
+    var fd *os.File
+    var err error
+    if isCSV {
+        fd, err = csvNew(filename)
+    } else {
+        fd, err = jsonNew(filename)
+    }
     if err != nil {
         return false, 0, fmt.Sprintf("cannot create file: %s", err), ""
+    }
+
+    // If CSV, append the header
+    if isCSV {
+		csvAppendHeader(fd)
     }
 
     // Convert to CSV
     rows := resultsToFile(response, isCSV, fd)
 
-	// Close the file
-	if isCSV {
-		csvClose(fd)
-	} else {
-		jsonClose(fd)
-	}
+    // Close the file
+    if isCSV {
+        csvClose(fd)
+    } else {
+        jsonClose(fd)
+    }
 
-	// Exit if no results
+    // Exit if no results
     if rows == 0 {
         return false, 0, "No results.", ""
     }

@@ -43,9 +43,6 @@ func csvNew(filename string) (*os.File, error) {
         return nil, err
     }
 
-    // Write the header
-    fd.WriteString("service_uploaded,when_captured,device,lnd_7318u,lnd_7318c,lnd_7128ec,loc_when_motion_began,loc_olc,loc_lat,loc_lon,loc_alt,bat_voltage,bat_charge,bat_current,env_temp,env_humid,env_press,enc_temp,enc_humid,enc_press,pms_pm01_0,pms_std01_0,pms_pm02_5,pms_std02_5,pms_pm10_0,pms_std10_0,pms_c00_30,pms_c00_50,pms_c01_00,pms_c02_50,pms_c05_00,pms_c10_00,pms_csecs,opc_pm01_0,opc_std01_0,opc_pm02_5,opc_std02_5,opc_pm10_0,opc_std10_0,opc_c00_38,opc_c00_54,opc_c01_00,opc_c02_10,opc_c05_00,opc_c10_00,opc_csecs,service_transport,gateway_lora_snr,service_handler,dev_test,dev_label,dev_uptime,dev_firmware,dev_cfgdev,dev_cfgsvc,dev_cfgttn,dev_cfggps,dev_cfgsen,dev_transmitted_bytes,dev_received_bytes,dev_comms_resets,dev_comms_failures,dev_comms_power_fails,dev_restarts,dev_motion_events,dev_oneshots,dev_oneshot_seconds,dev_iccid,dev_cpsi,dev_dfu,dev_free_memory,dev_ntp_count,dev_last_failure,dev_status,dev_module_lora,dev_module_fona,dev_err_opc,dev_err_pms,dev_err_bme0,dev_err_bme1,dev_err_lora,dev_err_fona,dev_err_geiger,dev_err_max01,dev_err_ugps,dev_err_twi,dev_err_twi_info,dev_err_lis,dev_err_spi,dev_err_con_lora,dev_err_con_fona,dev_err_con_wireless,dev_err_con_data,dev_err_con_service,dev_err_con_gateway,dev_comms_ant_fails,lnd_712u,lnd_78017w,dev_motion,dev_overcurrent_events,dev_err_mtu,dev_seqno\r\n")
-
     // Done
     return fd, nil
 
@@ -54,6 +51,11 @@ func csvNew(filename string) (*os.File, error) {
 // Done
 func csvClose(fd *os.File) {
     fd.Close()
+}
+
+// Append the header that's appropriate for what csvAppend will output
+func csvAppendHeader(fd *os.File) {
+    fd.WriteString("service_uploaded,when_captured,device,lnd_7318u,lnd_7318c,lnd_7128ec,loc_when_motion_began,loc_olc,loc_lat,loc_lon,loc_alt,bat_voltage,bat_charge,bat_current,env_temp,env_humid,env_press,enc_temp,enc_humid,enc_press,pms_pm01_0,pms_std01_0,pms_pm02_5,pms_std02_5,pms_pm10_0,pms_std10_0,pms_c00_30,pms_c00_50,pms_c01_00,pms_c02_50,pms_c05_00,pms_c10_00,pms_csecs,opc_pm01_0,opc_std01_0,opc_pm02_5,opc_std02_5,opc_pm10_0,opc_std10_0,opc_c00_38,opc_c00_54,opc_c01_00,opc_c02_10,opc_c05_00,opc_c10_00,opc_csecs,service_transport,gateway_lora_snr,service_handler,dev_test,dev_label,dev_uptime,dev_firmware,dev_cfgdev,dev_cfgsvc,dev_cfgttn,dev_cfggps,dev_cfgsen,dev_transmitted_bytes,dev_received_bytes,dev_comms_resets,dev_comms_failures,dev_comms_power_fails,dev_restarts,dev_motion_events,dev_oneshots,dev_oneshot_seconds,dev_iccid,dev_cpsi,dev_dfu,dev_free_memory,dev_ntp_count,dev_last_failure,dev_status,dev_module_lora,dev_module_fona,dev_err_opc,dev_err_pms,dev_err_bme0,dev_err_bme1,dev_err_lora,dev_err_fona,dev_err_geiger,dev_err_max01,dev_err_ugps,dev_err_twi,dev_err_twi_info,dev_err_lis,dev_err_spi,dev_err_con_lora,dev_err_con_fona,dev_err_con_wireless,dev_err_con_data,dev_err_con_service,dev_err_con_gateway,dev_comms_ant_fails,lnd_712u,lnd_78017w,dev_motion,dev_overcurrent_events,dev_err_mtu,dev_seqno\r\n")
 }
 
 // Append a measurement to the dataset
@@ -76,11 +78,11 @@ func csvAppend(fd *os.File, sd *SafecastData, first bool) {
     s += ","
     if sd.CapturedAt != nil {
         t, err = time.Parse("2006-01-02T15:04:05Z", *sd.CapturedAt)
-		// Handle Safecast Air's misformatted captured at dates
-		if err != nil {
-	        t, err = time.Parse("2006-1-2T15:4:5Z", *sd.CapturedAt)
-		}
-		// If no error, reformat it
+        // Handle Safecast Air's misformatted captured at dates
+        if err != nil {
+            t, err = time.Parse("2006-1-2T15:4:5Z", *sd.CapturedAt)
+        }
+        // If no error, reformat it
         if err == nil {
             s += t.UTC().Format("2006-01-02 15:04:05")
         } else {
@@ -471,100 +473,100 @@ func csvAppend(fd *os.File, sd *SafecastData, first bool) {
         s += ","
     }
     if sd.Dev != nil && sd.Dev.ErrorsOpc != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsOpc)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsOpc)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsPms != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsPms)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsPms)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsBme0 != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsBme0)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsBme0)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsBme1 != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsBme1)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsBme1)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsLora != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsLora)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsLora)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsFona != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsFona)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsFona)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsGeiger != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsGeiger)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsGeiger)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsMax01 != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsMax01)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsMax01)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsUgps != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsUgps)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsUgps)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsTwi != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsTwi)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsTwi)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsTwiInfo != nil {
-		s += fmt.Sprintf(",%s", *sd.Dev.ErrorsTwiInfo)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%s", *sd.Dev.ErrorsTwiInfo)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsLis != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsLis)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsLis)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsSpi != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsSpi)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsSpi)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsConnectLora != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectLora)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectLora)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsConnectFona != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectFona)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectFona)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsConnectWireless != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectWireless)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectWireless)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsConnectData != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectData)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectData)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsConnectService != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectService)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectService)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.ErrorsConnectGateway != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectGateway)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsConnectGateway)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.CommsAntFails != nil {
         s += fmt.Sprintf(",%d", *sd.Dev.CommsAntFails)
     } else {
@@ -592,15 +594,15 @@ func csvAppend(fd *os.File, sd *SafecastData, first bool) {
         s += ","
     }
     if sd.Dev != nil && sd.Dev.ErrorsMtu != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.ErrorsMtu)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsMtu)
+    } else {
+        s += ","
+    }
     if sd.Dev != nil && sd.Dev.Seqno != nil {
-		s += fmt.Sprintf(",%d", *sd.Dev.Seqno)
-	} else {
-		s += ","
-	}
+        s += fmt.Sprintf(",%d", *sd.Dev.Seqno)
+    } else {
+        s += ","
+    }
 
     s = s + "\r\n"
 
