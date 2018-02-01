@@ -449,7 +449,7 @@ func dbQueryWriterInJSON(writer io.Writer, rows *sql.Rows, serialCol bool, q *Db
     }
     isJustValue := (len(cols) == 1 && valueColumn == 0)
 
-    io.WriteString(writer, "[\n")
+    io.WriteString(writer, "xxx[\n")
 
     // Create an array to contain the columns
     rawColArray := make([][]byte, len(cols))
