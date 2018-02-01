@@ -752,7 +752,7 @@ func filterMapIdent(ident string, textify bool) (field string, label string, err
             s0 := strings.TrimPrefix(ident, ".value.")
             s1 := strings.Split(s0, ".")
 //            field = "(" + dbFieldValue + "->'value"
-            field = "(" + dbFieldValue
+            field = "('" + dbFieldValue
             if len(s1) == 1 {
                 label = s1[0]
                 field += "'" + sep + "'"
