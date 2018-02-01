@@ -37,6 +37,7 @@ const dbFieldSerial =       "serial"
 const dbFieldModified =     "modified"
 const dbFieldKey =          "key"
 const dbFieldValue =        "value"
+const dbColSeparator =		";"
 
 // Database globals
 var sqlDB                   *sql.DB
@@ -348,8 +349,6 @@ func dbQueryToWriter(writer io.Writer, query string, serialCol bool, q *DbQuery)
 // Do query to CSV
 func dbQueryWriterInCSV(writer io.Writer, rows *sql.Rows, serialCol bool, q *DbQuery) (serial int64, err error) {
 
-	io.WriteString(writer, "***begin\n")
-
     // Suppress the header if it's a count value
     if q.Count {
         q.NoHeader = true
@@ -384,7 +383,6 @@ func dbQueryWriterInCSV(writer io.Writer, rows *sql.Rows, serialCol bool, q *DbQ
     if !q.NoHeader {
         io.WriteString(writer, "\n")
     }
-	io.WriteString(writer, "***middle\n")
 
     // Create an array to contain the columns
     rawColArray := make([][]byte, len(cols))
@@ -422,7 +420,6 @@ func dbQueryWriterInCSV(writer io.Writer, rows *sql.Rows, serialCol bool, q *DbQ
         }
         io.WriteString(writer, "\n")
     }
-	io.WriteString(writer, "***end\n")
 
     return
 }
@@ -511,7 +508,7 @@ func dbBuildQuery(tableName string, q *DbQuery) (query string, err error) {
     colDisplay := []string{}
     numCols := 0
     if q.Columns != "" {
-        for colNo, col := range strings.Split(q.Columns, ";") {
+        for colNo, col := range strings.Split(q.Columns, dbColSeparator) {
 
             // Break it into display name and expression
             components := strings.SplitN(col, ":", 2)

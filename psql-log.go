@@ -63,7 +63,6 @@ func logQuery(qstr string, isCSV bool, user string) error {
     if err != nil {
         return fmt.Errorf("cannot create file %s: %s", file, err)
     }
-    defer fd.Close()
 	
 	var response string
 	_, response, err = dbQueryToWriter(fd, sqlQuery, false, &q)
@@ -72,6 +71,13 @@ func logQuery(qstr string, isCSV bool, user string) error {
 	}
 	fmt.Printf("QueryWriter response: %s file %s\n", response, file)
 
+	// Done, after writing the footer
+	if isCSV {
+		csvClose(fd)
+	} else {
+		jsonClose(fd)
+	}
+	
 	return nil
 }
 
