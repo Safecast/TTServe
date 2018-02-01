@@ -18,6 +18,14 @@ const dbTable = "data"
 // Query the log to a file
 func logQuery(qstr string, isCSV bool, user string) error {
 
+	// Bail if the data table isn't provisioned
+	err := dbValidateTable(dbTable, true)
+	if err != nil {
+		fmt.Printf("error opening table '%s': %s\n", dbTable, err)
+		return false
+	}
+
+	// Unmarshal the text into a JSON query
 	q := DbQuery{}
 	errParse := json.Unmarshal([]byte(qstr), &q)
 	if errParse != nil {
@@ -30,7 +38,7 @@ func logQuery(qstr string, isCSV bool, user string) error {
 		q.Format = "json"
 	}
 	
-
+	// Build a PSQL query
 	sqlQuery, err := dbBuildQuery(dbTable, &q)
 	if err != nil {
 		return fmt.Errorf("cannot build query: %s\n", err)

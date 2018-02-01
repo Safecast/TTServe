@@ -743,10 +743,6 @@ func filterMapIdent(ident string, textify bool) (field string, label string, err
         label = "modified"
         field = dbFieldModified
 
-    case ".value":  // Let's try to keep this undocumented because there's no good reason to expose the note structure
-        label = "value"
-        field = dbFieldValue
-
     default:
         if strings.HasPrefix(ident, ".value.") {
             s0 := strings.TrimPrefix(ident, ".value.")
