@@ -69,6 +69,15 @@ func logQuery(qstr string, isCSV bool, user string) (numResults int, url string,
         return 
     }
 
+	// Debug
+	if (true) {
+		fmt.Printf("////////////////////\n")
+		fmt.Printf("////////////////////\n")
+		fmt.Printf("%s\n", sqlQuery)
+		fmt.Printf("////////////////////\n")
+		fmt.Printf("////////////////////\n")
+	}
+
     // Generate the filename
     file := time.Now().UTC().Format("2006-01-02-15-04-05") + "-" + user
     file = file + "." + q.Format
