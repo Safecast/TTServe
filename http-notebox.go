@@ -40,7 +40,15 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Parse it into an array of SafecastData structures
     set := []SafecastData{}
-    err = json.Unmarshal(body, &set)
+	if body[0] == '{' {
+		one := SafecastData{}
+	    err = json.Unmarshal(body, &one)
+		set = append(set, one)
+	} else if body[0] == '[' {
+	    err = json.Unmarshal(body, &set)
+	} else {
+		err = fmt.Errorf("does not appear to be JSON or a JSON array")
+	}
     if err != nil {
         fmt.Printf("*** %s cannot parse received this from %s: %s\n%s\n***\n", UploadedAt, remoteAddr, err, string(body))
         return
