@@ -19,6 +19,18 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
     var body []byte
     var err error
 
+	//OZZIE
+	testdata := "{\"device_urn\":\"stm32:5836501000260020\",\"lnd_7128ec\":18.879999,\"lnd_7318u\":38.73000000000001,\"when_captured\":\"2018-02-09T18:25:50Z\"}"
+    testsd := []SafecastData{}
+    err = json.Unmarshal([]byte(testdata), &testsd)
+    if err != nil {
+        fmt.Printf("*** %s\n%s\n***\n", err, string(body))
+        return
+    } else {
+		fmt.Printf("ok\n")
+	}
+	return
+	//OZZIE
     // Remember when it was uploaded to us
     UploadedAt := NowInUTC()
 
