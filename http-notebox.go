@@ -104,11 +104,11 @@ func ReformatFromNotebox(uploadedAt string, sd *SafecastData) (err error) {
     sd.Dev.Test = &isTest
 
 	// Convert from a device name to device number
-	if sd.DeviceUID == nil {
-		err = fmt.Errorf("missing device UID")
+	if sd.DeviceURN == nil {
+		err = fmt.Errorf("missing device URN")
 		return;
 	}
-	hash := md5.Sum([]byte(*sd.DeviceUID))
+	hash := md5.Sum([]byte(*sd.DeviceURN))
 	var deviceID uint32 = 0
 	for i:=0; i<len(hash); i++ {
 		x := uint32(hash[i]) << (uint(i) % 4)
@@ -120,7 +120,7 @@ func ReformatFromNotebox(uploadedAt string, sd *SafecastData) (err error) {
     if (deviceID < 1048576) {
         deviceID = ^deviceID;
 	}
-	sd.DeviceUID = nil
+	sd.DeviceURN = nil
 	sd.DeviceID = &deviceID
 
 	// Convert olc to lat/lon

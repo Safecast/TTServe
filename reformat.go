@@ -132,6 +132,8 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 
 	// Device ID
     sd.DeviceID = &v2DeviceID
+	urn := fmt.Sprintf("safecast:%d", v2DeviceID)
+	sd.DeviceURN = &urn
 
     // Captured
     if v1.CapturedAt != nil {
