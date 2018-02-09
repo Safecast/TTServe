@@ -128,7 +128,6 @@ func ReformatFromNotebox(uploadedAt string, sd *SafecastData) (err error) {
     if (deviceID < 1048576) {
         deviceID = ^deviceID;
 	}
-	sd.DeviceURN = nil
 	sd.DeviceID = &deviceID
 
 	// Convert olc to lat/lon
