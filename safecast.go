@@ -63,7 +63,11 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
     sd.DeviceID = &did
 
 	// Add our new device ID field
-	urn := fmt.Sprintf("safecast:%d", did)
+	devicetype := SafecastDeviceType(did)
+	if devicetype == "" {
+		devicetype = "safecast"
+	}
+	urn := fmt.Sprintf("%s:%d", devicetype)
 	sd.DeviceURN = &urn
 
     // CapturedAt

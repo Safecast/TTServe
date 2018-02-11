@@ -46,7 +46,7 @@ func SafecastDeviceType(deviceid uint32) string {
         return "ngeigie"
     }
 
-	// Unknown (or solarcast)
+	// Unknown device type
 	return ""
 	
 }
@@ -132,7 +132,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 
 	// Device ID
     sd.DeviceID = &v2DeviceID
-	urn := fmt.Sprintf("safecast:%d", v2DeviceID)
+	urn := fmt.Sprintf("%s:%d", devicetype, v2DeviceID)
 	sd.DeviceURN = &urn
 
     // Captured
