@@ -175,6 +175,48 @@ func LogToInflux(sd SafecastData) bool {
         }
     }
 
+    if sd.Pms2 != nil {
+        if sd.Pms2.Pm01_0 != nil {
+            fields["pms2_pm01_0"] = *sd.Pms2.Pm01_0
+        }
+        if sd.Pms2.Pm02_5 != nil {
+            fields["pms2_pm02_5"] = *sd.Pms2.Pm02_5
+        }
+        if sd.Pms2.Pm10_0 != nil {
+            fields["pms2_pm10_0"] = *sd.Pms2.Pm10_0
+        }
+        if sd.Pms2.Std01_0 != nil {
+            fields["pms2_std01_0"] = *sd.Pms2.Std01_0
+        }
+        if sd.Pms2.Std02_5 != nil {
+            fields["pms2_std02_5"] = *sd.Pms2.Std02_5
+        }
+        if sd.Pms2.Std10_0 != nil {
+            fields["pms2_std10_0"] = *sd.Pms2.Std10_0
+        }
+        if sd.Pms2.Count00_30 != nil {
+            fields["pms2_c00_30"] = *sd.Pms2.Count00_30
+        }
+        if sd.Pms2.Count00_50 != nil {
+            fields["pms2_c00_50"] = *sd.Pms2.Count00_50
+        }
+        if sd.Pms2.Count01_00 != nil {
+            fields["pms2_c01_00"] = *sd.Pms2.Count01_00
+        }
+        if sd.Pms2.Count02_50 != nil {
+            fields["pms2_c02_50"] = *sd.Pms2.Count02_50
+        }
+        if sd.Pms2.Count05_00 != nil {
+            fields["pms2_c05_00"] = *sd.Pms2.Count05_00
+        }
+        if sd.Pms2.Count10_00 != nil {
+            fields["pms2_c10_00"] = *sd.Pms2.Count10_00
+        }
+        if sd.Pms2.CountSecs != nil {
+            fields["pms2_csecs"] = *sd.Pms2.CountSecs
+        }
+    }
+
     if sd.Opc != nil {
         if sd.Opc.Pm01_0 != nil {
             fields["opc_pm01_0"] = *sd.Opc.Pm01_0
@@ -322,6 +364,9 @@ func LogToInflux(sd SafecastData) bool {
         }
         if sd.Dev.ErrorsPms != nil {
             fields["dev_err_pms"] = *sd.Dev.ErrorsPms
+        }
+        if sd.Dev.ErrorsPms2 != nil {
+            fields["dev_err_pms2"] = *sd.Dev.ErrorsPms2
         }
         if sd.Dev.ErrorsBme0 != nil {
             fields["dev_err_bme0"] = *sd.Dev.ErrorsBme0

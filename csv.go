@@ -55,7 +55,7 @@ func csvClose(fd *os.File) {
 
 // Append the header that's appropriate for what csvAppend will output
 func csvAppendHeader(fd *os.File) {
-    fd.WriteString("service_uploaded,when_captured,device,lnd_7318u,lnd_7318c,lnd_7128ec,loc_when_motion_began,loc_olc,loc_lat,loc_lon,loc_alt,bat_voltage,bat_charge,bat_current,env_temp,env_humid,env_press,enc_temp,enc_humid,enc_press,pms_pm01_0,pms_std01_0,pms_pm02_5,pms_std02_5,pms_pm10_0,pms_std10_0,pms_c00_30,pms_c00_50,pms_c01_00,pms_c02_50,pms_c05_00,pms_c10_00,pms_csecs,opc_pm01_0,opc_std01_0,opc_pm02_5,opc_std02_5,opc_pm10_0,opc_std10_0,opc_c00_38,opc_c00_54,opc_c01_00,opc_c02_10,opc_c05_00,opc_c10_00,opc_csecs,service_transport,gateway_lora_snr,service_handler,dev_test,dev_label,dev_uptime,dev_firmware,dev_cfgdev,dev_cfgsvc,dev_cfgttn,dev_cfggps,dev_cfgsen,dev_transmitted_bytes,dev_received_bytes,dev_comms_resets,dev_comms_failures,dev_comms_power_fails,dev_restarts,dev_motion_events,dev_oneshots,dev_oneshot_seconds,dev_iccid,dev_cpsi,dev_dfu,dev_free_memory,dev_ntp_count,dev_last_failure,dev_status,dev_module_lora,dev_module_fona,dev_err_opc,dev_err_pms,dev_err_bme0,dev_err_bme1,dev_err_lora,dev_err_fona,dev_err_geiger,dev_err_max01,dev_err_ugps,dev_err_twi,dev_err_twi_info,dev_err_lis,dev_err_spi,dev_err_con_lora,dev_err_con_fona,dev_err_con_wireless,dev_err_con_data,dev_err_con_service,dev_err_con_gateway,dev_comms_ant_fails,lnd_712u,lnd_78017w,dev_motion,dev_overcurrent_events,dev_err_mtu,dev_seqno\r\n")
+    fd.WriteString("service_uploaded,when_captured,device,lnd_7318u,lnd_7318c,lnd_7128ec,loc_when_motion_began,loc_olc,loc_lat,loc_lon,loc_alt,bat_voltage,bat_charge,bat_current,env_temp,env_humid,env_press,enc_temp,enc_humid,enc_press,pms_pm01_0,pms_std01_0,pms_pm02_5,pms_std02_5,pms_pm10_0,pms_std10_0,pms_c00_30,pms_c00_50,pms_c01_00,pms_c02_50,pms_c05_00,pms_c10_00,pms_csecs,pms2_pm01_0,pms2_std01_0,pms2_pm02_5,pms2_std02_5,pms2_pm10_0,pms2_std10_0,pms2_c00_30,pms2_c00_50,pms2_c01_00,pms2_c02_50,pms2_c05_00,pms2_c10_00,pms2_csecs,opc_pm01_0,opc_std01_0,opc_pm02_5,opc_std02_5,opc_pm10_0,opc_std10_0,opc_c00_38,opc_c00_54,opc_c01_00,opc_c02_10,opc_c05_00,opc_c10_00,opc_csecs,service_transport,gateway_lora_snr,service_handler,dev_test,dev_label,dev_uptime,dev_firmware,dev_cfgdev,dev_cfgsvc,dev_cfgttn,dev_cfggps,dev_cfgsen,dev_transmitted_bytes,dev_received_bytes,dev_comms_resets,dev_comms_failures,dev_comms_power_fails,dev_restarts,dev_motion_events,dev_oneshots,dev_oneshot_seconds,dev_iccid,dev_cpsi,dev_dfu,dev_free_memory,dev_ntp_count,dev_last_failure,dev_status,dev_module_lora,dev_module_fona,dev_err_opc,dev_err_pms,dev_err_pms2,dev_err_bme0,dev_err_bme1,dev_err_lora,dev_err_fona,dev_err_geiger,dev_err_max01,dev_err_ugps,dev_err_twi,dev_err_twi_info,dev_err_lis,dev_err_spi,dev_err_con_lora,dev_err_con_fona,dev_err_con_wireless,dev_err_con_data,dev_err_con_service,dev_err_con_gateway,dev_comms_ant_fails,lnd_712u,lnd_78017w,dev_motion,dev_overcurrent_events,dev_err_mtu,dev_seqno\r\n")
 }
 
 // Append a measurement to the dataset
@@ -253,6 +253,72 @@ func csvAppend(fd *os.File, sd *SafecastData, first bool) {
         s += ","
     }
 
+    if sd.Pms2 != nil && sd.Pms2.Pm01_0 != nil {
+        s += fmt.Sprintf(",%f", *sd.Pms2.Pm01_0)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.Std01_0 != nil {
+        s += fmt.Sprintf(",%f", *sd.Pms2.Std01_0)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.Pm02_5 != nil {
+        s += fmt.Sprintf(",%f", *sd.Pms2.Pm02_5)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.Std02_5 != nil {
+        s += fmt.Sprintf(",%f", *sd.Pms2.Std02_5)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.Pm10_0 != nil {
+        s += fmt.Sprintf(",%f", *sd.Pms2.Pm10_0)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.Std10_0 != nil {
+        s += fmt.Sprintf(",%f", *sd.Pms2.Std10_0)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.Count00_30 != nil {
+        s += fmt.Sprintf(",%d", *sd.Pms2.Count00_30)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.Count00_50 != nil {
+        s += fmt.Sprintf(",%d", *sd.Pms2.Count00_50)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.Count01_00 != nil {
+        s += fmt.Sprintf(",%d", *sd.Pms2.Count01_00)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.Count02_50 != nil {
+        s += fmt.Sprintf(",%d", *sd.Pms2.Count02_50)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.Count05_00 != nil {
+        s += fmt.Sprintf(",%d", *sd.Pms2.Count05_00)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.Count10_00 != nil {
+        s += fmt.Sprintf(",%d", *sd.Pms2.Count10_00)
+    } else {
+        s += ","
+    }
+    if sd.Pms2 != nil && sd.Pms2.CountSecs != nil {
+        s += fmt.Sprintf(",%d", *sd.Pms2.CountSecs)
+    } else {
+        s += ","
+    }
+	
     if sd.Opc != nil && sd.Opc.Pm01_0 != nil {
         s += fmt.Sprintf(",%f", *sd.Opc.Pm01_0)
     } else {
@@ -479,6 +545,11 @@ func csvAppend(fd *os.File, sd *SafecastData, first bool) {
     }
     if sd.Dev != nil && sd.Dev.ErrorsPms != nil {
         s += fmt.Sprintf(",%d", *sd.Dev.ErrorsPms)
+    } else {
+        s += ","
+    }
+    if sd.Dev != nil && sd.Dev.ErrorsPms2 != nil {
+        s += fmt.Sprintf(",%d", *sd.Dev.ErrorsPms2)
     } else {
         s += ","
     }

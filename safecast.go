@@ -231,6 +231,10 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
         dev.ErrorsPms = msg.ErrorsPms
         dodev = true
     }
+    if msg.ErrorsPms2 != nil {
+        dev.ErrorsPms2 = msg.ErrorsPms2
+        dodev = true
+    }
     if msg.ErrorsBme0 != nil {
         dev.ErrorsBme0 = msg.ErrorsBme0
         dodev = true
@@ -462,6 +466,67 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
 
     if dopms {
         sd.Pms = &pms
+    }
+
+    // Pms2
+    var pms2 Pms2
+    var dopms2 = false
+
+    if msg.Pms2Pm01_0 != nil {
+        Pm01_0 := float32(msg.GetPms2Pm01_0())
+        pms2.Pm01_0 = &Pm01_0
+        dopms2 = true
+    }
+    if msg.Pms2Pm02_5 != nil {
+        Pm02_5 := float32(msg.GetPms2Pm02_5())
+        pms2.Pm02_5 = &Pm02_5
+        dopms2 = true
+    }
+    if msg.Pms2Pm10_0 != nil {
+        Pm10_0 := float32(msg.GetPms2Pm10_0())
+        pms2.Pm10_0 = &Pm10_0
+        dopms2 = true
+    }
+
+    if msg.Pms2Std01_0 != nil {
+        pms2.Std01_0 = msg.Pms2Std01_0
+        dopms2 = true
+    }
+    if msg.Pms2Std02_5 != nil {
+        pms2.Std02_5 = msg.Pms2Std02_5
+        dopms2 = true
+    }
+    if msg.Pms2Std10_0 != nil {
+        pms2.Std10_0 = msg.Pms2Std10_0
+        dopms2 = true
+    }
+
+    if dopms2 {
+        if msg.Pms2C00_30 != nil {
+            pms2.Count00_30 = msg.Pms2C00_30
+        }
+        if msg.Pms2C00_50 != nil {
+            pms2.Count00_50 = msg.Pms2C00_50
+        }
+        if msg.Pms2C01_00 != nil {
+            pms2.Count01_00 = msg.Pms2C01_00
+        }
+        if msg.Pms2C02_50 != nil {
+            pms2.Count02_50 = msg.Pms2C02_50
+        }
+        if msg.Pms2C05_00 != nil {
+            pms2.Count05_00 = msg.Pms2C05_00
+        }
+        if msg.Pms2C10_00 != nil {
+            pms2.Count10_00 = msg.Pms2C10_00
+        }
+        if msg.Pms2Csecs != nil {
+            pms2.CountSecs = msg.Pms2Csecs
+        }
+    }
+
+    if dopms2 {
+        sd.Pms2 = &pms2
     }
 
     // Opc

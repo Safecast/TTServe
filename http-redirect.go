@@ -204,7 +204,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
     // If the data doesn't have anything useful in it, optimize it completely away.  This is
     // observed to happen for Safecast Air from time to time
-    if sd.Opc == nil && sd.Pms == nil && sd.Env == nil && sd.Lnd == nil && sd.Bat == nil && sd.Dev == nil {
+    if sd.Opc == nil && sd.Pms == nil && sd.Pms2 == nil && sd.Env == nil && sd.Lnd == nil && sd.Bat == nil && sd.Dev == nil {
         fmt.Printf("%s *** Ignoring because message contains no data\n", LogTime())
         return
     }

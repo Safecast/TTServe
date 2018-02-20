@@ -32,6 +32,7 @@ type MeasurementStat struct {
     MotionBegan         string
     ErrorsOpc           uint32
     ErrorsPms           uint32
+    ErrorsPms2          uint32
     ErrorsBme0          uint32
     ErrorsBme1          uint32
     ErrorsLora          uint32
@@ -70,6 +71,8 @@ type MeasurementStat struct {
     GeigerWarning       bool
     hasPms              bool
     PmsWarning          bool
+    hasPms2             bool
+    Pms2Warning         bool
     hasOpc              bool
     OpcWarning          bool
     BatV                float64
@@ -84,14 +87,17 @@ type MeasurementStat struct {
     LndU                float64
     LndC                float64
     LndEC               float64
-    LndU2             float64
-    LndW               float64
+    LndU2				float64
+    LndW				float64
     Opc010              float64
     Opc025              float64
     Opc100              float64
     Pms010              float64
     Pms025              float64
     Pms100              float64
+    Pms2010             float64
+    Pms2025             float64
+    Pms2100             float64
 }
 
 // MeasurementDataset contains stats about all measurements
@@ -138,6 +144,8 @@ type MeasurementDataset struct {
     ThisErrorsOpc       uint32
     PrevErrorsPms       uint32
     ThisErrorsPms       uint32
+    PrevErrorsPms2      uint32
+    ThisErrorsPms2      uint32
     PrevErrorsBme0      uint32
     ThisErrorsBme0      uint32
     PrevErrorsBme1      uint32
@@ -207,6 +215,9 @@ type MeasurementDataset struct {
     PmsCount            uint32
     PmsWarningCount     uint32
     PmsWarningFirst     time.Time
+    Pms2Count           uint32
+    Pms2WarningCount    uint32
+    Pms2WarningFirst    time.Time
     OpcCount            uint32
     OpcWarningCount     uint32
     OpcWarningFirst     time.Time
@@ -222,6 +233,12 @@ type MeasurementDataset struct {
     HiPms025            float64
     LoPms100            float64
     HiPms100            float64
+    LoPms2010           float64
+    HiPms2010           float64
+    LoPms2025           float64
+    HiPms2025           float64
+    LoPms2100           float64
+    HiPms2100           float64
     LoLndU              float64
     HiLndU              float64
     LoLndC              float64
@@ -332,6 +349,9 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
         if sd.Dev.ErrorsPms != nil {
             stat.ErrorsPms = *sd.Dev.ErrorsPms
+        }
+        if sd.Dev.ErrorsPms2 != nil {
+            stat.ErrorsPms2 = *sd.Dev.ErrorsPms2
         }
         if sd.Dev.ErrorsBme0 != nil {
             stat.ErrorsBme0 = *sd.Dev.ErrorsBme0
@@ -569,6 +589,40 @@ func CheckMeasurement(sd SafecastData) MeasurementStat {
         }
     }
 
+    if sd.Pms2 != nil {
+        stat.hasPms2 = true
+        if sd.Pms2.Pm01_0 != nil {
+            val := *sd.Pms2.Pm01_0
+            if val < 0 || val > 600 {
+                stat.Pms2Warning = true
+            }
+            stat.Pms2010 = float64(val)
+        }
+        if sd.Pms2.Std01_0 != nil && *sd.Pms2.Std01_0 > 0 {
+            stat.Pms2Warning = true
+        }
+        if sd.Pms2.Pm02_5 != nil {
+            val := *sd.Pms2.Pm02_5
+            if val < 0 || val > 600 {
+                stat.Pms2Warning = true
+            }
+            stat.Pms2025 = float64(val)
+        }
+        if sd.Pms2.Std02_5 != nil && *sd.Pms2.Std02_5 > 0 {
+            stat.Pms2Warning = true
+        }
+        if sd.Pms2.Pm10_0 != nil {
+            val := *sd.Pms2.Pm10_0
+            if val < 0 || val > 600 {
+                stat.Pms2Warning = true
+            }
+            stat.Pms2100 = float64(val)
+        }
+        if sd.Pms2.Std10_0 != nil && *sd.Pms2.Std10_0 > 0 {
+            stat.Pms2Warning = true
+        }
+    }
+
     if sd.Opc != nil {
         stat.hasOpc = true
         if sd.Opc.Pm01_0 != nil {
@@ -782,6 +836,10 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
     }
     if stat.ErrorsPms > ds.ThisErrorsPms {
         ds.ThisErrorsPms = stat.ErrorsPms
+        ds.AnyErrors = true
+    }
+    if stat.ErrorsPms2 > ds.ThisErrorsPms2 {
+        ds.ThisErrorsPms2 = stat.ErrorsPms2
         ds.AnyErrors = true
     }
     if stat.ErrorsBme0 > ds.ThisErrorsBme0 {
@@ -1043,6 +1101,24 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
             ds.HiPms100 = math.Max(ds.HiPms100, stat.Pms100)
         }
     }
+    if stat.hasPms2 {
+        ds.Pms2Count++
+        if ds.Pms2Count == 1 {
+            ds.LoPms2010 = stat.Pms2010
+            ds.HiPms2010 = stat.Pms2010
+            ds.LoPms2025 = stat.Pms2025
+            ds.HiPms2025 = stat.Pms2025
+            ds.LoPms2100 = stat.Pms2100
+            ds.HiPms2100 = stat.Pms2100
+        } else {
+            ds.LoPms2010 = math.Min(ds.LoPms2010, stat.Pms2010)
+            ds.HiPms2010 = math.Max(ds.HiPms2010, stat.Pms2010)
+            ds.LoPms2025 = math.Min(ds.LoPms2025, stat.Pms2025)
+            ds.HiPms2025 = math.Max(ds.HiPms2025, stat.Pms2025)
+            ds.LoPms2100 = math.Min(ds.LoPms2100, stat.Pms2100)
+            ds.HiPms2100 = math.Max(ds.HiPms2100, stat.Pms2100)
+        }
+    }
     if stat.hasOpc {
         ds.OpcCount++
         if ds.OpcCount == 1 {
@@ -1091,6 +1167,12 @@ func AggregateMeasurementIntoDataset(ds *MeasurementDataset, stat MeasurementSta
         }
         ds.PmsWarningCount++
     }
+    if stat.Pms2Warning {
+        if ds.Pms2WarningCount == 0 {
+            ds.Pms2WarningFirst = stat.Uploaded
+        }
+        ds.Pms2WarningCount++
+    }
     if stat.OpcWarning {
         if ds.OpcWarningCount == 0 {
             ds.OpcWarningFirst = stat.Uploaded
@@ -1110,6 +1192,8 @@ func aggregateErrors(ds *MeasurementDataset) {
     ds.ThisErrorsOpc = 0
     ds.PrevErrorsPms += ds.ThisErrorsPms
     ds.ThisErrorsPms = 0
+    ds.PrevErrorsPms2 += ds.ThisErrorsPms2
+    ds.ThisErrorsPms2 = 0
     ds.PrevErrorsBme0 += ds.ThisErrorsBme0
     ds.ThisErrorsBme0 = 0
     ds.PrevErrorsBme1 += ds.ThisErrorsBme1
@@ -1408,6 +1492,16 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         } else {
             s += fmt.Sprintf("  (%.0f-%.0fpm1, %.0f-%.0fpm2.5, %.0f-%.0fpm10)\n", ds.LoPms010, ds.HiPms010, ds.LoPms025, ds.HiPms025, ds.LoPms100, ds.HiPms100)
         }
+        if ds.Pms2WarningCount == 0 {
+            s += fmt.Sprintf("  Pms2 %6d", ds.Pms2Count)
+        } else {
+            s += fmt.Sprintf("  Pms2 %6d  [%d OOR %s]", ds.Pms2Count, ds.Pms2WarningCount, ds.Pms2WarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
+        }
+        if ds.Pms2Count == 0 {
+            s += fmt.Sprintf("\n")
+        } else {
+            s += fmt.Sprintf("  (%.0f-%.0fpm1, %.0f-%.0fpm2.5, %.0f-%.0fpm10)\n", ds.LoPms2010, ds.HiPms2010, ds.LoPms2025, ds.HiPms2025, ds.LoPms2100, ds.HiPms2100)
+        }
         if ds.OpcWarningCount == 0 {
             s += fmt.Sprintf("  Opc %6d", ds.OpcCount)
         } else {
@@ -1455,6 +1549,9 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
         }
         if ds.PrevErrorsPms > 0 {
             s += fmt.Sprintf("  Pms          %d\n", ds.PrevErrorsPms)
+        }
+        if ds.PrevErrorsPms2 > 0 {
+            s += fmt.Sprintf("  Pms2         %d\n", ds.PrevErrorsPms2)
         }
         if ds.PrevErrorsBme0 > 0 {
             s += fmt.Sprintf("  Bme0         %d\n", ds.PrevErrorsBme0)

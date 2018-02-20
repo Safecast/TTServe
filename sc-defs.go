@@ -5,7 +5,7 @@
 // Safecast API data structures
 package main
 
-// Loc is Device Location Data - Lat and Lon required, Alt is optional
+// Loc is Device Location Data
 type Loc struct {
 	Lat *float32			`json:"loc_lat,omitempty"`
 	Lon *float32			`json:"loc_lon,omitempty"`
@@ -14,21 +14,21 @@ type Loc struct {
 	Olc *string				`json:"loc_olc,omitempty"`
 }
 
-// Env is Device Basic Environmental Data - all are optional
+// Env is Device Basic Environmental Data
 type Env struct {
     Temp *float32			`json:"env_temp,omitempty"`
     Humid *float32			`json:"env_humid,omitempty"`
     Press *float32			`json:"env_press,omitempty"`
 }
 
-// Bat is Device Battery Performance Data - all are optional
+// Bat is Device Battery Performance Data
 type Bat struct {
 	Voltage *float32		`json:"bat_voltage,omitempty"`
     Current *float32		`json:"bat_current,omitempty"`
 	Charge *float32			`json:"bat_charge,omitempty"`
 }
 
-// Lnd is support for LND Geiger Tubes - all are optional
+// Lnd is support for LND Geiger Tubes
 type Lnd struct {
 	// Unshielded LND 7318
     U7318 *float32			`json:"lnd_7318u,omitempty"`
@@ -42,7 +42,7 @@ type Lnd struct {
     W78017 *float32			`json:"lnd_78017w,omitempty"`
 }
 
-// Pms is for Plantower Air Sensor Data - PM all are optional
+// Pms is for Plantower Air Sensor Data
 type Pms struct {
     Pm01_0 *float32			`json:"pms_pm01_0,omitempty"`
     Pm02_5 *float32			`json:"pms_pm02_5,omitempty"`
@@ -59,7 +59,24 @@ type Pms struct {
     CountSecs *uint32		`json:"pms_csecs,omitempty"`
 }
 
-// Opc is for Alphasense OPC-N2 Air Sensor Data - all are optional
+// Pms2 is for an auxiliary Plantower Air Sensor Data
+type Pms2 struct {
+    Pm01_0 *float32			`json:"pms2_pm01_0,omitempty"`
+    Pm02_5 *float32			`json:"pms2_pm02_5,omitempty"`
+    Pm10_0 *float32			`json:"pms2_pm10_0,omitempty"`
+    Std01_0 *float32		`json:"pms2_std01_0,omitempty"`
+    Std02_5 *float32		`json:"pms2_std02_5,omitempty"`
+    Std10_0 *float32		`json:"pms2_std10_0,omitempty"`
+    Count00_30 *uint32		`json:"pms2_c00_30,omitempty"`
+    Count00_50 *uint32		`json:"pms2_c00_50,omitempty"`
+    Count01_00 *uint32		`json:"pms2_c01_00,omitempty"`
+    Count02_50 *uint32		`json:"pms2_c02_50,omitempty"`
+    Count05_00 *uint32		`json:"pms2_c05_00,omitempty"`
+    Count10_00 *uint32		`json:"pms2_c10_00,omitempty"`
+    CountSecs *uint32		`json:"pms2_csecs,omitempty"`
+}
+
+// Opc is for Alphasense OPC-N2 Air Sensor Data
 type Opc struct {
     Pm01_0 *float32			`json:"opc_pm01_0,omitempty"`
     Pm02_5 *float32			`json:"opc_pm02_5,omitempty"`
@@ -76,7 +93,7 @@ type Opc struct {
     CountSecs *uint32		`json:"opc_csecs,omitempty"`
 }
 
-// Dev contains General Device Statistics - All Optional
+// Dev contains General Device Statistics
 type Dev struct {
 	Test *bool				`json:"dev_test,omitempty"`
 	Motion *bool			`json:"dev_motion,omitempty"`
@@ -111,6 +128,7 @@ type Dev struct {
     Press *float32			`json:"dev_press,omitempty"`
     ErrorsOpc *uint32		`json:"dev_err_opc,omitempty"`
     ErrorsPms *uint32		`json:"dev_err_pms,omitempty"`
+    ErrorsPms2 *uint32		`json:"dev_err_pms2,omitempty"`
     ErrorsBme0 *uint32		`json:"dev_err_bme0,omitempty"`
     ErrorsBme1 *uint32		`json:"dev_err_bme1,omitempty"`
     ErrorsLora *uint32		`json:"dev_err_lora,omitempty"`
@@ -173,6 +191,7 @@ type SafecastData struct {
 	*Bat					`json:",omitempty"`
 	*Lnd					`json:",omitempty"`
 	*Pms					`json:",omitempty"`
+	*Pms2					`json:",omitempty"`
 	*Opc					`json:",omitempty"`
 	*Dev					`json:",omitempty"`
 

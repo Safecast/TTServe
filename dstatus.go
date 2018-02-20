@@ -23,6 +23,7 @@ type DeviceStatus struct {
     GeigerHistory           [5]SafecastData `json:"geiger_history,omitempty"`
     OpcHistory              [5]SafecastData `json:"opc_history,omitempty"`
     PmsHistory              [5]SafecastData `json:"pms_history,omitempty"`
+    Pms2History             [5]SafecastData `json:"pms2_history,omitempty"`
     IPInfo                  IPInfoData      `json:"transport_ip_info,omitempty"`
 }
 
@@ -83,6 +84,7 @@ func ReadDeviceStatus(deviceID uint32) (isAvail bool, isReset bool, sv DeviceSta
 func WriteDeviceStatus(sc SafecastData) {
     var ChangedLoc = false
     var ChangedPms = false
+    var ChangedPms2 = false
     var ChangedOpc = false
     var ChangedGeiger = false
     var value DeviceStatus
@@ -261,6 +263,64 @@ func WriteDeviceStatus(sc SafecastData) {
         if sc.Pms.CountSecs != nil && (value.Pms.CountSecs == nil || *value.Pms.CountSecs != *sc.Pms.CountSecs) {
             value.Pms.CountSecs = sc.Pms.CountSecs
             ChangedPms = true
+        }
+    }
+    if sc.Pms2 != nil {
+        var pms2 Pms2
+        if value.Pms2 == nil {
+            value.Pms2 = &pms2
+        }
+        if sc.Pms2.Pm01_0 != nil && (value.Pms2.Pm01_0 == nil || *value.Pms2.Pm01_0 != *sc.Pms2.Pm01_0) {
+            value.Pms2.Pm01_0 = sc.Pms2.Pm01_0
+            ChangedPms2 = true
+        }
+        if sc.Pms2.Pm02_5 != nil && (value.Pms2.Pm02_5 == nil || *value.Pms2.Pm02_5 != *sc.Pms2.Pm02_5) {
+            value.Pms2.Pm02_5 = sc.Pms2.Pm02_5
+            ChangedPms2 = true
+        }
+        if sc.Pms2.Pm10_0 != nil && (value.Pms2.Pm10_0 == nil || *value.Pms2.Pm10_0 != *sc.Pms2.Pm10_0) {
+            value.Pms2.Pm10_0 = sc.Pms2.Pm10_0
+            ChangedPms2 = true
+        }
+        if sc.Pms2.Std01_0 != nil && (value.Pms2.Std01_0 == nil || *value.Pms2.Std01_0 != *sc.Pms2.Std01_0) {
+            value.Pms2.Std01_0 = sc.Pms2.Std01_0
+            ChangedPms2 = true
+        }
+        if sc.Pms2.Std02_5 != nil && (value.Pms2.Std02_5 == nil || *value.Pms2.Std02_5 != *sc.Pms2.Std02_5) {
+            value.Pms2.Std02_5 = sc.Pms2.Std02_5
+            ChangedPms2 = true
+        }
+        if sc.Pms2.Std10_0 != nil && (value.Pms2.Std10_0 == nil || *value.Pms2.Std10_0 != *sc.Pms2.Std10_0) {
+            value.Pms2.Std10_0 = sc.Pms2.Std10_0
+            ChangedPms2 = true
+        }
+        if sc.Pms2.Count00_30 != nil && (value.Pms2.Count00_30 == nil || *value.Pms2.Count00_30 != *sc.Pms2.Count00_30) {
+            value.Pms2.Count00_30 = sc.Pms2.Count00_30
+            ChangedPms2 = true
+        }
+        if sc.Pms2.Count00_50 != nil && (value.Pms2.Count00_50 == nil || *value.Pms2.Count00_50 != *sc.Pms2.Count00_50) {
+            value.Pms2.Count00_50 = sc.Pms2.Count00_50
+            ChangedPms2 = true
+        }
+        if sc.Pms2.Count01_00 != nil && (value.Pms2.Count01_00 == nil || *value.Pms2.Count01_00 != *sc.Pms2.Count01_00) {
+            value.Pms2.Count01_00 = sc.Pms2.Count01_00
+            ChangedPms2 = true
+        }
+        if sc.Pms2.Count02_50 != nil && (value.Pms2.Count02_50 == nil || *value.Pms2.Count02_50 != *sc.Pms2.Count02_50) {
+            value.Pms2.Count02_50 = sc.Pms2.Count02_50
+            ChangedPms2 = true
+        }
+        if sc.Pms2.Count05_00 != nil && (value.Pms2.Count05_00 == nil || *value.Pms2.Count05_00 != *sc.Pms2.Count05_00) {
+            value.Pms2.Count05_00 = sc.Pms2.Count05_00
+            ChangedPms2 = true
+        }
+        if sc.Pms2.Count10_00 != nil && (value.Pms2.Count10_00 == nil || *value.Pms2.Count10_00 != *sc.Pms2.Count10_00) {
+            value.Pms2.Count10_00 = sc.Pms2.Count10_00
+            ChangedPms2 = true
+        }
+        if sc.Pms2.CountSecs != nil && (value.Pms2.CountSecs == nil || *value.Pms2.CountSecs != *sc.Pms2.CountSecs) {
+            value.Pms2.CountSecs = sc.Pms2.CountSecs
+            ChangedPms2 = true
         }
     }
     if sc.Opc != nil {
@@ -489,6 +549,12 @@ func WriteDeviceStatus(sc SafecastData) {
                 value.Dev.ErrorsPms = sc.Dev.ErrorsPms
             }
         }
+        if sc.Dev.ErrorsPms2 != nil {
+            if value.Dev.ErrorsPms2 == nil ||
+                (value.Dev.ErrorsPms2 != nil && *sc.Dev.ErrorsPms2 > *value.Dev.ErrorsPms2) {
+                value.Dev.ErrorsPms2 = sc.Dev.ErrorsPms2
+            }
+        }
         if sc.Dev.ErrorsBme0 != nil {
             if value.Dev.ErrorsBme0 == nil ||
                 (value.Dev.ErrorsBme0 != nil && *sc.Dev.ErrorsBme0 > *value.Dev.ErrorsBme0) {
@@ -627,6 +693,18 @@ func WriteDeviceStatus(sc SafecastData) {
         new.CapturedAt = ShuffledAt
         new.Pms = value.Pms
         value.PmsHistory[0] = new
+    }
+
+    // Shuffle
+    if ChangedPms2 {
+        for i:=len(value.Pms2History)-1; i>0; i-- {
+            value.Pms2History[i] = value.Pms2History[i-1]
+        }
+        new := SafecastData{}
+        new.DeviceID = value.DeviceID
+        new.CapturedAt = ShuffledAt
+        new.Pms2 = value.Pms2
+        value.Pms2History[0] = new
     }
 
     // Shuffle
@@ -791,6 +869,10 @@ func GetDeviceStatusSummary(DeviceID uint32) (DevEui string, Label string, Gps s
     } else if value.Pms != nil {
         if value.Pms.Pm01_0 != nil && value.Pms.Pm02_5 != nil && value.Pms.Pm10_0 != nil {
             s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3 ", *value.Pms.Pm01_0, *value.Pms.Pm02_5, *value.Pms.Pm10_0)
+        }
+    } else if value.Pms2 != nil {
+        if value.Pms2.Pm01_0 != nil && value.Pms2.Pm02_5 != nil && value.Pms2.Pm10_0 != nil {
+            s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3 ", *value.Pms2.Pm01_0, *value.Pms2.Pm02_5, *value.Pms2.Pm10_0)
         }
     }
 
