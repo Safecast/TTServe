@@ -60,6 +60,11 @@ func brokerPublish(sd SafecastData) {
 	// by the device URN
     sd.DeviceID = nil
 
+	// Delete the MD5, because we've now blown it
+	if sd.Service != nil {
+		sd.Service.HashMd5 = nil
+	}
+
     // Marshal the safecast data to json
     scJSON, _ := json.Marshal(sd)
     topic := "all"
