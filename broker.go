@@ -48,7 +48,8 @@ func brokerConnect() (err error) {
 
 // Send to a ttn device outbound
 func brokerPublish(sd SafecastData) {
-
+	return;
+	
 	// Init
 	if !brokerConnected {
 		brokerConnect()
