@@ -14,11 +14,7 @@ import (
 var brokerConnected bool
 var brokerMqttClient MQTT.Client
 
-func brokerConnect() (err error) {
-
-	if brokerConnected {
-		return;
-	}
+func brokerOutboundPublisher() {
 
     mqttOpts := MQTT.NewClientOptions()
     mqttOpts.AddBroker(ServiceConfig.BrokerHost)
@@ -39,6 +35,7 @@ func brokerConnect() (err error) {
     if token := brokerMqttClient.Connect(); token.Wait() && token.Error() != nil {
         fmt.Printf("Error connecting to broker: %s\n", token.Error())
     } else {
+        fmt.Printf("Broker: connected\n");
 		brokerConnected = true
 	}
 
@@ -48,14 +45,10 @@ func brokerConnect() (err error) {
 
 // Send to anyone/everyone listening on that MQTT topic
 func brokerPublish(sd SafecastData) {
-//	return;
 	
 	// Init
 	if !brokerConnected {
-		brokerConnect()
-		if !brokerConnected {
 			return;
-		}
 	}
 
     // Marshal the safecast data to json

@@ -148,6 +148,9 @@ func main() {
 		stats.Services += ", MQTT"
     }
 
+	// Spawn the broker publisher
+	go brokerOutboundPublisher()
+
 	// If this server is the monitor, indicate our other services
 	if ThisServerIsMonitor {
 		stats.Services += ", SLACK"
