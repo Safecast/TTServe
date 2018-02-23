@@ -57,8 +57,8 @@ func timer15m() {
         time.Sleep(15 * time.Minute)
 
         // Post long TTN outages
-        if ThisServerServesMQQT {
-            MQQTSubscriptionNotifier()
+        if ThisServerServesMQTT {
+            MQTTSubscriptionNotifier()
         }
 
     }

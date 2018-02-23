@@ -23,4 +23,9 @@ type TTServeConfig struct {
 	// Postgres
 	SQLInfo				string		`json:"sqlinfo,omitempty"`
 
+	// AWS IOT MQTT Broker
+	BrokerHost			string		`json:"broker_host,omitempty"`
+	BrokerUsername		string		`json:"broker_username,omitempty"`
+	BrokerPassword		string		`json:"broker_password,omitempty"`
+
 }

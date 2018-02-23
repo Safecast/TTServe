@@ -120,7 +120,7 @@ func (server *FtpServer) Listen() error {
 		return err
 	}
 
-	fmt.Printf("Listening... %s %s", "address", server.Listener.Addr())
+	fmt.Printf("FTP listening %s\n", server.Listener.Addr())
 
 	return err
 }

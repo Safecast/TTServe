@@ -2,7 +2,7 @@
 // Use of this source code is governed by licenses granted by the
 // copyright holder including that found in the LICENSE file.
 
-// Inbound MQQT support for TTN, quite workable but not utilized since
+// Inbound MQTT support for TTN, quite workable but not utilized since
 // switching over to use TTN's HTTP API for load-balancing reasons.
 package main
 
@@ -23,14 +23,14 @@ var ttnLastDisconnectedTime time.Time
 var ttnLastDisconnected = "(never)"
 var ttnUpQ chan MQTT.Message
 
-// MQQTInboundHandler handles inbound pulled from TTN's upstream mqtt message queue
-func MQQTInboundHandler() {
+// MQTTInboundHandler handles inbound pulled from TTN's upstream mqtt message queue
+func MQTTInboundHandler() {
 
     // Set up our internal message queues
     ttnUpQ = make(chan MQTT.Message, 5)
 
     // Now that the queue is created, monitor it
-    go mqqtSubscriptionMonitor()
+    go mqttSubscriptionMonitor()
 
     // Dequeue and process the messages as they're enqueued
     for msg := range ttnUpQ {
@@ -60,11 +60,11 @@ func MQQTInboundHandler() {
                 AppReq.GwLocation = &ttn.Metadata.Gateways[0].GtwID
             }
 
-            AppReq.SvTransport = "ttn-mqqt:" + AppReq.TTNDevID
+            AppReq.SvTransport = "ttn-mqtt:" + AppReq.TTNDevID
             fmt.Printf("\n%s Received %d-byte payload from %s\n", LogTime(), len(AppReq.Payload), AppReq.SvTransport)
             AppReq.SvUploadedAt = NowInUTC()
 			go AppReqPushPayload(AppReq, AppReq.Payload, "device via ttn")
-            stats.Count.MQQTTTN++
+            stats.Count.MQTTTTN++
 
             // See if there's an outbound message waiting for this app.  If so, send it now because we
             // know that there's a narrow receive window open.
@@ -98,8 +98,8 @@ func ttnOutboundPublish(devEui string, payload []byte) {
     }
 }
 
-// MQQTSubscriptionNotifier notifies Slack if there is an outage
-func MQQTSubscriptionNotifier() {
+// MQTTSubscriptionNotifier notifies Slack if there is an outage
+func MQTTSubscriptionNotifier() {
     if ttnEverConnected {
         if !ttnFullyConnected {
             minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
@@ -116,7 +116,7 @@ func MQQTSubscriptionNotifier() {
 }
 
 // Subscribe to TTN inbound messages, then monitor connection status
-func mqqtSubscriptionMonitor() {
+func mqttSubscriptionMonitor() {
 
     for {
 

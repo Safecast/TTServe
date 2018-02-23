@@ -101,8 +101,8 @@ func WriteServerStatus() {
     stats.Count.HTTPRedirect = 0
     value.Tts.Count.HTTPTTN += prevCount.HTTPTTN
     stats.Count.HTTPTTN = 0
-    value.Tts.Count.MQQTTTN += prevCount.MQQTTTN
-    stats.Count.MQQTTTN = 0
+    value.Tts.Count.MQTTTTN += prevCount.MQTTTTN
+    stats.Count.MQTTTTN = 0
 
     // Write it to the file
     filename := SafecastDirectory() + TTServerStatusPath + "/" + TTServeInstanceID + ".json"
@@ -159,7 +159,7 @@ func SummarizeStatsDelta() string {
     diff.HTTPRelay = thisCount.HTTPRelay - prevCount.HTTPRelay
     diff.HTTPRedirect = thisCount.HTTPRedirect - prevCount.HTTPRedirect
     diff.HTTPTTN = thisCount.HTTPTTN - prevCount.HTTPTTN
-    diff.MQQTTTN = thisCount.MQQTTTN - prevCount.MQQTTTN
+    diff.MQTTTTN = thisCount.MQTTTTN - prevCount.MQTTTTN
 
     // Return the jsonified summary
     statsdata, err := json.Marshal(&diff)

@@ -106,9 +106,9 @@ func main() {
     TTServerFTPAddressIPv4 = addrs[0]
     ThisServerServesFTP = TTServerFTPAddressIPv4 == ThisServerAddressIPv4
 
-	// If and only if we're using MQQT (rather than TTN HTTP), do it on the UDP server
-	if TTNMQQTMode {
-	    ThisServerServesMQQT = ThisServerServesUDP
+	// If and only if we're using MQTT (rather than TTN HTTP), do it on the UDP server
+	if TTNMQTTMode {
+	    ThisServerServesMQTT = ThisServerServesUDP
 	}
 
 	// We have one server instance that is configured to field inbound requests
@@ -143,9 +143,9 @@ func main() {
     }
 
     // Spawn the TTNhandlers
-    if ThisServerServesMQQT {
-        go MQQTInboundHandler()
-		stats.Services += ", MQQT"
+    if ThisServerServesMQTT {
+        go MQTTInboundHandler()
+		stats.Services += ", MQTT"
     }
 
 	// If this server is the monitor, indicate our other services

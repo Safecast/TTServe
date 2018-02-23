@@ -13,12 +13,12 @@ import (
     "encoding/json"
 )
 
-// TTNMQQTMode defines the MQQT vs mq-over-HTTP operating mode.
+// TTNMQTTMode defines the MQTT vs mq-over-HTTP operating mode.
 // As of 2017-02 we're now operating in "HTTP Integration" TTN mode, largely
 // so that we can serve incoming requests through our load balancer rather than
-// having a single server that pulls MQQT requests.
+// having a single server that pulls MQTT requests.
 // 
-const TTNMQQTMode = false
+const TTNMQTTMode = false
 
 // TTN service info
 const ttnAppID string = "ttserve"
@@ -170,8 +170,8 @@ var ThisServerAddressIPv4 = ""
 var   ThisServerServesUDP = false
 // ThisServerServesFTP (here for golint)
 var   ThisServerServesFTP = false
-// ThisServerServesMQQT (here for golint)
-var   ThisServerServesMQQT = false
+// ThisServerServesMQTT (here for golint)
+var   ThisServerServesMQTT = false
 // ThisServerIsMonitor (here for golint)
 var   ThisServerIsMonitor = false
 // ThisServerBootTime (here for golint)
@@ -201,7 +201,7 @@ type TTServeCounts struct {
     HTTPRelay       uint32          `json:"received_udp_to_http,omitempty"`
     HTTPRedirect    uint32          `json:"received_redirect_http,omitempty"`
     HTTPTTN         uint32          `json:"received_ttn_http,omitempty"`
-    MQQTTTN         uint32          `json:"received_ttn_mqqt,omitempty"`
+    MQTTTTN         uint32          `json:"received_ttn_mqtt,omitempty"`
 }
 
 // TTServeStatus is our global status

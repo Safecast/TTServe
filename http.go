@@ -21,7 +21,7 @@ func HTTPInboundHandler() {
     }
 
     // Spin up TTN
-    if !TTNMQQTMode {
+    if !TTNMQTTMode {
         http.HandleFunc(TTServerTopicTTN, inboundWebTTNHandler)
     }
 

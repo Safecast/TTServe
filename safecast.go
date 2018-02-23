@@ -905,6 +905,9 @@ func Upload(sd SafecastData) bool {
 	if v1UploadSolarcast {
 		go doSolarcastV1Uploads(sd)
 	}
+
+	// Upload safecast data to those listening on MQTT
+	go brokerPublish(sd)
 		
     return true
 }
