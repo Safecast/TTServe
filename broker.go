@@ -36,7 +36,7 @@ func brokerConnect() (err error) {
     brokerMqttClient = MQTT.NewClient(mqttOpts)
 
         // Connect to the service
-    if token := ttnMqttClient.Connect(); token.Wait() && token.Error() != nil {
+    if token := brokerMqttClient.Connect(); token.Wait() && token.Error() != nil {
         fmt.Printf("Error connecting to broker: %s\n", token.Error())
     } else {
 		brokerConnected = true
@@ -46,9 +46,8 @@ func brokerConnect() (err error) {
 	
 }
 
-// Send to a ttn device outbound
+// Send to anyone/everyone listening on that MQTT topic
 func brokerPublish(sd SafecastData) {
-	return;
 	
 	// Init
 	if !brokerConnected {

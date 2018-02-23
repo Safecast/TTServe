@@ -147,7 +147,7 @@ func (server *FtpServer) ListenAndServe() error {
 		return err
 	}
 
-	fmt.Printf("Starting...")
+	fmt.Printf("FTP server starting\n")
 
 	server.Serve()
 
