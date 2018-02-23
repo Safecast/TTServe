@@ -56,6 +56,10 @@ func brokerPublish(sd SafecastData) {
 		return;
 	}
 
+	// Delete the legacy device ID so that it doesn't confuse anyone.  It has been superceded
+	// by the device URN
+    sd.DeviceID = nil
+
     // Marshal the safecast data to json
     scJSON, _ := json.Marshal(sd)
     topic := "all"
