@@ -51,6 +51,11 @@ func brokerPublish(sd SafecastData) {
 			return;
 	}
 
+	// We don't publish anything without a captured date, because it confuses too many systems
+	if sd.CapturedAt == nil || *sd.CapturedAt == "" {
+		return;
+	}
+
     // Marshal the safecast data to json
     scJSON, _ := json.Marshal(sd)
     topic := "all"
