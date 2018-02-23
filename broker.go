@@ -48,7 +48,7 @@ func brokerConnect() (err error) {
 
 // Send to anyone/everyone listening on that MQTT topic
 func brokerPublish(sd SafecastData) {
-	return;
+//	return;
 	
 	// Init
 	if !brokerConnected {
