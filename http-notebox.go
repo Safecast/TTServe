@@ -6,6 +6,7 @@
 package main
 
 import (
+	"io"
     "io/ioutil"
     "net/http"
     "fmt"
@@ -14,10 +15,18 @@ import (
     "github.com/google/open-location-code/go"
 )
 
+type NoteboxResponse struct {
+	Err string			`json:"err,omitempty"`
+	Status string		`json:"status,omitempty"`
+}
+	
 // Handle inbound HTTP requests from Notebox's via the Notehub reporter task
 func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
     var body []byte
     var err error
+
+	// Prepare a response
+	rsp := NoteboxResponse{}
 
     // Remember when it was uploaded to us
     UploadedAt := NowInUTC()
@@ -38,6 +47,14 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
 
     }
 
+	// Exit if it's a get
+	if len(body) == 0 {
+		rsp.Err = "no measurements supplied"
+		rspJSON, _ := json.Marshal(rsp)
+        io.WriteString(rw, string(rspJSON))
+		return
+	}
+	
     // Parse it into an array of SafecastData structures
     set := []SafecastData{}
 	if body[0] == '{' {
@@ -55,6 +72,7 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Process each reading individually
+	uploaded := 0
     for _, sd := range set {
 
         err = ReformatFromNotebox(UploadedAt, &sd)
@@ -92,11 +110,17 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
         Upload(sd)
         WriteToLogs(sd)
         stats.Count.HTTPRedirect++
+		uploaded++
 
     }
 
     // A real request
     stats.Count.HTTP++
+
+	// Process response
+	rsp.Status = fmt.Sprintf("%d uploaded", uploaded)
+	rspJSON, _ := json.Marshal(rsp)
+    io.WriteString(rw, string(rspJSON))
 
 }
 
