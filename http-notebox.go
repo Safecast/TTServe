@@ -19,6 +19,14 @@ type NoteboxResponse struct {
 	Err string			`json:"err,omitempty"`
 	Status string		`json:"status,omitempty"`
 }
+
+// Write the error to the response writer
+func emitError(rw http.ResponseWriter, err error) {
+	rsp := NoteboxResponse{}
+	rsp.Err = fmt.Sprintf("%s", err)
+	rspJSON, _ := json.Marshal(rsp)
+    io.WriteString(rw, string(rspJSON))
+}
 	
 // Handle inbound HTTP requests from Notebox's via the Notehub reporter task
 func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
@@ -42,16 +50,14 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
     body, err = ioutil.ReadAll(req.Body)
     if err != nil {
         stats.Count.HTTP++
-        fmt.Printf("Error reading HTTP request body: \n%v\n", req)
+        emitError(rw, fmt.Errorf("error reading HTTP request body: %v", req))
         return
 
     }
 
 	// Exit if it's a get
 	if len(body) == 0 {
-		rsp.Err = "no measurements supplied"
-		rspJSON, _ := json.Marshal(rsp)
-        io.WriteString(rw, string(rspJSON))
+		emitError(rw, fmt.Errorf("no measurements supplied"))
 		return
 	}
 	
@@ -67,7 +73,7 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
 		err = fmt.Errorf("does not appear to be JSON or a JSON array")
 	}
     if err != nil {
-        fmt.Printf("*** %s cannot parse received this from %s: %s\n%s\n***\n", UploadedAt, remoteAddr, err, string(body))
+        emitError(rw, fmt.Errorf("%s cannot parse received this from %s: %s: %s", UploadedAt, remoteAddr, err, string(body)))
         return
     }
 
@@ -77,7 +83,8 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
 
         err = ReformatFromNotebox(UploadedAt, &sd)
         if err != nil {
-            fmt.Printf("*** cannot format incoming data from notebox: %sn", UploadedAt, remoteAddr, err)
+            emitError(rw, fmt.Errorf("cannot format incoming data from notebox: %s", UploadedAt, remoteAddr, err))
+			return
         }
 
         // Report where we got it from, and when we got it
@@ -91,7 +98,7 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
 		// with data points that have nothing to do with Safecast but are stored in the notebox DB
         if sd.Opc == nil && sd.Pms == nil && sd.Pms2 == nil && sd.Env == nil && sd.Lnd == nil && sd.Bat == nil {
             fmt.Printf("%s *** Ignoring because message contains no data\n", LogTime())
-            return
+			continue
         }
 
         // Generate the CRC of the original device data
