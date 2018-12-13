@@ -24,9 +24,9 @@ type NoteboxResponse struct {
 func emitError(rw http.ResponseWriter, err error) {
 	rsp := NoteboxResponse{}
 	rsp.Err = fmt.Sprintf("%s", err)
-	fmt.Printf("*** %s\n", rsp.Err)
 	rspJSON, _ := json.Marshal(rsp)
     io.WriteString(rw, string(rspJSON))
+	fmt.Printf("*** %s\n", string(rspJSON))
 }
 	
 // Handle inbound HTTP requests from Notebox's via the Notehub reporter task
@@ -84,7 +84,7 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
 
         err = ReformatFromNotebox(UploadedAt, &sd)
         if err != nil {
-            emitError(rw, fmt.Errorf("cannot format incoming data from notebox: %s", UploadedAt, remoteAddr, err))
+            emitError(rw, fmt.Errorf("cannot format incoming data from notebox: %s", err))
 			return
         }
 
