@@ -6,6 +6,7 @@
 
 # Make sure we're in the right directory, which is necessary via cron
 export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
 cd $GOPATH/src/github.com/safecast/ttserve
 
 # Loop forever

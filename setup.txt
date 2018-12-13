@@ -32,7 +32,7 @@ go version
 
 ## Add these to the end of ~/.profile with NANO editor
 export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
+export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
 export TT=$GOPATH/src/github.com/safecast/ttserve
 
 ## Fetch our app package
