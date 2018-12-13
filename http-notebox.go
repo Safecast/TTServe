@@ -24,6 +24,7 @@ type NoteboxResponse struct {
 func emitError(rw http.ResponseWriter, err error) {
 	rsp := NoteboxResponse{}
 	rsp.Err = fmt.Sprintf("%s", err)
+	fmt.Printf("*** %s\n", rsp.Err)
 	rspJSON, _ := json.Marshal(rsp)
     io.WriteString(rw, string(rspJSON))
 }
@@ -128,6 +129,7 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
 	rsp.Status = fmt.Sprintf("%d uploaded", uploaded)
 	rspJSON, _ := json.Marshal(rsp)
     io.WriteString(rw, string(rspJSON))
+	fmt.Printf("*** %s\n", string(rspJSON))
 
 }
 
