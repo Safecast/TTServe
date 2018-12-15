@@ -58,6 +58,20 @@ sudo apt-get install postgresql-client
 ## Just make sure everything is up to date
 sudo apt-get upgrade -y
 
+## Make sure that this linux instance doesn't run out of disk space because of accumulation of linux headers
+## in /usr/src by setting this to "true":
+sudo emacs /etc/apt/apt.conf.d/50unattended-upgrades
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+## By the way, if you ever need to clean up disk space because you forgot to do this:
+## remove a few folders in /usr/src manually via
+## sudo rm -rf linux-headers-4.4.0-101
+## now that there is space, download the LATEST headers
+## sudo apt-get -f install
+## now that the latest headers are installed, purge the older ones
+## sudo apt autoremove --purge
+## verify everything works after a restart
+## sudo shutdown -r 0
+
 ## REBOOT THE AWS INSTANCE
 ## You can then come back via SSH and use 'screen' to look around 
 
