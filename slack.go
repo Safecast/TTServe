@@ -240,22 +240,6 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 			}
         }
 
-    case "iselect":
-        if len(args) < 2 {
-            sendToSafecastOps("Command format: SELECT <query>", SlackMsgReply)
-        } else {
-            // Unescape the string, which substitutes &gt for >
-            rawQuery := html.UnescapeString(messageAfterFirstWord)
-            fmt.Printf("\n%s *** Influx query: \"%s\"\n", LogTime(), rawQuery)
-            // Perform the query
-            success, numrows, result, _ := InfluxQuery(user, "select", rawQuery, true)
-            if !success {
-                sendToSafecastOps(fmt.Sprintf("Query error: %s: %s", result, "SELECT " + rawQuery), SlackMsgReply)
-            } else {
-                sendToSafecastOps(fmt.Sprintf("%d rows of data are <%s|here>, @%s.", numrows, result, user), SlackMsgReply)
-            }
-        }
-
     case "deveui":
         generateTTNCTLDeviceRegistrationScript()
 

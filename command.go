@@ -15,9 +15,6 @@ import (
     "encoding/json"
 )
 
-// Use Influx, or use PSQL
-const useInflux = false
-
 // Structures
 const (
     ObjDevice = "group"
@@ -913,9 +910,9 @@ func reportVerify(user string, report string) (rValid bool, rResult string, devi
 
 // ReportRun runs a report
 func ReportRun(user string, csv bool, report string) (success bool, result string, filename string) {
-	var err error
-	var numrows int
-	
+    var err error
+    var numrows int
+
     // See if there is only one arg which is the report name
     if !strings.Contains(report, " ") {
         if report == "" {
@@ -929,100 +926,55 @@ func ReportRun(user string, csv bool, report string) (success bool, result strin
     }
 
     // Validate and expand the report
-    valid, result, deviceArg, devices, ranges, pluscodes, from, to := reportVerify(user, report)
+    valid, result, deviceArg, devices, ranges, _, from, to := reportVerify(user, report)
     if !valid {
         return false, result, ""
     }
 
-	message := ""
-    if (useInflux) {
+    message := ""
 
-        // Generate base of query
-        sql := "* FROM data"
+    // Generate base of query
+    query := "{"
 
-        // Generate device filter, which is required
-        sql += " WHERE ( "
-        first := true
-        for _, d := range devices {
-            if !first {
-                sql += " OR "
-            }
-            first = false
-            sql += fmt.Sprintf("device = %d", d)
+    // Generate device filter, which is required
+    query += "\"where\":\"("
+    first := true
+    for _, d := range devices {
+        if !first {
+            query += " OR "
         }
-        for _, r := range ranges {
-            if !first {
-                sql += " OR "
-            }
-            first = false
-            sql += fmt.Sprintf("( device >= %d AND device <= %d )", r.Low, r.High)
-        }
-        for _, s := range pluscodes {
-            if !first {
-                sql += " OR "
-            }
-            first = false
-            sql += fmt.Sprintf("loc_olc =~ /%s/", plusCodePattern(s))
-        }
-        sql += " )"
-
-        // Generate time filter
-        sql += fmt.Sprintf(" AND ( time >= '%s' AND time < '%s' )", from, to)
-
-        // Execute the query
-        success, numrows, result, filename = InfluxQuery(user, deviceArg, sql, csv)
-        if !success {
-            return false, result, ""
-        }
-
-		message = fmt.Sprintf("%d rows of data for %s are <%s|here>, @%s.", numrows, deviceArg, result, user)
-
-    } else {
-
-        // Generate base of query
-        query := "{"
-
-        // Generate device filter, which is required
-		query += "\"where\":\"("
-        first := true
-        for _, d := range devices {
-            if !first {
-                query += " OR "
-            }
-            first = false
-            query += fmt.Sprintf(".value.device::bigint=%d", d)
-        }
-        for _, r := range ranges {
-            if !first {
-                query += " OR "
-            }
-            first = false
-            query += fmt.Sprintf("(.value.device::bigint>=%d AND .value.device::bigint<= %d)", r.Low, r.High)
-        }
-        query += ")"
-
-        // Generate time filter
-		t, _ := time.Parse("2006-01-02T15:04:05Z", from)
-		fromEpoch := t.Unix()
-		t, _ = time.Parse("2006-01-02T15:04:05Z", to)
-		toEpoch := t.Unix()
-        query += fmt.Sprintf(" AND (.modified>=to_timestamp(%d) AND .modified<to_timestamp(%d))", fromEpoch, toEpoch)
-
-		// End the "where"
-        query += "\""
-
-		// End the query
-        query += "}"
-		
-		numrows, result, filename, err = logQuery(query, csv, user)
-		if err != nil {
-			message = fmt.Sprintf("report error: %s", err)
-			return false, message, ""
-		}
-
-		message = fmt.Sprintf("%d rows of data for %s are <%s|here>, @%s.", numrows, deviceArg, result, user)
-
+        first = false
+        query += fmt.Sprintf(".value.device::bigint=%d", d)
     }
+    for _, r := range ranges {
+        if !first {
+            query += " OR "
+        }
+        first = false
+        query += fmt.Sprintf("(.value.device::bigint>=%d AND .value.device::bigint<= %d)", r.Low, r.High)
+    }
+    query += ")"
+
+    // Generate time filter
+    t, _ := time.Parse("2006-01-02T15:04:05Z", from)
+    fromEpoch := t.Unix()
+    t, _ = time.Parse("2006-01-02T15:04:05Z", to)
+    toEpoch := t.Unix()
+    query += fmt.Sprintf(" AND (.modified>=to_timestamp(%d) AND .modified<to_timestamp(%d))", fromEpoch, toEpoch)
+
+    // End the "where"
+    query += "\""
+
+    // End the query
+    query += "}"
+
+    numrows, result, filename, err = logQuery(query, csv, user)
+    if err != nil {
+        message = fmt.Sprintf("report error: %s", err)
+        return false, message, ""
+    }
+
+    message = fmt.Sprintf("%d rows of data for %s are <%s|here>, @%s.", numrows, deviceArg, result, user)
 
     // Done
     return true, message, filename

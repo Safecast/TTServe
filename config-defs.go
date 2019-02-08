@@ -15,11 +15,6 @@ type TTServeConfig struct {
 	SlackInboundTokens	string		`json:"slack_inbound_tokens,omitempty"`
 	SlackOutboundUrls	string		`json:"slack_outbound_urls,omitempty"`
 
-	// Influx
-	InfluxHost			string		`json:"influx_host,omitempty"`
-	InfluxUsername		string		`json:"influx_username,omitempty"`
-	InfluxPassword		string		`json:"influx_password,omitempty"`
-
 	// Postgres
 	SQLInfo				string		`json:"sqlinfo,omitempty"`
 
