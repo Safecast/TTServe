@@ -134,6 +134,8 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 		tubeType = "W78017"
 	} else if devicetype == "ngeigie" {
 		tubeType = "U7318"
+	} else if devicetype == "geigiecast" {
+		tubeType = "U7318"
 	} else if devicetype == "pointcast" && v1DeviceID % 10 == 1 {
 		tubeType = "U7318"
 	} else if devicetype == "pointcast" && v1DeviceID % 10 == 2 {
