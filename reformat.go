@@ -41,6 +41,11 @@ func SafecastDeviceType(deviceid uint32) string {
         return "safecast-air"
     }
 
+    // GeigieCast
+    if deviceid >= 60000 && deviceid <= 69999 {
+        return "geigiecast"
+    }
+
     // nGeigie
     if deviceid > 0 && deviceid <= 999 {
         return "ngeigie"
@@ -56,18 +61,23 @@ func SafecastDeviceType(deviceid uint32) string {
 func SafecastV1DeviceType(deviceid uint32) (devicetype string, v2DeviceID uint32) {
 
     // For standard V1 pointcast numbering space
-    if deviceid >= 100000 && deviceid < 299999 {
+    if deviceid >= 100000 && deviceid <= 299999 {
         return "pointcast", deviceid/10
     }
 
     // Exception for pointcast device 100x
-    if deviceid >= 1000 && deviceid < 1999 {
+    if deviceid >= 1000 && deviceid <= 1999 {
         return "pointcast", deviceid/10
     }
 
     // Air
-    if deviceid >= 50000 && deviceid < 59999 {
+    if deviceid >= 50000 && deviceid <= 59999 {
         return "safecast-air", deviceid
+    }
+
+    // GeigieCast
+    if deviceid >= 60000 && deviceid <= 69999 {
+        return "geigiecast", deviceid
     }
 
     // nGeigie
