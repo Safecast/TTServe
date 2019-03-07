@@ -88,7 +88,7 @@ func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
 	fmt.Printf("***************************************\n");
 
 	// Display info about it
-    fmt.Printf("\n%s Received payload for %d %s from %s in %s\n", LogTime(), sd.DeviceID, sd.DeviceURN, transportStr,
+    fmt.Printf("\n%s Received payload for %d %s from %s in %s\n", LogTime(), sd.DeviceID, *sd.DeviceURN, transportStr,
 		e.TowerLocation+" "+e.TowerCountry)
 
 	var sdJSON []byte
