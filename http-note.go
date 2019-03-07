@@ -125,17 +125,22 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 	}
 	sd.DeviceID = &deviceID
 
-	// Service-related
-    var svc Service
-    sd.Service = &svc
-    svc.Transport = &transport
-    uploadedAt := NowInUTC()		// OZZIE should be in message
-	svc.UploadedAt = &uploadedAt
-
 	// When captured on the device
 	if e.When != 0 {
 		capturedAt := time.Unix(e.When, 0).Format("2006-01-02T15:04:05Z")
 		sd.CapturedAt = &capturedAt
+	}
+
+	// Service-related
+    var svc Service
+    sd.Service = &svc
+    svc.Transport = &transport
+	if e.Routed != 0 {
+		uploadedAt := time.Unix(e.Routed, 0).Format("2006-01-02T15:04:05Z")
+		sd.UploadedAt = &uploadedAt
+	} else {
+	    uploadedAt := NowInUTC()
+		svc.UploadedAt = &uploadedAt
 	}
 
 	// Where captured
