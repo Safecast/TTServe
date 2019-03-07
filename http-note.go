@@ -82,28 +82,20 @@ func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
 		fmt.Printf("NOTE ignored: %s\n%s\n", err, body);
 		return
     }
-	
-	fmt.Printf("***************************************\n");
-	fmt.Printf("***************************************\n");
-	fmt.Printf("***************************************\n");
 
 	// Display info about it
     fmt.Printf("\n%s Received payload for %d %s from %s in %s\n", LogTime(), sd.DeviceID, *sd.DeviceURN, transportStr,
 		e.TowerLocation+" "+e.TowerCountry)
 
+	fmt.Printf("%s TRANSFORMED INTO:\n", body);
 	var sdJSON []byte
 	sdJSON, err = json.Marshal(sd)
 	if err == nil {
 		fmt.Printf("%s\n", sdJSON)
 	}
-	fmt.Printf("%s\n", body);
 
 	// Send it to Safecast
 	go SendToSafecast(sd)
-	
-	fmt.Printf("***************************************\n");
-	fmt.Printf("***************************************\n");
-	fmt.Printf("***************************************\n");
 
 }
 
