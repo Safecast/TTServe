@@ -2,7 +2,7 @@
 // Use of this source code is governed by licenses granted by the
 // copyright holder including that found in the LICENSE file.
 
-// Inbound support for the routing from a notebox
+// Inbound support for the routing from a note
 package main
 
 import (
@@ -15,27 +15,27 @@ import (
     "github.com/google/open-location-code/go"
 )
 
-type NoteboxResponse struct {
+type NoteResponse struct {
 	Err string			`json:"err,omitempty"`
 	Status string		`json:"status,omitempty"`
 }
 
 // Write the error to the response writer
 func emitError(rw http.ResponseWriter, err error) {
-	rsp := NoteboxResponse{}
+	rsp := NoteResponse{}
 	rsp.Err = fmt.Sprintf("%s", err)
 	rspJSON, _ := json.Marshal(rsp)
     io.WriteString(rw, string(rspJSON))
 	fmt.Printf("*** %s\n", string(rspJSON))
 }
 	
-// Handle inbound HTTP requests from Notebox's via the Notehub reporter task
-func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
+// Handle inbound HTTP requests from Note's via the Notehub reporter task
+func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
     var body []byte
     var err error
 
 	// Prepare a response
-	rsp := NoteboxResponse{}
+	rsp := NoteResponse{}
 
     // Remember when it was uploaded to us
     UploadedAt := NowInUTC()
@@ -82,21 +82,21 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
 	uploaded := 0
     for _, sd := range set {
 
-        err = ReformatFromNotebox(UploadedAt, &sd)
+        err = ReformatFromNote(UploadedAt, &sd)
         if err != nil {
-            emitError(rw, fmt.Errorf("cannot format incoming data from notebox: %s", err))
+            emitError(rw, fmt.Errorf("cannot format incoming data from note: %s", err))
 			return
         }
 
         // Report where we got it from, and when we got it
         var svc Service
         svc.UploadedAt = &UploadedAt
-        transportStr := "notebox:" + remoteAddr
+        transportStr := "note:" + remoteAddr
         svc.Transport = &transportStr
         sd.Service = &svc
 
         // If the data doesn't have anything useful in it, optimize it completely away.  This happens
-		// with data points that have nothing to do with Safecast but are stored in the notebox DB
+		// with data points that have nothing to do with Safecast but are stored in the note DB
         if sd.Opc == nil && sd.Pms == nil && sd.Pms2 == nil && sd.Env == nil && sd.Lnd == nil && sd.Bat == nil {
             fmt.Printf("%s *** Ignoring because message contains no data\n", LogTime())
 			continue
@@ -133,8 +133,8 @@ func inboundWebNoteboxHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-// ReformatFromNotebox reformats to our standard normalized data format
-func ReformatFromNotebox(uploadedAt string, sd *SafecastData) (err error) {
+// ReformatFromNote reformats to our standard normalized data format
+func ReformatFromNote(uploadedAt string, sd *SafecastData) (err error) {
 
     // Mark it as a test measurement
     if sd.Dev == nil {

@@ -37,7 +37,7 @@ func HTTPInboundHandler() {
     http.HandleFunc(TTServerTopicGatewayStatus, inboundWebGatewayStatusHandler)
     http.HandleFunc(TTServerTopicGatewayUpdate, inboundWebGatewayUpdateHandler)
     http.HandleFunc(TTServerTopicSend, inboundWebSendHandler)
-    http.HandleFunc(TTServerTopicNotebox, inboundWebNoteboxHandler)
+    http.HandleFunc(TTServerTopicNote, inboundWebNoteHandler)
     http.HandleFunc(TTServerTopicRedirect1, inboundWebRedirectHandler)
     http.HandleFunc(TTServerTopicRedirect2, inboundWebRedirectHandler)
 
