@@ -6,7 +6,6 @@
 package main
 
 import (
-	"io"
     "io/ioutil"
     "net/http"
     "fmt"
@@ -14,31 +13,11 @@ import (
 	"crypto/md5"
     "github.com/google/open-location-code/go"
 )
-
-type NoteResponse struct {
-	Err string			`json:"err,omitempty"`
-	Status string		`json:"status,omitempty"`
-}
-
-// Write the error to the response writer
-func emitError(rw http.ResponseWriter, err error) {
-	rsp := NoteResponse{}
-	rsp.Err = fmt.Sprintf("%s", err)
-	rspJSON, _ := json.Marshal(rsp)
-    io.WriteString(rw, string(rspJSON))
-	fmt.Printf("*** %s\n", string(rspJSON))
-}
 	
 // Handle inbound HTTP requests from Note's via the Notehub reporter task
 func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
     var body []byte
     var err error
-
-	// Prepare a response
-	rsp := NoteResponse{}
-
-    // Remember when it was uploaded to us
-    UploadedAt := NowInUTC()
 
     // Get the remote address, and only add this to the count if it's likely from
     // the internal HTTP load balancer.
@@ -46,43 +25,46 @@ func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
     if !isReal {
         remoteAddr = "internal address"
     }
+    transportStr := "note:" + remoteAddr
+    uploadedAt := NowInUTC()
 
     // Read the body as a byte array
     body, err = ioutil.ReadAll(req.Body)
     if err != nil {
         stats.Count.HTTP++
-        emitError(rw, fmt.Errorf("error reading HTTP request body: %v", req))
         return
 
     }
 
-	// Exit if it's a get
+	// Exit if it's there's nothing there
 	if len(body) == 0 {
-		emitError(rw, fmt.Errorf("no measurements supplied"))
 		return
 	}
 	
+	// Unmarshal into a notehub Event structure
     // Parse it into an array of SafecastData structures
-    set := []SafecastData{}
-	if body[0] == '{' {
-		one := SafecastData{}
-	    err = json.Unmarshal(body, &one)
-		set = append(set, one)
-	} else if body[0] == '[' {
-	    err = json.Unmarshal(body, &set)
-	} else {
-		err = fmt.Errorf("does not appear to be JSON or a JSON array")
-	}
-    if err != nil {
-        emitError(rw, fmt.Errorf("%s cannot parse received this from %s: %s: %s", UploadedAt, remoteAddr, err, string(body)))
-        return
-    }
+    e := NoteEvent{}
+    err = json.Unmarshal(body, &e)
+
+	fmt.Printf("***************************************\n");
+	fmt.Printf("***************************************\n");
+	fmt.Printf("***************************************\n");
+	fmt.Printf("from %s at %s\n", transportStr, uploadedAt)
+	fmt.Printf("err: %s\n", err)
+	fmt.Printf("%s\n", string(body))
+	fmt.Printf("***************************************\n");
+	fmt.Printf("***************************************\n");
+	fmt.Printf("***************************************\n");
+
+/*
+
+    // Remember when it was uploaded to us
 
     // Process each reading individually
 	uploaded := 0
     for _, sd := range set {
 
-        err = ReformatFromNote(UploadedAt, &sd)
+        err = ReformatFromNote(uploadedAt, &sd)
         if err != nil {
             emitError(rw, fmt.Errorf("cannot format incoming data from note: %s", err))
 			return
@@ -90,8 +72,7 @@ func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Report where we got it from, and when we got it
         var svc Service
-        svc.UploadedAt = &UploadedAt
-        transportStr := "note:" + remoteAddr
+        svc.UploadedAt = &uploadedAt
         svc.Transport = &transportStr
         sd.Service = &svc
 
@@ -121,15 +102,10 @@ func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
 		uploaded++
 
     }
-
-    // A real request
+*/
+	
+    // Count the request
     stats.Count.HTTP++
-
-	// Process response
-	rsp.Status = fmt.Sprintf("%d uploaded", uploaded)
-	rspJSON, _ := json.Marshal(rsp)
-    io.WriteString(rw, string(rspJSON))
-	fmt.Printf("*** %s\n", string(rspJSON))
 
 }
 

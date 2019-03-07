@@ -26,7 +26,7 @@ func brokerOutboundPublisher() {
     mqttOpts.SetCleanSession(true)
 
     onMqConnectionLost := func (client MQTT.Client, err error) {
-        fmt.Printf("\n%s *** AWS IoT MQQT broker connection lost: %v\n\n", LogTime(), err)
+        fmt.Printf("\n%s *** MQTT broker connection lost: %s: %v\n\n", LogTime(), ServiceConfig.BrokerHost, err)
     }
     mqttOpts.SetConnectionLostHandler(onMqConnectionLost)
 
