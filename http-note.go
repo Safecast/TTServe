@@ -125,6 +125,11 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 	}
 	sd.DeviceID = &deviceID
 
+	// Serial number
+	if e.DeviceSN != "" {
+		sd.DeviceSN = &e.DeviceSN
+	}
+
 	// When captured on the device
 	if e.When != 0 {
 		capturedAt := time.Unix(e.When, 0).Format("2006-01-02T15:04:05Z")
