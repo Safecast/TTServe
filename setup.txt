@@ -25,6 +25,11 @@ sudo apt update
 sudo apt install git --assume-yes
 ## Install GOLANG so we can rebuild our code
 sudo apt install golang-go --assume-yes
+## Upgrade to go 1.12 (for module support)
+## instructions: https://github.com/golang/go/wiki/Ubuntu
+sudo add-apt-repository ppa:longsleep/golang-backports
+sudo apt-get update
+sudo apt-get install golang-go
 ## Install NFS so we can mount an EFS filesystem on amazon
 sudo apt-get install nfs-common --assume-yes
 ## Verify that the version of GOLANG is at least go1.6.2
@@ -34,6 +39,7 @@ go version
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
 export TT=$GOPATH/src/github.com/safecast/ttserve
+export GO111MODULE=on
 
 ## Fetch our app package
 mkdir $HOME/go && mkdir $HOME/go/src && mkdir $HOME/go/src/github.com && mkdir $HOME/go/src/github.com/safecast && cd $HOME/go/src/github.com/safecast

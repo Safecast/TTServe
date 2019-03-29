@@ -14,6 +14,9 @@ while [ ! -d "$HOME/efs/safecast" ]; do
 done
 
 set -v
+env
+pwd
+go version
 git pull https://github.com/safecast/ttserve
 go get -u
 go build
