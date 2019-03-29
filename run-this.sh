@@ -14,8 +14,6 @@ while [ ! -d "$HOME/efs/safecast" ]; do
 done
 
 set -v
-env
-pwd
 export GO111MODULE=on
 go version
 git reset --hard
