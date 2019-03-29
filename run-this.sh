@@ -21,5 +21,4 @@ git clean -f
 git pull https://github.com/safecast/ttserve
 go get -u
 go build
-ls
 sudo ./TTServe $HOME/efs/safecast
