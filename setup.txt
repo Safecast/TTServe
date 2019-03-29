@@ -39,7 +39,6 @@ go version
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
 export TT=$GOPATH/src/github.com/safecast/ttserve
-export GO111MODULE=on
 
 ## Fetch our app package
 mkdir $HOME/go && mkdir $HOME/go/src && mkdir $HOME/go/src/github.com && mkdir $HOME/go/src/github.com/safecast && cd $HOME/go/src/github.com/safecast
