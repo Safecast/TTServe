@@ -24,4 +24,4 @@ git pull https://github.com/safecast/ttserve
 go get -u
 go build
 ls
-./TTServe $HOME/efs/safecast
+sudo ./TTServe $HOME/efs/safecast
