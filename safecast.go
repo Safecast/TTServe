@@ -938,8 +938,8 @@ func doUploadToSafecast(sd SafecastData, url string) bool {
 
     // Marshal it to json text
     scJSON, _ := json.Marshal(sd)
-    if (false) {
-        fmt.Printf("%s\n", scJSON)
+    if (true) {
+        fmt.Printf("...ingested as...\n%s\n", scJSON)
     }
 
     req, err := http.NewRequest("POST", url, bytes.NewBuffer(scJSON))
