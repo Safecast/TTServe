@@ -131,12 +131,15 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
     }
 
     // Done
-    if !deviceIDFound {
-        return 0, ""
-    }
-    if snFound == 0 {
+    if !deviceIDFound || snFound == 0 {
+		if (true) {
+			fmt.Printf("** SN: failed to map %d\n", DeviceID)
+		}
         return 0, ""
     }
 
+	if (true) {
+		fmt.Printf("** SN: %d is #%d\n", DeviceID, snFound)
+	}
     return snFound, info
 }
