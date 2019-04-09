@@ -51,8 +51,8 @@ func SafecastDeviceType(deviceid uint32) (programmatic string, display string) {
         return "ngeigie", "nGeigie"
     }
 
-	// Unknown device type
-	return "", "Safecast"
+	// Unknown device type - must be a solarcast
+	return "", "Solarcast"
 	
 }
 
