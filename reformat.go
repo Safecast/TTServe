@@ -51,18 +51,8 @@ func SafecastDeviceType(deviceid uint32) (programmatic string, display string) {
         return "ngeigie", "nGeigie"
     }
 
-	// Solarcast
-	if deviceid >= 30000 && deviceid < 31000 {
-		return "", "Solarcast"
-	}
-
-	// SCNano
-	if deviceid >= 33000 && deviceid < 34000 {
-		return "", "Solarcast Nano"
-	}
-
 	// Unknown device type - must be a solarcast
-	return "", "???"
+	return "", "Solarcast"
 	
 }
 
@@ -95,7 +85,7 @@ func SafecastV1DeviceType(deviceid uint32) (devicetype string, devicename string
         return "ngeigie", "nGeigie", deviceid
     }
 	
-    return "", "", deviceid
+    return "", "Solarcast", deviceid
 
 }
 
