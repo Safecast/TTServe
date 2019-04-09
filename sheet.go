@@ -130,16 +130,20 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
         }
     }
 
-    // Done
+	// Not found
     if !deviceIDFound || snFound == 0 {
-		if (true) {
-			fmt.Printf("** SN: failed to map %d\n", DeviceID)
+
+		// It was agreed with Rob t(see ttnode/src/io.c) that we would reserve the low 2^20 addresses
+		// for fixed allocation.  If we didn't find the device ID here and if it was in that range,
+		// use THAT as the serial number.
+		if (DeviceID < 1048576) {
+			return DeviceID, ""
 		}
+
+		// A new style device that was not found
+		fmt.Printf("*** Please enter info for device %d in the Tracker spreadsheet\n", DeviceID)
         return 0, ""
     }
 
-	if (true) {
-		fmt.Printf("** SN: %d is #%d\n", DeviceID, snFound)
-	}
     return snFound, info
 }
