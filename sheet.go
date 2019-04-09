@@ -29,7 +29,7 @@ var failedRecently bool
 var lastError string
 
 // DeviceIDToSN converts a Safecast device ID to its manufacturing serial number
-func DeviceIDToSN(DeviceID uint32) (sn uint32, info string, errstr string) {
+func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
     var fRetrieve bool
     var sheetData string
 
@@ -46,7 +46,7 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string, errstr string) {
 
     // If we've got an error, make sure we don't thrash every time we come in here
     if fRetrieve && failedRecently {
-        return 0, "", lastError
+        return 0, ""
     }
 
     // Fetch and parse the sheet
@@ -55,14 +55,14 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string, errstr string) {
         if err != nil {
             lastError = fmt.Sprintf("%v", err)
             failedRecently = true;
-            return 0, "", lastError
+            return 0, ""
         }
         defer rsp.Body.Close()
         buf, err := ioutil.ReadAll(rsp.Body)
         if err != nil {
             lastError = fmt.Sprintf("%v", err)
             failedRecently = true;
-            return 0, "", lastError
+            return 0, ""
         }
 
         // Parse the sheet.  If the col numbers change, this must be changed
@@ -128,13 +128,11 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string, errstr string) {
 
     // Done
     if !deviceIDFound {
-        lastError = "Device ID not found"
-        return 0, "", lastError
+        return 0, ""
     }
     if snFound == 0 {
-        lastError = "S/N not found for device"
-        return 0, "", lastError
+        return 0, ""
     }
 
-    return snFound, info, ""
+    return snFound, info
 }

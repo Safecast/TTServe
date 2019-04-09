@@ -181,7 +181,7 @@ type SafecastData struct {
 	// The new device ID that will ultimatley replace DeviceID
 	// because of the fact that DeviceID is only 32-bits and will eventually
 	// have conflicts.
-    DeviceURN *string		`json:"device_urn,omitempty"`
+    DeviceUID *string		`json:"device_urn,omitempty"`
 
 	// An optional device serial number string
     DeviceSN *string		`json:"device_sn,omitempty"`

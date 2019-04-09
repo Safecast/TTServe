@@ -84,7 +84,7 @@ func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
 	// Display info about it
-    fmt.Printf("\n%s Received payload for %d %s from %s in %s\n", LogTime(), sd.DeviceID, *sd.DeviceURN, transportStr,
+    fmt.Printf("\n%s Received payload for %d %s from %s in %s\n", LogTime(), sd.DeviceID, *sd.DeviceUID, transportStr,
 		e.TowerLocation+" "+e.TowerCountry)
 
 	fmt.Printf("%s TRANSFORMED INTO:\n", body);
@@ -110,11 +110,11 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 
 	// Generate device name
 	deviceURN := "note:" + e.DeviceUID
-	sd.DeviceURN = &deviceURN
+	sd.DeviceUID = &deviceURN
 
 	// Generate backward-compatible safecast Device ID, reserving the low 2^20 addresses
 	// for fixed allocation as per Rob agreement (see ttnode/src/io.c)
-	hash := md5.Sum([]byte(*sd.DeviceURN))
+	hash := md5.Sum([]byte(*sd.DeviceUID))
 	var deviceID uint32 = 0
 	for i:=0; i<len(hash); i++ {
 		x := uint32(hash[i]) << (uint(i) % 4)
