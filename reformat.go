@@ -52,7 +52,7 @@ func SafecastDeviceType(deviceid uint32) (programmatic string, display string) {
     }
 
 	// Unknown device type
-	return "", ""
+	return "", "Safecast"
 	
 }
 
