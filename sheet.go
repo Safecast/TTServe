@@ -34,7 +34,7 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
     var sheetData string
 
     // Retrieve if never yet retrieved
-    if sheet == nil {
+    if !everRetrieved {
         fRetrieve = true
     }
 
@@ -53,15 +53,19 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
     if fRetrieve {
         rsp, err := http.Get(sheetsSolarcastTracker)
         if err != nil {
-            lastError = fmt.Sprintf("%v", err)
+            lastError = fmt.Sprintf("%s", err)
             failedRecently = true;
+			fmt.Printf("***** CANNOT http.Get %s\n", sheetsSolarcastTracker)
+			fmt.Printf("***** %s\n", lastError)
             return 0, ""
         }
         defer rsp.Body.Close()
         buf, err := ioutil.ReadAll(rsp.Body)
         if err != nil {
-            lastError = fmt.Sprintf("%v", err)
+            lastError = fmt.Sprintf("%s", err)
             failedRecently = true;
+			fmt.Printf("***** CANNOT ioutil.ReadAll %s\n", sheetsSolarcastTracker)
+			fmt.Printf("***** %s\n", lastError)
             return 0, ""
         }
 
