@@ -83,7 +83,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time) {
         minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
         dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes(dev.deviceid)
         dev.notifiedAsUnseen = false
-        dev.label = SafecastDeviceType(dev.deviceid)
+        dev.label, _ = SafecastDeviceType(dev.deviceid)
         seenDevices = append(seenDevices, dev)
     }
 
@@ -270,7 +270,7 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
 
         } else {
 
-            devicetype := SafecastDeviceType(id)
+            devicetype, _ := SafecastDeviceType(id)
 			switch devicetype {
 
             // Don't send to devices that we cannot
@@ -499,7 +499,8 @@ func deviceWarningAfterMinutes(deviceID uint32) int64 {
     return 24*60
 
     // This is what the behavior was for months while we were debugging
-    switch SafecastDeviceType(deviceID) {
+	deviceType, _ := SafecastDeviceType(deviceID)
+    switch deviceType {
     case "pointcast":
         fallthrough
     case "safecast-air":

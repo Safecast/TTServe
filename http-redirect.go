@@ -151,7 +151,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // Debugging on 2017-06-24 with Rob; feel free to delete after 2017-07-01 if it's still here
     if (false) {
         if sdV1.DeviceID != nil {
-            devicetype, _ := SafecastV1DeviceType(*sdV1.DeviceID)
+            devicetype, _, _ := SafecastV1DeviceType(*sdV1.DeviceID)
             if devicetype == "safecast-air" {
                 fmt.Printf("*** DeviceID %d %t %s\n", *sdV1.DeviceID, isTestMeasurement, req.RequestURI)
             }

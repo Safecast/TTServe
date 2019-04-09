@@ -24,68 +24,68 @@ func SafecastDeviceIsSolarcastNano(deviceid uint32) bool {
 
 // SafecastDeviceType returns the type of a Safecast device AS NUMBERED in our
 // V2 address space
-func SafecastDeviceType(deviceid uint32) string {
+func SafecastDeviceType(deviceid uint32) (programmatic string, display string) {
 
     // Pointcast
     if deviceid >= 10000 && deviceid <= 29999 {
-        return "pointcast"
+        return "pointcast", "Pointcast"
     }
 
     // Exception for pointcast device 100
     if deviceid == 100 {
-        return "pointcast"
+        return "pointcast", "Pointcast"
     }
 
     // Air
     if deviceid >= 50000 && deviceid <= 59999 {
-        return "safecast-air"
+        return "safecast-air", "Safecast Air"
     }
 
     // GeigieCast
     if deviceid >= 60000 && deviceid <= 69999 {
-        return "geigiecast"
+        return "geigiecast", "bGeigie"
     }
 
     // nGeigie
     if deviceid > 0 && deviceid <= 999 {
-        return "ngeigie"
+        return "ngeigie", "nGeigie"
     }
 
 	// Unknown device type
-	return ""
+	return "", ""
 	
 }
 
 // SafecastV1DeviceType returns the type of a device AS NATIVELY NUMBERED
 // by pointcast, safecast-air, or ngeigie devices
-func SafecastV1DeviceType(deviceid uint32) (devicetype string, v2DeviceID uint32) {
+func SafecastV1DeviceType(deviceid uint32) (devicetype string, devicename string, v2DeviceID uint32) {
 
     // For standard V1 pointcast numbering space
     if deviceid >= 100000 && deviceid <= 299999 {
-        return "pointcast", deviceid/10
+        return "pointcast", "Pointcast", deviceid/10
     }
 
     // Exception for pointcast device 100x
     if deviceid >= 1000 && deviceid <= 1999 {
-        return "pointcast", deviceid/10
+        return "pointcast", "Pointcast", deviceid/10
     }
 
     // Air
     if deviceid >= 50000 && deviceid <= 59999 {
-        return "safecast-air", deviceid
+        return "safecast-air", "Safecast Air", deviceid
     }
 
     // GeigieCast
     if deviceid >= 60000 && deviceid <= 69999 {
-        return "geigiecast", deviceid
+        return "geigiecast", "bGeigie", deviceid
     }
 
     // nGeigie
     if deviceid > 0 && deviceid <= 999 {
-        return "ngeigie", deviceid
+        return "ngeigie", "nGeigie", deviceid
     }
 	
-    return "", deviceid
+    return "", "", deviceid
 
 }
 
@@ -120,7 +120,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 	
     // Detect what range it is within, and process the conversion differently,
 	// rejecting non-reformattable devices
-    devicetype, v2DeviceID := SafecastV1DeviceType(v1DeviceID)
+    devicetype, devicename, v2DeviceID := SafecastV1DeviceType(v1DeviceID)
     if devicetype == "" {
         fmt.Printf("*** Reformat: unsuccessful attempt to reformat Device ID %d\n", v1DeviceID)
         return 0, "", sd
@@ -150,7 +150,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 	// Device Serial Number
 	sn, _ := DeviceIDToSN(v2DeviceID)
 	if sn != 0 {
-		snstr := fmt.Sprintf("%d", sn)
+		snstr := fmt.Sprintf("%s #%d", devicename, sn)
 		sd.DeviceSN = &snstr
 	}
 
@@ -384,7 +384,7 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	if sd.DeviceID == nil {
 		return
 	}
-	deviceType := SafecastDeviceType(*sd.DeviceID)
+	deviceType, _ := SafecastDeviceType(*sd.DeviceID)
 	if deviceType != "" {
 		return
 	}

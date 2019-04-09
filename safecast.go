@@ -63,7 +63,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
     sd.DeviceID = &did
 
 	// Add our new device ID field
-	devicetype := SafecastDeviceType(did)
+	devicetype, devicename := SafecastDeviceType(did)
 	if devicetype == "" {
 		devicetype = "safecast"
 	}
@@ -73,7 +73,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
 	// Generate a Serial Number
 	sn, _ := DeviceIDToSN(did)
 	if sn != 0 {
-		snstr := fmt.Sprintf("%d", sn)
+		snstr := fmt.Sprintf("%s #%d", devicename, sn)
 		sd.DeviceSN = &snstr
 	}
 	
