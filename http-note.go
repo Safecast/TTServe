@@ -119,7 +119,7 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 	fmt.Printf("////   UID HASH: %v\n", hash)
 	var deviceID uint32 = 0
 	for i:=0; i<len(hash); i++ {
-		x := uint32(hash[i]) << (uint(i) % 4)
+		x := uint32(hash[i]) << ((uint(i) % 4)*8)
 		deviceID = deviceID ^ x
 		fmt.Printf("////   %d: %08x = %08x\n", i, x, deviceID)
 	}
