@@ -825,7 +825,7 @@ func GetDeviceStatusSummary(DeviceID uint32) (DevEui string, Label string, Gps s
 
     // If no SN, use the old style device label concatenated with SN
     if label == "" && value.Dev != nil && value.Dev.DeviceLabel != nil {
-        label := *value.Dev.DeviceLabel
+        label = *value.Dev.DeviceLabel
 		sn, info := DeviceIDToSN(DeviceID)
         if sn != 0 {
             if info == "" {
