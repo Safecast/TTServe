@@ -803,9 +803,6 @@ func GetDeviceStatusSummary(DeviceID uint32) (DevEui string, Label string, Gps s
 
     // Default the label
     label := ""
-    if false {
-        label, _ = SafecastDeviceType(DeviceID)
-    }
 
     // Read the file
     isAvail, _, value := ReadDeviceStatus(DeviceID)
@@ -824,11 +821,19 @@ func GetDeviceStatusSummary(DeviceID uint32) (DevEui string, Label string, Gps s
     // Get the label
     if label == "" && value.Dev != nil && value.Dev.DeviceLabel != nil {
         label = *value.Dev.DeviceLabel
+		fmt.Printf("LABEL: '%s'\n", label)
     }
 
 	// Use the SN as a label if present
 	if label == "" && value.DeviceSN != nil {
 		label = *value.DeviceSN
+		fmt.Printf("SN: '%s'\n", label)
+	}
+	if value.DeviceSN == nil {
+		fmt.Printf("SN is nil\n")
+	}
+	if label == "" {
+		fmt.Printf("label is nil\n")
 	}
 
     gps := ""
