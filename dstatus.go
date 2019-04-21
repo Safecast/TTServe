@@ -678,6 +678,8 @@ func WriteDeviceStatus(sc SafecastData) {
         }
         new := SafecastData{}
         new.DeviceID = value.DeviceID
+        new.DeviceUID = value.DeviceUID
+        new.DeviceSN = value.DeviceSN
         new.CapturedAt = ShuffledAt
         new.Loc = value.Loc
         value.LocationHistory[0] = new
@@ -690,6 +692,8 @@ func WriteDeviceStatus(sc SafecastData) {
         }
         new := SafecastData{}
         new.DeviceID = value.DeviceID
+        new.DeviceUID = value.DeviceUID
+        new.DeviceSN = value.DeviceSN
         new.CapturedAt = ShuffledAt
         new.Pms = value.Pms
         value.PmsHistory[0] = new
@@ -702,6 +706,8 @@ func WriteDeviceStatus(sc SafecastData) {
         }
         new := SafecastData{}
         new.DeviceID = value.DeviceID
+        new.DeviceUID = value.DeviceUID
+        new.DeviceSN = value.DeviceSN
         new.CapturedAt = ShuffledAt
         new.Pms2 = value.Pms2
         value.Pms2History[0] = new
@@ -714,6 +720,8 @@ func WriteDeviceStatus(sc SafecastData) {
         }
         new := SafecastData{}
         new.DeviceID = value.DeviceID
+        new.DeviceUID = value.DeviceUID
+        new.DeviceSN = value.DeviceSN
         new.CapturedAt = ShuffledAt
         new.Opc = value.Opc
         value.OpcHistory[0] = new
@@ -726,6 +734,8 @@ func WriteDeviceStatus(sc SafecastData) {
         }
         new := SafecastData{}
         new.DeviceID = value.DeviceID
+        new.DeviceUID = value.DeviceUID
+        new.DeviceSN = value.DeviceSN
         new.CapturedAt = ShuffledAt
         new.Lnd = value.Lnd
         value.GeigerHistory[0] = new
