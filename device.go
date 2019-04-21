@@ -411,19 +411,8 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
             s = fmt.Sprintf("%s %s ago", s, AgoMinutes(uint32(sortedDevices[i].minutesAgo)))
         }
 
-        sn, info := DeviceIDToSN(id)
-        if sn != 0 {
-            if info == "" {
-                s += fmt.Sprintf(" #%d", sn)
-            } else {
-                s += fmt.Sprintf(" #%d (%s)", sn, info)
-            }
-        }
-        // Too noisy.  Label is not super useful anymore.  Removed 2017-12-24 by Ray
-        if (false) {
-            if label != "" {
-                s += fmt.Sprintf(" \"%s\"", label)
-            }
+        if label != "" {
+            s += fmt.Sprintf(" \"%s\"", label)
         }
         if words != "" {
             s += fmt.Sprintf(" %s", words)
