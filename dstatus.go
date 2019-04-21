@@ -826,6 +826,11 @@ func GetDeviceStatusSummary(DeviceID uint32) (DevEui string, Label string, Gps s
         label = *value.Dev.DeviceLabel
     }
 
+	// Use the SN as a label if present
+	if label == "" && value.DeviceSN != nil {
+		label = *value.DeviceSN
+	}
+
     gps := ""
     if value.Loc != nil && value.Loc.Lat != nil && value.Loc.Lon != nil {
         gps = fmt.Sprintf("<http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps>", *value.Loc.Lat, *value.Loc.Lon)
