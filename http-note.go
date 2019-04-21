@@ -116,18 +116,18 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 	// for fixed allocation as per Rob agreement (see ttnode/src/io.c)
 	hash := md5.Sum([]byte(*sd.DeviceUID))
 	fmt.Printf("//// DEVICE UID: %s\n", *sd.DeviceUID)
-	fmt.Printf("////   UID HASH: %s\n", hash)
+	fmt.Printf("////   UID HASH: %v\n", hash)
 	var deviceID uint32 = 0
 	for i:=0; i<len(hash); i++ {
 		x := uint32(hash[i]) << (uint(i) % 4)
 		deviceID = deviceID ^ x
-		fmt.Printf("////   %d: %02x = %08x\n", i, x, deviceID)
+		fmt.Printf("////   %d: %08x = %08x\n", i, x, deviceID)
 	}
     if (deviceID < 1048576) {
         deviceID = ^deviceID;
 	}
 	sd.DeviceID = &deviceID
-	fmt.Printf("////   DEVICE ID: %08x %d\n", sd.DeviceID, sd.DeviceID)
+	fmt.Printf("////   DEVICE ID: %08x %d\n", *sd.DeviceID, *sd.DeviceID)
 
 	// Serial number
 	if e.DeviceSN != "" {
