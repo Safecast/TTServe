@@ -818,23 +818,25 @@ func GetDeviceStatusSummary(DeviceID uint32) (DevEui string, Label string, Gps s
         }
     }
 
-    // Get the label
-    if label == "" && value.Dev != nil && value.Dev.DeviceLabel != nil {
-        label = *value.Dev.DeviceLabel
-		fmt.Printf("LABEL: '%s'\n", label)
-    }
-
 	// Use the SN as a label if present
 	if label == "" && value.DeviceSN != nil {
 		label = *value.DeviceSN
 		fmt.Printf("SN: '%s'\n", label)
 	}
-	if value.DeviceSN == nil {
-		fmt.Printf("SN is nil\n")
-	}
-	if label == "" {
-		fmt.Printf("label is nil\n")
-	}
+
+    // If no SN, use the old style device label concatenated with SN
+    if label == "" && value.Dev != nil && value.Dev.DeviceLabel != nil {
+        label := *value.Dev.DeviceLabel
+		sn, info := DeviceIDToSN(DeviceID)
+        if sn != 0 {
+            if info == "" {
+                label += fmt.Sprintf(" #%d", sn)
+            } else {
+                label += fmt.Sprintf(" #%d (%s)", sn, info)
+            }
+        }
+		fmt.Printf("LABEL: '%s'\n", label)
+    }
 
     gps := ""
     if value.Loc != nil && value.Loc.Lat != nil && value.Loc.Lon != nil {
