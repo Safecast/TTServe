@@ -122,6 +122,10 @@ func WriteDeviceStatus(sc SafecastData) {
         time.Sleep(time.Duration(Random(1, 6)) * time.Second)
     }
 
+	// Update the identity-related fields
+    value.DeviceUID = sc.DeviceUID
+    value.DeviceSN = sc.DeviceSN
+
     // Update the current values, but only if modified
     if sc.Service != nil && sc.Service.UploadedAt != nil {
         if value.Service == nil {
