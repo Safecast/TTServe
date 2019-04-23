@@ -139,7 +139,7 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
     }
 
 	// Not found
-    if !deviceIDFound || snFound == 0 {
+    if !deviceIDFound {
 
 		// It was agreed with Rob t(see ttnode/src/io.c) that we would reserve the low 2^20 addresses
 		// for fixed allocation.  If we didn't find the device ID here and if it was in that range,
