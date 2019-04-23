@@ -95,7 +95,7 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
 
                 }
             }
-            if row.sn != 0 && row.deviceid != 0 {
+            if row.deviceid != 0 {
                 sheet = append(sheet, row)
             }
         }
