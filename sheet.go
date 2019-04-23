@@ -109,14 +109,9 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
     }
 
     // Iterate over the rows to find the device
-	fmt.Printf("DEVICEID: %d\n", DeviceID) // OZZIE
     deviceIDFound := false;
     snFound := uint32(0)
     for _, r := range sheet {
-		if DeviceID == 1770858550 || DeviceID == 3343207012 { // OZZIE
-			fmt.Printf("%d == %d ? %t\n", DeviceID, r.deviceid, r.deviceid == DeviceID)
-			fmt.Printf("%s\n%s\n", r.custodian, r.location)
-		}
         if r.deviceid == DeviceID {
 
             deviceIDFound = true
@@ -130,9 +125,6 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
             } else {
                 info = fmt.Sprintf("%s, %s", r.custodian, r.location)
             }
-			if DeviceID == 1770858550 || DeviceID == 3343207012 {	// OZZIE
-				fmt.Printf("%s\n", info)
-			}
 
             break
         }
