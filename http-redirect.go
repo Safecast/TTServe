@@ -39,7 +39,10 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Get the remote address, and only add this to the count if it's likely from
     // the internal HTTP load balancer.
-    remoteAddr, isReal := getRequestorIPv4(req)
+    remoteAddr, isReal, abusive := getRequestorIPv4(req)
+	if abusive {
+		return
+	}
     if !isReal {
         remoteAddr = "internal address"
     }
@@ -179,7 +182,10 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // Convert to current data format
     deviceID, deviceType, sd := SafecastReformatFromV1(sdV1, isTestMeasurement)
     if deviceID == 0 {
-        requestor, _ := getRequestorIPv4(req)
+        requestor, _, abusive := getRequestorIPv4(req)
+		if abusive {
+			return
+		}
         transportStr := deviceType+":" + requestor
         fmt.Printf("\n%s ** Ignoring message with DeviceID == 0 from %s:\n%s\n", LogTime(), transportStr, string(cleanBody))
         return
@@ -194,7 +200,10 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
     // Report where we got it from, and when we got it
     var svc Service
     svc.UploadedAt = &UploadedAt
-    requestor, _ := getRequestorIPv4(req)
+    requestor, _, abusive := getRequestorIPv4(req)
+	if abusive {
+		return
+	}
     transportStr := deviceType+":" + requestor
     svc.Transport = &transportStr
     sd.Service = &svc

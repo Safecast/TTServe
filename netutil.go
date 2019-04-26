@@ -22,11 +22,24 @@ func ipv4(Str1 string) string {
     return Str1
 }
 
+// Filter abusive ports
+func isAbusiveIP(ipaddr string) bool {
+
+	// Block all from the tencent cloud, which is constantly hammering us
+	if strings.HasPrefix(ipaddr, "118.24.") || strings.HasPrefix(ipaddr, "118.25.") {
+		return true
+	}
+
+	// Not known to be abusive
+	return false
+
+}
+
 // Utility to extract the true IP address of a request forwarded by intermediate
 // nodes such as the AWS Route 53 load balancer.  This is a vast improvement
 // over just calling ipv4(req.RemoteAddr), which returns the internal LB address.
 // Thanks to https://husobee.github.io/golang/ip-address/2015/12/17/remote-ip-go.html
-func getRequestorIPv4(r *http.Request) (IPstr string, isReal bool) {
+func getRequestorIPv4(r *http.Request) (IPstr string, isReal bool, isAbusive bool) {
 	if (false) {
 		fmt.Printf("GetRequestorIPv4: \n%v\n", r.Header)
 	}
@@ -42,10 +55,10 @@ func getRequestorIPv4(r *http.Request) (IPstr string, isReal bool) {
 				// bad address, go to next
 				continue
 			}
-			return ip, true
+			return ip, true, isAbusiveIP(ip)
 		}
 	}
-	return ipv4(r.RemoteAddr), !isPrivateSubnet(net.ParseIP(ipv4(r.RemoteAddr)))
+	return ipv4(r.RemoteAddr), !isPrivateSubnet(net.ParseIP(ipv4(r.RemoteAddr))), isAbusiveIP(ipv4(r.RemoteAddr))
 }
 
 // Private IP ranges

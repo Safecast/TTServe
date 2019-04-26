@@ -85,7 +85,10 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
         }
 
         // Figure out the transport based upon whether or not a gateway ID was included
-        requestor, _ := getRequestorIPv4(req)
+        requestor, _, abusive := getRequestorIPv4(req)
+		if abusive {
+			return
+		}
         Transport := "lora-http:" + requestor
         if ttg.GatewayID != "" {
             Transport = "lora:"+ttg.GatewayID
@@ -115,7 +118,10 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 
         // Initialize a new AppReq
         AppReq := IncomingAppReq{}
-        requestor, _ := getRequestorIPv4(req)
+        requestor, _, abusive := getRequestorIPv4(req)
+		if abusive {
+			return
+		}
         AppReq.SvTransport = "device-http:" + requestor
 
         // Extract the device ID from the message, which we will need later

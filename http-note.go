@@ -51,7 +51,10 @@ func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
 
     // Get the remote address, and only add this to the count if it's likely from
     // the internal HTTP load balancer.
-    remoteAddr, isReal := getRequestorIPv4(req)
+    remoteAddr, isReal, abusive := getRequestorIPv4(req)
+	if abusive {
+		return
+	}
     if !isReal {
         remoteAddr = "internal address"
     }
