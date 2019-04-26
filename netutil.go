@@ -22,19 +22,6 @@ func ipv4(Str1 string) string {
     return Str1
 }
 
-// Filter abusive ports
-func isAbusiveIP(ipaddr string) bool {
-
-	// Block all from the tencent cloud, which is constantly hammering us
-	if strings.HasPrefix(ipaddr, "118.24.") || strings.HasPrefix(ipaddr, "118.25.") {
-		return true
-	}
-
-	// Not known to be abusive
-	return false
-
-}
-
 // Utility to extract the true IP address of a request forwarded by intermediate
 // nodes such as the AWS Route 53 load balancer.  This is a vast improvement
 // over just calling ipv4(req.RemoteAddr), which returns the internal LB address.
