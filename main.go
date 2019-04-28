@@ -113,7 +113,8 @@ func main() {
 
 	// We have one server instance that is configured to field inbound requests
 	// from web hooks configured on external websites.
-    ThisServerIsMonitor = ThisServerServesFTP
+    ThisServerIsMonitor = ThisServerServesUDP
+	fmt.Printf("THIS SERVER IS THE MONITOR INSTANCE\n")
 
     // Get the date/time of the special files that we monitor
     AllServersSlackRestartRequestTime = ControlFileTime(TTServerRestartAllControlFile, "")
