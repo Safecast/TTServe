@@ -75,17 +75,26 @@ func main() {
 
     // Look up the two IP addresses that we KNOW have only a single A record,
     // and determine if WE are the server for those protocols
-    addrs, err := net.LookupHost(TTServerUDPAddress)
-    if err != nil {
+	for {
+	    addrs, err := net.LookupHost(TTServerUDPAddress)
+	    if err == nil {
+		    if len(addrs) >= 1 {
+			    TTServerUDPAddressIPv4 = addrs[0]
+				break
+			}
+			err = fmt.Errorf("insufficient addr records for UDP")
+	    }
         fmt.Printf("Can't resolve %s: %v\n", TTServerUDPAddress, err)
-        os.Exit(0)
-    }
-    if len(addrs) < 1 {
-        fmt.Printf("Can't resolve %s: %v\n", TTServerUDPAddress, err)
-        os.Exit(0)
-    }
-    TTServerUDPAddressIPv4 = addrs[0]
+        time.Sleep(3 * time.Second)
+	}
     ThisServerServesUDP = TTServerUDPAddressIPv4 == ThisServerAddressIPv4
+
+	// We have one server instance that is configured to field inbound requests
+	// from web hooks configured on external websites.
+    ThisServerIsMonitor = ThisServerServesUDP
+	if ThisServerIsMonitor {
+		fmt.Printf("THIS SERVER IS THE MONITOR INSTANCE\n")
+	}
 
 	// We all support TCP because it's load-balanced.
     ThisServerServesTCP := true
@@ -94,27 +103,24 @@ func main() {
 	ThisServerServesHTTP := true
 	
 	// Configure FTP, which only runs on the primary server because it's not load-balanced.
-    addrs, err = net.LookupHost(TTServerFTPAddress)
-    if err != nil {
+	for {
+	    addrs, err := net.LookupHost(TTServerFTPAddress)
+	    if err == nil {
+		    if len(addrs) >= 1 {
+			    TTServerFTPAddressIPv4 = addrs[0]
+				break
+			}
+			err = fmt.Errorf("insufficient addr records for FTP")
+	    }
         fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err)
-        os.Exit(0)
-    }
-    if len(addrs) < 1 {
-        fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err)
-        os.Exit(0)
-    }
-    TTServerFTPAddressIPv4 = addrs[0]
+        time.Sleep(3 * time.Second)
+	}
     ThisServerServesFTP = TTServerFTPAddressIPv4 == ThisServerAddressIPv4
 
 	// If and only if we're using MQTT (rather than TTN HTTP), do it on the UDP server
 	if TTNMQTTMode {
 	    ThisServerServesMQTT = ThisServerServesUDP
 	}
-
-	// We have one server instance that is configured to field inbound requests
-	// from web hooks configured on external websites.
-    ThisServerIsMonitor = ThisServerServesUDP
-	fmt.Printf("THIS SERVER IS THE MONITOR INSTANCE\n")
 
     // Get the date/time of the special files that we monitor
     AllServersSlackRestartRequestTime = ControlFileTime(TTServerRestartAllControlFile, "")
