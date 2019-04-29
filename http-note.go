@@ -39,6 +39,7 @@ type sensorAIR struct {
 	Count05_00 uint32	`json:"c05_00,omitempty"`
 	Count10_00 uint32	`json:"c10_00,omitempty"`
     CountSecs uint32	`json:"csecs,omitempty"`
+    Samples uint32		`json:"csamples,omitempty"`
 }
 	
 // Handle inbound HTTP requests from Note's via the Notehub reporter task
@@ -234,6 +235,7 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 		pms.Count05_00 = &s.Count05_00
 		pms.Count10_00 = &s.Count10_00
 		pms.CountSecs = &s.CountSecs
+		pms.Samples = &s.Samples
 		sd.Pms = &pms
 
 	case "aq1-pms5003.qo":
@@ -253,6 +255,7 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 		pms.Count05_00 = &s.Count05_00
 		pms.Count10_00 = &s.Count10_00
 		pms.CountSecs = &s.CountSecs
+		pms.Samples = &s.Samples
 		sd.Pms2 = &pms
 
 	default:

@@ -57,6 +57,7 @@ type Pms struct {
     Count05_00 *uint32		`json:"pms_c05_00,omitempty"`
     Count10_00 *uint32		`json:"pms_c10_00,omitempty"`
     CountSecs *uint32		`json:"pms_csecs,omitempty"`
+    Samples *uint32			`json:"pms_csamples,omitempty"`
 }
 
 // Pms2 is for an auxiliary Plantower Air Sensor Data
@@ -74,6 +75,7 @@ type Pms2 struct {
     Count05_00 *uint32		`json:"pms2_c05_00,omitempty"`
     Count10_00 *uint32		`json:"pms2_c10_00,omitempty"`
     CountSecs *uint32		`json:"pms2_csecs,omitempty"`
+    Samples *uint32			`json:"pms2_csamples,omitempty"`
 }
 
 // Opc is for Alphasense OPC-N2 Air Sensor Data
@@ -91,6 +93,7 @@ type Opc struct {
     Count05_00 *uint32		`json:"opc_c05_00,omitempty"`
     Count10_00 *uint32		`json:"opc_c10_00,omitempty"`
     CountSecs *uint32		`json:"opc_csecs,omitempty"`
+    Samples *uint32			`json:"opc_csamples,omitempty"`
 }
 
 // Dev contains General Device Statistics
