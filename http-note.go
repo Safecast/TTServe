@@ -218,6 +218,8 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 	    lnd.EC7128 = &s.CPM
 		sd.Lnd = &lnd
 
+	case "aq0-pms7003.qo":
+		fallthrough
 	case "aq0-pms5003.qo":
 		s := sensorAIR{}
 	    err = json.Unmarshal(sensorJSON, &s)
@@ -238,6 +240,8 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 		pms.Samples = &s.Samples
 		sd.Pms = &pms
 
+	case "aq1-pms7003.qo":
+		fallthrough
 	case "aq1-pms5003.qo":
 		s := sensorAIR{}
 	    err = json.Unmarshal(sensorJSON, &s)
