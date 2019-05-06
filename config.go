@@ -160,6 +160,8 @@ const TTServerTopicRedirect1 string = "/scripts/"
 const TTServerTopicRedirect2 string = "/"
 // TTServerTopicNote (here for golint)
 const TTServerTopicNote string = "/note"
+// TTServerTopicNotecard (here for golint)
+const TTServerTopicNotecard string = "/notecard"
 
 // ThisServerAddressIPv4 is looked up dynamically
 var ThisServerAddressIPv4 = ""

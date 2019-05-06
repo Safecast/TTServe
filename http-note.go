@@ -10,6 +10,7 @@ import (
 	"time"
     "io/ioutil"
     "net/http"
+	"net/url"
     "encoding/json"
     "hash/crc32"
 )
@@ -42,7 +43,7 @@ type sensorAIR struct {
     Samples uint32		`json:"csamples,omitempty"`
 }
 	
-// Handle inbound HTTP requests from Note's via the Notehub reporter task
+// Handle inbound HTTP requests from individual data Notes
 func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
     var body []byte
     var err error
@@ -103,7 +104,16 @@ func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-// Deterministic way to convert a DeviceUID to a DeviceID
+// Deterministic way to convert a Notecard DeviceUID to a Safecast DeviceID, in a way that
+// reserves the low 2^20 addresses for fixed allocation as per Rob agreement (see ttnode/src/io.c)
+func notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID string) (safecastDeviceURN string, safecastDeviceID uint32) {
+	safecastDeviceURN = "note:" + notecardDeviceUID
+    safecastDeviceID = crc32.ChecksumIEEE([]byte(safecastDeviceURN))
+    if (safecastDeviceID < 1048576) {
+        safecastDeviceID = ^safecastDeviceID;
+	}
+	return
+}
 
 // ReformatFromNote reformats to our standard normalized data format
 func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
@@ -114,16 +124,9 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
     sd.Dev = &dev
     sd.Dev.Test = &isTest
 
-	// Generate device name
-	deviceURN := "note:" + e.DeviceUID
+	// Convert to safecast device ID
+	deviceURN, deviceID := notecardDeviceUIDToSafecastDeviceID(e.DeviceUID)
 	sd.DeviceUID = &deviceURN
-
-	// Generate backward-compatible safecast Device ID, reserving the low 2^20 addresses
-	// for fixed allocation as per Rob agreement (see ttnode/src/io.c)
-    deviceID := crc32.ChecksumIEEE([]byte(*sd.DeviceUID))
-    if (deviceID < 1048576) {
-        deviceID = ^deviceID;
-	}
 	sd.DeviceID = &deviceID
 
 	// Serial number
@@ -271,4 +274,26 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 	// Done
 	return
 	
+}
+	
+// Handle inbound HTTP requests from Notecards (from the device About screen)
+func inboundWebNotecardHandler(rw http.ResponseWriter, req *http.Request) {
+
+	// Decode the URL and determine the device ID
+    encodedNotecardDeviceUID := req.RequestURI[len(TTServerTopicNotecard):]
+	notecardDeviceUID, err := url.QueryUnescape(encodedNotecardDeviceUID)
+	if err != nil {
+		fmt.Printf("%s Notecard request error decoding Notecard DeviceUID '%s': %s\n", LogTime(), encodedNotecardDeviceUID, err)
+		return
+	}
+	
+	_, safecastDeviceID := notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID)
+
+	// For now, send them to the log
+    url := fmt.Sprintf("http://%s%s%s%d.json", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), safecastDeviceID)
+    fmt.Printf("%s Notecard request for %s being redirected to %s\n", LogTime(), notecardDeviceUID, url)
+
+	// Perform the redirect
+    http.Redirect(rw, req, url, http.StatusTemporaryRedirect)
+
 }
