@@ -289,8 +289,17 @@ func inboundWebNotecardHandler(rw http.ResponseWriter, req *http.Request) {
 	
 	_, safecastDeviceID := notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID)
 
-	// For now, send them to the log
-    url := fmt.Sprintf("http://%s%s%s%d.json", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), safecastDeviceID)
+	// Figure out where to redirect themg
+	url := ""
+	if (false) {
+		url = fmt.Sprintf("http://%s%s%s%d.json",
+			TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), safecastDeviceID)
+	}
+	if (true) {
+		url = fmt.Sprintf("http://safecast.org/tilemap/prototype/best_devicefu.html?filter_nohis=1&highlights=%d",
+			safecastDeviceID)
+	}
+
     fmt.Printf("%s Notecard request for %s being redirected to %s\n", LogTime(), notecardDeviceUID, url)
 
 	// Perform the redirect
