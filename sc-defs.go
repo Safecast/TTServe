@@ -77,7 +77,7 @@ type Pms2 struct {
     Count10_00 *uint32		`json:"pms2_c10_00,omitempty"`
     CountSecs *uint32		`json:"pms2_csecs,omitempty"`
     Samples *uint32			`json:"pms2_csamples,omitempty"`
-    Model *string			`json:"pms_model,omitempty"`
+    Model *string			`json:"pms2_model,omitempty"`
 }
 
 // Opc is for Alphasense OPC-N2 Air Sensor Data
