@@ -8,6 +8,7 @@ package main
 import (
     "fmt"
 	"time"
+	"strings"
     "io/ioutil"
     "net/http"
 	"net/url"
@@ -241,6 +242,8 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 		pms.Count10_00 = &s.Count10_00
 		pms.CountSecs = &s.CountSecs
 		pms.Samples = &s.Samples
+        model := strings.Split(strings.Split(e.NotefileID, "-")[1], ".")[0]
+        pms.Model = &model
 		sd.Pms = &pms
 
 	case "aq1-pms7003.qo":
@@ -263,6 +266,8 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 		pms.Count10_00 = &s.Count10_00
 		pms.CountSecs = &s.CountSecs
 		pms.Samples = &s.Samples
+        model := strings.Split(strings.Split(e.NotefileID, "-")[1], ".")[0]
+        pms.Model = &model
 		sd.Pms2 = &pms
 
 	default:
