@@ -292,7 +292,7 @@ func inboundWebNotecardHandler(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	
-	_, safecastDeviceID := notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID)
+	safecastDeviceURN, safecastDeviceID := notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID)
 
 	// Figure out where to redirect themg
 	url := ""
@@ -300,10 +300,15 @@ func inboundWebNotecardHandler(rw http.ResponseWriter, req *http.Request) {
 		url = fmt.Sprintf("http://%s%s%s%d.json",
 			TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), safecastDeviceID)
 	}
-	if (true) {
+	if (false) {
 		url = fmt.Sprintf("http://safecast.org/tilemap/prototype/best_devicefu.html?card_tall=1&card_show_tbl_mnew=0&card_show_tt_links=1&filter_nohis=1&highlights=%d",
 			safecastDeviceID)
 	}
+	if (true) {
+		url = fmt.Sprintf("https://grafana.safecast.cc/d/Med5wakZk/device-checker?orgId=1&var-device_urn=%s",
+			safecastDeviceURN)
+	}
+
 
     fmt.Printf("%s Notecard request for %s being redirected to %s\n", LogTime(), notecardDeviceUID, url)
 
