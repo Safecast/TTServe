@@ -163,6 +163,15 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 		sd.Loc.Lat = &lat
 		sd.Loc.Lon = &lon
 		sd.Loc.Olc = &e.Where
+		if e.WhereLocation != "" {
+			sd.Loc.LocName = &e.WhereLocation
+		}
+		if e.WhereCountry != "" {
+			sd.Loc.LocCountry = &e.WhereCountry
+		}
+		if e.WhereTimeZone != "" {
+			sd.Loc.LocZone = &e.WhereTimeZone
+		}
 	}
 
 	// If there's no body, bail

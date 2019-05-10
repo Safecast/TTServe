@@ -12,6 +12,9 @@ type Loc struct {
 	Alt *float32			`json:"loc_alt,omitempty"`
 	MotionBegan *string		`json:"loc_when_motion_began,omitempty"`
 	Olc *string				`json:"loc_olc,omitempty"`
+	LocName *string			`json:"loc_name,omitempty"`
+	LocCountry *string		`json:"loc_country,omitempty"`
+	LocZone *string			`json:"loc_zone,omitempty"`
 }
 
 // Env is Device Basic Environmental Data
