@@ -76,7 +76,7 @@ func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 	
 	// Unmarshal into a notehub Event structure, and exit if badly formatted
-    e := NoteEvent{}
+    e := Event{}
     err = json.Unmarshal(body, &e)
 	if err != nil {
 		return
@@ -117,7 +117,7 @@ func notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID string) (safecastDevi
 }
 
 // ReformatFromNote reformats to our standard normalized data format
-func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
+func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 
     // Mark it as a test measurement
 	isTest := true
@@ -134,6 +134,9 @@ func noteToSD(e NoteEvent, transport string) (sd SafecastData, err error) {
 	if e.DeviceSN != "" {
 		sd.DeviceSN = &e.DeviceSN
 	}
+
+	// Source, for accountability
+	sd.Source = &e.App
 
 	// When captured on the device
 	if e.When != 0 {

@@ -4,7 +4,24 @@
 
 package main
 
-type NoteEvent struct {
+// EventAdd (golint)
+const EventAdd =				"note.add"
+// EventUpdate (golint)
+const EventUpdate =				"note.update"
+// EventDelete (golint)
+const EventDelete =				"note.delete"
+// EventPost (golint)
+const EventPost =				"post"
+// EventPut (golint)
+const EventPut =				"put"
+// EventGet (golint)
+const EventGet =				"get"
+// EventNoAction (golint)
+const EventNoAction =			""
+
+// Event is the request structure passed to the Notification proc
+type Event struct {
+	EventUID string				`json:"event,omitempty"`
     Req string                  `json:"req,omitempty"`
     Rsp string					`json:"rsp,omitempty"`
     Error string                `json:"err,omitempty"`
@@ -15,7 +32,6 @@ type NoteEvent struct {
     NotefileID string           `json:"file,omitempty"`
     DeviceUID string            `json:"device,omitempty"`
 	DeviceSN string				`json:"sn,omitempty"`
-	AppUID string				`json:"app,omitempty"`
 	ProductUID string			`json:"product,omitempty"`
 	EndpointID string			`json:"endpoint,omitempty"`
 	TowerCountry string			`json:"tower_country,omitempty"`
@@ -34,4 +50,38 @@ type NoteEvent struct {
     Updates int32               `json:"updates,omitempty"`
     Body *interface{}			`json:"body,omitempty"`
     Payload []byte              `json:"payload,omitempty"`
+	SessionUID string			`json:"session,omitempty"`
+	// Used only for event logs
+	LogAttn bool				`json:"logattn,omitempty"`
+	Log map[string]EventLogEntry `json:"log,omitempty"`
+	// Provenance of the event
+	App EventApp				`json:"project,omitempty"`
+}
+
+// EventLogEntry is the log entry used by notification processing
+type EventLogEntry struct {
+	Attn bool					`json:"attn,omitempty"`
+    Status string				`json:"status,omitempty"`
+    Text string					`json:"text,omitempty"`
+}
+
+// Contact info for this app
+type EventContact struct {
+	Name string					`json:"name,omitempty"`
+	Affiliation string			`json:"org,omitempty"`
+	Role string					`json:"role,omitempty"`
+	Email string				`json:"email,omitempty"`
+}
+
+// Contact info for this app
+type EventContacts struct {
+	Admin *EventContact			`json:"admin,omitempty"`
+	Tech *EventContact			`json:"tech,omitempty"`
+}
+
+// App information
+type EventApp struct {
+	AppUID string				`json:"uid,omitempty"`
+	AppLabel string				`json:"label,omitempty"`
+	Contacts EventContacts		`json:"contacts,omitempty"`
 }
