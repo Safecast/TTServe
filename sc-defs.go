@@ -17,6 +17,16 @@ type Loc struct {
 	LocZone *string			`json:"loc_zone,omitempty"`
 }
 
+// Track is a device tracking structure
+type Track struct {
+	Lat *float32			`json:"lat,omitempty"`
+	Lon *float32			`json:"lon,omitempty"`
+	Distance *float32		`json:"distance,omitempty"`
+	Seconds *uint32			`json:"seconds,omitempty"`
+	Velocity *float32		`json:"velocity,omitempty"`
+	Bearing *float32		`json:"bearing,omitempty"`
+}
+
 // Env is Device Basic Environmental Data
 type Env struct {
     Temp *float32			`json:"env_temp,omitempty"`
@@ -208,6 +218,7 @@ type SafecastData struct {
 	*Pms2					`json:",omitempty"`
 	*Opc					`json:",omitempty"`
 	*Dev					`json:",omitempty"`
+	*Track					`json:",omitempty"`
 
 	// Metadata added as the above is being
 	*Gateway				`json:",omitempty"`

@@ -191,6 +191,8 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 	// Decompose the body with a per-notefile schema
 	switch e.NotefileID {
 
+	case "bat.qo":
+		fallthrough
 	case "bat-ina219.qo":
 	    s := sensorINA{}
 	    err = json.Unmarshal(sensorJSON, &s)
@@ -281,6 +283,14 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
         model := strings.Split(strings.Split(e.NotefileID, "-")[1], ".")[0]
         pms.Model = &model
 		sd.Pms2 = &pms
+
+	case "track.qo":
+	    s := Track{}
+	    err = json.Unmarshal(sensorJSON, &s)
+		if err != nil {
+			return
+		}
+	    sd.Track = &s
 
 	default:
 		err = fmt.Errorf("no sensor data in file %s", e.NotefileID)
