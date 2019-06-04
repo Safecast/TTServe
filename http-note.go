@@ -43,6 +43,14 @@ type sensorAIR struct {
     CountSecs uint32	`json:"csecs,omitempty"`
     Samples uint32		`json:"csamples,omitempty"`
 }
+type sensorTRACK struct {
+	Lat float32			`json:"lat,omitempty"`
+	Lon float32			`json:"lon,omitempty"`
+	Distance float32	`json:"distance,omitempty"`
+	Seconds uint32		`json:"seconds,omitempty"`
+	Velocity float32	`json:"velocity,omitempty"`
+	Bearing float32		`json:"bearing,omitempty"`
+}
 	
 // Handle inbound HTTP requests from individual data Notes
 func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
@@ -285,12 +293,19 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 		sd.Pms2 = &pms
 
 	case "track.qo":
-	    s := Track{}
+	    s := sensorTRACK{}
 	    err = json.Unmarshal(sensorJSON, &s)
 		if err != nil {
 			return
 		}
-	    sd.Track = &s
+	    var track Track
+		track.Lat = &s.Lat
+		track.Lon = &s.Lon
+		track.Distance = &s.Distance
+		track.Seconds = &s.Seconds
+		track.Velocity = &s.Velocity
+		track.Bearing = &s.Bearing
+		sd.Track = &track
 
 	default:
 		err = fmt.Errorf("no sensor data in file %s", e.NotefileID)

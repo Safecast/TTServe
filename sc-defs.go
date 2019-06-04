@@ -19,12 +19,12 @@ type Loc struct {
 
 // Track is a device tracking structure
 type Track struct {
-	Lat *float32			`json:"lat,omitempty"`
-	Lon *float32			`json:"lon,omitempty"`
-	Distance *float32		`json:"distance,omitempty"`
-	Seconds *uint32			`json:"seconds,omitempty"`
-	Velocity *float32		`json:"velocity,omitempty"`
-	Bearing *float32		`json:"bearing,omitempty"`
+	Lat *float32			`json:"track_lat,omitempty"`
+	Lon *float32			`json:"track_lon,omitempty"`
+	Distance *float32		`json:"track_distance,omitempty"`
+	Seconds *uint32			`json:"track_seconds,omitempty"`
+	Velocity *float32		`json:"track_velocity,omitempty"`
+	Bearing *float32		`json:"track_bearing,omitempty"`
 }
 
 // Env is Device Basic Environmental Data
