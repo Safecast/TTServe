@@ -224,7 +224,21 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 		env.Press = &s.Pressure
 	    sd.Env = &env
 		
+	case "rad1-lnd7318u.qo":
+		fallthrough
 	case "rad0-lnd7318u.qo":
+		s := sensorRAD{}
+	    err = json.Unmarshal(sensorJSON, &s)
+		if err != nil {
+			return
+		}
+	    var lnd Lnd
+	    lnd.U7318 = &s.CPM
+		sd.Lnd = &lnd
+		
+	case "rad1-lnd7318c.qo":
+		fallthrough
+	case "rad0-lnd7318c.qo":
 		s := sensorRAD{}
 	    err = json.Unmarshal(sensorJSON, &s)
 		if err != nil {
@@ -235,6 +249,8 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 		sd.Lnd = &lnd
 
 	case "rad1-lnd7128ec.qo":
+		fallthrough
+	case "rad0-lnd7128ec.qo":
 		s := sensorRAD{}
 	    err = json.Unmarshal(sensorJSON, &s)
 		if err != nil {
