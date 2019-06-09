@@ -196,6 +196,8 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 		return
 	}
 
+	fmt.Printf("OZZIE ***** %s\n", e.NotefileID)
+	
 	// Decompose the body with a per-notefile schema
 	switch e.NotefileID {
 
