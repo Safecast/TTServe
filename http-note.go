@@ -28,7 +28,7 @@ type sensorBME struct {
 }
 type sensorRAD struct {
 	CPM float32			`json:"cpm,omitempty"`
-    Seconds uint32		`json:"secs,omitempty"`
+    Seconds float32		`json:"secs,omitempty"`
 }
 type sensorAIR struct {
 	Pm01_0 float32		`json:"pm01_0,omitempty"`
@@ -47,7 +47,7 @@ type sensorTRACK struct {
 	Lat float32			`json:"lat,omitempty"`
 	Lon float32			`json:"lon,omitempty"`
 	Distance float32	`json:"distance,omitempty"`
-	Seconds uint32		`json:"seconds,omitempty"`
+	Seconds float32		`json:"seconds,omitempty"`
 	Velocity float32	`json:"velocity,omitempty"`
 	Bearing float32		`json:"bearing,omitempty"`
 }
@@ -196,8 +196,6 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 		return
 	}
 
-	fmt.Printf("OZZIE ***** %s\n", e.NotefileID)
-	
 	// Decompose the body with a per-notefile schema
 	switch e.NotefileID {
 
@@ -320,7 +318,8 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 		track.Lat = &s.Lat
 		track.Lon = &s.Lon
 		track.Distance = &s.Distance
-		track.Seconds = &s.Seconds
+		var secs uint32 = uint32(s.Seconds)
+		track.Seconds = &secs
 		track.Velocity = &s.Velocity
 		track.Bearing = &s.Bearing
 		sd.Track = &track
