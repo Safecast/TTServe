@@ -320,6 +320,9 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
 // Get a summary of devices that are older than this many minutes ago
 func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist string, fOffline bool, fDetails bool) {
 
+	// Force a re-read of the sheet, just to ensure that it reflects the lastest changes
+	InvalidateSheetCache()
+
     // Get the device list if one was specified
     valid, _, devices, ranges, _ := DeviceList(user, devicelist)
     if !valid {

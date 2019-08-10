@@ -23,11 +23,16 @@ type sheetRow struct {
 var sheet []sheetRow
 
 // Statics
+var fRetrieve bool
 var lastRetrieved time.Time
+
+// InvalidateSheetCache forces a reload
+func InvalidateSheetCache() {
+	fRetrieve = true
+}
 
 // DeviceIDToSN converts a Safecast device ID to its manufacturing serial number
 func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
-    var fRetrieve bool
 
     // Cache for some time, for performance
     if (time.Now().Sub(lastRetrieved) / time.Minute) > 15 {
@@ -38,6 +43,7 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
     if fRetrieve {
 
 		// Set retrieved date regardless of error, so we don't thrash trying to reload
+		fRetrieve = false
         lastRetrieved = time.Now()
 
 		// Preset for parsing
