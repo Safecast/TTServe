@@ -69,9 +69,14 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
                 rec := sheetRow{}
 				for col:=0; col<len(record); col++ {
 					val := record[col]
+					// Skip first header row
+					if row == 0 {
+						continue
+					}
 					// OZZIE
 					fmt.Printf(",%s", val)
-					if row == 0 {
+					// Header row with field names
+					if row == 1 {
 						switch (val) {
 						case "Serial Number":
 							colSerialNumber = col
