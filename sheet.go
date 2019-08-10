@@ -8,17 +8,17 @@ package main
 import (
     "fmt"
     "time"
-    "strings"
+    "io"
     "strconv"
     "net/http"
-    "io/ioutil"
+	"encoding/csv"
 )
 
 type sheetRow struct {
-    sn                  uint32
-    deviceid            uint32
-    custodian           string
-    location            string
+    SerialNumber        uint32
+    DeviceID            uint32
+    Custodian           string
+    Location            string
 }
 var sheet []sheetRow
 
@@ -28,7 +28,6 @@ var lastRetrieved time.Time
 // DeviceIDToSN converts a Safecast device ID to its manufacturing serial number
 func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
     var fRetrieve bool
-    var sheetData string
 
     // Cache for some time, for performance
     if (time.Now().Sub(lastRetrieved) / time.Minute) > 15 {
@@ -41,52 +40,89 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
 		// Set retrieved date regardless of error, so we don't thrash trying to reload
         lastRetrieved = time.Now()
 
+		// Preset for parsing
+        sheet = nil
+		colSerialNumber := -1
+		colDeviceID := -1
+		colCustodian := -1
+		colLocation := -1
+
 		// Reload
         rsp, err := http.Get(sheetsSolarcastTracker)
         if err != nil {
             fmt.Printf("***** CANNOT http.Get %s: %s\n", sheetsSolarcastTracker, err)
         } else {
             defer rsp.Body.Close()
-            buf, err := ioutil.ReadAll(rsp.Body)
-            if err != nil {
-                fmt.Printf("***** CANNOT ioutil.ReadAll %s: %s\n", sheetsSolarcastTracker, err)
-            } else {
-
-                // Parse the sheet.  If the col numbers change, this must be changed
-                sheetData = string(buf)
-                sheet = nil
-                splitContents := strings.Split(string(sheetData), "\n")
-                for _, c := range splitContents {
-                    var row sheetRow
-                    splitLine := strings.Split(c, ",")
-                    for col, val := range splitLine {
-                        switch col {
-                        case 0: // A
-                            u64, err := strconv.ParseUint(val, 10, 32)
-                            if err == nil {
-                                row.sn = uint32(u64)
-                            }
-                        case 1: // B
-                            u64, err := strconv.ParseUint(val, 10, 32)
-                            if err == nil {
-                                row.deviceid = uint32(u64)
-                            }
-                        case 5: // F
-                            row.custodian = val
-                        case 6: // G
-                            row.location = val
-
-                        }
-                    }
-                    if row.deviceid != 0 {
-                        sheet = append(sheet, row)
-                    }
+			r := csv.NewReader(rsp.Body)
+			sheetRowsTotal := 0
+			sheetRowsRecognized := 0
+			for row:=0;;row++ {
+				record, err := r.Read()
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					fmt.Printf("***** error reading CSV: %s\n", err)
+					break
+				}
+				sheetRowsTotal++
+                rec := sheetRow{}
+				for col:=0; col<len(record); col++ {
+					val := record[col]
+					// OZZIE
+					fmt.Printf(",%s", val)
+					if row == 0 {
+						switch (val) {
+						case "Serial Number":
+							colSerialNumber = col
+						case "Device ID":
+							colDeviceID = col
+						case "Custodian":
+							colCustodian = col
+						case "Location":
+							colLocation = col
+						}
+					} else {
+						if (colSerialNumber == -1) {
+							return 1, "no 'Serial Number' column"
+						}
+						if (colDeviceID == -1) {
+							return 1, "no 'Device ID' column"
+						}
+						if (colCustodian == -1) {
+							return 1, "no 'Custodian' column"
+						}
+						if (colLocation == -1) {
+							return 1, "no 'Location' column"
+						}
+						if col == colSerialNumber {
+		                    u64, err := strconv.ParseUint(val, 10, 32)
+			                if err == nil {
+				                rec.SerialNumber = uint32(u64)
+					        }
+						} else if col == colDeviceID {
+			                u64, err := strconv.ParseUint(val, 10, 32)
+		                    if err == nil {
+				                rec.DeviceID = uint32(u64)
+					        }
+						} else if col == colCustodian {
+		                    rec.Custodian = val
+						} else if col == colLocation {
+				            rec.Location = val
+					    }
+					}
+				}
+                if rec.DeviceID != 0 {
+                    sheet = append(sheet, rec)
+					sheetRowsRecognized++
                 }
+					// OZZIE
+				fmt.Printf("\n");
+			}
 
-                // Cache the data for future iterations
-                fmt.Printf("\n%s *** Refreshed %d entries from Google Sheets\n", LogTime(), len(splitContents))
+            // Summary
+            fmt.Printf("\n%s *** Parsed Device Tracker CSV: recognized %d rows of %d total\n\n", LogTime(), sheetRowsRecognized, sheetRowsTotal)
 
-            }
         }
 
 
@@ -96,18 +132,18 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
     deviceIDFound := false;
     snFound := uint32(0)
     for _, r := range sheet {
-        if r.deviceid == DeviceID {
+        if r.DeviceID == DeviceID {
 
             deviceIDFound = true
-            snFound = r.sn
+            snFound = r.SerialNumber
 
             // Craft an info string from the sheetRow
-            if (r.custodian == "" && r.location != "") {
-                info = fmt.Sprintf("%s", r.location)
-            } else if (r.custodian != "" && r.location == "") {
-                info = fmt.Sprintf("%s", r.custodian)
+            if (r.Custodian == "" && r.Location != "") {
+                info = fmt.Sprintf("%s", r.Location)
+            } else if (r.Custodian != "" && r.Location == "") {
+                info = fmt.Sprintf("%s", r.Custodian)
             } else {
-                info = fmt.Sprintf("%s, %s", r.custodian, r.location)
+                info = fmt.Sprintf("%s, %s", r.Custodian, r.Location)
             }
 
             break
