@@ -73,8 +73,6 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
 					if row == 0 {
 						continue
 					}
-					// OZZIE
-					fmt.Printf(",%s", val)
 					// Header row with field names
 					if row == 1 {
 						switch (val) {
@@ -121,8 +119,6 @@ func DeviceIDToSN(DeviceID uint32) (sn uint32, info string) {
                     sheet = append(sheet, rec)
 					sheetRowsRecognized++
                 }
-					// OZZIE
-				fmt.Printf("\n");
 			}
 
             // Summary
