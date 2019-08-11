@@ -71,7 +71,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
 	sd.DeviceUID = &urn
 
 	// Generate a Serial Number
-	sn, _ := DeviceIDToSN(did)
+	sn, _ := sheetDeviceIDToSN(did)
 	if sn != 0 {
 		snstr := fmt.Sprintf("%s #%d", devicename, sn)
 		sd.DeviceSN = &snstr

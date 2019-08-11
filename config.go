@@ -126,6 +126,8 @@ const TTServerUDPPort string = ":8081"
 const TTServerTCPPort string = ":8082"
 // TTServerFTPPort (here for golint)
 const TTServerFTPPort int = 8083                    // plus 8084 plus the entire passive range
+// TTServerTopicDevices (here for golint)
+const TTServerTopicDevices string = "/devices"
 // TTServerTopicSend (here for golint)
 const TTServerTopicSend string = "/send"
 // TTServerTopicRoot1 (here for golint)

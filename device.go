@@ -161,6 +161,27 @@ func sendHelloToNewDevices() {
 
 }
 
+// Get sheet records for all seen devices
+func devicesSeenInfo() (allInfo []sheetInfo) {
+
+    // Update the in-memory list of seen devices
+    trackAllDevices()
+
+	// Force a re-read of the sheet, just to ensure that it reflects the lastest changes
+	sheetInvalidateCache()
+
+    // Sweep through all devices that we've seen
+    for i := 0; i < len(seenDevices); i++ {
+		info, err := sheetDeviceInfo(seenDevices[i].deviceid)
+		if err == nil {
+			info.LastSeen = seenDevices[i].seen.UTC().Format("2006-01-02T15:04:05Z")
+			allInfo = append(allInfo, info)
+		}
+	}
+
+	return
+}
+
 // Update message ages and notify
 func sendExpiredSafecastDevicesToSlack() {
 
@@ -321,7 +342,7 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
 func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist string, fOffline bool, fDetails bool) {
 
 	// Force a re-read of the sheet, just to ensure that it reflects the lastest changes
-	InvalidateSheetCache()
+	sheetInvalidateCache()
 
     // Get the device list if one was specified
     valid, _, devices, ranges, _ := DeviceList(user, devicelist)

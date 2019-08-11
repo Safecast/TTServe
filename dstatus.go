@@ -826,14 +826,14 @@ func GetDeviceStatusSummary(DeviceID uint32) (DevEui string, Label string, Gps s
     // If no SN, use the old style device label concatenated with SN
     if label == "" && value.Dev != nil && value.Dev.DeviceLabel != nil {
         label = *value.Dev.DeviceLabel
-		sn, _ := DeviceIDToSN(DeviceID)
+		sn, _ := sheetDeviceIDToSN(DeviceID)
         if sn != 0 {
             label += fmt.Sprintf(" #%d", sn)
         }
     }
 
 	// Add info if present from the spreadsheet
-	_, info := DeviceIDToSN(DeviceID)
+	_, info := sheetDeviceIDToSN(DeviceID)
 	if info != "" {
 	    label += fmt.Sprintf(" (%s)", info)
     }
