@@ -97,12 +97,8 @@ func sheetDeviceInfo(DeviceID uint32) (info sheetInfo, err error) {
                 rec := sheetInfo{}
                 for col:=0; col<len(record); col++ {
                     val := record[col]
-                    // Skip first header row
-                    if row == 0 {
-                        continue
-                    }
                     // Header row with field names
-                    if row == 1 {
+                    if row == 0 {
                         switch (val) {
                         case "Serial Number":
                             colSerialNumber = col
