@@ -17,6 +17,9 @@ import (
 )
 
 // Schemas for the different file types
+type sensorBAT struct {
+	Voltage float32		`json:"voltage,omitempty"`
+}
 type sensorINA struct {
 	Voltage float32		`json:"voltage,omitempty"`
     Current float32		`json:"current,omitempty"`
@@ -200,7 +203,15 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 	switch e.NotefileID {
 
 	case "bat.qo":
-		fallthrough
+	    s := sensorBAT{}
+	    err = json.Unmarshal(sensorJSON, &s)
+		if err != nil {
+			return
+		}
+	    var bat Bat
+		bat.Voltage = &s.Voltage
+	    sd.Bat = &bat
+
 	case "bat-ina219.qo":
 	    s := sensorINA{}
 	    err = json.Unmarshal(sensorJSON, &s)
