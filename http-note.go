@@ -17,6 +17,11 @@ import (
 )
 
 // Schemas for the different file types
+type sensorTRACKER struct {
+	CPM float32			`json:"cpm,omitempty"`
+	Temperature float32	`json:"temperature,omitempty"`
+	Voltage float32		`json:"voltage,omitempty"`
+}
 type sensorBAT struct {
 	Voltage float32		`json:"voltage,omitempty"`
 }
@@ -201,6 +206,21 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 
 	// Decompose the body with a per-notefile schema
 	switch e.NotefileID {
+
+	case "_track.qo":
+	    s := sensorTRACKER{}
+	    err = json.Unmarshal(sensorJSON, &s)
+		if err != nil {
+			return
+		}
+	    var bat Bat
+		bat.Voltage = &s.Voltage
+	    sd.Bat = &bat
+	    var env Env
+		env.Temp = &s.Temperature
+	    sd.Env = &env
+	    var lnd Lnd
+	    lnd.U7318 = &s.CPM
 
 	case "bat.qo":
 	    s := sensorBAT{}
