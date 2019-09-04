@@ -356,7 +356,7 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 		sd.Track = &track
 
 	default:
-		err = fmt.Errorf("no sensor data in file %s", e.NotefileID)
+		fmt.Printf("*** note-go: no sensor data in file %s", e.NotefileID)
 		return
 
 	}
