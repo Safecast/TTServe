@@ -221,7 +221,8 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 	    sd.Env = &env
 	    var lnd Lnd
 	    lnd.U7318 = &s.CPM
-
+		sd.Lnd = &lnd
+		
 	case "bat.qo":
 	    s := sensorBAT{}
 	    err = json.Unmarshal(sensorJSON, &s)
