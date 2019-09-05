@@ -219,9 +219,11 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 	    var env Env
 		env.Temp = &s.Temperature
 	    sd.Env = &env
-	    var lnd Lnd
-	    lnd.U7318 = &s.CPM
-		sd.Lnd = &lnd
+		if s.CPM > 0 {
+		    var lnd Lnd
+		    lnd.U7318 = &s.CPM
+			sd.Lnd = &lnd
+		}
 		
 	case "bat.qo":
 	    s := sensorBAT{}
