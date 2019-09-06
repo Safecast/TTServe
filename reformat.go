@@ -174,7 +174,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
         loc.Lat = v1.Latitude
         loc.Lon = v1.Longitude
         if v1.Height != nil {
-            alt := float32(*v1.Height)
+            alt := float64(*v1.Height)
             loc.Alt = &alt
         }
         // 11 digits is 3m accuracy
@@ -267,10 +267,9 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
                 field := strings.Split(fields[v], ":")
                 switch (field[0]) {
                 case "Battery Voltage":
-                    f64, _ := strconv.ParseFloat(field[1], 32)
-                    f32 := float32(f64)
-                    if f32 != 0 {
-                        bat.Voltage = &f32
+                    f64, _ := strconv.ParseFloat(field[1], 64)
+                    if f64 != 0 {
+                        bat.Voltage = &f64
                         dobat = true
                     }
                 case "Fails":

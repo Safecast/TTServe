@@ -14,10 +14,10 @@ import (
 // IncomingAppReq is the common request format that we process as a goroutine
 type IncomingAppReq struct {
     Payload []byte
-    GwLongitude   *float32
-    GwLatitude    *float32
-    GwAltitude    *float32
-    GwSnr         *float32
+    GwLongitude   *float64
+    GwLatitude    *float64
+    GwAltitude    *float64
+    GwSnr         *float64
     GwLocation    *string
     GwReceivedAt  *string
     SvTransport   string

@@ -21,7 +21,7 @@ func newAppReqFromGateway(ttg *TTGateReq, Transport string) IncomingAppReq {
     if ttg.Latitude != 0 {
         AppReq.GwLatitude = &ttg.Latitude
         AppReq.GwLongitude = &ttg.Longitude
-        alt := float32(ttg.Altitude)
+        alt := float64(ttg.Altitude)
         AppReq.GwAltitude = &alt
     }
 

@@ -391,7 +391,7 @@ func WriteDeviceStatus(sc SafecastData) {
             value.Lnd = &lnd
         }
         if sc.Lnd.U7318 != nil {
-            var val float32
+            var val float64
             if value.Lnd.U7318 == nil {
                 value.Lnd.U7318 = &val
             }
@@ -401,7 +401,7 @@ func WriteDeviceStatus(sc SafecastData) {
             }
         }
         if sc.Lnd.C7318 != nil {
-            var val float32
+            var val float64
             if value.Lnd.C7318 == nil {
                 value.Lnd.C7318 = &val
             }
@@ -411,7 +411,7 @@ func WriteDeviceStatus(sc SafecastData) {
             }
         }
         if sc.Lnd.EC7128 != nil {
-            var val float32
+            var val float64
             if value.Lnd.EC7128 == nil {
                 value.Lnd.EC7128 = &val
             }
@@ -421,7 +421,7 @@ func WriteDeviceStatus(sc SafecastData) {
             }
         }
         if sc.Lnd.U712 != nil {
-            var val float32
+            var val float64
             if value.Lnd.U712 == nil {
                 value.Lnd.U712 = &val
             }
@@ -431,7 +431,7 @@ func WriteDeviceStatus(sc SafecastData) {
             }
         }
         if sc.Lnd.W78017 != nil {
-            var val float32
+            var val float64
             if value.Lnd.W78017 == nil {
                 value.Lnd.W78017 = &val
             }

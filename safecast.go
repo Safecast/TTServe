@@ -94,15 +94,15 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
             loc.Olc = &Olc
         }
         if msg.Latitude != nil {
-            lat := msg.GetLatitude()
+            lat := float64(msg.GetLatitude())
             loc.Lat = &lat
         }
         if msg.Longitude != nil {
-            lon := msg.GetLongitude()
+            lon := float64(msg.GetLongitude())
             loc.Lon = &lon
         }
         if msg.Altitude != nil {
-            alt := float32(msg.GetAltitude())
+            alt := float64(msg.GetAltitude())
             loc.Alt = &alt
         }
         if msg.MotionBeganOffset != nil && msg.CapturedAtDate != nil && msg.CapturedAtTime != nil {
@@ -127,15 +127,18 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
         dodev = true
     }
     if msg.EncTemp != nil {
-        dev.Temp = msg.EncTemp
+		temp := float64(*msg.EncTemp)
+        dev.Temp = &temp
         dodev = true
     }
     if msg.EncHumid != nil {
-        dev.Humid = msg.EncHumid
+		humid := float64(*msg.EncHumid)
+        dev.Humid = &humid
         dodev = true
     }
     if msg.EncPressure != nil {
-        dev.Press = msg.EncPressure
+		press := float64(*msg.EncPressure)
+        dev.Press = &press
         dodev = true
     }
     if msg.StatsUptimeMinutes != nil {
@@ -328,15 +331,18 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
     var dobat = false
 
     if msg.BatVoltage != nil {
-        bat.Voltage = msg.BatVoltage
+		voltage := float64(*msg.BatVoltage)
+        bat.Voltage = &voltage
         dobat = true
     }
     if msg.BatSoc != nil {
-        bat.Charge = msg.BatSoc
+		charge := float64(*msg.BatSoc)
+        bat.Charge = &charge
         dobat = true
     }
     if msg.BatCurrent != nil {
-        bat.Current = msg.BatCurrent
+		current := float64(*msg.BatCurrent)
+        bat.Current = &current
         dobat = true
     }
 
@@ -349,15 +355,18 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
     var doenv = false
 
     if msg.EnvTemp != nil {
-        env.Temp = msg.EnvTemp
+		temp := float64(*msg.EnvTemp)
+        env.Temp = &temp
         doenv = true
     }
     if msg.EnvHumid != nil {
-        env.Humid = msg.EnvHumid
+		humid := float64(*msg.EnvHumid)
+        env.Humid = &humid
         doenv = true
     }
     if msg.EnvPressure != nil {
-        env.Press = msg.EnvPressure
+		press := float64(*msg.EnvPressure)
+        env.Press = &press
         doenv = true
     }
 
@@ -387,7 +396,8 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
     var dogate = false
 
     if msg.WirelessSnr != nil {
-        gate.SNR = msg.WirelessSnr
+		snr := float64(*msg.WirelessSnr)
+        gate.SNR = &snr
         dogate = true
     } else if req.GwSnr != nil {
         gate.SNR = req.GwSnr
@@ -419,31 +429,34 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
     var dopms = false
 
     if msg.PmsPm01_0 != nil {
-        Pm01_0 := float32(msg.GetPmsPm01_0())
+        Pm01_0 := float64(msg.GetPmsPm01_0())
         pms.Pm01_0 = &Pm01_0
         dopms = true
     }
     if msg.PmsPm02_5 != nil {
-        Pm02_5 := float32(msg.GetPmsPm02_5())
+        Pm02_5 := float64(msg.GetPmsPm02_5())
         pms.Pm02_5 = &Pm02_5
         dopms = true
     }
     if msg.PmsPm10_0 != nil {
-        Pm10_0 := float32(msg.GetPmsPm10_0())
+        Pm10_0 := float64(msg.GetPmsPm10_0())
         pms.Pm10_0 = &Pm10_0
         dopms = true
     }
 
     if msg.PmsStd01_0 != nil {
-        pms.Std01_0 = msg.PmsStd01_0
+		f64 := float64(*msg.PmsStd01_0)
+        pms.Std01_0 = &f64
         dopms = true
     }
     if msg.PmsStd02_5 != nil {
-        pms.Std02_5 = msg.PmsStd02_5
+		f64 := float64(*msg.PmsStd02_5)
+        pms.Std02_5 = &f64
         dopms = true
     }
     if msg.PmsStd10_0 != nil {
-        pms.Std10_0 = msg.PmsStd10_0
+		f64 := float64(*msg.PmsStd10_0)
+        pms.Std10_0 = &f64
         dopms = true
     }
 
@@ -480,31 +493,34 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
     var dopms2 = false
 
     if msg.Pms2Pm01_0 != nil {
-        Pm01_0 := float32(msg.GetPms2Pm01_0())
+        Pm01_0 := float64(msg.GetPms2Pm01_0())
         pms2.Pm01_0 = &Pm01_0
         dopms2 = true
     }
     if msg.Pms2Pm02_5 != nil {
-        Pm02_5 := float32(msg.GetPms2Pm02_5())
+        Pm02_5 := float64(msg.GetPms2Pm02_5())
         pms2.Pm02_5 = &Pm02_5
         dopms2 = true
     }
     if msg.Pms2Pm10_0 != nil {
-        Pm10_0 := float32(msg.GetPms2Pm10_0())
+        Pm10_0 := float64(msg.GetPms2Pm10_0())
         pms2.Pm10_0 = &Pm10_0
         dopms2 = true
     }
 
     if msg.Pms2Std01_0 != nil {
-        pms2.Std01_0 = msg.Pms2Std01_0
+		f64 := float64(*msg.Pms2Std01_0)
+        pms2.Std01_0 = &f64
         dopms2 = true
     }
     if msg.Pms2Std02_5 != nil {
-        pms2.Std02_5 = msg.Pms2Std02_5
+		f64 := float64(*msg.Pms2Std02_5)
+        pms2.Std02_5 = &f64
         dopms2 = true
     }
     if msg.Pms2Std10_0 != nil {
-        pms2.Std10_0 = msg.Pms2Std10_0
+		f64 := float64(*msg.Pms2Std10_0)
+        pms2.Std10_0 = &f64
         dopms2 = true
     }
 
@@ -541,28 +557,34 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
     var doopc = false
 
     if msg.OpcPm01_0 != nil {
-        opc.Pm01_0 = msg.OpcPm01_0
+		f64 := float64(*msg.OpcPm01_0)
+        opc.Pm01_0 = &f64
         doopc = true
     }
     if msg.OpcPm02_5 != nil {
-        opc.Pm02_5 = msg.OpcPm02_5
+		f64 := float64(*msg.OpcPm02_5)
+        opc.Pm02_5 = &f64
         doopc = true
     }
     if msg.OpcPm10_0 != nil {
-        opc.Pm10_0 = msg.OpcPm10_0
+		f64 := float64(*msg.OpcPm10_0)
+        opc.Pm10_0 = &f64
         doopc = true
     }
 
     if msg.OpcStd01_0 != nil {
-        opc.Std01_0 = msg.OpcStd01_0
+		f64 := float64(*msg.OpcStd01_0)
+        opc.Std01_0 = &f64
         doopc = true
     }
     if msg.OpcStd02_5 != nil {
-        opc.Std02_5 = msg.OpcStd02_5
+		f64 := float64(*msg.OpcStd02_5)
+        opc.Std02_5 = &f64
         doopc = true
     }
     if msg.OpcStd10_0 != nil {
-        opc.Std10_0 = msg.OpcStd10_0
+		f64 := float64(*msg.OpcStd10_0)
+        opc.Std10_0 = &f64
         doopc = true
     }
 
@@ -599,27 +621,27 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
     var dolnd = false
 
     if msg.Lnd_7318U != nil {
-        var cpm = float32(msg.GetLnd_7318U())
+        var cpm = float64(msg.GetLnd_7318U())
         lnd.U7318 = &cpm
         dolnd = true
     }
     if msg.Lnd_7318C != nil {
-        var cpm = float32(msg.GetLnd_7318C())
+        var cpm = float64(msg.GetLnd_7318C())
         lnd.C7318 = &cpm
         dolnd = true
     }
     if msg.Lnd_7128Ec != nil {
-        var cpm = float32(msg.GetLnd_7128Ec())
+        var cpm = float64(msg.GetLnd_7128Ec())
         lnd.EC7128 = &cpm
         dolnd = true
     }
     if msg.Lnd_712U != nil {
-        var cpm = float32(msg.GetLnd_712U())
+        var cpm = float64(msg.GetLnd_712U())
         lnd.U712 = &cpm
         dolnd = true
     }
     if msg.Lnd_78017W != nil {
-        var cpm = float32(msg.GetLnd_78017W())
+        var cpm = float64(msg.GetLnd_78017W())
         lnd.W78017 = &cpm
         dolnd = true
     }

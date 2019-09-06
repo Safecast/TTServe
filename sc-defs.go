@@ -7,9 +7,9 @@ package main
 
 // Loc is Device Location Data
 type Loc struct {
-	Lat *float32			`json:"loc_lat,omitempty"`
-	Lon *float32			`json:"loc_lon,omitempty"`
-	Alt *float32			`json:"loc_alt,omitempty"`
+	Lat *float64			`json:"loc_lat,omitempty"`
+	Lon *float64			`json:"loc_lon,omitempty"`
+	Alt *float64			`json:"loc_alt,omitempty"`
 	MotionBegan *string		`json:"loc_when_motion_began,omitempty"`
 	Olc *string				`json:"loc_olc,omitempty"`
 	LocName *string			`json:"loc_name,omitempty"`
@@ -19,50 +19,50 @@ type Loc struct {
 
 // Track is a device tracking structure
 type Track struct {
-	Lat *float32			`json:"track_lat,omitempty"`
-	Lon *float32			`json:"track_lon,omitempty"`
-	Distance *float32		`json:"track_distance,omitempty"`
+	Lat *float64			`json:"track_lat,omitempty"`
+	Lon *float64			`json:"track_lon,omitempty"`
+	Distance *float64		`json:"track_distance,omitempty"`
 	Seconds *uint32			`json:"track_seconds,omitempty"`
-	Velocity *float32		`json:"track_velocity,omitempty"`
-	Bearing *float32		`json:"track_bearing,omitempty"`
+	Velocity *float64		`json:"track_velocity,omitempty"`
+	Bearing *float64		`json:"track_bearing,omitempty"`
 }
 
 // Env is Device Basic Environmental Data
 type Env struct {
-    Temp *float32			`json:"env_temp,omitempty"`
-    Humid *float32			`json:"env_humid,omitempty"`
-    Press *float32			`json:"env_press,omitempty"`
+    Temp *float64			`json:"env_temp,omitempty"`
+    Humid *float64			`json:"env_humid,omitempty"`
+    Press *float64			`json:"env_press,omitempty"`
 }
 
 // Bat is Device Battery Performance Data
 type Bat struct {
-	Voltage *float32		`json:"bat_voltage,omitempty"`
-    Current *float32		`json:"bat_current,omitempty"`
-	Charge *float32			`json:"bat_charge,omitempty"`
+	Voltage *float64		`json:"bat_voltage,omitempty"`
+    Current *float64		`json:"bat_current,omitempty"`
+	Charge *float64			`json:"bat_charge,omitempty"`
 }
 
 // Lnd is support for LND Geiger Tubes
 type Lnd struct {
 	// Unshielded LND 7318
-    U7318 *float32			`json:"lnd_7318u,omitempty"`
+    U7318 *float64			`json:"lnd_7318u,omitempty"`
 	// Shielded LND 7318
-    C7318 *float32			`json:"lnd_7318c,omitempty"`
+    C7318 *float64			`json:"lnd_7318c,omitempty"`
 	// Energy-compensated LND 7128
-    EC7128 *float32			`json:"lnd_7128ec,omitempty"`
+    EC7128 *float64			`json:"lnd_7128ec,omitempty"`
 	// Unshielded LND 712
-    U712 *float32			`json:"lnd_712u,omitempty"`
+    U712 *float64			`json:"lnd_712u,omitempty"`
 	// Water-attenuated LND LND 78017
-    W78017 *float32			`json:"lnd_78017w,omitempty"`
+    W78017 *float64			`json:"lnd_78017w,omitempty"`
 }
 
 // Pms is for Plantower Air Sensor Data
 type Pms struct {
-    Pm01_0 *float32			`json:"pms_pm01_0,omitempty"`
-    Pm02_5 *float32			`json:"pms_pm02_5,omitempty"`
-    Pm10_0 *float32			`json:"pms_pm10_0,omitempty"`
-    Std01_0 *float32		`json:"pms_std01_0,omitempty"`
-    Std02_5 *float32		`json:"pms_std02_5,omitempty"`
-    Std10_0 *float32		`json:"pms_std10_0,omitempty"`
+    Pm01_0 *float64			`json:"pms_pm01_0,omitempty"`
+    Pm02_5 *float64			`json:"pms_pm02_5,omitempty"`
+    Pm10_0 *float64			`json:"pms_pm10_0,omitempty"`
+    Std01_0 *float64		`json:"pms_std01_0,omitempty"`
+    Std02_5 *float64		`json:"pms_std02_5,omitempty"`
+    Std10_0 *float64		`json:"pms_std10_0,omitempty"`
     Count00_30 *uint32		`json:"pms_c00_30,omitempty"`
     Count00_50 *uint32		`json:"pms_c00_50,omitempty"`
     Count01_00 *uint32		`json:"pms_c01_00,omitempty"`
@@ -76,12 +76,12 @@ type Pms struct {
 
 // Pms2 is for an auxiliary Plantower Air Sensor Data
 type Pms2 struct {
-    Pm01_0 *float32			`json:"pms2_pm01_0,omitempty"`
-    Pm02_5 *float32			`json:"pms2_pm02_5,omitempty"`
-    Pm10_0 *float32			`json:"pms2_pm10_0,omitempty"`
-    Std01_0 *float32		`json:"pms2_std01_0,omitempty"`
-    Std02_5 *float32		`json:"pms2_std02_5,omitempty"`
-    Std10_0 *float32		`json:"pms2_std10_0,omitempty"`
+    Pm01_0 *float64			`json:"pms2_pm01_0,omitempty"`
+    Pm02_5 *float64			`json:"pms2_pm02_5,omitempty"`
+    Pm10_0 *float64			`json:"pms2_pm10_0,omitempty"`
+    Std01_0 *float64		`json:"pms2_std01_0,omitempty"`
+    Std02_5 *float64		`json:"pms2_std02_5,omitempty"`
+    Std10_0 *float64		`json:"pms2_std10_0,omitempty"`
     Count00_30 *uint32		`json:"pms2_c00_30,omitempty"`
     Count00_50 *uint32		`json:"pms2_c00_50,omitempty"`
     Count01_00 *uint32		`json:"pms2_c01_00,omitempty"`
@@ -95,12 +95,12 @@ type Pms2 struct {
 
 // Opc is for Alphasense OPC-N2 Air Sensor Data
 type Opc struct {
-    Pm01_0 *float32			`json:"opc_pm01_0,omitempty"`
-    Pm02_5 *float32			`json:"opc_pm02_5,omitempty"`
-    Pm10_0 *float32			`json:"opc_pm10_0,omitempty"`
-    Std01_0 *float32		`json:"opc_std01_0,omitempty"`
-    Std02_5 *float32		`json:"opc_std02_5,omitempty"`
-    Std10_0 *float32		`json:"opc_std10_0,omitempty"`
+    Pm01_0 *float64			`json:"opc_pm01_0,omitempty"`
+    Pm02_5 *float64			`json:"opc_pm02_5,omitempty"`
+    Pm10_0 *float64			`json:"opc_pm10_0,omitempty"`
+    Std01_0 *float64		`json:"opc_std01_0,omitempty"`
+    Std02_5 *float64		`json:"opc_std02_5,omitempty"`
+    Std10_0 *float64		`json:"opc_std10_0,omitempty"`
     Count00_38 *uint32		`json:"opc_c00_38,omitempty"`
     Count00_54 *uint32		`json:"opc_c00_54,omitempty"`
     Count01_00 *uint32		`json:"opc_c01_00,omitempty"`
@@ -141,9 +141,9 @@ type Dev struct {
 	Status *string			`json:"dev_status,omitempty"`
 	ModuleLora *string		`json:"dev_module_lora,omitempty"`
 	ModuleFona *string		`json:"dev_module_fona,omitempty"`
-    Temp *float32			`json:"dev_temp,omitempty"`
-    Humid *float32			`json:"dev_humid,omitempty"`
-    Press *float32			`json:"dev_press,omitempty"`
+    Temp *float64			`json:"dev_temp,omitempty"`
+    Humid *float64			`json:"dev_humid,omitempty"`
+    Press *float64			`json:"dev_press,omitempty"`
     ErrorsOpc *uint32		`json:"dev_err_opc,omitempty"`
     ErrorsPms *uint32		`json:"dev_err_pms,omitempty"`
     ErrorsPms2 *uint32		`json:"dev_err_pms2,omitempty"`
@@ -173,10 +173,10 @@ type Dev struct {
 // Gateway is Lora home gateway-supplied metadata
 type Gateway struct {
 	ReceivedAt *string		`json:"gateway_received,omitempty"`
-	SNR *float32			`json:"gateway_lora_snr,omitempty"`
-	Lat *float32			`json:"gateway_loc_lat,omitempty"`
-	Lon *float32			`json:"gateway_loc_lon,omitempty"`
-	Alt *float32			`json:"gateway_loc_alt,omitempty"`
+	SNR *float64			`json:"gateway_lora_snr,omitempty"`
+	Lat *float64			`json:"gateway_loc_lat,omitempty"`
+	Lon *float64			`json:"gateway_loc_lon,omitempty"`
+	Alt *float64			`json:"gateway_loc_alt,omitempty"`
 }
 
 // Service contains service metadata

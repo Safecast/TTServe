@@ -65,10 +65,10 @@ type SafecastDataV1 struct {
     StationID		*uint32  `json:"station_id,omitempty"`
     UserID			*uint32  `json:"user_id,omitempty"`
     ID				*uint32  `json:"id,omitempty"`
-    Height			*float32 `json:"height,omitempty"`
-    Value			*float32 `json:"value,omitempty"`
-    Latitude		*float32 `json:"latitude,omitempty"`
-    Longitude		*float32 `json:"longitude,omitempty"`
+    Height			*float64 `json:"height,omitempty"`
+    Value			*float64 `json:"value,omitempty"`
+    Latitude		*float64 `json:"latitude,omitempty"`
+    Longitude		*float64 `json:"longitude,omitempty"`
 }
 
 // SafecastV1Decode converts a loosely-formatted message to a structured safecast object
@@ -223,15 +223,14 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	switch t := in.HeightRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
-	    f64, err := strconv.ParseFloat(t, 32)
+	    f64, err := strconv.ParseFloat(t, 64)
 	    if err == nil {
-			f32 := float32(f64)
-	        out.Height = &f32
+	        out.Height = &f64
 			emit.Height = &t
 	    }
 	case float64:
-		f32 := float32(t)
-		out.Height = &f32
+		f64 := float64(t)
+		out.Height = &f64
 		str := fmt.Sprintf("%v", t)
 		emit.Height = &str
 	}
@@ -244,17 +243,16 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 		// a bogus value that should be ignored
 		var beginsWithSpace = t[0] == ' '
 		t = strings.TrimSpace(t)
-	    f64, err := strconv.ParseFloat(t, 32)
+	    f64, err := strconv.ParseFloat(t, 64)
 	    if err == nil {
-			f32 := float32(f64)
-			if f32 != 0 || !beginsWithSpace {
-		        out.Value = &f32
+			if f64 != 0 || !beginsWithSpace {
+		        out.Value = &f64
 				emit.Value = &t
 			}
 	    }
 	case float64:
-		f32 := float32(t)
-		out.Value = &f32
+		f64 := float64(t)
+		out.Value = &f64
 		str := fmt.Sprintf("%v", t)
 		emit.Value = &str
 	}
@@ -262,15 +260,14 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	switch t := in.LatitudeRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
-	    f64, err := strconv.ParseFloat(t, 32)
+	    f64, err := strconv.ParseFloat(t, 64)
 	    if err == nil {
-			f32 := float32(f64)
-	        out.Latitude = &f32
+	        out.Latitude = &f64
 			emit.Latitude = &t
 	    }
 	case float64:
-		f32 := float32(t)
-		out.Latitude = &f32
+		f64 := float64(t)
+		out.Latitude = &f64
 		str := fmt.Sprintf("%v", t)
 		emit.Latitude = &str
 	}
@@ -278,15 +275,14 @@ func SafecastV1Decode(r io.Reader) (out *SafecastDataV1, emit *SafecastDataV1ToE
 	switch t := in.LongitudeRaw.(type) {
 	case string:
 		t = strings.TrimSpace(t)
-	    f64, err := strconv.ParseFloat(t, 32)
+	    f64, err := strconv.ParseFloat(t, 64)
 	    if err == nil {
-			f32 := float32(f64)
-	        out.Longitude = &f32
+	        out.Longitude = &f64
 			emit.Longitude = &t
 	    }
 	case float64:
-		f32 := float32(t)
-		out.Longitude = &f32
+		f64 := float64(t)
+		out.Longitude = &f64
 		str := fmt.Sprintf("%v", t)
 		emit.Longitude = &str
 	}

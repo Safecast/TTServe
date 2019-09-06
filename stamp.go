@@ -28,8 +28,8 @@ const StampVersion1 = 1
 type stampFile struct {
     Version         uint32  `json:"Version,omitempty"`
     Stamp           uint32  `json:"Stamp,omitempty"`
-    Latitude        float32 `json:"Latitude,omitempty"`
-    Longitude       float32 `json:"Longitude,omitempty"`
+    Latitude        float64 `json:"Latitude,omitempty"`
+    Longitude       float64 `json:"Longitude,omitempty"`
     Altitude        int32   `json:"Altitude,omitempty"`
     CapturedAtDate  uint32  `json:"CapturedAtDate,omitempty"`
     CapturedAtTime  uint32  `json:"CapturedAtTime,omitempty"`
@@ -130,8 +130,8 @@ func stampSet(message *ttproto.Telecast, DeviceID uint32, CacheEntry int) (isVal
             sf.CapturedAtDate = message.GetCapturedAtDate()
             sf.CapturedAtTime = message.GetCapturedAtTime()
             if message.Latitude != nil || message.Longitude != nil {
-                sf.Latitude = message.GetLatitude()
-                sf.Longitude = message.GetLongitude()
+                sf.Latitude = float64(message.GetLatitude())
+                sf.Longitude = float64(message.GetLongitude())
                 if message.Altitude != nil {
                     sf.Altitude = message.GetAltitude()
                 } else {
@@ -237,8 +237,10 @@ func stampApply(message *ttproto.Telecast, DeviceID uint32, CacheEntry int) (isV
             // Location is best set to last known good rather than nothing at all
             if message.Latitude == nil || message.Longitude == nil {
                 if cachedDevices[CacheEntry].cache.Latitude != 0.0 || cachedDevices[CacheEntry].cache.Longitude != 0.0 {
-                    message.Latitude = &cachedDevices[CacheEntry].cache.Latitude
-                    message.Longitude = &cachedDevices[CacheEntry].cache.Longitude
+					lat := float32(cachedDevices[CacheEntry].cache.Latitude)
+                    message.Latitude = &lat
+					lon := float32(cachedDevices[CacheEntry].cache.Longitude)
+                    message.Longitude = &lon
                     if cachedDevices[CacheEntry].cache.Altitude != 0.0 {
                         message.Altitude = &cachedDevices[CacheEntry].cache.Altitude
                     }
@@ -294,8 +296,10 @@ func stampApply(message *ttproto.Telecast, DeviceID uint32, CacheEntry int) (isV
         // Set Location
         if message.Latitude == nil || message.Longitude == nil {
             if cachedDevices[CacheEntry].cache.Latitude != 0.0 || cachedDevices[CacheEntry].cache.Longitude != 0.0 {
-                message.Latitude = &cachedDevices[CacheEntry].cache.Latitude
-                message.Longitude = &cachedDevices[CacheEntry].cache.Longitude
+				lat := float32(cachedDevices[CacheEntry].cache.Latitude)
+                message.Latitude = &lat
+				lon := float32(cachedDevices[CacheEntry].cache.Longitude)
+                message.Longitude = &lon
                 if cachedDevices[CacheEntry].cache.Altitude != 0.0 {
                     message.Altitude = &cachedDevices[CacheEntry].cache.Altitude
                 }

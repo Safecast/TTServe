@@ -25,7 +25,7 @@ type UplinkMessage struct {
 // Metadata contains metadata of a message
 type Metadata struct {
 	Time       JSONTime          `json:"time,omitempty,omitempty"`
-	Frequency  float32           `json:"frequency,omitempty"`
+	Frequency  float64           `json:"frequency,omitempty"`
 	Modulation string            `json:"modulation,omitempty"`
 	DataRate   string            `json:"data_rate,omitempty"`
 	Bitrate    uint32            `json:"bit_rate,omitempty"`
@@ -41,8 +41,8 @@ type GatewayMetadata struct {
 	Timestamp  uint32   `json:"timestamp,omitempty"`
 	Time       JSONTime `json:"time,omitempty"`
 	Channel    uint32   `json:"channel"`
-	RSSI       float32  `json:"rssi,omitempty"`
-	SNR        float32  `json:"snr,omitempty"`
+	RSSI       float64  `json:"rssi,omitempty"`
+	SNR        float64  `json:"snr,omitempty"`
 	RFChain    uint32   `json:"rf_chain,omitempty"`
 	LocationMetadata
 }
@@ -52,8 +52,8 @@ type JSONTime time.Time
 
 // LocationMetadata contains GPS coordinates
 type LocationMetadata struct {
-	Latitude  float32 `json:"latitude,omitempty"`
-	Longitude float32 `json:"longitude,omitempty"`
+	Latitude  float64 `json:"latitude,omitempty"`
+	Longitude float64 `json:"longitude,omitempty"`
 	Altitude  int32   `json:"altitude,omitempty"`
 }
 

@@ -140,9 +140,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
         sdV1Emit.Unit = &s
     }
     if sdV1.Value == nil {
-        f32 := float32(0)
-        sdV1.Value = &f32
-        str := fmt.Sprintf("%f", f32)
+        f64 := float64(0)
+        sdV1.Value = &f64
+        str := fmt.Sprintf("%f", f64)
         sdV1Emit.Value = &str
     }
     if sdV1.CapturedAt == nil {

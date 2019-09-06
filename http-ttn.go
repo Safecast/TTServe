@@ -43,7 +43,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 	if ttn.Metadata.Longitude != 0 {
 	    AppReq.GwLongitude = &ttn.Metadata.Longitude
 	    AppReq.GwLatitude = &ttn.Metadata.Latitude
-		alt := float32(ttn.Metadata.Altitude)
+		alt := float64(ttn.Metadata.Altitude)
 	    AppReq.GwAltitude = &alt
 	}
     if len(ttn.Metadata.Gateways) >= 1 {

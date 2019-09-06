@@ -18,30 +18,30 @@ import (
 
 // Schemas for the different file types
 type sensorTRACKER struct {
-	CPM float32			`json:"cpm,omitempty"`
-	Temperature float32	`json:"temperature,omitempty"`
-	Voltage float32		`json:"voltage,omitempty"`
+	CPM float64			`json:"cpm,omitempty"`
+	Temperature float64	`json:"temperature,omitempty"`
+	Voltage float64		`json:"voltage,omitempty"`
 }
 type sensorBAT struct {
-	Voltage float32		`json:"voltage,omitempty"`
+	Voltage float64		`json:"voltage,omitempty"`
 }
 type sensorINA struct {
-	Voltage float32		`json:"voltage,omitempty"`
-    Current float32		`json:"current,omitempty"`
+	Voltage float64		`json:"voltage,omitempty"`
+    Current float64		`json:"current,omitempty"`
 }
 type sensorBME struct {
-	Temperature float32	`json:"temp,omitempty"`
-    Humidity float32	`json:"humid,omitempty"`
-    Pressure float32	`json:"press,omitempty"`
+	Temperature float64	`json:"temp,omitempty"`
+    Humidity float64	`json:"humid,omitempty"`
+    Pressure float64	`json:"press,omitempty"`
 }
 type sensorRAD struct {
-	CPM float32			`json:"cpm,omitempty"`
-    Seconds float32		`json:"secs,omitempty"`
+	CPM float64			`json:"cpm,omitempty"`
+    Seconds float64		`json:"secs,omitempty"`
 }
 type sensorAIR struct {
-	Pm01_0 float32		`json:"pm01_0,omitempty"`
-	Pm02_5 float32		`json:"pm02_5,omitempty"`
-	Pm10_0 float32		`json:"pm10_0,omitempty"`
+	Pm01_0 float64		`json:"pm01_0,omitempty"`
+	Pm02_5 float64		`json:"pm02_5,omitempty"`
+	Pm10_0 float64		`json:"pm10_0,omitempty"`
 	Count00_30 uint32	`json:"c00_30,omitempty"`
 	Count00_50 uint32	`json:"c00_50,omitempty"`
 	Count01_00 uint32	`json:"c01_00,omitempty"`
@@ -52,12 +52,12 @@ type sensorAIR struct {
     Samples uint32		`json:"csamples,omitempty"`
 }
 type sensorTRACK struct {
-	Lat float32			`json:"lat,omitempty"`
-	Lon float32			`json:"lon,omitempty"`
-	Distance float32	`json:"distance,omitempty"`
-	Seconds float32		`json:"seconds,omitempty"`
-	Velocity float32	`json:"velocity,omitempty"`
-	Bearing float32		`json:"bearing,omitempty"`
+	Lat float64			`json:"lat,omitempty"`
+	Lon float64			`json:"lon,omitempty"`
+	Distance float64	`json:"distance,omitempty"`
+	Seconds float64		`json:"seconds,omitempty"`
+	Velocity float64	`json:"velocity,omitempty"`
+	Bearing float64		`json:"bearing,omitempty"`
 }
 	
 // Handle inbound HTTP requests from individual data Notes
@@ -176,9 +176,9 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 	if e.Where != "" {
 	    var loc Loc
 	    sd.Loc = &loc
-		var lat, lon float32
-		lat = float32(e.WhereLat)
-		lon = float32(e.WhereLon)
+		var lat, lon float64
+		lat = float64(e.WhereLat)
+		lon = float64(e.WhereLon)
 		sd.Loc.Lat = &lat
 		sd.Loc.Lon = &lon
 		sd.Loc.Olc = &e.Where

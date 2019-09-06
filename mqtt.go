@@ -52,7 +52,7 @@ func MQTTInboundHandler() {
             if ttn.Metadata.Latitude != 0 {
                 AppReq.GwLatitude = &ttn.Metadata.Latitude
                 AppReq.GwLongitude = &ttn.Metadata.Longitude
-                alt := float32(ttn.Metadata.Altitude)
+                alt := float64(ttn.Metadata.Altitude)
                 AppReq.GwAltitude = &alt
             }
             if len(ttn.Metadata.Gateways) >= 1 {
