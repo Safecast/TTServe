@@ -48,7 +48,11 @@ func WriteToLogs(sd SafecastData) {
 // JSONDeviceLog writes the value to the log
 func JSONDeviceLog(sd SafecastData) {
 
-    file := DeviceLogFilename(*sd.DeviceID, *sd.DeviceSN, ".json")
+	sn := ""
+	if sd.DeviceSN != nil {
+		sn = *sd.DeviceSN
+	}
+    file := DeviceLogFilename(*sd.DeviceID, sn, ".json")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
@@ -94,7 +98,11 @@ func JSONDeviceLog(sd SafecastData) {
 func CSVDeviceLog(sd SafecastData) {
 
 	// Open the file for append
-    filename := DeviceLogFilename(*sd.DeviceID, *sd.DeviceSN, ".csv")
+	sn := ""
+	if sd.DeviceSN != nil {
+		sn = *sd.DeviceSN
+	}
+    filename := DeviceLogFilename(*sd.DeviceID, sn, ".csv")
 	fd, err := csvOpen(filename)
     if err != nil {
         fmt.Printf("Logging: Can't open %s: %s\n", filename, err)
