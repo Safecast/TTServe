@@ -13,10 +13,11 @@ import (
 )
 
 // DeviceLogFilename constructs path of a log file
-func DeviceLogFilename(DeviceID uint32, sn string, Extension string) string {
+func DeviceLogFilename(DeviceID uint32, Extension string) string {
     directory := SafecastDirectory()
     fn := time.Now().UTC().Format("2006-01-")
 	fn += fmt.Sprintf("%d", DeviceID)
+	sn, _ := sheetDeviceIDToSN(DeviceID)
 	if sn != "" {
 		fn += "-" + normalizeSN(sn)
 	}
@@ -44,11 +45,7 @@ func WriteToLogs(sd SafecastData) {
 // JSONDeviceLog writes the value to the log
 func JSONDeviceLog(sd SafecastData) {
 
-	sn := ""
-	if sd.DeviceSN != nil {
-		sn = *sd.DeviceSN
-	}
-    file := DeviceLogFilename(*sd.DeviceID, sn, ".json")
+    file := DeviceLogFilename(*sd.DeviceID, ".json")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
@@ -94,11 +91,7 @@ func JSONDeviceLog(sd SafecastData) {
 func CSVDeviceLog(sd SafecastData) {
 
 	// Open the file for append
-	sn := ""
-	if sd.DeviceSN != nil {
-		sn = *sd.DeviceSN
-	}
-    filename := DeviceLogFilename(*sd.DeviceID, sn, ".csv")
+    filename := DeviceLogFilename(*sd.DeviceID, ".csv")
 	fd, err := csvOpen(filename)
     if err != nil {
         fmt.Printf("Logging: Can't open %s: %s\n", filename, err)
