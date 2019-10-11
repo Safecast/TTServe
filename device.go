@@ -374,7 +374,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 
 		// Skip if the online state doesn't match
 		isOffline := sortedDevices[i].minutesAgo > (12 * 60)
-		fmt.Printf("OZZIE device %d %s offline? %t\n", sortedDevices[i].deviceid, sortedDevices[i].normalizedSN);
+		fmt.Printf("OZZIE ago:%d device %d %s offline? %t\n", sortedDevices[i].minutesAgo, sortedDevices[i].deviceid, sortedDevices[i].normalizedSN, isOffline);
 		if isOffline != fOffline {
 			continue
 		}
