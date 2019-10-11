@@ -151,7 +151,7 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 						return
 					}
 					if col == colSerialNumber {
-						rec.SerialNumber = val
+						rec.SerialNumber = normalizeSN(val)
 					} else if col == colDeviceID {
 						u64, err2 := strconv.ParseUint(val, 10, 32)
 						if err2 == nil {
@@ -166,7 +166,7 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 					}
 				}
 			}
-			if rec.DeviceID != 0 {
+			if rec.DeviceID != 0 || rec.SerialNumber != "" {
 				sheet = append(sheet, rec)
 				sheetRowsRecognized++
 			}
@@ -182,7 +182,7 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 	// Iterate over the rows to find the device
 	deviceIDFound := false;
 	for _, r := range sheet {
-		if r.DeviceID == DeviceID {
+		if r.DeviceID == DeviceID || r.SerialNumber == normalizedSN {
 			deviceIDFound = true
 			info = r
 			break

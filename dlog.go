@@ -36,7 +36,9 @@ func WriteToLogs(sd SafecastData) {
     go LogToDb(sd)
     go WriteDeviceStatus(sd)
     go JSONDeviceLog(sd)
-    go CSVDeviceLog(sd)
+	// 2019-10-11 Ray commented out because it doesn't appear that anyone is actually using this, and it
+	// adds a reasonable amount of storage burden on the server.  If you want it, just comment it back in.
+//    go CSVDeviceLog(sd)
 }
 
 // JSONDeviceLog writes the value to the log
