@@ -424,8 +424,8 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 		s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicDeviceStatus, id, id)
 
 		s += fmt.Sprintf("<http://%s%s%d|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, id)
-		sn, _ := sheetDeviceIDToSN(id)
-		sn = normalizeSN(sn)
+		info, _ := sheetDeviceInfo(id, label)
+		sn := info.SerialNumber
 		if sn != "" {
 			sn = "-"+sn
 		}
