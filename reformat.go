@@ -470,7 +470,7 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 		sd9.Value = &value
 		unit := "celcius"
 		sd9.Unit = &unit
-		info := fmt.Sprintf("DeviceID:%d,Temperature:%.1f", id, *sd.Env.Temp)
+		info := fmt.Sprintf("DeviceID:%s,Temperature:%.1f", id, *sd.Env.Temp)
 		if (sd.Bat != nil && sd.Bat.Voltage != nil) {
 			info += fmt.Sprintf(",Battery Voltage:%1f", *sd.Bat.Voltage)
 		}
