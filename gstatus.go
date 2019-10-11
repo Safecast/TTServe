@@ -167,7 +167,7 @@ func WriteGatewayStatus(ttg TTGateReq, IP string) {
 }
 
 // GetGatewaySummary gets summary of a device
-func GetGatewaySummary(GatewayID string, bol string, fDetails bool) (Summary string, Label string) {
+func GetGatewaySummary(GatewayID string, bol string) (Summary string, Label string) {
 
     // Read the file
     isAvail, _, value := ReadGatewayStatus(GatewayID)
@@ -199,12 +199,12 @@ func GetGatewaySummary(GatewayID string, bol string, fDetails bool) (Summary str
 	}
 	
 	// Location
-	if fDetails && loc != "" {
+	if loc != "" {
 		s += "\n" + bol + loc
 	}
 
 	// Received
-    if fDetails && value.Ttg.MessagesReceived != 0 {
+    if value.Ttg.MessagesReceived != 0 {
 		s += "\n" + bol
 
         if value.Ttg.DevicesSeen == "" {

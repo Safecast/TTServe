@@ -65,16 +65,6 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     args := strings.Split(message, " ")
     argsLC := strings.Split(strings.ToLower(message), " ")
 
-    firstArgLC := ""
-    if len(args) > 1 {
-        firstArgLC = argsLC[1]
-    }
-
-    secondArgLC := ""
-    if len(args) > 2 {
-        secondArgLC = argsLC[2]
-    }
-
     messageAfterFirstWord := ""
     if len(args) > 1 {
         messageAfterFirstWord = strings.Join(args[1:], " ")
@@ -108,22 +98,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Process common arguments
-    devicelist := ""
-    fDetails := false
-    if firstArgLC == "detail" || firstArgLC == "details" {
-        fDetails = true
-        if secondArgLC != "" {
-            devicelist = args[2]
-        }
-    } else if secondArgLC == "detail" || secondArgLC == "details" {
-        fDetails = true
-        devicelist = args[1]
-    } else {
-        if firstArgLC != "" {
-            devicelist = args[1]
-        }
-    }
-
+    devicelist := args[1]
 
     // Process queries
     switch argsLC[0] {
@@ -133,13 +108,13 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         help += "Named Device Lists:\n"
         help += "     device <subcommand> <devlistname> <args>\n"
         help += "Get bulk or select device status:\n"
-        help += "     status [devlistname] [details]\n"
+        help += "     status [devlistname]\n"
         help += "Show bulk device status:\n"
-        help += "     online [details]\n"
-        help += "     offline [details]\n"
+        help += "     online\n"
+        help += "     offline\n"
         help += "Show gateway and server status:\n"
-        help += "     gateway [details]\n"
-        help += "     server [details]\n"
+        help += "     gateway\n"
+        help += "     server\n"
         help += "Send/cancel/display device-targeted messages:\n"
         help += "     send <device> <message>\n"
         help += "     cancel <device>\n"
@@ -170,10 +145,10 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
         go sendCommandToSlack(user, message)
 
     case "online":
-        go sendSafecastDeviceSummaryToSlack(user, "", devicelist, false, fDetails)
+        go sendSafecastDeviceSummaryToSlack(user, "", devicelist, false)
 
     case "offline":
-        go sendSafecastDeviceSummaryToSlack(user, "", devicelist, true, fDetails)
+        go sendSafecastDeviceSummaryToSlack(user, "", devicelist, true)
 
     case "did":
         fallthrough
@@ -201,23 +176,23 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     case "gateway":
         fallthrough
     case "gateways":
-        sendSafecastGatewaySummaryToSlack("", fDetails)
+        sendSafecastGatewaySummaryToSlack("")
 
     case "server":
         fallthrough
     case "servers":
         fallthrough
     case "ttserve":
-        sendSafecastServerSummaryToSlack("", fDetails)
+        sendSafecastServerSummaryToSlack("")
 
     case "status":
         if devicelist != "" {
-            go sendSafecastDeviceSummaryToSlack(user, "", devicelist, false, fDetails)
+            go sendSafecastDeviceSummaryToSlack(user, "", devicelist, false)
         } else {
             if (false) {
-                go sendSafecastDeviceSummaryToSlack(user, "== Offline ==", devicelist, true, fDetails)
+                go sendSafecastDeviceSummaryToSlack(user, "== Offline ==", devicelist, true)
                 time.Sleep(2 * time.Second)
-                go sendSafecastDeviceSummaryToSlack(user, "== Online ==", devicelist, false, fDetails)
+                go sendSafecastDeviceSummaryToSlack(user, "== Online ==", devicelist, false)
             } else {
                 sendToSafecastOps("Please use 'status <named-device-list>', using the 'device' command to manage lists. You may also use 'online' or 'offline' to see full status, but the output is *very* large.", SlackMsgReply)
             }

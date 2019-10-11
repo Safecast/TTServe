@@ -143,7 +143,7 @@ func sendExpiredSafecastServersToSlack() {
 }
 
 // Get a summary of devices that are older than this many minutes ago
-func sendSafecastServerSummaryToSlack(header string, fDetails bool) {
+func sendSafecastServerSummaryToSlack(header string) {
 
     // First, age out the expired devices and recompute when last seen
     sendExpiredSafecastServersToSlack()

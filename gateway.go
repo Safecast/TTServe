@@ -85,7 +85,7 @@ func trackGateway(GatewayID string, whenSeen time.Time) {
 
     // Add a new array entry if necessary
     if !found {
-        _, dev.label = GetGatewaySummary(dev.gatewayid, "", false)
+        _, dev.label = GetGatewaySummary(dev.gatewayid, "")
         dev.seen = whenSeen
         minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
         dev.everRecentlySeen = minutesAgo < gatewayWarningAfterMinutes
@@ -151,7 +151,7 @@ func sendExpiredSafecastGatewaysToSlack() {
 }
 
 // Get a summary of devices that are older than this many minutes ago
-func sendSafecastGatewaySummaryToSlack(header string, fDetails bool) {
+func sendSafecastGatewaySummaryToSlack(header string) {
 
     // First, age out the expired devices and recompute when last seen
     sendExpiredSafecastGatewaysToSlack()
@@ -169,7 +169,7 @@ func sendSafecastGatewaySummaryToSlack(header string, fDetails bool) {
         gatewayID := sortedGateways[i].gatewayid
 
         // Emit info about the device
-        summary, _ := GetGatewaySummary(gatewayID, "    ", fDetails)
+        summary, _ := GetGatewaySummary(gatewayID, "    ")
         if summary != "" {
             if s != "" {
                 s += fmt.Sprintf("\n")
