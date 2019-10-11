@@ -48,7 +48,6 @@ func normalizeSN(sn string) (result string) {
 			continue
 		}
 	}
-	fmt.Printf("*** OZZIE: '%s' -> '%s'\n", sn, result)
 	return
 }
 
@@ -166,15 +165,17 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 					}
 				}
 			}
+
 			if rec.DeviceID != 0 || rec.SerialNumber != "" {
 				sheet = append(sheet, rec)
 				sheetRowsRecognized++
+				fmt.Printf("OZZIE: %v\n", rec);
 			}
 
-			// Summary
-			fmt.Printf("\n%s *** Parsed Device Tracker CSV: recognized %d rows of %d total\n\n", LogTime(), sheetRowsRecognized, sheetRowsTotal)
-
 		}
+
+		// Summary
+		fmt.Printf("\n%s *** Parsed Device Tracker CSV: recognized %d rows of %d total\n\n", LogTime(), sheetRowsRecognized, sheetRowsTotal)
 
 
 	}
@@ -188,6 +189,7 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 			break
 		}
 	}
+	fmt.Printf("OZZIE: looking for %d '%s' found? %T\n", DeviceID, normalizedSN, deviceIDFound);
 
 	// Device not found
 	if !deviceIDFound {
