@@ -183,7 +183,7 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 	// Iterate over the rows to find the device
 	deviceIDFound := false;
 	for _, r := range sheet {
-		if r.DeviceID == DeviceID || r.SerialNumber == normalizedSN {
+		if r.DeviceID == DeviceID || (r.SerialNumber != "" && r.SerialNumber == normalizedSN) {
 			deviceIDFound = true
 			info = r
 			break
