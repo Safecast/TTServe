@@ -240,9 +240,6 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 			}
         }
 
-    case "deveui":
-        generateTTNCTLDeviceRegistrationScript()
-
     case "pending":
         fallthrough
     case "outbound":

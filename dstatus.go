@@ -800,55 +800,30 @@ func WriteDeviceStatus(sc SafecastData) {
 }
 
 // GetDeviceStatusSummary gets a summary of a device
-func GetDeviceStatusSummary(DeviceID uint32) (DevEui string, Label string, Gps string, Summary string) {
+func GetDeviceStatusSummary(DeviceID uint32) (label string, Gps string, Summary string) {
 
-    // Default the label
-    label := ""
-
-    // Read the file
-    isAvail, _, value := ReadDeviceStatus(DeviceID)
-    if !isAvail {
-        return "", label, "", ""
-    }
-
-    // Get the DevEUI, which must be precisely 16 characters
-    ttnDevEui := ""
-    if value.Dev != nil && value.Dev.TtnParams != nil {
-        if len(*value.Dev.TtnParams) == 16 {
-            ttnDevEui = *value.Dev.TtnParams
-        }
-    }
-
-	// Use the SN as a label if present
-	if label == "" && value.DeviceSN != nil {
-		label = *value.DeviceSN
-	}
-
-    // If no SN, use the old style device label concatenated with SN
-    if label == "" && value.Dev != nil && value.Dev.DeviceLabel != nil {
-        label = *value.Dev.DeviceLabel
-		sn, _ := sheetDeviceIDToSN(DeviceID)
-        u64, err2 := strconv.ParseUint(sn, 10, 32)
-        if err2 == nil {
+    // Fetch and format the serial number
+	sn, info := sheetDeviceIDToSN(DeviceID)
+	if sn != "" {
+        u64, err := strconv.ParseUint(sn, 10, 32)
+        if err == nil {
 			sn = fmt.Sprintf("#%d", u64)
 		}
-        if sn != "" {
-            label += fmt.Sprintf(" %s", sn)
-        }
     }
-
-	// Add info if present from the spreadsheet
-	_, info := sheetDeviceIDToSN(DeviceID)
+	label = sn
 	if info != "" {
 	    label += fmt.Sprintf(" (%s)", info)
     }
+
+    // Read the "last known interesting data value" from the status file, which might include GPS
+    _, _, value := ReadDeviceStatus(DeviceID)
 
     gps := ""
     if value.Loc != nil && value.Loc.Lat != nil && value.Loc.Lon != nil {
         gps = fmt.Sprintf("<http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps>", *value.Loc.Lat, *value.Loc.Lon)
     }
 
-    // Build the summary
+    // Build the summary from the value
     s := ""
 
     if value.Bat != nil && value.Bat.Voltage != nil {
@@ -908,7 +883,7 @@ func GetDeviceStatusSummary(DeviceID uint32) (DevEui string, Label string, Gps s
     }
 
     // Done
-    return ttnDevEui, label, gps, s
+    return label, gps, s
 
 }
 

@@ -227,7 +227,7 @@ func refreshDeviceSummaryLabels() {
 
     // Sweep over all these devices in sorted order, refreshing label
     for i := 0; i < len(sortedDevices); i++ {
-        _, sortedDevices[i].label, _, _ = GetDeviceStatusSummary(sortedDevices[i].deviceid)
+        sortedDevices[i].label, _, _ = GetDeviceStatusSummary(sortedDevices[i].deviceid)
     }
 
 }
@@ -416,7 +416,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
         gps := ""
         summary := ""
         if fDetails {
-            _, label, gps, summary = GetDeviceStatusSummary(id)
+            label, gps, summary = GetDeviceStatusSummary(id)
             // Refresh cached label
             sortedDevices[i].label = label
         }
@@ -474,44 +474,6 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 
     // Send it to Slack
     sendToSafecastOps(s, SlackMsgReply)
-
-}
-
-// Get a summary of devices that are older than this many minutes ago
-func generateTTNCTLDeviceRegistrationScript() {
-
-    // First, age out the expired devices and recompute when last seen
-    sendExpiredSafecastDevicesToSlack()
-
-    // Next sort the device list
-    sortedDevices := seenDevices
-    sort.Sort(byDeviceKey(sortedDevices))
-
-    // Sweep over devices and generate the TTNCTL commands, newest first
-    s := ""
-    devicesRegistered := 0
-    for i := 0; i < len(sortedDevices); i++ {
-        id := sortedDevices[i].deviceid
-        deveui, _, _, _ := GetDeviceStatusSummary(id)
-        if deveui != "" {
-            s += fmt.Sprintf("ttnctl devices register %s\n", strings.ToLower(deveui))
-            s += fmt.Sprintf("ttnctl device set %s --app-eui 70B3D57EF0003810 --app-key 5CB50DDCF44CEADA6A27DA8BC6607E6A --dev-eui %s --override\n", strings.ToLower(deveui), strings.ToLower(deveui))
-            devicesRegistered++
-            if devicesRegistered % 10 == 0 {
-                sendToSafecastOps(s, SlackMsgReply)
-                s = ""
-            }
-        }
-    }
-
-    // Send it to Slack
-    if devicesRegistered != 0 {
-        if s != "" {
-            sendToSafecastOps(s, SlackMsgReply)
-        }
-    } else {
-        sendToSafecastOps("None found.", SlackMsgReply)
-    }
 
 }
 
