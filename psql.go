@@ -18,7 +18,7 @@ import (
     _ "github.com/lib/pq"
 )
 
-// Database query
+// DbQuery is the Database query
 type DbQuery struct {
     Columns string              `json:"columns,omitempty"`
     Format string               `json:"format,omitempty"`

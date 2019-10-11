@@ -352,7 +352,7 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 		track.Lat = &s.Lat
 		track.Lon = &s.Lon
 		track.Distance = &s.Distance
-		var secs uint32 = uint32(s.Seconds)
+		var secs = uint32(s.Seconds)
 		track.Seconds = &secs
 		track.Velocity = &s.Velocity
 		track.Bearing = &s.Bearing

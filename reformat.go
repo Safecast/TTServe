@@ -13,7 +13,7 @@ import (
 	"github.com/google/open-location-code/go"
 )
 
-// Determine if this is a Solarcast Nano
+// SafecastDeviceIsSolarcastNano determines if this is a Solarcast Nano
 func SafecastDeviceIsSolarcastNano(deviceid uint32) bool {
 	sn, _ := sheetDeviceIDToSN(deviceid)
 	u64, err := strconv.ParseUint(sn, 10, 32)

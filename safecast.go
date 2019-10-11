@@ -660,7 +660,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
 
 }
 
-// SendSafecast processes an inbound Safecast V2 SD structure as an asynchronous goroutine
+// SendToSafecast processes an inbound Safecast V2 SD structure as an asynchronous goroutine
 func SendToSafecast(sd SafecastData) {
 
     // Generate the hash of the original device data

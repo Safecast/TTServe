@@ -33,7 +33,7 @@ func logQuery(qstr string, isCSV bool, user string) (numResults int, url string,
     q := DbQuery{}
     err = json.Unmarshal([]byte(qstr), &q)
     if err != nil {
-        err = fmt.Errorf("query format not recognized: %s: %s\n%v\n", qstr, err, []byte(qstr))
+        err = fmt.Errorf("query format not recognized: %s: %s: %v", qstr, err, []byte(qstr))
 		return
     }
 
@@ -65,7 +65,7 @@ func logQuery(qstr string, isCSV bool, user string) (numResults int, url string,
     // Build a PSQL query
     sqlQuery, qerr := dbBuildQuery(dbTable, &q)
     if qerr != nil {
-		err = fmt.Errorf("cannot build query: %s\n", qerr)
+		err = fmt.Errorf("cannot build query: %s", qerr)
         return 
     }
 
