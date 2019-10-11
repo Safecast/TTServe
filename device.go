@@ -123,6 +123,7 @@ func trackAllDevices() {
 
 				// Track the device
 				if deviceID != 0 || normalizedSN != "" {
+					fmt.Printf("OZZIE TRACKING %d %s\n", deviceID, normalizedSN)
 					trackDevice(deviceID, file.ModTime(), normalizedSN)
 				}
 
