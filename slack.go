@@ -98,7 +98,10 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
     }
 
     // Process common arguments
-    devicelist := args[1]
+	devicelist := ""
+	if len(args) >= 2 {
+	    devicelist = args[1]
+	}
 
     // Process queries
     switch argsLC[0] {
