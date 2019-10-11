@@ -13,6 +13,7 @@ import (
     "fmt"
     "io/ioutil"
     "strings"
+	"strconv"
     "encoding/json"
 )
 
@@ -827,8 +828,12 @@ func GetDeviceStatusSummary(DeviceID uint32) (DevEui string, Label string, Gps s
     if label == "" && value.Dev != nil && value.Dev.DeviceLabel != nil {
         label = *value.Dev.DeviceLabel
 		sn, _ := sheetDeviceIDToSN(DeviceID)
-        if sn != 0 {
-            label += fmt.Sprintf(" #%d", sn)
+        u64, err2 := strconv.ParseUint(sn, 10, 32)
+        if err2 == nil {
+			sn = fmt.Sprintf("#%d", u64)
+		}
+        if sn != "" {
+            label += fmt.Sprintf(" %s", sn)
         }
     }
 

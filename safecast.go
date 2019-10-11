@@ -14,6 +14,7 @@ import (
     "bytes"
     "time"
     "strings"
+	"strconv"
     "encoding/json"
     "crypto/md5"
     "github.com/safecast/ttproto/golang"
@@ -72,8 +73,12 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
 
 	// Generate a Serial Number
 	sn, _ := sheetDeviceIDToSN(did)
-	if sn != 0 {
-		snstr := fmt.Sprintf("%s #%d", devicename, sn)
+	if sn != "" {
+        u64, err2 := strconv.ParseUint(sn, 10, 32)
+        if err2 == nil {
+			sn = fmt.Sprintf("#%d", u64)
+		}
+		snstr := fmt.Sprintf("%s %s", devicename, sn)
 		sd.DeviceSN = &snstr
 	}
 	

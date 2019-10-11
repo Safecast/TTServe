@@ -9,6 +9,7 @@ import (
     "fmt"
     "time"
     "io"
+	"strings"
     "strconv"
     "net/http"
     "encoding/csv"
@@ -16,7 +17,7 @@ import (
 
 type sheetInfo struct {
     DeviceID            uint32			`json:"device,omitempty"`
-    SerialNumber        uint32			`json:"sn,omitempty"`
+    SerialNumber        string			`json:"sn,omitempty"`
     Custodian           string			`json:"custodian_name,omitempty"`
     CustodianContact    string			`json:"custodian_contact,omitempty"`
     Location            string			`json:"location,omitempty"`
@@ -34,11 +35,27 @@ func sheetInvalidateCache() {
     fRetrieve = true
 }
 
+// normalize a serial number to remove characters not valid in a filename
+func normalizeSN(sn string) (result string) {
+	sn = strings.ToLower(sn)
+	for char := range sn {
+		if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') {
+			result += fmt.Sprintf("%c", char)
+			continue
+		}
+		if (char == ' ') {
+			result += "_"
+			continue
+		}
+	}
+	return
+}
+
 // sheetDeviceIDToSN converts a Safecast device ID to its manufacturing serial number
-func sheetDeviceIDToSN(DeviceID uint32) (sn uint32, infoStr string) {
-    info, err := sheetDeviceInfo(DeviceID)
+func sheetDeviceIDToSN(DeviceID uint32) (sn string, infoStr string) {
+    info, err := sheetDeviceInfo(DeviceID, "")
     if err != nil {
-        return 0, fmt.Sprintf("%s", err)
+        return "", fmt.Sprintf("%s", err)
     }
     sn = info.SerialNumber
     if (info.Custodian == "" && info.Location != "") {
@@ -52,7 +69,7 @@ func sheetDeviceIDToSN(DeviceID uint32) (sn uint32, infoStr string) {
 }
 
 // sheetDeviceInfo retrieves sheetInfo for a given device
-func sheetDeviceInfo(DeviceID uint32) (info sheetInfo, err error) {
+func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err error) {
 
     // Cache for some time, for performance
     if (time.Now().Sub(lastRetrieved) / time.Minute) > 15 {
@@ -133,10 +150,7 @@ func sheetDeviceInfo(DeviceID uint32) (info sheetInfo, err error) {
                             return
                         }
                         if col == colSerialNumber {
-                            u64, err2 := strconv.ParseUint(val, 10, 32)
-                            if err2 == nil {
-                                rec.SerialNumber = uint32(u64)
-                            }
+							rec.SerialNumber = val
                         } else if col == colDeviceID {
                             u64, err2 := strconv.ParseUint(val, 10, 32)
                             if err2 == nil {

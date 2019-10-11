@@ -17,6 +17,7 @@ import (
 // Describes every device that has sent us a message
 type seenDevice struct {
     deviceid            uint32
+    normalizedSN		string
     label               string
     seen                time.Time
     everRecentlySeen    bool
@@ -48,14 +49,15 @@ func (a byDeviceKey) Less(i, j int) bool {
 }
 
 // Keep track of all devices that have logged data via ttserve
-func trackDevice(DeviceID uint32, whenSeen time.Time) {
+func trackDevice(DeviceID uint32, whenSeen time.Time, normalizedSN string) {
     var dev seenDevice
     dev.deviceid = DeviceID
-
+	dev.normalizedSN = normalizedSN
+	
     // Attempt to update the existing entry if we can find it
     found := false
     for i := 0; i < len(seenDevices); i++ {
-        if dev.deviceid == seenDevices[i].deviceid {
+        if dev.deviceid == seenDevices[i].deviceid || dev.normalizedSN == seenDevices[i].normalizedSN {
             // Only pay attention to things that have truly recently come or gone
             minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
             if minutesAgo < deviceWarningAfterMinutes(dev.deviceid) {
@@ -106,7 +108,7 @@ func trackAllDevices() {
                 Str0 := file.Name()
                 Str1 := strings.Split(Str0, ".")[0]
                 Str2 := strings.Split(Str1, "-")
-                if len(Str2) == 3 {
+                if len(Str2) >= 3 {
                     yr, _ := strconv.ParseUint(Str2[0], 10, 32)
                     mo, _ := strconv.ParseUint(Str2[1], 10, 32)
                     if int(yr) == time.Now().Year() && int(mo) == int(time.Now().Month()) {
@@ -114,10 +116,14 @@ func trackAllDevices() {
                         deviceID = uint32(i64)
                     }
                 }
+				normalizedSN := ""
+                if len(Str2) >= 4 {
+					normalizedSN = Str2[3]
+				}
 
                 // Track the device
-                if deviceID != 0 {
-                    trackDevice(deviceID, file.ModTime())
+                if deviceID != 0 || normalizedSN != "" {
+                    trackDevice(deviceID, file.ModTime(), normalizedSN)
                 }
 
             }
@@ -172,7 +178,7 @@ func devicesSeenInfo() (allInfo []sheetInfo) {
 
     // Sweep through all devices that we've seen
     for i := 0; i < len(seenDevices); i++ {
-		info, err := sheetDeviceInfo(seenDevices[i].deviceid)
+		info, err := sheetDeviceInfo(seenDevices[i].deviceid, seenDevices[i].normalizedSN)
 		if err == nil {
 			info.LastSeen = seenDevices[i].seen.UTC().Format("2006-01-02T15:04:05Z")
 			allInfo = append(allInfo, info)

@@ -13,12 +13,14 @@ import (
 )
 
 // DeviceLogFilename constructs path of a log file
-func DeviceLogFilename(DeviceID uint32, Extension string) string {
+func DeviceLogFilename(DeviceID uint32, sn string, Extension string) string {
     directory := SafecastDirectory()
-    prefix := time.Now().UTC().Format("2006-01-")
-	devstr := fmt.Sprintf("%d", DeviceID)
-    file := directory + TTDeviceLogPath + "/" + prefix + devstr + Extension
-    return file
+    fn := time.Now().UTC().Format("2006-01-")
+	fn += fmt.Sprintf("%d", DeviceID)
+	if sn != "" {
+		fn += "-" + normalizeSN(sn)
+	}
+    return directory + TTDeviceLogPath + "/" + fn + Extension
 }
 
 // WriteToLogs writes logs.
@@ -26,7 +28,11 @@ func DeviceLogFilename(DeviceID uint32, Extension string) string {
 // in log-ordering for buffered I/O messages where there are a huge batch of readings
 // that are updated in sequence very quickly.
 func WriteToLogs(sd SafecastData) {
-	go trackDevice(*sd.DeviceID, time.Now())
+	sn := ""
+	if sd.DeviceSN != nil {
+		sn = *sd.DeviceSN
+	}
+	go trackDevice(*sd.DeviceID, time.Now(), normalizeSN(sn))
     go LogToDb(sd)
     go WriteDeviceStatus(sd)
     go JSONDeviceLog(sd)
@@ -36,7 +42,11 @@ func WriteToLogs(sd SafecastData) {
 // JSONDeviceLog writes the value to the log
 func JSONDeviceLog(sd SafecastData) {
 
-    file := DeviceLogFilename(*sd.DeviceID, ".json")
+	sn := ""
+	if sd.DeviceSN != nil {
+		sn = *sd.DeviceSN
+	}
+    file := DeviceLogFilename(*sd.DeviceID, sn, ".json")
 
     // Open it
     fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
@@ -82,7 +92,11 @@ func JSONDeviceLog(sd SafecastData) {
 func CSVDeviceLog(sd SafecastData) {
 
 	// Open the file for append
-    filename := DeviceLogFilename(*sd.DeviceID, ".csv")
+	sn := ""
+	if sd.DeviceSN != nil {
+		sn = *sd.DeviceSN
+	}
+    filename := DeviceLogFilename(*sd.DeviceID, sn, ".csv")
 	fd, err := csvOpen(filename)
     if err != nil {
         fmt.Printf("Logging: Can't open %s: %s\n", filename, err)
