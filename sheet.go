@@ -189,7 +189,7 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 			break
 		}
 	}
-	fmt.Printf("OZZIE: looking for %d '%s' found? %T\n", DeviceID, normalizedSN, deviceIDFound);
+	fmt.Printf("OZZIE: looking for %d '%s' found? %t\n%v\n", DeviceID, normalizedSN, deviceIDFound, info);
 
 	// Device not found
 	if !deviceIDFound {
