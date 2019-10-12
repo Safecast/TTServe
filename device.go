@@ -391,6 +391,8 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 	// Finally, sweep over all these devices in sorted order,
 	// generating a single large text string to be sent as a Slack message
 	s := header
+	numAdded := 0
+	numPending := 0
 	for i := 0; i < len(sortedDevices); i++ {
 
 		// Skip if the online state doesn't match
@@ -479,18 +481,30 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 			s += ")"
 		}
 
+		// Display
+		numAdded++
+		numPending++
+		if numPending > 9 {
+			sendToSafecastOps(s, SlackMsgReply)
+			s = ""
+			numPending = 0
+		}
+
 	}
 
 	// None
-	if s == header {
+	if numAdded == 0 {
 		if fOffline {
 			s = "All devices are currently online."
 		} else {
 			s = "All devices are currently offline."
 		}
+		numPending++
 	}
 
 	// Send it to Slack
-	sendToSafecastOps(s, SlackMsgReply)
+	if numPending > 0 {
+		sendToSafecastOps(s, SlackMsgReply)
+	}
 
 }
