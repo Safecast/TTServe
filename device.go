@@ -84,8 +84,8 @@ func trackDevice(DeviceID uint32, whenSeen time.Time, normalizedSN string) {
 	// Add a new array entry if necessary
 	if !found {
 		dev.seen = whenSeen
-		minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
-		dev.everRecentlySeen = minutesAgo < deviceWarningAfterMinutes(dev.deviceid)
+		dev.minutesAgo = int64(time.Now().Sub(dev.seen) / time.Minute)
+		dev.everRecentlySeen = dev.minutesAgo < deviceWarningAfterMinutes(dev.deviceid)
 		dev.notifiedAsUnseen = false
 		dev.label, _ = SafecastDeviceType(dev.deviceid)
 		seenDevices = append(seenDevices, dev)
