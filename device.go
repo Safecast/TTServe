@@ -57,7 +57,12 @@ func trackDevice(DeviceID uint32, whenSeen time.Time, normalizedSN string) {
 	// Attempt to update the existing entry if we can find it
 	found := false
 	for i := 0; i < len(seenDevices); i++ {
-		if dev.deviceid == seenDevices[i].deviceid || dev.normalizedSN == seenDevices[i].normalizedSN {
+		if dev.deviceid == seenDevices[i].deviceid || (dev.normalizedSN != "" && dev.normalizedSN == seenDevices[i].normalizedSN) {
+			// If the SN hasn't yet been filled in, do it.  This is because legacy file formats that may
+			// still exist in the directory are missing the SN, and they may just happen to come first.
+			if (seenDevices[i].normalizedSN == "" && dev.normalizedSN != "") {
+				seenDevices[i].normalizedSN = dev.normalizedSN
+			}
 			// Only pay attention to things that have truly recently come or gone
 			minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
 			if minutesAgo < deviceWarningAfterMinutes(dev.deviceid) {
