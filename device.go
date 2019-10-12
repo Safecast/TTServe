@@ -54,8 +54,6 @@ func trackDevice(DeviceID uint32, whenSeen time.Time, normalizedSN string) {
 	dev.deviceid = DeviceID
 	dev.normalizedSN = normalizedSN
 
-	fmt.Printf("OZZIE trackDevice %d %s %s\n", DeviceID, normalizedSN, whenSeen.Format("2006-01-02-15-04-05"))
-
 	// Attempt to update the existing entry if we can find it
 	found := false
 	for i := 0; i < len(seenDevices); i++ {
@@ -89,7 +87,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time, normalizedSN string) {
 		dev.notifiedAsUnseen = false
 		dev.label, _ = SafecastDeviceType(dev.deviceid)
 		seenDevices = append(seenDevices, dev)
-		fmt.Printf("OZZIE added to list (len=%d)\n", len(seenDevices))
+		fmt.Printf("OZZIE trackDevice ADDED(%d) %d %s %s\n", len(seenDevices), DeviceID, normalizedSN, whenSeen.Format("2006-01-02-15-04-05"))
 	}
 
 }
@@ -371,9 +369,6 @@ func deviceWarningAfterMinutes(deviceID uint32) int64 {
 // Get a summary of devices that are older than this many minutes ago
 func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist string, fOffline bool) {
 
-	// Update the in-memory list of seen devices
-	trackAllDevices()
-
 	// Force a re-read of the sheet, just to ensure that it reflects the lastest changes
 	sheetInvalidateCache()
 
@@ -388,7 +383,9 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 
 	// Next sort the device list
 	sortedDevices := seenDevices
+	fmt.Printf("OZZIE SORT BEFORE: %d\n", len(sortedDevices))
 	sort.Sort(byDeviceKey(sortedDevices))
+	fmt.Printf("OZZIE SORT AFTER: %d\n", len(sortedDevices))
 
 	// Finally, sweep over all these devices in sorted order,
 	// generating a single large text string to be sent as a Slack message
