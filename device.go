@@ -98,7 +98,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time, normalizedSN string) {
 func trackAllDevices() {
 
 	// Loop over the file system, tracking all devices
-	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceStatusPath)
+	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceLogPath)
 	if err == nil {
 
 		// Iterate over each of the values
