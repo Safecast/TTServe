@@ -54,7 +54,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time, normalizedSN string) {
 	dev.deviceid = DeviceID
 	dev.normalizedSN = normalizedSN
 
-	fmt.Printf("OZZIE trackDevice %s %s %s\n", DeviceID, normalizedSN, whenSeen.Format("2006-01-02-15-04-05"))
+	fmt.Printf("OZZIE trackDevice %d %s %s\n", DeviceID, normalizedSN, whenSeen.Format("2006-01-02-15-04-05"))
 
 	// Attempt to update the existing entry if we can find it
 	found := false
@@ -123,6 +123,7 @@ func trackAllDevices() {
 				if len(Str2) >= 4 {
 					normalizedSN = Str2[3]
 				}
+				fmt.Printf("OZZIE %s %s %v\n", normalizedSN, Str0, Str2)
 
 				// Track the device
 				if deviceID != 0 || normalizedSN != "" {
