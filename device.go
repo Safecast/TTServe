@@ -54,6 +54,8 @@ func trackDevice(DeviceID uint32, whenSeen time.Time, normalizedSN string) {
 	dev.deviceid = DeviceID
 	dev.normalizedSN = normalizedSN
 
+	fmt.Printf("OZZIE trackDevice %s %s %s\n", DeviceID, normalizedSN, whenSeen.Format("2006-01-02-15-04-05"))
+
 	// Attempt to update the existing entry if we can find it
 	found := false
 	for i := 0; i < len(seenDevices); i++ {
@@ -87,6 +89,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time, normalizedSN string) {
 		dev.notifiedAsUnseen = false
 		dev.label, _ = SafecastDeviceType(dev.deviceid)
 		seenDevices = append(seenDevices, dev)
+		fmt.Printf("OZZIE added to list (len=%d)\n", len(seenDevices))
 	}
 
 }
@@ -344,6 +347,26 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
 
 }
 
+// Get the number of minutes after which to expire a device
+func deviceWarningAfterMinutes(deviceID uint32) int64 {
+
+	// On 2017-08-14 Ray changed to only warn very rarely, because it was getting
+	// far, far too noisy in the ops channel with lots of devices.
+	return 24*60
+
+	// This is what the behavior was for months while we were debugging
+	deviceType, _ := SafecastDeviceType(deviceID)
+	switch deviceType {
+	case "pointcast":
+		fallthrough
+	case "safecast-air":
+		return 20
+	}
+
+	return 90
+
+}
+
 // Get a summary of devices that are older than this many minutes ago
 func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist string, fOffline bool) {
 
@@ -470,25 +493,5 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 
 	// Send it to Slack
 	sendToSafecastOps(s, SlackMsgReply)
-
-}
-
-// Get the number of minutes after which to expire a device
-func deviceWarningAfterMinutes(deviceID uint32) int64 {
-
-	// On 2017-08-14 Ray changed to only warn very rarely, because it was getting
-	// far, far too noisy in the ops channel with lots of devices.
-	return 24*60
-
-	// This is what the behavior was for months while we were debugging
-	deviceType, _ := SafecastDeviceType(deviceID)
-	switch deviceType {
-	case "pointcast":
-		fallthrough
-	case "safecast-air":
-		return 20
-	}
-
-	return 90
 
 }
