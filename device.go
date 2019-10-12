@@ -123,7 +123,6 @@ func trackAllDevices() {
 
 				// Track the device
 				if deviceID != 0 || normalizedSN != "" {
-					fmt.Printf("OZZIE TRACKING %d %s\n", deviceID, normalizedSN)
 					trackDevice(deviceID, file.ModTime(), normalizedSN)
 				}
 
@@ -364,10 +363,8 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 	sendExpiredSafecastDevicesToSlack()
 
 	// Next sort the device list
-	fmt.Printf("**** OZZIE seenDevices: %d\n", len(seenDevices))
 	sortedDevices := seenDevices
 	sort.Sort(byDeviceKey(sortedDevices))
-	fmt.Printf("**** OZZIE sortedDevices: %d\n", len(sortedDevices))
 
 	// Finally, sweep over all these devices in sorted order,
 	// generating a single large text string to be sent as a Slack message
@@ -376,7 +373,6 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 
 		// Skip if the online state doesn't match
 		isOffline := sortedDevices[i].minutesAgo > (12 * 60)
-		fmt.Printf("OZZIE ago:%d device %d %s offline? %t\n", sortedDevices[i].minutesAgo, sortedDevices[i].deviceid, sortedDevices[i].normalizedSN, isOffline);
 		if isOffline != fOffline {
 			continue
 		}

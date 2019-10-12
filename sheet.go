@@ -171,7 +171,6 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 			if rec.DeviceID != 0 || rec.SN != "" {
 				sheet = append(sheet, rec)
 				sheetRowsRecognized++
-				fmt.Printf("OZZIE: %v\n", rec);
 			}
 
 		}
@@ -191,7 +190,6 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 			break
 		}
 	}
-	fmt.Printf("OZZIE: looking for %d '%s' found? %t\n%v\n", DeviceID, normalizedSN, deviceIDFound, info);
 
 	// Device not found
 	if !deviceIDFound {
