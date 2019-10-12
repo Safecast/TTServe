@@ -364,8 +364,10 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 	sendExpiredSafecastDevicesToSlack()
 
 	// Next sort the device list
+	fmt.Printf("**** OZZIE seenDevices: %d\n", len(seenDevices))
 	sortedDevices := seenDevices
 	sort.Sort(byDeviceKey(sortedDevices))
+	fmt.Printf("**** OZZIE sortedDevices: %d\n", len(sortedDevices))
 
 	// Finally, sweep over all these devices in sorted order,
 	// generating a single large text string to be sent as a Slack message
