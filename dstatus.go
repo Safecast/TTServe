@@ -800,10 +800,10 @@ func WriteDeviceStatus(sc SafecastData) {
 }
 
 // GetDeviceStatusSummary gets a summary of a device
-func GetDeviceStatusSummary(DeviceID uint32) (label string, Gps string, Summary string) {
+func GetDeviceStatusSummary(DeviceID uint32, normalizedSN string) (label string, Gps string, Summary string) {
 
     // Fetch and format the serial number
-	sn, info := sheetDeviceIDToSN(DeviceID)
+	sn, info := sheetDeviceIDToSN(DeviceID, normalizedSN)
 	if sn != "" {
         u64, err := strconv.ParseUint(sn, 10, 32)
         if err == nil {

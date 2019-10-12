@@ -17,7 +17,8 @@ import (
 
 type sheetInfo struct {
 	DeviceID			uint32			`json:"device,omitempty"`
-	SerialNumber		string			`json:"sn,omitempty"`
+	SN					string			`json:"sn,omitempty"`
+	NormalizedSN		string			`json:"normalized_sn,omitempty"`
 	Custodian			string			`json:"custodian_name,omitempty"`
 	CustodianContact	string			`json:"custodian_contact,omitempty"`
 	Location			string			`json:"location,omitempty"`
@@ -52,12 +53,12 @@ func normalizeSN(sn string) (result string) {
 }
 
 // sheetDeviceIDToSN converts a Safecast device ID to its manufacturing serial number
-func sheetDeviceIDToSN(DeviceID uint32) (sn string, infoStr string) {
-	info, err := sheetDeviceInfo(DeviceID, "")
+func sheetDeviceIDToSN(DeviceID uint32, normalizedSN string) (sn string, infoStr string) {
+	info, err := sheetDeviceInfo(DeviceID, normalizedSN)
 	if err != nil {
 		return "", fmt.Sprintf("%s", err)
 	}
-	sn = info.SerialNumber
+	sn = info.SN
 	if (info.Custodian == "" && info.Location != "") {
 		infoStr = fmt.Sprintf("%s", info.Location)
 	} else if (info.Custodian != "" && info.Location == "") {
@@ -150,7 +151,8 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 						return
 					}
 					if col == colSerialNumber {
-						rec.SerialNumber = normalizeSN(val)
+						rec.SN = val
+						rec.NormalizedSN = normalizeSN(val)
 					} else if col == colDeviceID {
 						u64, err2 := strconv.ParseUint(val, 10, 32)
 						if err2 == nil {
@@ -166,7 +168,7 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 				}
 			}
 
-			if rec.DeviceID != 0 || rec.SerialNumber != "" {
+			if rec.DeviceID != 0 || rec.SN != "" {
 				sheet = append(sheet, rec)
 				sheetRowsRecognized++
 				fmt.Printf("OZZIE: %v\n", rec);
@@ -183,7 +185,7 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 	// Iterate over the rows to find the device
 	deviceIDFound := false;
 	for _, r := range sheet {
-		if r.DeviceID == DeviceID || (r.SerialNumber != "" && r.SerialNumber == normalizedSN) {
+		if r.DeviceID == DeviceID || (r.SN != "" && r.NormalizedSN == normalizedSN) {
 			deviceIDFound = true
 			info = r
 			break

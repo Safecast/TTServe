@@ -17,7 +17,7 @@ func DeviceLogFilename(DeviceID uint32, snDefault string, Extension string) stri
     directory := SafecastDirectory()
     fn := time.Now().UTC().Format("2006-01-")
 	fn += fmt.Sprintf("%d", DeviceID)
-	sn, _ := sheetDeviceIDToSN(DeviceID)
+	sn, _ := sheetDeviceIDToSN(DeviceID, snDefault)
 	// If the sheet doesn't specify anything in the ID field, we use the SN that's passed in
 	if sn != "" {
 		fn += "-" + normalizeSN(sn)

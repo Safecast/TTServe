@@ -228,7 +228,7 @@ func refreshDeviceSummaryLabels() {
 
 	// Sweep over all these devices in sorted order, refreshing label
 	for i := 0; i < len(sortedDevices); i++ {
-		sortedDevices[i].label, _, _ = GetDeviceStatusSummary(sortedDevices[i].deviceid)
+		sortedDevices[i].label, _, _ = GetDeviceStatusSummary(sortedDevices[i].deviceid, sortedDevices[i].normalizedSN)
 	}
 
 }
@@ -419,7 +419,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 		label := sortedDevices[i].label
 		gps := ""
 		summary := ""
-		label, gps, summary = GetDeviceStatusSummary(id)
+		label, gps, summary = GetDeviceStatusSummary(id, sortedDevices[i].normalizedSN)
 		// Refresh cached label
 		sortedDevices[i].label = label
 
@@ -429,7 +429,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 
 		s += fmt.Sprintf("<http://%s%s%d|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, id)
 		info, _ := sheetDeviceInfo(id, sortedDevices[i].normalizedSN)
-		sn := info.SerialNumber
+		sn := info.NormalizedSN
 		if sn != "" {
 			sn = "-"+sn
 		}

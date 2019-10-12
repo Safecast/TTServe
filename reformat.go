@@ -15,7 +15,7 @@ import (
 
 // SafecastDeviceIsSolarcastNano determines if this is a Solarcast Nano
 func SafecastDeviceIsSolarcastNano(deviceid uint32) bool {
-	sn, _ := sheetDeviceIDToSN(deviceid)
+	sn, _ := sheetDeviceIDToSN(deviceid, "")
 	u64, err := strconv.ParseUint(sn, 10, 32)
 	if err == nil {
 		if u64 >= 33000 && u64 < 34000 {
@@ -151,7 +151,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 	sd.DeviceUID = &urn
 
 	// Device Serial Number
-	sn, _ := sheetDeviceIDToSN(v2DeviceID)
+	sn, _ := sheetDeviceIDToSN(v2DeviceID, "")
 	if sn != "" {
         u64, err2 := strconv.ParseUint(sn, 10, 32)
         if err2 == nil {
@@ -396,7 +396,7 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	}
 
 	// Solarcast.  Return S/N as V1 device ID
-	id, _ := sheetDeviceIDToSN(*sd.DeviceID)
+	id, _ := sheetDeviceIDToSN(*sd.DeviceID, "")
 	if id == "" {
 		return
 	}

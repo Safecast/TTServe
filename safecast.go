@@ -72,7 +72,7 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
 	sd.DeviceUID = &urn
 
 	// Generate a Serial Number
-	sn, _ := sheetDeviceIDToSN(did)
+	sn, _ := sheetDeviceIDToSN(did, "")
 	if sn != "" {
         u64, err2 := strconv.ParseUint(sn, 10, 32)
         if err2 == nil {
