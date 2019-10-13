@@ -22,7 +22,9 @@ func DeviceLogFilename(DeviceID uint32, snDefault string, Extension string) stri
 	if sn != "" {
 		fn += "-" + normalizeSN(sn)
 	} else {
-		fn += "-" + normalizeSN(snDefault)
+		if snDefault != "" {
+			fn += "-" + normalizeSN(snDefault)
+		}
 	}
     return directory + TTDeviceLogPath + "/" + fn + Extension
 }
