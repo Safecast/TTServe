@@ -200,7 +200,11 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 		if (DeviceID < 1048576) {
 			info.DeviceID = DeviceID
 		} else {
-			err = fmt.Errorf("not found in Tracker Sheet")
+			if normalizedSN != "" {
+				err = fmt.Errorf("%s not found in Tracker Sheet", normalizedSN)
+			} else {
+				err = fmt.Errorf("not found in Tracker Sheet")
+			}
 			return
 		}
 
