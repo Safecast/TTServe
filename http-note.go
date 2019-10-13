@@ -146,10 +146,13 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 	sd.DeviceUID = &deviceURN
 	sd.DeviceID = &deviceID
 
-	// Serial number
-	if e.DeviceSN != "" {
-		sd.DeviceSN = &e.DeviceSN
+	// Serial number is REQUIRED for anything passed through from notehub
+	if e.DeviceSN == "" {
+		err = fmt.Errorf("note: device has no serial number")
+		return
 	}
+	sd.DeviceSN = &e.DeviceSN
+
 
 	// Source, for accountability
 	sd.Source = &e.App
@@ -195,7 +198,7 @@ func noteToSD(e Event, transport string) (sd SafecastData, err error) {
 
 	// If there's no body, bail
 	if e.Body == nil {
-		err = fmt.Errorf("no sensor data")
+		err = fmt.Errorf("note: no recognizable sensor data")
 		return
 	}
 	var sensorJSON []byte
