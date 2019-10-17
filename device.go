@@ -476,7 +476,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 		}
 
 		if summary != "" {
-			s += " ( "
+			s += " ("
 			if summary != "" {
 				s += summary
 			}

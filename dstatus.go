@@ -825,61 +825,72 @@ func GetDeviceStatusSummary(DeviceID uint32, normalizedSN string) (label string,
     }
 
     // Build the summary from the value
+	needSpace := false
     if value.Bat != nil && value.Bat.Voltage != nil {
-        s += fmt.Sprintf("%.1fv ", *value.Bat.Voltage)
+		needSpace = true
+        s += fmt.Sprintf("%.1fv", *value.Bat.Voltage)
     }
 
     if value.Lnd != nil {
-        didlnd := false
+        rad := ""
         if value.Lnd.U7318 != nil {
-            s += fmt.Sprintf("%.0f", *value.Lnd.U7318)
-            didlnd = true
+            rad += fmt.Sprintf("%.0f", *value.Lnd.U7318)
         }
         if value.Lnd.C7318 != nil {
-            if didlnd {
-                s += "|"
+            if rad != "" {
+                rad += "|"
             }
-            s += fmt.Sprintf("%.0f", *value.Lnd.C7318)
-            didlnd = true
+            rad += fmt.Sprintf("%.0f", *value.Lnd.C7318)
         }
         if value.Lnd.EC7128 != nil {
-            if didlnd {
-                s += "|"
+            if rad != "" {
+                rad += "|"
             }
-            s += fmt.Sprintf("%.0f", *value.Lnd.EC7128)
-            didlnd = true
+            rad += fmt.Sprintf("%.0f", *value.Lnd.EC7128)
         }
         if value.Lnd.U712 != nil {
-            if didlnd {
-                s += "|"
+            if rad != "" {
+                rad += "|"
             }
-            s += fmt.Sprintf("%.0f", *value.Lnd.U712)
-            didlnd = true
+            rad += fmt.Sprintf("%.0f", *value.Lnd.U712)
         }
         if value.Lnd.W78017 != nil {
-            if didlnd {
-                s += "|"
+            if rad != "" {
+                rad += "|"
             }
-            s += fmt.Sprintf("%.0f", *value.Lnd.W78017)
-            didlnd = true
+            rad += fmt.Sprintf("%.0f", *value.Lnd.W78017)
         }
-        if didlnd {
-            s += "cpm "
+        if rad != "" {
+			if needSpace {
+				s += " "
+				needSpace = false
+			}
+            s += rad + "cpm"
+			needSpace = true
         }
     }
+	air := ""
     if value.Opc != nil {
         if value.Opc.Pm01_0 != nil && value.Opc.Pm02_5 != nil && value.Opc.Pm10_0 != nil {
-            s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3", *value.Opc.Pm01_0, *value.Opc.Pm02_5, *value.Opc.Pm10_0)
+            air += fmt.Sprintf("%.1f|%.1f|%.1fug/m3", *value.Opc.Pm01_0, *value.Opc.Pm02_5, *value.Opc.Pm10_0)
         }
     } else if value.Pms != nil {
         if value.Pms.Pm01_0 != nil && value.Pms.Pm02_5 != nil && value.Pms.Pm10_0 != nil {
-            s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3", *value.Pms.Pm01_0, *value.Pms.Pm02_5, *value.Pms.Pm10_0)
+            air += fmt.Sprintf("%.1f|%.1f|%.1fug/m3", *value.Pms.Pm01_0, *value.Pms.Pm02_5, *value.Pms.Pm10_0)
         }
     } else if value.Pms2 != nil {
         if value.Pms2.Pm01_0 != nil && value.Pms2.Pm02_5 != nil && value.Pms2.Pm10_0 != nil {
-            s += fmt.Sprintf("%.1f|%.1f|%.1fug/m3", *value.Pms2.Pm01_0, *value.Pms2.Pm02_5, *value.Pms2.Pm10_0)
+            air += fmt.Sprintf("%.1f|%.1f|%.1fug/m3", *value.Pms2.Pm01_0, *value.Pms2.Pm02_5, *value.Pms2.Pm10_0)
         }
     }
+        if air != "" {
+			if needSpace {
+				s += " "
+				needSpace = false
+			}
+            s += air
+			needSpace = true
+        }
 
     // Done
     return
