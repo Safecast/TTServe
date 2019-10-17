@@ -800,7 +800,7 @@ func WriteDeviceStatus(sc SafecastData) {
 }
 
 // GetDeviceStatusSummary gets a summary of a device
-func GetDeviceStatusSummary(DeviceID uint32, normalizedSN string) (label string, Gps string, Summary string) {
+func GetDeviceStatusSummary(DeviceID uint32, normalizedSN string) (label string, gps string, Lat float64, Lon float64, s string) {
 
     // Fetch and format the serial number
 	sn, info := sheetDeviceIDToSN(DeviceID, normalizedSN)
@@ -818,14 +818,13 @@ func GetDeviceStatusSummary(DeviceID uint32, normalizedSN string) (label string,
     // Read the "last known interesting data value" from the status file, which might include GPS
     _, _, value := ReadDeviceStatus(DeviceID)
 
-    gps := ""
     if value.Loc != nil && value.Loc.Lat != nil && value.Loc.Lon != nil {
+		Lat = *value.Loc.Lat
+		Lon = *value.Loc.Lon
         gps = fmt.Sprintf("<http://maps.google.com/maps?z=12&t=m&q=loc:%f+%f|gps>", *value.Loc.Lat, *value.Loc.Lon)
     }
 
     // Build the summary from the value
-    s := ""
-
     if value.Bat != nil && value.Bat.Voltage != nil {
         s += fmt.Sprintf("%.1fv ", *value.Bat.Voltage)
     }
@@ -883,7 +882,7 @@ func GetDeviceStatusSummary(DeviceID uint32, normalizedSN string) (label string,
     }
 
     // Done
-    return label, gps, s
+    return
 
 }
 

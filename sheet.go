@@ -24,6 +24,9 @@ type sheetInfo struct {
 	Location			string			`json:"location,omitempty"`
 	// Info that is not contained in spreadsheet, but which is needed externally
 	LastSeen			string			`json:"last_seen,omitempty"`
+	LastSeenLat			float64			`json:"last_lat,omitempty"`
+	LastSeenLon			float64			`json:"last_lon,omitempty"`
+	LastSeenSummary		string			`json:"last_values,omitempty"`
 }
 var sheet []sheetInfo
 
