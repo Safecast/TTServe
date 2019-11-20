@@ -22,6 +22,7 @@ type sheetInfo struct {
 	Custodian			string			`json:"custodian_name,omitempty"`
 	CustodianContact	string			`json:"custodian_contact,omitempty"`
 	Location			string			`json:"location,omitempty"`
+	Dashboard			string			`json:"dashboard,omitempty"`
 	// Info that is not contained in spreadsheet, but which is needed externally
 	LastSeen			string			`json:"last_seen,omitempty"`
 	LastSeenLat			float64			`json:"last_lat,omitempty"`
@@ -94,6 +95,7 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 		colCustodian := -1
 		colCustodianContact := -1
 		colLocation := -1
+		colDashboard := -1
 
 		// Reload
 		rsp, err2 := http.Get(sheetsSolarcastTracker)
@@ -131,6 +133,8 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 						colCustodianContact = col
 					case "Location":
 						colLocation = col
+					case "Dashboard":
+						colDashboard = col
 					}
 				} else {
 					if (colSerialNumber == -1) {
@@ -163,6 +167,8 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 						}
 					} else if col == colCustodian {
 						rec.Custodian = val
+					} else if col == colDashboard {
+						rec.Dashboard = val
 					} else if col == colCustodianContact {
 						rec.CustodianContact = val
 					} else if col == colLocation {
