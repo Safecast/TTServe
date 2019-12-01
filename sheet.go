@@ -28,6 +28,7 @@ type sheetInfo struct {
 	LastSeenLat			float64			`json:"last_lat,omitempty"`
 	LastSeenLon			float64			`json:"last_lon,omitempty"`
 	LastSeenSummary		string			`json:"last_values,omitempty"`
+	DeviceURN			string			`json:"device_urn,omitempty"`
 }
 var sheet []sheetInfo
 

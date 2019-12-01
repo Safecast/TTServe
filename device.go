@@ -16,6 +16,7 @@ import (
 
 // Describes every device that has sent us a message
 type seenDevice struct {
+	deviceurn			string
 	deviceid			uint32
 	normalizedSN		string
 	label				string
@@ -186,7 +187,7 @@ func devicesSeenInfo() (allInfo []sheetInfo) {
 		info, err := sheetDeviceInfo(seenDevices[i].deviceid, seenDevices[i].normalizedSN)
 		if err == nil {
 			info.LastSeen = seenDevices[i].seen.UTC().Format("2006-01-02T15:04:05Z")
-			_, _, info.LastSeenLat, info.LastSeenLon, info.LastSeenSummary = GetDeviceStatusSummary(seenDevices[i].deviceid, seenDevices[i].normalizedSN)
+			info.DeviceURN, _, _, info.LastSeenLat, info.LastSeenLon, info.LastSeenSummary = GetDeviceStatusSummary(seenDevices[i].deviceid, seenDevices[i].normalizedSN)
 
 			allInfo = append(allInfo, info)
 		}
@@ -234,7 +235,7 @@ func refreshDeviceSummaryLabels() {
 
 	// Sweep over all these devices in sorted order, refreshing label
 	for i := 0; i < len(sortedDevices); i++ {
-		sortedDevices[i].label, _, _, _, _ = GetDeviceStatusSummary(sortedDevices[i].deviceid, sortedDevices[i].normalizedSN)
+		_, sortedDevices[i].label, _, _, _, _ = GetDeviceStatusSummary(sortedDevices[i].deviceid, sortedDevices[i].normalizedSN)
 	}
 
 }
@@ -441,7 +442,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 		label := sortedDevices[i].label
 		gps := ""
 		summary := ""
-		label, gps, _, _, summary = GetDeviceStatusSummary(id, sortedDevices[i].normalizedSN)
+		_, label, gps, _, _, summary = GetDeviceStatusSummary(id, sortedDevices[i].normalizedSN)
 		// Refresh cached label
 		sortedDevices[i].label = label
 
