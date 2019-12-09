@@ -162,6 +162,8 @@ const TTServerTopicRedirect1 string = "/scripts/"
 const TTServerTopicRedirect2 string = "/"
 // TTServerTopicNote (here for golint)
 const TTServerTopicNote string = "/note"
+// TTServerTopicNoteTest (here for golint)
+const TTServerTopicNoteTest string = "/notetest"
 // TTServerTopicNotecard (here for golint)
 const TTServerTopicNotecard string = "/notecard/"
 

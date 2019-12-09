@@ -60,8 +60,18 @@ type sensorTRACK struct {
 	Bearing float64		`json:"bearing,omitempty"`
 }
 	
-// Handle inbound HTTP requests from individual data Notes
+// Handle inbound HTTP requests from individual data Notes, in test mode
+func inboundWebNoteHandlerTest(rw http.ResponseWriter, req *http.Request) {
+	noteHandler(rw, req, true)
+}
+	
+// Handle inbound HTTP requests from individual data Notes, in production mode
 func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
+	noteHandler(rw, req, false)
+}
+	
+// Handle inbound HTTP requests from individual data Notes
+func noteHandler(rw http.ResponseWriter, req *http.Request, testMode bool) {
     var body []byte
     var err error
 	
@@ -99,7 +109,7 @@ func inboundWebNoteHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Convert to Safecast data, and exit if failure
-    sd, err := noteToSD(e, transportStr)
+    sd, err := noteToSD(e, transportStr, testMode)
     if err != nil {
 		fmt.Printf("NOTE ignored: %s\n%s\n", err, body);
 		return
@@ -133,10 +143,10 @@ func notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID string) (safecastDevi
 }
 
 // ReformatFromNote reformats to our standard normalized data format
-func noteToSD(e Event, transport string) (sd SafecastData, err error) {
+func noteToSD(e Event, transport string, testMode bool) (sd SafecastData, err error) {
 
-    // Mark it as a test measurement
-	isTest := true
+    // Mark it as to whether or not it is a test measurement
+	isTest := testMode
     var dev Dev
     sd.Dev = &dev
     sd.Dev.Test = &isTest
