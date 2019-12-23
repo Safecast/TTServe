@@ -174,8 +174,10 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 	// Optional device contact info, for accountability
 	sd.DeviceContact = e.DeviceContact
 
-	// Optional app source, for accountability
-	sd.Source = e.App
+	// Optional app source, for accountability on every data point
+	if (false) {
+		sd.Source = e.App
+	}
 
 	// When captured on the device
 	if e.When != 0 {
