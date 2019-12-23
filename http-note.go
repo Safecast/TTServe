@@ -14,6 +14,7 @@ import (
 	"net/url"
     "encoding/json"
     "hash/crc32"
+	"github.com/blues/note-go/note"
 )
 
 // Schemas for the different file types
@@ -102,7 +103,7 @@ func noteHandler(rw http.ResponseWriter, req *http.Request, testMode bool) {
 	}
 	
 	// Unmarshal into a notehub Event structure, and exit if badly formatted
-    e := Event{}
+    e := note.Event{}
     err = json.Unmarshal(body, &e)
 	if err != nil {
 		return
@@ -143,7 +144,7 @@ func notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID string) (safecastDevi
 }
 
 // ReformatFromNote reformats to our standard normalized data format
-func noteToSD(e Event, transport string, testMode bool) (sd SafecastData, err error) {
+func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, err error) {
 
     // Mark it as to whether or not it is a test measurement
 	isTest := testMode
@@ -156,16 +157,25 @@ func noteToSD(e Event, transport string, testMode bool) (sd SafecastData, err er
 	sd.DeviceUID = &deviceURN
 	sd.DeviceID = &deviceID
 
-	// Serial number is REQUIRED for anything passed through from notehub
+	// Serial number is REQUIRED of anything which passed through from notehub
 	if e.DeviceSN == "" {
 		err = fmt.Errorf("note: device has no serial number")
 		return
 	}
 	sd.DeviceSN = &e.DeviceSN
 
+	// Product UID is REQUIRED of anything which passed through from notehub
+	if e.ProductUID == "" {
+		err = fmt.Errorf("note: event has no product UID")
+		return
+	}
+	sd.DeviceClass = &e.ProductUID
 
-	// Source, for accountability
-	sd.Source = &e.App
+	// Optional device contact info, for accountability
+	sd.DeviceContact = e.DeviceContact
+
+	// Optional app source, for accountability
+	sd.Source = e.App
 
 	// When captured on the device
 	if e.When != 0 {
