@@ -150,6 +150,9 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 	urn := fmt.Sprintf("%s:%d", devicetype, v2DeviceID)
 	sd.DeviceUID = &urn
 
+	// Generate the device class
+	sd.DeviceClass = &devicetype
+
 	// Device Serial Number
 	sn, _ := sheetDeviceIDToSN(v2DeviceID, "")
 	if sn != "" {
