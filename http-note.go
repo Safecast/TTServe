@@ -51,6 +51,9 @@ type sensorAIR struct {
 	Count10_00 uint32	`json:"c10_00,omitempty"`
     CountSecs uint32	`json:"csecs,omitempty"`
     Samples uint32		`json:"csamples,omitempty"`
+    Model string		`json:"sensor,omitempty"`
+	CardVoltage *float64 `json:"voltage,omitempty"`
+    CardTemp *float64 	 `json:"temp,omitempty"`
 }
 type sensorTRACK struct {
 	Lat float64			`json:"lat,omitempty"`
@@ -231,6 +234,37 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 
 	// Decompose the body with a per-notefile schema
 	switch e.NotefileID {
+
+	case "_air.qo":
+		s := sensorAIR{}
+	    err = json.Unmarshal(sensorJSON, &s)
+		if err != nil {
+			return
+		}
+	    var pms Pms
+		pms.Pm01_0 = &s.Pm01_0
+		pms.Pm02_5 = &s.Pm02_5
+		pms.Pm10_0 = &s.Pm10_0
+		pms.Count00_30 = &s.Count00_30
+		pms.Count00_50 = &s.Count00_50
+		pms.Count01_00 = &s.Count01_00
+		pms.Count02_50 = &s.Count02_50
+		pms.Count05_00 = &s.Count05_00
+		pms.Count10_00 = &s.Count10_00
+		pms.CountSecs = &s.CountSecs
+		pms.Samples = &s.Samples
+        pms.Model = &s.Model
+		sd.Pms = &pms
+		if s.CardVoltage != nil {
+		    var bat Bat
+			bat.Voltage = s.CardVoltage
+		    sd.Bat = &bat
+		}
+		if s.CardTemp != nil {
+		    var env Env
+			env.Temp = s.CardTemp
+		    sd.Env = &env
+		}
 
 	case "_track.qo":
 	    s := sensorTRACKER{}

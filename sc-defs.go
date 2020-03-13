@@ -76,6 +76,8 @@ type Pms struct {
     CountSecs *uint32		`json:"pms_csecs,omitempty"`
     Samples *uint32			`json:"pms_csamples,omitempty"`
     Model *string			`json:"pms_model,omitempty"`
+	CardVoltage *float64	`json:"voltage,omitempty"`
+    CardTemp *float64		`json:"temp,omitempty"`
 }
 
 // Pms2 is for an auxiliary Plantower Air Sensor Data

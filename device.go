@@ -16,7 +16,7 @@ import (
 
 // Describes every device that has sent us a message
 type seenDevice struct {
-	deviceurn			string
+//	deviceurn			string
 	deviceid			uint32
 	normalizedSN		string
 	label				string
