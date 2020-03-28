@@ -16,7 +16,7 @@ import (
 
 // Describes every device that has sent us a message
 type seenDevice struct {
-//	deviceurn			string
+	//	deviceurn			string
 	deviceid			uint32
 	normalizedSN		string
 	label				string
@@ -140,33 +140,38 @@ func trackAllDevices() {
 // Send a hello to devices that have never reported full stats
 func sendHelloToNewDevices() {
 
-	// Make sure the list of devices is up to date
-	trackAllDevices()
+	// 2020-03-28 (Ray) ommands are a historical artifact of thenoriginal Solarcast firmware and we are
+	// removing them because newer devices do not support a reverse channel and we are simplifying the design
+	if (false) {
 
-	// Sweep through all devices that we've seen
-	for i := 0; i < len(seenDevices); i++ {
+		// Make sure the list of devices is up to date
+		trackAllDevices()
 
-		// Get the device ID
-		deviceID := seenDevices[i].deviceid
+		// Sweep through all devices that we've seen
+		for i := 0; i < len(seenDevices); i++ {
 
-		// Only do this for Safecast devices, as opposed to pointcast or air
-		if deviceID > 1048576 {
+			// Get the device ID
+			deviceID := seenDevices[i].deviceid
 
-			// Read the current value, or a blank value structure if it's blank
-			_, _, value := ReadDeviceStatus(deviceID)
+			// Only do this for Safecast devices, as opposed to pointcast or air
+			if deviceID > 1048576 {
 
-			// Check to see if it has a required stats field
-			if value.Dev == nil || value.Dev.AppVersion == nil {
+				// Read the current value, or a blank value structure if it's blank
+				_, _, value := ReadDeviceStatus(deviceID)
 
-				// See if there's a pending command already waiting for this device
-				isValid, _ := getCommand(deviceID)
-				if !isValid {
+				// Check to see if it has a required stats field
+				if value.Dev == nil || value.Dev.AppVersion == nil {
 
-					sendToSafecastOps(fmt.Sprintf("** NOTE ** Sending hello to newly-detected device %d", deviceID), SlackMsgUnsolicitedOps)
-					sendCommand("New device detected", deviceID, "hello")
+					// See if there's a pending command already waiting for this device
+					isValid, _ := getCommand(deviceID)
+					if !isValid {
+
+						sendToSafecastOps(fmt.Sprintf("** NOTE ** Sending hello to newly-detected device %d", deviceID), SlackMsgUnsolicitedOps)
+						sendCommand("New device detected", deviceID, "hello")
+
+					}
 
 				}
-
 			}
 		}
 	}
