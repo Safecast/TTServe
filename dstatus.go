@@ -111,13 +111,10 @@ func WriteDeviceStatus(sc SafecastData) {
     // Read the current value, or a blank value structure if it's blank.
     // If the value isn't available it's because of a nonrecoverable  error.
     // If it was reset, try waiting around a bit until it is fixed.
-    for i:=0; i<5; i++ {
+    for i:=0; i<4; i++ {
         isAvail, isReset, rvalue := ReadDeviceStatus(uint32(*sc.DeviceID))
         value = rvalue
-        if !isAvail {
-            return
-        }
-        if !isReset {
+        if isAvail && !isReset {
             break
         }
         time.Sleep(time.Duration(Random(1, 6)) * time.Second)
