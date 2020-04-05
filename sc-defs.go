@@ -43,6 +43,7 @@ type Bat struct {
 	Voltage *float64		`json:"bat_voltage,omitempty"`
     Current *float64		`json:"bat_current,omitempty"`
 	Charge *float64			`json:"bat_charge,omitempty"`
+	Charging *bool			`json:"bat_charging,omitempty"`
 }
 
 // Lnd is support for LND Geiger Tubes

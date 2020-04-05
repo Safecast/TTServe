@@ -53,7 +53,8 @@ type sensorAIR struct {
     Samples uint32		`json:"csamples,omitempty"`
     Model string		`json:"sensor,omitempty"`
 	CardVoltage *float64 `json:"voltage,omitempty"`
-    CardTemp *float64 	 `json:"temp,omitempty"`
+    CardTemp *float64 	`json:"temp,omitempty"`
+    Charging *bool		`json:"charging,omitempty"`
 }
 type sensorTRACK struct {
 	Lat float64			`json:"lat,omitempty"`
@@ -258,6 +259,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 		if s.CardVoltage != nil {
 		    var bat Bat
 			bat.Voltage = s.CardVoltage
+			bat.Charging = s.Charging
 		    sd.Bat = &bat
 		}
 		if s.CardTemp != nil {
