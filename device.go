@@ -7,29 +7,31 @@ package main
 
 import (
 	"fmt"
-	"sort"
-	"time"
 	"io/ioutil"
-	"strings"
+	"sort"
 	"strconv"
+	"strings"
+	"time"
 )
 
 // Describes every device that has sent us a message
 type seenDevice struct {
 	//	deviceurn			string
-	deviceid			uint32
-	normalizedSN		string
-	label				string
-	seen				time.Time
-	everRecentlySeen	bool
-	notifiedAsUnseen	bool
-	minutesAgo			int64
+	deviceid         uint32
+	normalizedSN     string
+	label            string
+	seen             time.Time
+	everRecentlySeen bool
+	notifiedAsUnseen bool
+	minutesAgo       int64
 }
+
 var seenDevices []seenDevice
 
 // Class used to sort seen devices
 type byDeviceKey []seenDevice
-func (a byDeviceKey) Len() int		{ return len(a) }
+
+func (a byDeviceKey) Len() int      { return len(a) }
 func (a byDeviceKey) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a byDeviceKey) Less(i, j int) bool {
 	// Primary:
@@ -61,7 +63,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time, normalizedSN string) {
 		if dev.deviceid == seenDevices[i].deviceid || (dev.normalizedSN != "" && dev.normalizedSN == seenDevices[i].normalizedSN) {
 			// If the SN hasn't yet been filled in, do it.  This is because legacy file formats that may
 			// still exist in the directory are missing the SN, and they may just happen to come first.
-			if (seenDevices[i].normalizedSN == "" && dev.normalizedSN != "") {
+			if seenDevices[i].normalizedSN == "" && dev.normalizedSN != "" {
 				seenDevices[i].normalizedSN = dev.normalizedSN
 			}
 			// Only pay attention to things that have truly recently come or gone
@@ -74,7 +76,7 @@ func trackDevice(DeviceID uint32, whenSeen time.Time, normalizedSN string) {
 					sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %d has returned after %s", seenDevices[i].deviceid, message), SlackMsgUnsolicitedOps)
 				}
 				// Mark as having been seen on the latest date of any file having that time
-				seenDevices[i].notifiedAsUnseen = false;
+				seenDevices[i].notifiedAsUnseen = false
 			}
 			// Always track the most recent seen date
 			if seenDevices[i].seen.Before(whenSeen) {
@@ -142,7 +144,7 @@ func sendHelloToNewDevices() {
 
 	// 2020-03-28 (Ray) ommands are a historical artifact of thenoriginal Solarcast firmware and we are
 	// removing them because newer devices do not support a reverse channel and we are simplifying the design
-	if (false) {
+	if false {
 
 		// Make sure the list of devices is up to date
 		trackAllDevices()
@@ -313,7 +315,7 @@ func sendSafecastDeviceCommand(user string, devicelist string, command string) {
 			devicetype, _ := SafecastDeviceType(id)
 			switch devicetype {
 
-				// Don't send to devices that we cannot
+			// Don't send to devices that we cannot
 			case "pointcast":
 				fallthrough
 			case "safecast-air":
@@ -362,7 +364,7 @@ func deviceWarningAfterMinutes(deviceID uint32) int64 {
 
 	// On 2017-08-14 Ray changed to only warn very rarely, because it was getting
 	// far, far too noisy in the ops channel with lots of devices.
-	return 24*60
+	return 24 * 60
 
 	// This is what the behavior was for months while we were debugging
 	deviceType, _ := SafecastDeviceType(deviceID)
@@ -455,11 +457,12 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 
 		s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicDeviceStatus, id, id)
 
-		s += fmt.Sprintf("<http://%s%s%d|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, id)
+		//		s += fmt.Sprintf("<http://%s%s%d|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, id)
+		s += fmt.Sprintf("<http://%s%s%d|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, sortedDevices[i].normalizedSN)
 		info, _ := sheetDeviceInfo(id, sortedDevices[i].normalizedSN)
 		sn := info.NormalizedSN
 		if sn != "" {
-			sn = "-"+sn
+			sn = "-" + sn
 		}
 		s += fmt.Sprintf("<http://%s%s%s%d%s.json|log> ", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), id, sn)
 		if gps != "" {
