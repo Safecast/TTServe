@@ -454,16 +454,16 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, devicelist str
 		sortedDevices[i].label = label
 
 		words := WordsFromNumber(id)
-
-		s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicDeviceStatus, id, id)
-
-		//		s += fmt.Sprintf("<http://%s%s%d|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, id)
-		s += fmt.Sprintf("<http://%s%s%s|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, sortedDevices[i].normalizedSN)
 		info, _ := sheetDeviceInfo(id, sortedDevices[i].normalizedSN)
 		sn := info.NormalizedSN
 		if sn != "" {
 			sn = "-" + sn
 		}
+
+		s += fmt.Sprintf("<http://%s%s%d|%010d> ", TTServerHTTPAddress, TTServerTopicDeviceStatus, id, id)
+
+		//		s += fmt.Sprintf("<http://%s%s%d|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, id)
+		s += fmt.Sprintf("<http://%s%s%s|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, sn)
 		s += fmt.Sprintf("<http://%s%s%s%d%s.json|log> ", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), id, sn)
 		if gps != "" {
 			s += " " + gps
