@@ -410,7 +410,6 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	if strings.Contains(id, "#") {
 		tmp := strings.Split(id, "#")
 		id = tmp[len(tmp)-1]
-		fmt.Printf("OZZIE: %s (%v)\n", id, tmp)
 	}
 	u64, err2 := strconv.ParseUint(id, 10, 32)
 	if err2 != nil || u64 == 0 {
