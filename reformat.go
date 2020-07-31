@@ -7,10 +7,11 @@ package main
 
 import (
 	"fmt"
-	"time"
-	"strings"
 	"strconv"
-	"github.com/google/open-location-code/go"
+	"strings"
+	"time"
+
+	olc "github.com/google/open-location-code/go"
 )
 
 // SafecastDeviceIsSolarcastNano determines if this is a Solarcast Nano
@@ -65,12 +66,12 @@ func SafecastV1DeviceType(deviceid uint32) (devicetype string, devicename string
 
 	// For standard V1 pointcast numbering space
 	if deviceid >= 100000 && deviceid <= 299999 {
-		return "pointcast", "Pointcast", deviceid/10
+		return "pointcast", "Pointcast", deviceid / 10
 	}
 
 	// Exception for pointcast device 100x
 	if deviceid >= 1000 && deviceid <= 1999 {
-		return "pointcast", "Pointcast", deviceid/10
+		return "pointcast", "Pointcast", deviceid / 10
 	}
 
 	// Air
@@ -139,9 +140,9 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 		tubeType = "U7318"
 	} else if devicetype == "geigiecast" {
 		tubeType = "U7318"
-	} else if devicetype == "pointcast" && v1DeviceID % 10 == 1 {
+	} else if devicetype == "pointcast" && v1DeviceID%10 == 1 {
 		tubeType = "U7318"
-	} else if devicetype == "pointcast" && v1DeviceID % 10 == 2 {
+	} else if devicetype == "pointcast" && v1DeviceID%10 == 2 {
 		tubeType = "EC7128"
 	}
 
@@ -156,11 +157,13 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 	// Device Serial Number
 	sn, _ := sheetDeviceIDToSN(v2DeviceID, "")
 	if sn != "" {
-        u64, err2 := strconv.ParseUint(sn, 10, 32)
-        if err2 == nil {
+		u64, err2 := strconv.ParseUint(sn, 10, 32)
+		if err2 == nil {
 			sn = fmt.Sprintf("#%d", u64)
 		}
-		snstr := fmt.Sprintf("%s %s", devicename, sn)
+		//		snstr := fmt.Sprintf("%s %s", devicename, sn)		// 2020-07-31 rob added device type to SN
+		_ = devicename
+		snstr := sn
 		sd.DeviceSN = &snstr
 	}
 
@@ -196,7 +199,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 	// Reverse-engineer Unit/Value to yield the good stuff
 	if v1.Unit != nil && v1.Value != nil {
 
-		switch (strings.ToLower(*v1.Unit)) {
+		switch strings.ToLower(*v1.Unit) {
 
 		case "pm1":
 			var opc Opc
@@ -275,7 +278,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 			fields := strings.Split(status, ",")
 			for v := range fields {
 				field := strings.Split(fields[v], ":")
-				switch (field[0]) {
+				switch field[0] {
 				case "Battery Voltage":
 					f64, _ := strconv.ParseFloat(field[1], 64)
 					if f64 != 0 {
@@ -403,34 +406,34 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	if id == "" {
 		return
 	}
-    u64, err2 := strconv.ParseUint(id, 10, 32)
-    if err2 != nil || u64 == 0 {
+	u64, err2 := strconv.ParseUint(id, 10, 32)
+	if err2 != nil || u64 == 0 {
 		return
 	}
-	id1 := fmt.Sprintf("%d", u64*10 + 1)
+	id1 := fmt.Sprintf("%d", u64*10+1)
 	sd1.DeviceID = &id1
-	id2 := fmt.Sprintf("%d", u64*10 + 2)
+	id2 := fmt.Sprintf("%d", u64*10+2)
 	sd2.DeviceID = &id2
-	id9 := fmt.Sprintf("%d", u64*10 + 9)
+	id9 := fmt.Sprintf("%d", u64*10+9)
 	sd9.DeviceID = &id9
 
 	// Generate the first geiger tube value
-	if (sd.Lnd != nil) {
-		if (sd.U7318 != nil) {
+	if sd.Lnd != nil {
+		if sd.U7318 != nil {
 			value := fmt.Sprintf("%d", int(*sd.Lnd.U7318))
 			sd1.Value = &value
 			unit := "cpm"
 			sd1.Unit = &unit
 			deviceType := "lnd_7318u"
 			sd1.DeviceTypeID = &deviceType
-		} else if (sd.U712 != nil) {
+		} else if sd.U712 != nil {
 			value := fmt.Sprintf("%d", int(*sd.Lnd.U712))
 			sd1.Value = &value
 			unit := "cpm"
 			sd1.Unit = &unit
 			deviceType := "lnd_712u"
 			sd1.DeviceTypeID = &deviceType
-		} else if (sd.W78017 != nil) {
+		} else if sd.W78017 != nil {
 			value := fmt.Sprintf("%d", int(*sd.Lnd.W78017))
 			sd1.Value = &value
 			unit := "cpm"
@@ -445,15 +448,15 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	}
 
 	// Generate the second geiger tube value
-	if (sd.Lnd != nil) {
-		if (sd.C7318 != nil) {
+	if sd.Lnd != nil {
+		if sd.C7318 != nil {
 			value := fmt.Sprintf("%d", int(*sd.Lnd.C7318))
 			sd2.Value = &value
 			unit := "cpm"
 			sd2.Unit = &unit
 			deviceType := "lnd_7318c"
 			sd2.DeviceTypeID = &deviceType
-		} else if (sd.EC7128 != nil) {
+		} else if sd.EC7128 != nil {
 			value := fmt.Sprintf("%d", int(*sd.Lnd.EC7128))
 			sd2.Value = &value
 			unit := "cpm"
@@ -468,13 +471,13 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	}
 
 	// Generate the temp value
-	if (sd.Env != nil && sd.Env.Temp != nil) {
+	if sd.Env != nil && sd.Env.Temp != nil {
 		value := fmt.Sprintf("%.1f", *sd.Env.Temp)
 		sd9.Value = &value
 		unit := "celcius"
 		sd9.Unit = &unit
 		info := fmt.Sprintf("DeviceID:%s,Temperature:%.1f", id, *sd.Env.Temp)
-		if (sd.Bat != nil && sd.Bat.Voltage != nil) {
+		if sd.Bat != nil && sd.Bat.Voltage != nil {
 			info += fmt.Sprintf(",Battery Voltage:%1f", *sd.Bat.Voltage)
 		}
 		sd9.DeviceTypeID = &info
