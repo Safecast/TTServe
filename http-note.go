@@ -171,6 +171,24 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 		dev.Orientation = &e.Orientation
 	}
 
+	// Device temp & voltage
+	if e.Temp != 0.0 {
+		dev.Temp = &e.Temp
+	}
+	if e.Voltage != 0.0 {
+		var bat Bat
+		bat.Voltage = &e.Voltage
+		sd.Bat = &bat
+	}
+
+	// Cell info
+	if e.Rat != "" {
+		dev.Rat = &e.Rat
+	}
+	if e.Bars != 0 {
+		dev.Bars = &e.Bars
+	}
+
 	// Convert to safecast device ID
 	deviceURN, deviceID := notecardDeviceUIDToSafecastDeviceID(e.DeviceUID)
 	sd.DeviceUID = &deviceURN
@@ -252,7 +270,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 	switch e.NotefileID {
 
 	case "_session.qo":
-		err = fmt.Errorf("note: ignoring start-of-session event")
+		// Everything in session has been captured above
 		return
 
 	case "_air.qo":

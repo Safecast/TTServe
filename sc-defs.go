@@ -152,6 +152,8 @@ type Dev struct {
 	Temp                  *float64 `json:"dev_temp,omitempty"`
 	Humid                 *float64 `json:"dev_humid,omitempty"`
 	Press                 *float64 `json:"dev_press,omitempty"`
+	Rat                   *string  `json:"dev_rat,omitempty"`
+	Bars                  *uint32  `json:"dev_bars,omitempty"`
 	ErrorsOpc             *uint32  `json:"dev_err_opc,omitempty"`
 	ErrorsPms             *uint32  `json:"dev_err_pms,omitempty"`
 	ErrorsPms2            *uint32  `json:"dev_err_pms2,omitempty"`
