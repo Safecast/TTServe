@@ -182,9 +182,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 
 	// Device temp & voltage
 	if e.Temp != 0.0 {
-		var env Env
-		env.Temp = &e.Temp
-		sd.Env = &env
+		dev.Temp = &e.Temp
 	}
 	if e.Voltage != 0.0 {
 		var bat Bat
