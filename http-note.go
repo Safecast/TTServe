@@ -22,7 +22,13 @@ import (
 type sensorTRACKER struct {
 	CPM         float64 `json:"cpm,omitempty"`
 	Temperature float64 `json:"temperature,omitempty"`
+	Humidity    float64 `json:"humidity,omitempty"`
+	Pressure    float64 `json:"pressure,omitempty"`
 	Voltage     float64 `json:"voltage,omitempty"`
+	Distance    float64 `json:"distance,omitempty"`
+	Seconds     float64 `json:"seconds,omitempty"`
+	Velocity    float64 `json:"velocity,omitempty"`
+	Bearing     float64 `json:"bearing,omitempty"`
 }
 type sensorBAT struct {
 	Voltage float64 `json:"voltage,omitempty"`
@@ -54,9 +60,12 @@ type sensorAIR struct {
 	Samples    uint32   `json:"csamples,omitempty"`
 	Model      string   `json:"sensor,omitempty"`
 	Voltage    *float64 `json:"voltage,omitempty"`
-	Temp       *float64 `json:"temp,omitempty"`
-	Humid      *float64 `json:"humid,omitempty"`
-	Press      *float64 `json:"press,omitempty"`
+	TempOLD    *float64 `json:"temp,omitempty"`
+	HumidOLD   *float64 `json:"humid,omitempty"`
+	PressOLD   *float64 `json:"press,omitempty"`
+	Temp       *float64 `json:"temperature,omitempty"`
+	Humid      *float64 `json:"humidity,omitempty"`
+	Press      *float64 `json:"pressure,omitempty"`
 	Charging   *bool    `json:"charging,omitempty"`
 	USB        *bool    `json:"usb,omitempty"`
 }
@@ -173,7 +182,9 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 
 	// Device temp & voltage
 	if e.Temp != 0.0 {
-		dev.Temp = &e.Temp
+		var env Env
+		env.Temp = &e.Temp
+		sd.Env = &env
 	}
 	if e.Voltage != 0.0 {
 		var bat Bat
@@ -300,6 +311,13 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 			bat.Line = s.USB
 			sd.Bat = &bat
 		}
+		if s.TempOLD != nil {
+			var env Env
+			env.Temp = s.TempOLD
+			env.Humid = s.HumidOLD
+			env.Press = s.PressOLD
+			sd.Env = &env
+		}
 		if s.Temp != nil {
 			var env Env
 			env.Temp = s.Temp
@@ -319,12 +337,25 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 		sd.Bat = &bat
 		var env Env
 		env.Temp = &s.Temperature
+		if s.Humidity != 0 {
+			env.Humid = &s.Humidity
+		}
+		if s.Pressure != 0 {
+			env.Press = &s.Pressure
+		}
 		sd.Env = &env
 		if s.CPM > 0 {
 			var lnd Lnd
 			lnd.U7318 = &s.CPM
 			sd.Lnd = &lnd
 		}
+		var track Track
+		track.Distance = &s.Distance
+		var secs = uint32(s.Seconds)
+		track.Seconds = &secs
+		track.Velocity = &s.Velocity
+		track.Bearing = &s.Bearing
+		sd.Track = &track
 
 	case "bat.qo":
 		s := sensorBAT{}
