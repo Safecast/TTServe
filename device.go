@@ -256,9 +256,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, fOffline bool)
 			s += "gps "
 		}
 
-		if sortedDevices[i].minutesAgo == 0 {
-			s += fmt.Sprintf("just now")
-		} else {
+		if sortedDevices[i].minutesAgo != 0 {
 			s += fmt.Sprintf("%s ago", AgoMinutes(uint32(sortedDevices[i].minutesAgo)))
 		}
 
