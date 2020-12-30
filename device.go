@@ -208,6 +208,9 @@ func deviceWarningAfterMinutes(deviceUID string) int64 {
 // Get a summary of devices that are older than this many minutes ago
 func sendSafecastDeviceSummaryToSlack(user string, header string, fOffline bool) {
 
+	// Update the in-memory list of seen devices
+	trackAllDevices()
+
 	// Force a re-read of the sheet, just to ensure that it reflects the lastest changes
 	sheetInvalidateCache()
 
@@ -248,9 +251,9 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, fOffline bool)
 		s += fmt.Sprintf("<http://%s%s%s|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, id)
 		s += fmt.Sprintf("<http://%s%s%s%s.json|log> ", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01"+DeviceLogSep()), DeviceUIDFilename(id))
 		if gps != "" {
-			s += " " + gps
+			s += gps + " "
 		} else {
-			s += " gps"
+			s += "gps "
 		}
 
 		if sortedDevices[i].minutesAgo == 0 {
