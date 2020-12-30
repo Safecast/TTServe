@@ -244,7 +244,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, fOffline bool)
 		// Refresh cached label
 		sortedDevices[i].label = label
 
-		s += fmt.Sprintf("<http://%s%s%s|%010d> ", TTServerHTTPAddress, TTServerTopicDeviceStatus, id, id)
+		s += fmt.Sprintf("<http://%s%s%s|%s> ", TTServerHTTPAddress, TTServerTopicDeviceStatus, id, id)
 		s += fmt.Sprintf("<http://%s%s%s|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, id)
 		s += fmt.Sprintf("<http://%s%s%s%s.json|log> ", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01"+DeviceLogSep()), id)
 		if gps != "" {
