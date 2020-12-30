@@ -110,13 +110,19 @@ func trackAllDevices() {
 				Str0 := file.Name()
 				Str1 := strings.Split(Str0, ".")[0]
 				Str2 := strings.Split(Str1, DeviceLogSep())
+				fmt.Printf("Str0(%d): %v\n", len(Str0), Str0)
+				fmt.Printf("Str1(%d): %v\n", len(Str1), Str1)
+				fmt.Printf("Str2(%d): %v\n", len(Str2), Str2)
 				if len(Str2) >= 2 {
 					Str3 := strings.Split(Str2[0], DeviceLogSep())
+					fmt.Printf("Str3(%d): %v\n", len(Str3), Str3)
 					if len(Str3) >= 2 {
 						yr, _ := strconv.ParseUint(Str3[0], 10, 32)
 						mo, _ := strconv.ParseUint(Str3[1], 10, 32)
+						fmt.Printf("yr:%d mo:%d\n", yr, mo)
 						if int(yr) == time.Now().Year() && int(mo) == int(time.Now().Month()) {
 							deviceUID = Str2[1]
+							fmt.Printf("deviceUID:%s\n", deviceUID)
 						}
 					}
 				}
