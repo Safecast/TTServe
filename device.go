@@ -275,6 +275,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, fOffline bool)
 			sendToSafecastOps(s, SlackMsgReply)
 			s = ""
 			numPending = 0
+			time.Sleep(500 * time.Millisecond)
 		}
 
 	}
