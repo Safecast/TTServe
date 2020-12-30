@@ -64,30 +64,23 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
 	// Generate the fields common to all uploads to safecast
 	sd := SafecastData{}
 	did := uint32(msg.GetDeviceId())
-	sd.DeviceID = &did
+	sd.DeviceID = did
 
 	// Add our new device ID field
-	devicetype, devicename := SafecastDeviceType(did)
+	devicetype, _ := SafecastDeviceType(did)
 	if devicetype == "" {
 		devicetype = "safecast"
 	}
-	urn := fmt.Sprintf("%s:%d", devicetype, did)
-	sd.DeviceUID = &urn
-
-	// Generate the device class
-	sd.DeviceClass = &devicetype
+	sd.DeviceUID = fmt.Sprintf("%s:%d", devicetype, did)
+	sd.DeviceClass = devicetype
 
 	// Generate a Serial Number
-	sn, _ := sheetDeviceIDToSN(did, "")
+	sn, _ := sheetDeviceIDToSN(did)
 	if sn != "" {
 		u64, err2 := strconv.ParseUint(sn, 10, 32)
 		if err2 == nil {
-			sn = fmt.Sprintf("#%d", u64)
+			sd.DeviceSN = fmt.Sprintf("#%d", u64)
 		}
-		//		snstr := fmt.Sprintf("%s %s", devicename, sn)		// 2020-07-31 rob added device type to SN
-		_ = devicename
-		snstr := sn
-		sd.DeviceSN = &snstr
 	}
 
 	// CapturedAt

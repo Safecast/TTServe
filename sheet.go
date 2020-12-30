@@ -6,30 +6,29 @@
 package main
 
 import (
-	"fmt"
-	"time"
-	"io"
-	"strings"
-	"strconv"
-	"net/http"
 	"encoding/csv"
+	"fmt"
+	"io"
+	"net/http"
+	"strconv"
+	"time"
 )
 
 type sheetInfo struct {
-	DeviceID			uint32			`json:"device,omitempty"`
-	SN					string			`json:"sn,omitempty"`
-	NormalizedSN		string			`json:"normalized_sn,omitempty"`
-	Custodian			string			`json:"custodian_name,omitempty"`
-	CustodianContact	string			`json:"custodian_contact,omitempty"`
-	Location			string			`json:"location,omitempty"`
-	Dashboard			string			`json:"dashboard,omitempty"`
+	DeviceID         uint32 `json:"device,omitempty"`
+	SN               string `json:"sn,omitempty"`
+	Custodian        string `json:"custodian_name,omitempty"`
+	CustodianContact string `json:"custodian_contact,omitempty"`
+	Location         string `json:"location,omitempty"`
+	Dashboard        string `json:"dashboard,omitempty"`
 	// Info that is not contained in spreadsheet, but which is needed externally
-	LastSeen			string			`json:"last_seen,omitempty"`
-	LastSeenLat			float64			`json:"last_lat,omitempty"`
-	LastSeenLon			float64			`json:"last_lon,omitempty"`
-	LastSeenSummary		string			`json:"last_values,omitempty"`
-	DeviceURN			string			`json:"device_urn,omitempty"`
+	LastSeen        string  `json:"last_seen,omitempty"`
+	LastSeenLat     float64 `json:"last_lat,omitempty"`
+	LastSeenLon     float64 `json:"last_lon,omitempty"`
+	LastSeenSummary string  `json:"last_values,omitempty"`
+	DeviceURN       string  `json:"device_urn,omitempty"`
 }
+
 var sheet []sheetInfo
 
 // Statics
@@ -41,32 +40,16 @@ func sheetInvalidateCache() {
 	fRetrieve = true
 }
 
-// normalize a serial number to remove characters not valid in a filename
-func normalizeSN(sn string) (result string) {
-	sn = strings.ToLower(sn)
-	for _, char := range sn {
-		if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') {
-			result += fmt.Sprintf("%c", char)
-			continue
-		}
-		if (char == ' ') {
-			result += "_"
-			continue
-		}
-	}
-	return
-}
-
 // sheetDeviceIDToSN converts a Safecast device ID to its manufacturing serial number
-func sheetDeviceIDToSN(DeviceID uint32, normalizedSN string) (sn string, infoStr string) {
-	info, err := sheetDeviceInfo(DeviceID, normalizedSN)
+func sheetDeviceIDToSN(DeviceID uint32) (sn string, infoStr string) {
+	info, err := sheetDeviceInfo(DeviceID)
 	if err != nil {
 		return "", fmt.Sprintf("%s", err)
 	}
 	sn = info.SN
-	if (info.Custodian == "" && info.Location != "") {
+	if info.Custodian == "" && info.Location != "" {
 		infoStr = fmt.Sprintf("%s", info.Location)
-	} else if (info.Custodian != "" && info.Location == "") {
+	} else if info.Custodian != "" && info.Location == "" {
 		infoStr = fmt.Sprintf("%s", info.Custodian)
 	} else {
 		infoStr = fmt.Sprintf("%s, %s", info.Custodian, info.Location)
@@ -75,7 +58,7 @@ func sheetDeviceIDToSN(DeviceID uint32, normalizedSN string) (sn string, infoStr
 }
 
 // sheetDeviceInfo retrieves sheetInfo for a given device
-func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err error) {
+func sheetDeviceInfo(DeviceID uint32) (info sheetInfo, err error) {
 
 	// Cache for some time, for performance
 	if (time.Now().Sub(lastRetrieved) / time.Minute) > 15 {
@@ -108,7 +91,7 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 		r := csv.NewReader(rsp.Body)
 		sheetRowsTotal := 0
 		sheetRowsRecognized := 0
-		for row:=0;;row++ {
+		for row := 0; ; row++ {
 			record, err2 := r.Read()
 			if err2 == io.EOF {
 				break
@@ -119,11 +102,11 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 			}
 			sheetRowsTotal++
 			rec := sheetInfo{}
-			for col:=0; col<len(record); col++ {
+			for col := 0; col < len(record); col++ {
 				val := record[col]
 				// Header row with field names
 				if row == 0 {
-					switch (val) {
+					switch val {
 					case "Serial Number":
 						colSerialNumber = col
 					case "Device ID":
@@ -138,29 +121,28 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 						colDashboard = col
 					}
 				} else {
-					if (colSerialNumber == -1) {
+					if colSerialNumber == -1 {
 						err = fmt.Errorf("no 'Serial Number' column")
 						return
 					}
-					if (colDeviceID == -1) {
+					if colDeviceID == -1 {
 						err = fmt.Errorf("no 'Device ID' column")
 						return
 					}
-					if (colCustodian == -1) {
+					if colCustodian == -1 {
 						err = fmt.Errorf("no 'Custodian' column")
 						return
 					}
-					if (colCustodianContact == -1) {
+					if colCustodianContact == -1 {
 						err = fmt.Errorf("no 'Custodian Contact' column")
 						return
 					}
-					if (colLocation == -1) {
+					if colLocation == -1 {
 						err = fmt.Errorf("no 'Location' column")
 						return
 					}
 					if col == colSerialNumber {
 						rec.SN = val
-						rec.NormalizedSN = normalizeSN(val)
 					} else if col == colDeviceID {
 						u64, err2 := strconv.ParseUint(val, 10, 32)
 						if err2 == nil {
@@ -188,13 +170,12 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 		// Summary
 		fmt.Printf("\n%s *** Parsed Device Tracker CSV: recognized %d rows of %d total\n\n", LogTime(), sheetRowsRecognized, sheetRowsTotal)
 
-
 	}
 
 	// Iterate over the rows to find the device
-	deviceIDFound := false;
+	deviceIDFound := false
 	for _, r := range sheet {
-		if r.DeviceID == DeviceID || (r.SN != "" && r.NormalizedSN == normalizedSN) {
+		if r.DeviceID == DeviceID {
 			deviceIDFound = true
 			info = r
 			break
@@ -207,14 +188,10 @@ func sheetDeviceInfo(DeviceID uint32, normalizedSN string) (info sheetInfo, err 
 		// It was agreed with Rob t(see ttnode/src/io.c) that we would reserve the low 2^20 addresses
 		// for fixed allocation.  If we didn't find the device ID here and if it was in that range,
 		// use THAT as the serial number.
-		if (DeviceID < 1048576) {
+		if DeviceID < 1048576 {
 			info.DeviceID = DeviceID
 		} else {
-			if normalizedSN != "" {
-				err = fmt.Errorf("%s not found in Tracker Sheet", normalizedSN)
-			} else {
-				err = fmt.Errorf("not found in Tracker Sheet")
-			}
+			err = fmt.Errorf("not found in Tracker Sheet")
 			return
 		}
 

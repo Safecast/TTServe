@@ -134,7 +134,7 @@ func noteHandler(rw http.ResponseWriter, req *http.Request, testMode bool) {
 	}
 
 	// Display info about it
-	fmt.Printf("\n%s Received payload for %d %s from %s in %s\n", LogTime(), sd.DeviceID, *sd.DeviceUID, transportStr,
+	fmt.Printf("\n%s Received payload for %d %s from %s in %s\n", LogTime(), sd.DeviceID, sd.DeviceUID, transportStr,
 		e.TowerLocation+" "+e.TowerCountry)
 
 	fmt.Printf("%s TRANSFORMED INTO:\n", body)
@@ -199,23 +199,21 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 	}
 
 	// Convert to safecast device ID
-	deviceURN, deviceID := notecardDeviceUIDToSafecastDeviceID(e.DeviceUID)
-	sd.DeviceUID = &deviceURN
-	sd.DeviceID = &deviceID
+	sd.DeviceUID, sd.DeviceID = notecardDeviceUIDToSafecastDeviceID(e.DeviceUID)
 
 	// Serial number is REQUIRED of anything which passed through from notehub
 	if e.DeviceSN == "" {
 		err = fmt.Errorf("note: device has no serial number")
 		return
 	}
-	sd.DeviceSN = &e.DeviceSN
+	sd.DeviceSN = e.DeviceSN
 
 	// Product UID is REQUIRED of anything which passed through from notehub
 	if e.ProductUID == "" {
 		err = fmt.Errorf("note: event has no product UID")
 		return
 	}
-	sd.DeviceClass = &e.ProductUID
+	sd.DeviceClass = e.ProductUID
 
 	// Optional device contact info, for accountability
 	sd.DeviceContact = e.DeviceContact

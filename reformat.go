@@ -16,7 +16,10 @@ import (
 
 // SafecastDeviceIsSolarcastNano determines if this is a Solarcast Nano
 func SafecastDeviceIsSolarcastNano(deviceid uint32) bool {
-	sn, _ := sheetDeviceIDToSN(deviceid, "")
+	sn, _ := sheetDeviceIDToSN(deviceid)
+	if sn == "" {
+		return false
+	}
 	u64, err := strconv.ParseUint(sn, 10, 32)
 	if err == nil {
 		if u64 >= 33000 && u64 < 34000 {
@@ -24,6 +27,11 @@ func SafecastDeviceIsSolarcastNano(deviceid uint32) bool {
 		}
 	}
 	return false
+}
+
+// SafecastDeviceUIDType returns just the scheme
+func SafecastDeviceUIDType(deviceUID string) (scheme string) {
+	return strings.Split(deviceUID, ":")[0]
 }
 
 // SafecastDeviceType returns the type of a Safecast device AS NUMBERED in our
@@ -147,15 +155,15 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 	}
 
 	// Device ID
-	sd.DeviceID = &v2DeviceID
+	sd.DeviceID = v2DeviceID
 	urn := fmt.Sprintf("%s:%d", devicetype, v2DeviceID)
-	sd.DeviceUID = &urn
+	sd.DeviceUID = urn
 
 	// Generate the device class
-	sd.DeviceClass = &devicetype
+	sd.DeviceClass = devicetype
 
 	// Device Serial Number
-	sn, _ := sheetDeviceIDToSN(v2DeviceID, "")
+	sn, _ := sheetDeviceIDToSN(v2DeviceID)
 	if sn != "" {
 		u64, err2 := strconv.ParseUint(sn, 10, 32)
 		if err2 == nil {
@@ -163,8 +171,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 		}
 		//		snstr := fmt.Sprintf("%s %s", devicename, sn)		// 2020-07-31 rob added device type to SN
 		_ = devicename
-		snstr := sn
-		sd.DeviceSN = &snstr
+		sd.DeviceSN = sn
 	}
 
 	// Captured
@@ -254,7 +261,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 				lnd.W78017 = &cpm
 				sd.Lnd = &lnd
 			default:
-				fmt.Printf("*** Reformat: Received CPM for unrecognized device %d\n", *sd.DeviceID)
+				fmt.Printf("*** Reformat: Received CPM for unrecognized device %d\n", sd.DeviceID)
 			}
 
 		case "status":
@@ -359,7 +366,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 		sd.Dev.Test = &isTestMeasurement
 	}
 
-	return uint32(*sd.DeviceID), devicetype, sd
+	return uint32(sd.DeviceID), devicetype, sd
 
 }
 
@@ -393,16 +400,16 @@ func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Dat
 	*sd9 = *sd1
 
 	// Generate the device IDs.	 If this isn't a solarcast device, don't generate anything.
-	if sd.DeviceID == nil {
+	if sd.DeviceID == 0 {
 		return
 	}
-	deviceType, _ := SafecastDeviceType(*sd.DeviceID)
+	deviceType, _ := SafecastDeviceType(sd.DeviceID)
 	if deviceType != "" {
 		return
 	}
 
 	// Solarcast.  Return S/N as V1 device ID
-	id, _ := sheetDeviceIDToSN(*sd.DeviceID, "")
+	id, _ := sheetDeviceIDToSN(sd.DeviceID)
 	if id == "" {
 		return
 	}

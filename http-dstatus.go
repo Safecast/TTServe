@@ -6,40 +6,36 @@
 package main
 
 import (
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
-    "io/ioutil"
-    "net/http"
-    "fmt"
-    "io"
 )
 
 // Handle inbound HTTP requests to fetch log files
 func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
-    stats.Count.HTTP++
+	stats.Count.HTTP++
 
-    // Set response mime type
-    rw.Header().Set("Content-Type", "application/json")
+	// Set response mime type
+	rw.Header().Set("Content-Type", "application/json")
 
-    // Log it
-    device := req.RequestURI[len(TTServerTopicDeviceStatus):]
-	valid, deviceid := WordsToNumber(device)
-	if !valid {
-		return;
+	// Log it
+	deviceUID := req.RequestURI[len(TTServerTopicDeviceStatus):]
+	fmt.Printf("%s Device information request for %d\n", LogTime(), deviceUID)
+
+	// Open the file
+	file := GetDeviceStatusFilePath(deviceUID)
+	fd, err := os.Open(file)
+	if err != nil {
+		io.WriteString(rw, ErrorString(err))
+		return
 	}
-    fmt.Printf("%s Device information request for %d\n", LogTime(), deviceid)
+	defer fd.Close()
 
-    // Open the file
-	file := GetDeviceStatusFilePath(deviceid)
-    fd, err := os.Open(file)
-    if err != nil {
-        io.WriteString(rw, ErrorString(err))
-        return
-    }
-    defer fd.Close()
-
-    // Copy the file to output
-    io.Copy(rw, fd)
+	// Copy the file to output
+	io.Copy(rw, fd)
 
 }
 
@@ -47,7 +43,7 @@ func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
 func GenerateDeviceSummaryWebPage(rw http.ResponseWriter, contents []byte) {
 
 	// Read the web page template
-    page, err := ioutil.ReadFile("./device.html")
+	page, err := ioutil.ReadFile("./device.html")
 	if err != nil {
 		io.WriteString(rw, "error reading page\n")
 		return

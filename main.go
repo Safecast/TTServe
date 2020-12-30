@@ -71,7 +71,6 @@ func main() {
 
 	// Init our utility packages, but only after we've got our server instance ID
 	UtilInit()
-	WordsInit()
 
 	// Look up the two IP addresses that we KNOW have only a single A record,
 	// and determine if WE are the server for those protocols
@@ -102,21 +101,6 @@ func main() {
 	// We all support HTTP because it's load-balanced.
 	ThisServerServesHTTP := true
 
-	// Configure FTP, which only runs on the primary server because it's not load-balanced.
-	for {
-		addrs, err := net.LookupHost(TTServerFTPAddress)
-		if err == nil {
-			if len(addrs) >= 1 {
-				TTServerFTPAddressIPv4 = addrs[0]
-				break
-			}
-			err = fmt.Errorf("insufficient addr records for FTP")
-		}
-		fmt.Printf("Can't resolve %s: %v\n", TTServerFTPAddress, err)
-		time.Sleep(3 * time.Second)
-	}
-	ThisServerServesFTP = TTServerFTPAddressIPv4 == ThisServerAddressIPv4
-
 	// If and only if we're using MQTT (rather than TTN HTTP), do it on the UDP server
 	if TTNMQTTMode {
 		ThisServerServesMQTT = ThisServerServesUDP
@@ -141,12 +125,6 @@ func main() {
 	if ThisServerServesTCP {
 		go TCPInboundHandler()
 		stats.Services += ", TCP"
-	}
-
-	// Init our FTP server
-	if ThisServerServesFTP {
-		go FTPInboundHandler()
-		stats.Services += ", FTP"
 	}
 
 	// Spawn the TTNhandlers
@@ -198,7 +176,6 @@ func signalHandler() {
 			fmt.Printf("*** Exiting %s because of SIGNAL \n", LogTime())
 			os.Exit(0)
 		case syscall.SIGTERM:
-			FTPStop()
 			break
 		}
 	}

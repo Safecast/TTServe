@@ -1,32 +1,27 @@
-// Copyright 2017 Inca Roads LLC.  All rights reserved. 
+// Copyright 2017 Inca Roads LLC.  All rights reserved.
 // Use of this source code is governed by licenses granted by the
 // copyright holder including that found in the LICENSE file.
 
-// Log file handling, whether JSON or CSV
+// Log file handling
 package main
 
 import (
-    "os"
-    "fmt"
-    "time"
-    "encoding/json"
+	"encoding/json"
+	"fmt"
+	"os"
+	"time"
 )
 
+// DeviceLogSep is the date/time separator
+func DeviceLogSep() string {
+	return "$"
+}
+
 // DeviceLogFilename constructs path of a log file
-func DeviceLogFilename(DeviceID uint32, snDefault string, Extension string) string {
-    directory := SafecastDirectory()
-    fn := time.Now().UTC().Format("2006-01-")
-	fn += fmt.Sprintf("%d", DeviceID)
-	sn, _ := sheetDeviceIDToSN(DeviceID, snDefault)
-	// If the sheet doesn't specify anything in the ID field, we use the SN that's passed in
-	if sn != "" {
-		fn += "-" + normalizeSN(sn)
-	} else {
-		if snDefault != "" {
-			fn += "-" + normalizeSN(snDefault)
-		}
-	}
-    return directory + TTDeviceLogPath + "/" + fn + Extension
+func DeviceLogFilename(DeviceUID string, Extension string) string {
+	fn := time.Now().UTC().Format("2006-01" + DeviceLogSep())
+	fn += DeviceUIDFilename(DeviceUID)
+	return SafecastDirectory() + TTDeviceLogPath + "/" + fn + Extension
 }
 
 // WriteToLogs writes logs.
@@ -34,113 +29,71 @@ func DeviceLogFilename(DeviceID uint32, snDefault string, Extension string) stri
 // in log-ordering for buffered I/O messages where there are a huge batch of readings
 // that are updated in sequence very quickly.
 func WriteToLogs(sd SafecastData) {
-	sn := ""
-	if sd.DeviceSN != nil {
-		sn = *sd.DeviceSN
-	}
-	go trackDevice(*sd.DeviceID, time.Now(), normalizeSN(sn))
-    go LogToDb(sd)
-    go WriteDeviceStatus(sd)
-    go JSONDeviceLog(sd)
-	// 2019-10-11 Ray commented out because it doesn't appear that anyone is actually using this, and it
-	// adds a reasonable amount of storage burden on the server.  If you want it, just comment it back in.
-//    go CSVDeviceLog(sd)
+	go trackDevice(sd.DeviceUID, sd.DeviceID, time.Now())
+	go WriteDeviceStatus(sd)
+	go JSONDeviceLog(sd)
 }
 
 // JSONDeviceLog writes the value to the log
 func JSONDeviceLog(sd SafecastData) {
 
-	sn := ""
-	if sd.DeviceSN != nil {
-		sn = *sd.DeviceSN
+	file := DeviceLogFilename(sd.DeviceUID, ".json")
+
+	// Open it
+	fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+
+		// Don't attempt to create it if it already exists
+		_, err2 := os.Stat(file)
+		if err2 == nil {
+			fmt.Printf("Logging: Can't log to %s: %s\n", file, err)
+			return
+		}
+		if err2 == nil {
+			if !os.IsNotExist(err2) {
+				fmt.Printf("Logging: Ignoring attempt to create %s: %s\n", file, err2)
+				return
+			}
+		}
+
+		// Attempt to create the file because it doesn't already exist
+		fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+		if err != nil {
+			fmt.Printf("Logging: error creating %s: %s\n", file, err)
+			return
+		}
+
 	}
-    file := DeviceLogFilename(*sd.DeviceID, sn, ".json")
 
-    // Open it
-    fd, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0666)
-    if err != nil {
-
-        // Don't attempt to create it if it already exists
-        _, err2 := os.Stat(file)
-        if err2 == nil {
-            fmt.Printf("Logging: Can't log to %s: %s\n", file, err)
-            return
-        }
-        if err2 == nil {
-            if !os.IsNotExist(err2) {
-                fmt.Printf("Logging: Ignoring attempt to create %s: %s\n", file, err2)
-                return
-            }
-        }
-
-        // Attempt to create the file because it doesn't already exist
-        fd, err = os.OpenFile(file, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
-        if err != nil {
-            fmt.Printf("Logging: error creating %s: %s\n", file, err)
-            return
-        }
-
-    }
-
-    // Turn stats into a safe string writing
-    if sd.Service == nil {
-        var svc Service
-        sd.Service = &svc
-    }
-    scJSON, _ := json.Marshal(sd)
-    fd.WriteString(string(scJSON))
-    fd.WriteString("\r\n,\r\n")
-
-    // Close and exit
-    fd.Close()
-
-}
-
-// CSVDeviceLog writes the value to the log
-func CSVDeviceLog(sd SafecastData) {
-
-	// Open the file for append
-	sn := ""
-	if sd.DeviceSN != nil {
-		sn = *sd.DeviceSN
+	// Turn stats into a safe string writing
+	if sd.Service == nil {
+		var svc Service
+		sd.Service = &svc
 	}
-    filename := DeviceLogFilename(*sd.DeviceID, sn, ".csv")
-	fd, err := csvOpen(filename)
-    if err != nil {
-        fmt.Printf("Logging: Can't open %s: %s\n", filename, err)
-        return
-    }
+	scJSON, _ := json.Marshal(sd)
+	fd.WriteString(string(scJSON))
+	fd.WriteString("\r\n,\r\n")
 
-	// Append this measurement
-	csvAppend(fd, &sd, false)
-
-	// Done
-	csvClose(fd)
+	// Close and exit
+	fd.Close()
 
 }
 
 // DeleteLogs clears the logs
-func DeleteLogs(DeviceID uint32) string {
+func DeleteLogs(DeviceUID string) string {
 
-	filename := fmt.Sprintf("%d", DeviceID)
-
-    jsonFilename := TTDeviceLogPath + "/" + fmt.Sprintf("%s%s.json", time.Now().UTC().Format("2006-01-"), filename)
-    csvFilename := TTDeviceLogPath + "/" + fmt.Sprintf("%s%s.csv", time.Now().UTC().Format("2006-01-"), filename)
+	jsonFilename := DeviceLogFilename(DeviceUID, ".json")
 
 	deleted := false
-    err := os.Remove(SafecastDirectory() + jsonFilename)
-	if err == nil {
-		deleted = true
-	}
-    err = os.Remove(SafecastDirectory() + csvFilename)
+	err := os.Remove(SafecastDirectory() + jsonFilename)
 	if err == nil {
 		deleted = true
 	}
 
 	if !deleted {
-		return fmt.Sprintf("Nothing for %d to be cleared.", DeviceID)
+		return fmt.Sprintf("Nothing for %d to be cleared.", DeviceUID)
 	}
 
-	return fmt.Sprintf("Device logs for %d have been deleted.", DeviceID)
+	return fmt.Sprintf("Device logs for %d have been deleted.", DeviceUID)
 
 }
