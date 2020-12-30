@@ -114,7 +114,7 @@ func trackAllDevices() {
 				fmt.Printf("Str1(%d): %v\n", len(Str1), Str1)
 				fmt.Printf("Str2(%d): %v\n", len(Str2), Str2)
 				if len(Str2) >= 2 {
-					Str3 := strings.Split(Str2[0], DeviceLogSep())
+					Str3 := strings.Split(Str2[0], "-")
 					fmt.Printf("Str3(%d): %v\n", len(Str3), Str3)
 					if len(Str3) >= 2 {
 						yr, _ := strconv.ParseUint(Str3[0], 10, 32)
