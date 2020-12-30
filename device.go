@@ -7,9 +7,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"sort"
-	"strings"
 	"time"
 )
 
@@ -92,40 +90,8 @@ func trackDevice(DeviceUID string, DeviceID uint32, whenSeen time.Time) {
 
 }
 
-// Update the list of seen devices
-func trackAllDevices() {
-
-	// Loop over the file system, tracking all devices
-	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceStatusPath)
-	if err == nil {
-
-		// Iterate over each of the values
-		for _, file := range files {
-
-			if !file.IsDir() {
-
-				deviceUID := ""
-				Str0 := file.Name()
-				Str1 := strings.Split(Str0, ".")[0]
-				if Str1 != "" {
-					deviceUID = Str1
-				}
-
-				// Track the device
-				if deviceUID != "" {
-					trackDevice(deviceUID, 0, file.ModTime())
-				}
-
-			}
-		}
-	}
-}
-
 // Get sheet records for all seen devices
 func devicesSeenInfo() (allInfo []sheetInfo) {
-
-	// Update the in-memory list of seen devices
-	trackAllDevices()
 
 	// Force a re-read of the sheet, just to ensure that it reflects the lastest changes
 	sheetInvalidateCache()
@@ -144,9 +110,6 @@ func devicesSeenInfo() (allInfo []sheetInfo) {
 
 // Update message ages and notify
 func sendExpiredSafecastDevicesToSlack() {
-
-	// Update the in-memory list of seen devices
-	trackAllDevices()
 
 	// Compute an expiration time
 
@@ -197,9 +160,6 @@ func deviceWarningAfterMinutes(deviceUID string) int64 {
 
 // Get a summary of devices that are older than this many minutes ago
 func sendSafecastDeviceSummaryToSlack(user string, header string, fOffline bool) {
-
-	// Update the in-memory list of seen devices
-	trackAllDevices()
 
 	// Force a re-read of the sheet, just to ensure that it reflects the lastest changes
 	sheetInvalidateCache()
