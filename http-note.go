@@ -134,7 +134,7 @@ func noteHandler(rw http.ResponseWriter, req *http.Request, testMode bool) {
 	}
 
 	// Display info about it
-	fmt.Printf("\n%s Received payload for %d %s from %s in %s\n", LogTime(), sd.DeviceID, sd.DeviceUID, transportStr,
+	fmt.Printf("\n%s Received payload for %s from %s in %s\n", LogTime(), sd.DeviceUID, transportStr,
 		e.TowerLocation+" "+e.TowerCountry)
 
 	fmt.Printf("%s TRANSFORMED INTO:\n", body)
