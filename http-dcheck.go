@@ -6,35 +6,35 @@
 package main
 
 import (
-    "net/http"
+	"encoding/json"
+	"fmt"
+	"io"
 	"io/ioutil"
+	"net/http"
 	"strings"
-    "fmt"
 	"time"
-    "io"
-    "encoding/json"
 )
 
 // Handle inbound HTTP requests to do a quick analysis of a device's log file
 func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
-    stats.Count.HTTP++
+	stats.Count.HTTP++
 
-    // Set response mime type
-    rw.Header().Set("Content-Type", "application/json")
+	// Set response mime type
+	rw.Header().Set("Content-Type", "application/json")
 
-    // Log it
-    deviceidstr := req.RequestURI[len(TTServerTopicDeviceCheck):]
+	// Log it
+	deviceidstr := req.RequestURI[len(TTServerTopicDeviceCheck):]
 	timeRange := time.Now().UTC().Format("2006-01")
-    filename := fmt.Sprintf("%s/%s-%s.json", TTDeviceLogPath, timeRange, deviceidstr)
+	filename := fmt.Sprintf("%s/%s$%s.json", TTDeviceLogPath, timeRange, DeviceUIDFilename(deviceidstr))
 
-    fmt.Printf("%s LOG ANALYSIS request for %s\n", LogTime(), filename)
+	fmt.Printf("%s LOG ANALYSIS request for %s\n", LogTime(), filename)
 
 	// Check it
 	success, s := CheckJSON(SafecastDirectory() + filename)
 	if !success {
 		io.WriteString(rw, s)
 	}
-	
+
 	// Done
 	io.WriteString(rw, s)
 
@@ -42,12 +42,12 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 
 // CheckJSON performs a standard check on a JSON file
 func CheckJSON(infile string) (success bool, result string) {
-	
+
 	// Read the log
-    contents, err := ioutil.ReadFile(infile)
-    if err != nil {
-        return false, ErrorString(err)
-    }
+	contents, err := ioutil.ReadFile(infile)
+	if err != nil {
+		return false, ErrorString(err)
+	}
 
 	// Begin taking stats
 	stats := NewMeasurementDataset()
@@ -66,8 +66,8 @@ func CheckJSON(infile string) (success bool, result string) {
 		// Unmarshal it.  Badly-formatted json occasionally occurs because of
 		// concurrent file writes to the log from different process instances,
 		// but this is rare - so no worry.
-        value := SafecastData{}
-        err = json.Unmarshal([]byte(clean), &value)
+		value := SafecastData{}
+		err = json.Unmarshal([]byte(clean), &value)
 		if err != nil {
 			fmt.Printf("CHECK: error unmarshaling data: %s\n", err)
 			continue
@@ -89,5 +89,5 @@ func CheckJSON(infile string) (success bool, result string) {
 
 	// Done
 	return true, s
-	
+
 }

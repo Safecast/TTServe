@@ -246,7 +246,7 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, fOffline bool)
 
 		s += fmt.Sprintf("<http://%s%s%s|%s> ", TTServerHTTPAddress, TTServerTopicDeviceStatus, id, id)
 		s += fmt.Sprintf("<http://%s%s%s|chk> ", TTServerHTTPAddress, TTServerTopicDeviceCheck, id)
-		s += fmt.Sprintf("<http://%s%s%s%s.json|log> ", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01"+DeviceLogSep()), id)
+		s += fmt.Sprintf("<http://%s%s%s%s.json|log> ", TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01"+DeviceLogSep()), DeviceUIDFilename(id))
 		if gps != "" {
 			s += " " + gps
 		} else {

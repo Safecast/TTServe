@@ -148,9 +148,6 @@ const TTServerTopicRoot1 string = "/index.html"
 // TTServerTopicRoot2 (here for golint)
 const TTServerTopicRoot2 string = "/index.htm"
 
-// TTServerTopicQueryResults (here for golint)
-const TTServerTopicQueryResults string = "/query-results/"
-
 // TTServerTopicDeviceLog (here for golint)
 const TTServerTopicDeviceLog string = "/device-log/"
 
