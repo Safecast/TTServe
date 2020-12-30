@@ -112,10 +112,12 @@ func trackAllDevices() {
 				Str2 := strings.Split(Str1, DeviceLogSep())
 				if len(Str2) >= 2 {
 					Str3 := strings.Split(Str2[0], DeviceLogSep())
-					yr, _ := strconv.ParseUint(Str3[0], 10, 32)
-					mo, _ := strconv.ParseUint(Str3[1], 10, 32)
-					if int(yr) == time.Now().Year() && int(mo) == int(time.Now().Month()) {
-						deviceUID = Str2[1]
+					if len(Str3) >= 2 {
+						yr, _ := strconv.ParseUint(Str3[0], 10, 32)
+						mo, _ := strconv.ParseUint(Str3[1], 10, 32)
+						if int(yr) == time.Now().Year() && int(mo) == int(time.Now().Month()) {
+							deviceUID = Str2[1]
+						}
 					}
 				}
 
