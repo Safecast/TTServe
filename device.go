@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -97,7 +96,7 @@ func trackDevice(DeviceUID string, DeviceID uint32, whenSeen time.Time) {
 func trackAllDevices() {
 
 	// Loop over the file system, tracking all devices
-	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceLogPath)
+	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceStatusPath)
 	if err == nil {
 
 		// Iterate over each of the values
@@ -105,20 +104,11 @@ func trackAllDevices() {
 
 			if !file.IsDir() {
 
-				// ONLY pay attention to files from the current year/month
 				deviceUID := ""
 				Str0 := file.Name()
 				Str1 := strings.Split(Str0, ".")[0]
-				Str2 := strings.Split(Str1, DeviceLogSep())
-				if len(Str2) >= 2 {
-					Str3 := strings.Split(Str2[0], "-")
-					if len(Str3) >= 2 {
-						yr, _ := strconv.ParseUint(Str3[0], 10, 32)
-						mo, _ := strconv.ParseUint(Str3[1], 10, 32)
-						if int(yr) == time.Now().Year() && int(mo) == int(time.Now().Month()) {
-							deviceUID = Str2[1]
-						}
-					}
+				if Str1 != "" {
+					deviceUID = Str1
 				}
 
 				// Track the device
