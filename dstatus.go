@@ -897,7 +897,7 @@ func DeviceUIDFilename(DeviceUID string) (clean string) {
 		DeviceUID = "unknown"
 	}
 	clean = strings.ReplaceAll(DeviceUID, ":", "-")
-	clean = strings.ReplaceAll(DeviceUID, ".", "-")
+	clean = strings.ReplaceAll(clean, ".", "-")
 	return
 }
 
