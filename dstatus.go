@@ -808,7 +808,10 @@ func GetDeviceStatusSummary(DeviceUID string) (label string, gps string, Lat flo
 	}
 	label = value.DeviceSN
 	if info != "" {
-		label += fmt.Sprintf(" (%s)", info)
+		if label != "" {
+			label += " "
+		}
+		label += fmt.Sprintf("(%s)", info)
 	}
 
 	// Get location

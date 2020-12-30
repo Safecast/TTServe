@@ -44,7 +44,7 @@ func sheetInvalidateCache() {
 func sheetDeviceIDToSN(DeviceID uint32) (sn string, infoStr string) {
 	info, err := sheetDeviceInfo(DeviceID)
 	if err != nil {
-		return "", fmt.Sprintf("%s", err)
+		return "", ""
 	}
 	sn = info.SN
 	if info.Custodian == "" && info.Location != "" {
