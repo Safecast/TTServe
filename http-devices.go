@@ -24,11 +24,16 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 		io.WriteString(rw, fmt.Sprintf("%s", err))
 		return
 	}
+
+	// Extract offset/count
 	offset, _ := strconv.Atoi(args["offset"])
 	count, _ := strconv.Atoi(args["count"])
 	if count == 0 {
 		offset = 0
 	}
+
+	// Get the filters
+	filterClass := args["class"]
 
 	// Loop over the file system, tracking all devices
 	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceStatusPath)
@@ -62,6 +67,11 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 		dstatus := DeviceStatus{}
 		err = json.Unmarshal(contents, &dstatus)
 		if err != nil {
+			continue
+		}
+
+		// Filter by class
+		if filterClass != "" && dstatus.DeviceClass != filterClass {
 			continue
 		}
 
