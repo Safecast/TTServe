@@ -22,11 +22,11 @@ type sheetInfo struct {
 	Location         string `json:"location,omitempty"`
 	Dashboard        string `json:"dashboard,omitempty"`
 	// Info that is not contained in spreadsheet, but which is needed externally
-	LastSeen        string  `json:"last_seen,omitempty"`
-	LastSeenLat     float64 `json:"last_lat,omitempty"`
-	LastSeenLon     float64 `json:"last_lon,omitempty"`
-	LastSeenSummary string  `json:"last_values,omitempty"`
-	DeviceURN       string  `json:"device_urn,omitempty"`
+	//	LastSeen        string  `json:"last_seen,omitempty"`
+	//	LastSeenLat     float64 `json:"last_lat,omitempty"`
+	//	LastSeenLon     float64 `json:"last_lon,omitempty"`
+	//	LastSeenSummary string  `json:"last_values,omitempty"`
+	//	DeviceURN       string  `json:"device_urn,omitempty"`
 }
 
 var sheet []sheetInfo

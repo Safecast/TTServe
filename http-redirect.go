@@ -202,16 +202,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Generate the CRC of the original device data
-	hash := HashSafecastData(sd)
-	sd.Service.HashMd5 = &hash
-
-	// Add info about the server instance that actually did the upload
-	sd.Service.Handler = &TTServeInstanceID
-
 	// Post to V2
-	Upload(sd)
-	WriteToLogs(sd)
+	SafecastUpload(sd)
+	SafecastLog(sd)
 	stats.Count.HTTPRedirect++
 
 }

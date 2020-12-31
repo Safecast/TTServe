@@ -39,7 +39,6 @@ func HTTPInboundHandler() {
 	http.HandleFunc(TTServerTopicSend, inboundWebSendHandler)
 	http.HandleFunc(TTServerTopicNote, inboundWebNoteHandler)
 	http.HandleFunc(TTServerTopicNoteTest, inboundWebNoteHandlerTest)
-	http.HandleFunc(TTServerTopicNotecard, inboundWebNotecardHandler)
 	http.HandleFunc(TTServerTopicRedirect1, inboundWebRedirectHandler)
 	http.HandleFunc(TTServerTopicRedirect2, inboundWebRedirectHandler)
 

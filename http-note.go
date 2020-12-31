@@ -11,7 +11,6 @@ import (
 	"hash/crc32"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
@@ -127,7 +126,7 @@ func noteHandler(rw http.ResponseWriter, req *http.Request, testMode bool) {
 	}
 
 	// Convert to Safecast data, and exit if failure
-	sd, err := noteToSD(e, transportStr, testMode)
+	sd, upload, log, err := noteToSD(e, transportStr, testMode)
 	if err != nil {
 		fmt.Printf("NOTE ignored: %s\n%s\n", err, body)
 		return
@@ -137,15 +136,20 @@ func noteHandler(rw http.ResponseWriter, req *http.Request, testMode bool) {
 	fmt.Printf("\n%s Received payload for %s from %s in %s\n", LogTime(), sd.DeviceUID, transportStr,
 		e.TowerLocation+" "+e.TowerCountry)
 
-	fmt.Printf("%s TRANSFORMED INTO:\n", body)
-	var sdJSON []byte
-	sdJSON, err = json.Marshal(sd)
-	if err == nil {
-		fmt.Printf("%s\n", sdJSON)
+	// Send it to the Ingest service
+	if upload {
+		go SafecastUpload(sd)
 	}
 
-	// Send it to Safecast
-	go SendToSafecast(sd)
+	// Add native event data and log it
+	if log {
+		native := map[string]interface{}{}
+		err = json.Unmarshal(body, &native)
+		if err == nil {
+			sd.Native = &native
+			go SafecastLog(sd)
+		}
+	}
 
 }
 
@@ -161,7 +165,7 @@ func notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID string) (safecastDevi
 }
 
 // ReformatFromNote reformats to our standard normalized data format
-func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, err error) {
+func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, upload bool, log bool, err error) {
 
 	// Mark it as to whether or not it is a test measurement
 	isTest := testMode
@@ -274,9 +278,12 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 	}
 
 	// Decompose the body with a per-notefile schema
+	upload = true
+	log = true
 	switch e.NotefileID {
 
 	case "_session.qo":
+		upload = false
 		// Everything in session has been captured above
 		return
 
@@ -487,6 +494,8 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 		sd.Track = &track
 
 	default:
+		upload = false
+		log = false
 		fmt.Printf("*** note-go: no sensor data in file %s", e.NotefileID)
 		return
 
@@ -494,40 +503,5 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, e
 
 	// Done
 	return
-
-}
-
-// Handle inbound HTTP requests from Notecards (from the device About screen)
-func inboundWebNotecardHandler(rw http.ResponseWriter, req *http.Request) {
-
-	// Decode the URL and determine the device ID
-	encodedNotecardDeviceUID := req.RequestURI[len(TTServerTopicNotecard):]
-	notecardDeviceUID, err := url.QueryUnescape(encodedNotecardDeviceUID)
-	if err != nil {
-		fmt.Printf("%s Notecard request error decoding Notecard DeviceUID '%s': %s\n", LogTime(), encodedNotecardDeviceUID, err)
-		return
-	}
-
-	safecastDeviceURN, safecastDeviceID := notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID)
-
-	// Figure out where to redirect themg
-	url := ""
-	if false {
-		url = fmt.Sprintf("http://%s%s%s%d.json",
-			TTServerHTTPAddress, TTServerTopicDeviceLog, time.Now().UTC().Format("2006-01-"), safecastDeviceID)
-	}
-	if false {
-		url = fmt.Sprintf("http://safecast.org/tilemap/prototype/best_devicefu.html?card_tall=1&card_show_tbl_mnew=0&card_show_tt_links=1&filter_nohis=1&highlights=%d",
-			safecastDeviceID)
-	}
-	if true {
-		url = fmt.Sprintf("https://grafana.safecast.cc/d/Med5wakZk/device-checker?orgId=1&var-device_urn=%s",
-			safecastDeviceURN)
-	}
-
-	fmt.Printf("%s Notecard request for %s being redirected to %s\n", LogTime(), notecardDeviceUID, url)
-
-	// Perform the redirect
-	http.Redirect(rw, req, url, http.StatusTemporaryRedirect)
 
 }

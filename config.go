@@ -190,9 +190,6 @@ const TTServerTopicNote string = "/note"
 // TTServerTopicNoteTest (here for golint)
 const TTServerTopicNoteTest string = "/notetest"
 
-// TTServerTopicNotecard (here for golint)
-const TTServerTopicNotecard string = "/notecard/"
-
 // ThisServerAddressIPv4 is looked up dynamically
 var ThisServerAddressIPv4 = ""
 

@@ -14,6 +14,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/blues/note-go/note"
 )
 
 // DeviceStatus is the data structure for the "Device Status" files
@@ -122,6 +124,30 @@ func WriteDeviceStatus(sc SafecastData) {
 	value.DeviceID = sc.DeviceID
 	value.DeviceUID = sc.DeviceUID
 	value.DeviceSN = sc.DeviceSN
+
+	// Copy extra info from the sheet
+	if value.DeviceID != 0 {
+		si, err := sheetDeviceInfo(value.DeviceID)
+		if err == nil {
+			if si.Custodian != "" || si.CustodianContact != "" {
+				if value.DeviceContact == nil {
+					value.DeviceContact = &(note.EventContact{})
+				}
+				if value.DeviceContact.Name == "" {
+					value.DeviceContact.Name = si.Custodian
+				}
+				if value.DeviceContact.Email == "" {
+					value.DeviceContact.Email = si.CustodianContact
+				}
+			}
+			if si.Dashboard != "" {
+				if value.Dev == nil {
+					value.Dev = &(Dev{})
+				}
+				value.Dev.Dashboard = &si.Dashboard
+			}
+		}
+	}
 
 	// Update the current values, but only if modified
 	if sc.Service != nil && sc.Service.UploadedAt != nil {
@@ -443,14 +469,14 @@ func WriteDeviceStatus(sc SafecastData) {
 		if value.Dev == nil {
 			value.Dev = &dev
 		}
-		if sc.Dev.Temp != nil {
-			value.Dev.Temp = sc.Dev.Temp
+		if sc.Dev.Test != nil {
+			value.Dev.Test = sc.Dev.Test
 		}
-		if sc.Dev.Humid != nil {
-			value.Dev.Humid = sc.Dev.Humid
+		if sc.Dev.Motion != nil {
+			value.Dev.Motion = sc.Dev.Motion
 		}
-		if sc.Dev.Press != nil {
-			value.Dev.Press = sc.Dev.Press
+		if sc.Dev.DeviceLabel != nil {
+			value.Dev.DeviceLabel = sc.Dev.DeviceLabel
 		}
 		if sc.Dev.UptimeMinutes != nil {
 			value.Dev.UptimeMinutes = sc.Dev.UptimeMinutes
@@ -461,14 +487,14 @@ func WriteDeviceStatus(sc SafecastData) {
 		if sc.Dev.DeviceParams != nil {
 			value.Dev.DeviceParams = sc.Dev.DeviceParams
 		}
-		if sc.Dev.GpsParams != nil {
-			value.Dev.GpsParams = sc.Dev.GpsParams
-		}
 		if sc.Dev.ServiceParams != nil {
 			value.Dev.ServiceParams = sc.Dev.ServiceParams
 		}
 		if sc.Dev.TtnParams != nil {
 			value.Dev.TtnParams = sc.Dev.TtnParams
+		}
+		if sc.Dev.GpsParams != nil {
+			value.Dev.GpsParams = sc.Dev.GpsParams
 		}
 		if sc.Dev.SensorParams != nil {
 			value.Dev.SensorParams = sc.Dev.SensorParams
@@ -488,12 +514,6 @@ func WriteDeviceStatus(sc SafecastData) {
 		if sc.Dev.CommsPowerFails != nil {
 			value.Dev.CommsPowerFails = sc.Dev.CommsPowerFails
 		}
-		if sc.Dev.OvercurrentEvents != nil {
-			value.Dev.OvercurrentEvents = sc.Dev.OvercurrentEvents
-		}
-		if sc.Dev.CommsAntFails != nil {
-			value.Dev.CommsAntFails = sc.Dev.CommsAntFails
-		}
 		if sc.Dev.DeviceRestarts != nil {
 			value.Dev.DeviceRestarts = sc.Dev.DeviceRestarts
 		}
@@ -509,20 +529,11 @@ func WriteDeviceStatus(sc SafecastData) {
 		if sc.Dev.Iccid != nil {
 			value.Dev.Iccid = sc.Dev.Iccid
 		}
-		if sc.Dev.ModuleLora != nil {
-			value.Dev.ModuleLora = sc.Dev.ModuleLora
-		}
-		if sc.Dev.ModuleFona != nil {
-			value.Dev.ModuleFona = sc.Dev.ModuleFona
-		}
 		if sc.Dev.Cpsi != nil {
 			value.Dev.Cpsi = sc.Dev.Cpsi
 		}
 		if sc.Dev.Dfu != nil {
 			value.Dev.Dfu = sc.Dev.Dfu
-		}
-		if sc.Dev.DeviceLabel != nil {
-			value.Dev.DeviceLabel = sc.Dev.DeviceLabel
 		}
 		if sc.Dev.FreeMem != nil {
 			value.Dev.FreeMem = sc.Dev.FreeMem
@@ -535,6 +546,45 @@ func WriteDeviceStatus(sc SafecastData) {
 		}
 		if sc.Dev.Status != nil {
 			value.Dev.Status = sc.Dev.Status
+		}
+		if sc.Dev.ModuleLora != nil {
+			value.Dev.ModuleLora = sc.Dev.ModuleLora
+		}
+		if sc.Dev.ModuleFona != nil {
+			value.Dev.ModuleFona = sc.Dev.ModuleFona
+		}
+		if sc.Dev.Temp != nil {
+			value.Dev.Temp = sc.Dev.Temp
+		}
+		if sc.Dev.Humid != nil {
+			value.Dev.Humid = sc.Dev.Humid
+		}
+		if sc.Dev.Press != nil {
+			value.Dev.Press = sc.Dev.Press
+		}
+		if sc.Dev.Rat != nil {
+			value.Dev.Rat = sc.Dev.Rat
+		}
+		if sc.Dev.Bars != nil {
+			value.Dev.Bars = sc.Dev.Bars
+		}
+		if sc.Dev.CommsAntFails != nil {
+			value.Dev.CommsAntFails = sc.Dev.CommsAntFails
+		}
+		if sc.Dev.OvercurrentEvents != nil {
+			value.Dev.OvercurrentEvents = sc.Dev.OvercurrentEvents
+		}
+		if sc.Dev.Seqno != nil {
+			value.Dev.Seqno = sc.Dev.Seqno
+		}
+		if sc.Dev.Moved != nil {
+			value.Dev.Moved = sc.Dev.Moved
+		}
+		if sc.Dev.Orientation != nil {
+			value.Dev.Orientation = sc.Dev.Orientation
+		}
+		if sc.Dev.Dashboard != nil {
+			value.Dev.Dashboard = sc.Dev.Dashboard
 		}
 
 		// Maximize error values that are supplied

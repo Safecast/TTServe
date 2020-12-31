@@ -7,6 +7,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -19,11 +20,12 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	// Loop over the file system, tracking all devices
 	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceLogPath)
 	if err != nil {
+		io.WriteString(rw, fmt.Sprintf("ReadDir: %s", err))
 		return
 	}
 
 	// Generate this array
-	var allInfo []sheetInfo
+	var allStatus []DeviceStatus
 
 	// Iterate over each of the values
 	for _, file := range files {
@@ -39,43 +41,25 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 			continue
 		}
 		dstatus := DeviceStatus{}
-		err = json.Unmarshal(contents, &dstatus)
+		json.Unmarshal(contents, &dstatus)
 		if err != nil {
 			continue
 		}
 
-		// Generate results
-		var si sheetInfo
-		si.DeviceID = dstatus.DeviceID
-		si.DeviceURN = dstatus.DeviceUID
-		si.SN = dstatus.DeviceSN
-		if dstatus.DeviceContact != nil {
-			si.Custodian = dstatus.DeviceContact.Name
-			si.CustodianContact = dstatus.DeviceContact.Email
-		}
-		if dstatus.CapturedAt != nil {
-			si.LastSeen = *dstatus.CapturedAt
-		}
-		if dstatus.Loc != nil {
-			if dstatus.Loc.Lat != nil {
-				si.LastSeenLat = *dstatus.Loc.Lat
-			}
-			if dstatus.Loc.Lon != nil {
-				si.LastSeenLon = *dstatus.Loc.Lon
-			}
-		}
-
-		allInfo = append(allInfo, si)
+		// Copy only the "current values" to the output, not the historical data
+		var ds DeviceStatus
+		ds.SafecastData = dstatus.SafecastData
+		allStatus = append(allStatus, ds)
 
 	}
 
 	// Marshal it
-	allInfoJSON, _ := json.Marshal(allInfo)
+	allStatusJSON, _ := json.Marshal(allStatus)
 
 	// Tell the caller that it's JSON
 	rw.Header().Set("Content-Type", "application/json")
 
 	// Output it
-	io.WriteString(rw, string(allInfoJSON))
+	io.WriteString(rw, string(allStatusJSON))
 
 }

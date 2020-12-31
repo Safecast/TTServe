@@ -90,24 +90,6 @@ func trackDevice(DeviceUID string, DeviceID uint32, whenSeen time.Time) {
 
 }
 
-// Get sheet records for all seen devices
-func devicesSeenInfo() (allInfo []sheetInfo) {
-
-	// Force a re-read of the sheet, just to ensure that it reflects the lastest changes
-	sheetInvalidateCache()
-
-	// Sweep through all devices that we've seen
-	for i := 0; i < len(seenDevices); i++ {
-		info, _ := sheetDeviceInfo(seenDevices[i].deviceID) // Ignore errors
-		info.DeviceURN = seenDevices[i].deviceUID
-		info.LastSeen = seenDevices[i].seen.UTC().Format("2006-01-02T15:04:05Z")
-		_, _, info.LastSeenLat, info.LastSeenLon, info.LastSeenSummary = GetDeviceStatusSummary(seenDevices[i].deviceUID)
-		allInfo = append(allInfo, info)
-	}
-
-	return
-}
-
 // Update message ages and notify
 func sendExpiredSafecastDevicesToSlack() {
 

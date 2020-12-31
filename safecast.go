@@ -656,26 +656,31 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
 		sd.Lnd = &lnd
 	}
 
-	// Send it
-	SendToSafecast(sd)
+	// Send it and log it
+	SafecastUpload(sd)
+	SafecastLog(sd)
 
 }
 
-// SendToSafecast processes an inbound Safecast V2 SD structure as an asynchronous goroutine
-func SendToSafecast(sd SafecastData) {
+// SafecastUpload processes an inbound Safecast V2 SD structure as an asynchronous goroutine
+func SafecastUpload(sd SafecastData) {
 
-	// Generate the hash of the original device data
-	hash := HashSafecastData(sd)
-	sd.Service.HashMd5 = &hash
+	// Add info about the server instance that actually did the upload
+	sd.Service.Handler = &TTServeInstanceID
+
+	// Upload
+	Upload(sd)
+
+}
+
+// SafecastLog logs the event
+func SafecastLog(sd SafecastData) {
 
 	// Add info about the server instance that actually did the upload
 	sd.Service.Handler = &TTServeInstanceID
 
 	// Log as accurately as we can with regard to what came in
 	WriteToLogs(sd)
-
-	// Upload
-	Upload(sd)
 
 }
 
