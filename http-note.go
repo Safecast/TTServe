@@ -205,11 +205,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 	// Convert to safecast device ID
 	sd.DeviceUID, sd.DeviceID = notecardDeviceUIDToSafecastDeviceID(e.DeviceUID)
 
-	// Serial number is REQUIRED of anything which passed through from notehub
-	if e.DeviceSN == "" {
-		err = fmt.Errorf("note: device has no serial number")
-		return
-	}
+	// Serial number
 	sd.DeviceSN = e.DeviceSN
 
 	// Product UID is REQUIRED of anything which passed through from notehub
