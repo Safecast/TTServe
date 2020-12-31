@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strconv"
 )
 
@@ -71,8 +72,11 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		// Filter by class
-		if filterClass != "" && dstatus.DeviceClass != filterClass {
-			continue
+		if filterClass != "" {
+			match, err := regexp.MatchString(filterClass, dstatus.DeviceClass)
+			if err == nil && !match {
+				continue
+			}
 		}
 
 		// Copy only the "current values" to the output, not the historical data
