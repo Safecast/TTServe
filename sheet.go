@@ -36,7 +36,7 @@ func sheetInvalidateCache() {
 
 // sheetDeviceIDToSN converts a Safecast device ID to its manufacturing serial number
 func sheetDeviceIDToSN(DeviceID uint32) (sn string, infoStr string) {
-	info, err := sheetDeviceInfo(DeviceID)
+	info, err := sheetDeviceInfo(DeviceID, "")
 	if err != nil {
 		return "", ""
 	}
@@ -52,7 +52,7 @@ func sheetDeviceIDToSN(DeviceID uint32) (sn string, infoStr string) {
 }
 
 // sheetDeviceInfo retrieves sheetInfo for a given device
-func sheetDeviceInfo(DeviceID uint32) (info sheetInfo, err error) {
+func sheetDeviceInfo(DeviceID uint32, DeviceSN string) (info sheetInfo, err error) {
 
 	// Cache for some time, for performance
 	if (time.Now().Sub(lastRetrieved) / time.Minute) > 15 {
@@ -169,7 +169,7 @@ func sheetDeviceInfo(DeviceID uint32) (info sheetInfo, err error) {
 	// Iterate over the rows to find the device
 	deviceIDFound := false
 	for _, r := range sheet {
-		if r.DeviceID == DeviceID {
+		if r.DeviceID == DeviceID || (DeviceSN != "" && r.SN == DeviceSN) {
 			deviceIDFound = true
 			info = r
 			break

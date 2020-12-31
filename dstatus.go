@@ -129,8 +129,8 @@ func WriteDeviceStatus(sc SafecastData) {
 	value.DeviceID = sc.DeviceID
 
 	// Copy extra info from the sheet
-	if value.DeviceID != 0 {
-		si, err := sheetDeviceInfo(value.DeviceID)
+	if value.DeviceID != 0 || value.DeviceSN != "" {
+		si, err := sheetDeviceInfo(value.DeviceID, value.DeviceSN)
 		if err == nil {
 			if si.Custodian != "" || si.CustodianContact != "" {
 				if value.DeviceContact == nil {
