@@ -18,10 +18,9 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	stats.Count.HTTP++
 
 	// Loop over the file system, tracking all devices
-	fmt.Printf("/devices query\n")
-	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceLogPath)
+	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceStatusPath)
 	if err != nil {
-		fmt.Printf("ReadDir: %s", err)
+		fmt.Printf("/devices query error: %s", err)
 		io.WriteString(rw, fmt.Sprintf("ReadDir: %s", err))
 		return
 	}
@@ -38,12 +37,13 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		// Read the file
-		contents, err := ioutil.ReadFile(SafecastDirectory() + TTDeviceLogPath + file.Name())
+		contents, err := ioutil.ReadFile(SafecastDirectory() + TTDeviceStatusPath + file.Name())
+		fmt.Printf("/devices query error: %s", err)
 		if err != nil {
 			continue
 		}
 		dstatus := DeviceStatus{}
-		json.Unmarshal(contents, &dstatus)
+		err = json.Unmarshal(contents, &dstatus)
 		if err != nil {
 			continue
 		}
