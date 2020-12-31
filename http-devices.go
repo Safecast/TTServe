@@ -26,7 +26,7 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Generate this array
-	var allStatus []DeviceStatus
+	var allStatus []SafecastData
 
 	// Iterate over each of the values
 	for _, file := range files {
@@ -38,7 +38,6 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 
 		// Read the file
 		contents, err := ioutil.ReadFile(SafecastDirectory() + TTDeviceStatusPath + "/" + file.Name())
-		fmt.Printf("/devices query error: %s\n", err)
 		if err != nil {
 			continue
 		}
@@ -49,9 +48,7 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		// Copy only the "current values" to the output, not the historical data
-		var ds DeviceStatus
-		ds.SafecastData = dstatus.SafecastData
-		allStatus = append(allStatus, ds)
+		allStatus = append(allStatus, dstatus.SafecastData)
 
 	}
 
