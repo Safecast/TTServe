@@ -18,8 +18,10 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	stats.Count.HTTP++
 
 	// Loop over the file system, tracking all devices
+	fmt.Printf("/devices query\n")
 	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceLogPath)
 	if err != nil {
+		fmt.Printf("ReadDir: %s", err)
 		io.WriteString(rw, fmt.Sprintf("ReadDir: %s", err))
 		return
 	}
