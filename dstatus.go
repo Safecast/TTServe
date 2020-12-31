@@ -136,10 +136,10 @@ func WriteDeviceStatus(sc SafecastData) {
 				if value.DeviceContact == nil {
 					value.DeviceContact = &(note.EventContact{})
 				}
-				if value.DeviceContact.Name == "" {
+				if si.Custodian != "" {
 					value.DeviceContact.Name = si.Custodian
 				}
-				if value.DeviceContact.Email == "" {
+				if si.CustodianContact == "" {
 					value.DeviceContact.Email = si.CustodianContact
 				}
 			}
