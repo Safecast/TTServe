@@ -37,8 +37,8 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		// Read the file
-		contents, err := ioutil.ReadFile(SafecastDirectory() + TTDeviceStatusPath + file.Name())
-		fmt.Printf("/devices query error: %s", err)
+		contents, err := ioutil.ReadFile(SafecastDirectory() + TTDeviceStatusPath + "/" + file.Name())
+		fmt.Printf("/devices query error: %s\n", err)
 		if err != nil {
 			continue
 		}
