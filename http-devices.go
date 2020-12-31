@@ -11,17 +11,29 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 // Handle inbound HTTP requests to fetch the entire list of devices
 func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	stats.Count.HTTP++
 
+	// Parse arguments to extract offset and count
+	_, args, err := HTTPArgs(req, TTServerTopicDevices)
+	if err != nil {
+		io.WriteString(rw, fmt.Sprintf("%s", err))
+		return
+	}
+	offset, _ := strconv.Atoi(args["offset"])
+	count, _ := strconv.Atoi(args["count"])
+	if count == 0 {
+		offset = 0
+	}
+
 	// Loop over the file system, tracking all devices
 	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceStatusPath)
 	if err != nil {
-		fmt.Printf("/devices query error: %s", err)
-		io.WriteString(rw, fmt.Sprintf("ReadDir: %s", err))
+		io.WriteString(rw, fmt.Sprintf("%s", err))
 		return
 	}
 
@@ -33,6 +45,12 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 
 		// Skip directories
 		if file.IsDir() {
+			continue
+		}
+
+		// Skip if we're still processing an offset
+		if offset > 0 {
+			offset--
 			continue
 		}
 
@@ -49,6 +67,14 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 
 		// Copy only the "current values" to the output, not the historical data
 		allStatus = append(allStatus, dstatus.SafecastData)
+
+		// Stop if we're processing count
+		if count > 0 {
+			count--
+			if count == 0 {
+				break
+			}
+		}
 
 	}
 
