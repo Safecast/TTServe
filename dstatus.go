@@ -120,10 +120,13 @@ func WriteDeviceStatus(sc SafecastData) {
 		time.Sleep(time.Duration(Random(1, 6)) * time.Second)
 	}
 
-	// Update the identity-related fields
-	value.DeviceID = sc.DeviceID
+	// Update the identity-related fields that are unconditionally specified
 	value.DeviceUID = sc.DeviceUID
+	value.DeviceClass = sc.DeviceClass
 	value.DeviceSN = sc.DeviceSN
+	value.DeviceContact = sc.DeviceContact
+	value.Source = sc.Source
+	value.DeviceID = sc.DeviceID
 
 	// Copy extra info from the sheet
 	if value.DeviceID != 0 {
