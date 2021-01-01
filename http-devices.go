@@ -13,6 +13,8 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+
+	"github.com/safecast/ttdata"
 )
 
 // Handle inbound HTTP requests to fetch the entire list of devices
@@ -44,7 +46,7 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Generate this array
-	var allStatus []SafecastData
+	var allStatus []ttdata.SafecastData
 
 	// Iterate over each of the values
 	for _, file := range files {

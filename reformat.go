@@ -12,6 +12,7 @@ import (
 	"time"
 
 	olc "github.com/google/open-location-code/go"
+	"github.com/safecast/ttdata"
 )
 
 // SafecastDeviceIsSolarcastNano determines if this is a Solarcast Nano
@@ -102,8 +103,8 @@ func SafecastV1DeviceType(deviceid uint32) (devicetype string, devicename string
 }
 
 // SafecastReformatFromV1 reformats a special V1 payload to Current
-func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint32, devtype string, data SafecastData) {
-	var sd SafecastData
+func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (deviceid uint32, devtype string, data ttdata.SafecastData) {
+	var sd ttdata.SafecastData
 	var v1DeviceID uint32
 
 	// Required field
@@ -190,7 +191,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 
 	// Loc
 	if v1.Latitude != nil && v1.Longitude != nil {
-		var loc Loc
+		var loc ttdata.Loc
 		loc.Lat = v1.Latitude
 		loc.Lon = v1.Longitude
 		if v1.Height != nil {
@@ -209,25 +210,25 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 		switch strings.ToLower(*v1.Unit) {
 
 		case "pm1":
-			var opc Opc
+			var opc ttdata.Opc
 			pm := *v1.Value
 			opc.Pm01_0 = &pm
 			sd.Opc = &opc
 
 		case "pm2.5":
-			var opc Opc
+			var opc ttdata.Opc
 			pm := *v1.Value
 			opc.Pm02_5 = &pm
 			sd.Opc = &opc
 
 		case "pm10":
-			var opc Opc
+			var opc ttdata.Opc
 			pm := *v1.Value
 			opc.Pm10_0 = &pm
 			sd.Opc = &opc
 
 		case "humd%":
-			var env Env
+			var env ttdata.Env
 			humid := *v1.Value
 			env.Humid = &humid
 			sd.Env = &env
@@ -235,13 +236,13 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 		case "celcius":
 			fallthrough
 		case "tempc":
-			var env Env
+			var env ttdata.Env
 			temp := *v1.Value
 			env.Temp = &temp
 			sd.Env = &env
 
 		case "cpm":
-			var lnd Lnd
+			var lnd ttdata.Lnd
 			cpm := *v1.Value
 			// Special case for missing tube on this sensor
 			if v1DeviceID == 1001 && cpm == 0 {
@@ -266,15 +267,15 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 
 		case "status":
 			// The value is the temp
-			var env Env
+			var env ttdata.Env
 			TempC := *v1.Value
 			env.Temp = &TempC
 			sd.Env = &env
 
 			// Parse subfields
-			var bat Bat
+			var bat ttdata.Bat
 			var dobat = false
-			var dev Dev
+			var dev ttdata.Dev
 			var dodev = false
 
 			unrecognized := ""
@@ -360,7 +361,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 	// Test
 	if isTestMeasurement {
 		if sd.Dev == nil {
-			var dev Dev
+			var dev ttdata.Dev
 			sd.Dev = &dev
 		}
 		sd.Dev.Test = &isTestMeasurement
@@ -371,7 +372,7 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 }
 
 // SafecastReformatToV1 reformats a special V1 payload to Current
-func SafecastReformatToV1(sd SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Data2 *SafecastDataV1ToEmit, v1Data9 *SafecastDataV1ToEmit, err error) {
+func SafecastReformatToV1(sd ttdata.SafecastData) (v1Data1 *SafecastDataV1ToEmit, v1Data2 *SafecastDataV1ToEmit, v1Data9 *SafecastDataV1ToEmit, err error) {
 
 	// Start under the assumption that we will generate all three
 	sd1 := &SafecastDataV1ToEmit{}

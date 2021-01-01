@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/blues/note-go/note"
+	"github.com/safecast/ttdata"
 )
 
 // Schemas for the different file types
@@ -165,11 +166,11 @@ func notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID string) (safecastDevi
 }
 
 // ReformatFromNote reformats to our standard normalized data format
-func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, upload bool, log bool, err error) {
+func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.SafecastData, upload bool, log bool, err error) {
 
 	// Mark it as to whether or not it is a test measurement
 	isTest := testMode
-	var dev Dev
+	var dev ttdata.Dev
 	sd.Dev = &dev
 	if isTest {
 		sd.Dev.Test = &isTest
@@ -189,7 +190,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		dev.Temp = &e.Temp
 	}
 	if e.Voltage != 0.0 {
-		var bat Bat
+		var bat ttdata.Bat
 		bat.Voltage = &e.Voltage
 		sd.Bat = &bat
 	}
@@ -230,7 +231,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 	}
 
 	// Service-related
-	var svc Service
+	var svc ttdata.Service
 	sd.Service = &svc
 	svc.Transport = &transport
 	if e.Routed != 0 {
@@ -243,7 +244,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 
 	// Where captured
 	if e.Where != "" {
-		var loc Loc
+		var loc ttdata.Loc
 		sd.Loc = &loc
 		var lat, lon float64
 		lat = float64(e.WhereLat)
@@ -289,7 +290,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		if err != nil {
 			return
 		}
-		var pms Pms
+		var pms ttdata.Pms
 		pms.Pm01_0 = &s.Pm01_0
 		pms.Pm02_5 = &s.Pm02_5
 		pms.Pm10_0 = &s.Pm10_0
@@ -304,21 +305,21 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		pms.Model = &s.Model
 		sd.Pms = &pms
 		if s.Voltage != nil {
-			var bat Bat
+			var bat ttdata.Bat
 			bat.Voltage = s.Voltage
 			bat.Charging = s.Charging
 			bat.Line = s.USB
 			sd.Bat = &bat
 		}
 		if s.TempOLD != nil {
-			var env Env
+			var env ttdata.Env
 			env.Temp = s.TempOLD
 			env.Humid = s.HumidOLD
 			env.Press = s.PressOLD
 			sd.Env = &env
 		}
 		if s.Temp != nil {
-			var env Env
+			var env ttdata.Env
 			env.Temp = s.Temp
 			env.Humid = s.Humid
 			env.Press = s.Press
@@ -331,10 +332,10 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		if err != nil {
 			return
 		}
-		var bat Bat
+		var bat ttdata.Bat
 		bat.Voltage = &s.Voltage
 		sd.Bat = &bat
-		var env Env
+		var env ttdata.Env
 		env.Temp = &s.Temperature
 		if s.Humidity != 0 {
 			env.Humid = &s.Humidity
@@ -344,11 +345,11 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		}
 		sd.Env = &env
 		if s.CPM > 0 {
-			var lnd Lnd
+			var lnd ttdata.Lnd
 			lnd.U7318 = &s.CPM
 			sd.Lnd = &lnd
 		}
-		var track Track
+		var track ttdata.Track
 		track.Distance = &s.Distance
 		var secs = uint32(s.Seconds)
 		track.Seconds = &secs
@@ -362,7 +363,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		if err != nil {
 			return
 		}
-		var bat Bat
+		var bat ttdata.Bat
 		bat.Voltage = &s.Voltage
 		sd.Bat = &bat
 
@@ -372,7 +373,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		if err != nil {
 			return
 		}
-		var bat Bat
+		var bat ttdata.Bat
 		bat.Voltage = &s.Voltage
 		bat.Current = &s.Current
 		sd.Bat = &bat
@@ -383,7 +384,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		if err != nil {
 			return
 		}
-		var env Env
+		var env ttdata.Env
 		env.Temp = &s.Temperature
 		env.Humid = &s.Humidity
 		env.Press = &s.Pressure
@@ -397,7 +398,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		if err != nil {
 			return
 		}
-		var lnd Lnd
+		var lnd ttdata.Lnd
 		lnd.U7318 = &s.CPM
 		sd.Lnd = &lnd
 
@@ -409,7 +410,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		if err != nil {
 			return
 		}
-		var lnd Lnd
+		var lnd ttdata.Lnd
 		lnd.C7318 = &s.CPM
 		sd.Lnd = &lnd
 
@@ -421,7 +422,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		if err != nil {
 			return
 		}
-		var lnd Lnd
+		var lnd ttdata.Lnd
 		lnd.EC7128 = &s.CPM
 		sd.Lnd = &lnd
 
@@ -433,7 +434,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		if err != nil {
 			return
 		}
-		var pms Pms
+		var pms ttdata.Pms
 		pms.Pm01_0 = &s.Pm01_0
 		pms.Pm02_5 = &s.Pm02_5
 		pms.Pm10_0 = &s.Pm10_0
@@ -457,7 +458,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		if err != nil {
 			return
 		}
-		var pms Pms2
+		var pms ttdata.Pms2
 		pms.Pm01_0 = &s.Pm01_0
 		pms.Pm02_5 = &s.Pm02_5
 		pms.Pm10_0 = &s.Pm10_0
@@ -479,7 +480,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd SafecastData, u
 		if err != nil {
 			return
 		}
-		var track Track
+		var track ttdata.Track
 		track.Lat = &s.Lat
 		track.Lon = &s.Lon
 		track.Distance = &s.Distance

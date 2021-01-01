@@ -13,6 +13,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/safecast/ttdata"
 )
 
 // Debugging
@@ -182,7 +184,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Report where we got it from, and when we got it
-	var svc Service
+	var svc ttdata.Service
 	svc.UploadedAt = &UploadedAt
 	requestor, _, abusive := getRequestorIPv4(req)
 	if abusive {

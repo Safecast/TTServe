@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/safecast/ttdata"
 )
 
 // DeviceLogSep is the date/time separator
@@ -28,14 +30,14 @@ func DeviceLogFilename(DeviceUID string, Extension string) string {
 // Note that we don't do this with a goroutine because the serialization is helpful
 // in log-ordering for buffered I/O messages where there are a huge batch of readings
 // that are updated in sequence very quickly.
-func WriteToLogs(sd SafecastData) {
+func WriteToLogs(sd ttdata.SafecastData) {
 	go trackDevice(sd.DeviceUID, sd.DeviceID, time.Now())
 	go WriteDeviceStatus(sd)
 	go JSONDeviceLog(sd)
 }
 
 // JSONDeviceLog writes the value to the log
-func JSONDeviceLog(sd SafecastData) {
+func JSONDeviceLog(sd ttdata.SafecastData) {
 
 	file := DeviceLogFilename(sd.DeviceUID, ".json")
 
@@ -67,7 +69,7 @@ func JSONDeviceLog(sd SafecastData) {
 
 	// Turn stats into a safe string writing
 	if sd.Service == nil {
-		var svc Service
+		var svc ttdata.Service
 		sd.Service = &svc
 	}
 	scJSON, _ := json.Marshal(sd)

@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"github.com/safecast/ttdata"
 )
 
 var brokerConnected bool
@@ -45,7 +46,7 @@ func brokerOutboundPublisher() {
 }
 
 // Send to anyone/everyone listening on that MQTT topic
-func brokerPublish(sd SafecastData) {
+func brokerPublish(sd ttdata.SafecastData) {
 
 	// Init
 	if !brokerConnected {
@@ -63,7 +64,6 @@ func brokerPublish(sd SafecastData) {
 
 	// Marshal the safecast data to json
 	scJSON, _ := json.Marshal(sd)
-	//	topic := fmt.Sprintf("device/%s", DeviceUIDFilename(sd.DeviceUID))
 	topic := fmt.Sprintf("device/%s", sd.DeviceUID)
 	if token := brokerMqttClient.Publish(topic, 0, false, scJSON); token.Wait() && token.Error() != nil {
 		fmt.Printf("broker: %s\n", token.Error())

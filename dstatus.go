@@ -16,17 +16,18 @@ import (
 	"time"
 
 	"github.com/blues/note-go/note"
+	"github.com/safecast/ttdata"
 )
 
 // DeviceStatus is the data structure for the "Device Status" files
 type DeviceStatus struct {
-	SafecastData    `json:"current_values,omitempty"`
-	LocationHistory [5]SafecastData `json:"location_history,omitempty"`
-	GeigerHistory   [5]SafecastData `json:"geiger_history,omitempty"`
-	OpcHistory      [5]SafecastData `json:"opc_history,omitempty"`
-	PmsHistory      [5]SafecastData `json:"pms_history,omitempty"`
-	Pms2History     [5]SafecastData `json:"pms2_history,omitempty"`
-	IPInfo          IPInfoData      `json:"transport_ip_info,omitempty"`
+	ttdata.SafecastData `json:"current_values,omitempty"`
+	LocationHistory     [5]ttdata.SafecastData `json:"location_history,omitempty"`
+	GeigerHistory       [5]ttdata.SafecastData `json:"geiger_history,omitempty"`
+	OpcHistory          [5]ttdata.SafecastData `json:"opc_history,omitempty"`
+	PmsHistory          [5]ttdata.SafecastData `json:"pms_history,omitempty"`
+	Pms2History         [5]ttdata.SafecastData `json:"pms2_history,omitempty"`
+	IPInfo              IPInfoData             `json:"transport_ip_info,omitempty"`
 }
 
 // ReadDeviceStatus gets the current value
@@ -82,7 +83,7 @@ func ReadDeviceStatus(deviceUID string) (isAvail bool, isReset bool, sv DeviceSt
 }
 
 // WriteDeviceStatus saves the last value in a file
-func WriteDeviceStatus(sc SafecastData) {
+func WriteDeviceStatus(sc ttdata.SafecastData) {
 	var ChangedLoc = false
 	var ChangedPms = false
 	var ChangedPms2 = false
@@ -104,7 +105,7 @@ func WriteDeviceStatus(sc SafecastData) {
 
 	// Use the supplied upload time as our modification time
 	if sc.Service == nil {
-		var svc Service
+		var svc ttdata.Service
 		sc.Service = &svc
 	}
 
@@ -145,7 +146,7 @@ func WriteDeviceStatus(sc SafecastData) {
 			}
 			if si.Dashboard != "" {
 				if value.Dev == nil {
-					value.Dev = &(Dev{})
+					value.Dev = &(ttdata.Dev{})
 				}
 				value.Dev.Dashboard = &si.Dashboard
 			}
@@ -155,7 +156,7 @@ func WriteDeviceStatus(sc SafecastData) {
 	// Update the current values, but only if modified
 	if sc.Service != nil && sc.Service.UploadedAt != nil {
 		if value.Service == nil {
-			var svc Service
+			var svc ttdata.Service
 			value.Service = &svc
 		}
 		value.Service.UploadedAt = sc.Service.UploadedAt
@@ -164,7 +165,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		value.CapturedAt = sc.CapturedAt
 	}
 	if sc.Bat != nil {
-		var bat Bat
+		var bat ttdata.Bat
 		if value.Bat == nil {
 			value.Bat = &bat
 		}
@@ -179,7 +180,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		}
 	}
 	if sc.Env != nil {
-		var env Env
+		var env ttdata.Env
 		if value.Env == nil {
 			value.Env = &env
 		}
@@ -194,7 +195,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		}
 	}
 	if sc.Gateway != nil {
-		var gate Gateway
+		var gate ttdata.Gateway
 		if value.Gateway == nil {
 			value.Gateway = &gate
 		}
@@ -215,7 +216,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		}
 	}
 	if sc.Service != nil {
-		var svc Service
+		var svc ttdata.Service
 		if value.Service == nil {
 			value.Service = &svc
 		}
@@ -224,7 +225,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		}
 	}
 	if sc.Loc != nil {
-		var loc Loc
+		var loc ttdata.Loc
 		if value.Loc == nil {
 			value.Loc = &loc
 		}
@@ -238,7 +239,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		}
 	}
 	if sc.Pms != nil {
-		var pms Pms
+		var pms ttdata.Pms
 		if value.Pms == nil {
 			value.Pms = &pms
 		}
@@ -296,7 +297,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		}
 	}
 	if sc.Pms2 != nil {
-		var pms2 Pms2
+		var pms2 ttdata.Pms2
 		if value.Pms2 == nil {
 			value.Pms2 = &pms2
 		}
@@ -354,7 +355,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		}
 	}
 	if sc.Opc != nil {
-		var opc Opc
+		var opc ttdata.Opc
 		if value.Opc == nil {
 			value.Opc = &opc
 		}
@@ -412,7 +413,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		}
 	}
 	if sc.Lnd != nil {
-		var lnd Lnd
+		var lnd ttdata.Lnd
 		if value.Lnd == nil {
 			value.Lnd = &lnd
 		}
@@ -468,7 +469,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		}
 	}
 	if sc.Dev != nil {
-		var dev Dev
+		var dev ttdata.Dev
 		if value.Dev == nil {
 			value.Dev = &dev
 		}
@@ -730,7 +731,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		for i := len(value.LocationHistory) - 1; i > 0; i-- {
 			value.LocationHistory[i] = value.LocationHistory[i-1]
 		}
-		new := SafecastData{}
+		new := ttdata.SafecastData{}
 		new.DeviceID = value.DeviceID
 		new.DeviceUID = value.DeviceUID
 		new.DeviceSN = value.DeviceSN
@@ -744,7 +745,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		for i := len(value.PmsHistory) - 1; i > 0; i-- {
 			value.PmsHistory[i] = value.PmsHistory[i-1]
 		}
-		new := SafecastData{}
+		new := ttdata.SafecastData{}
 		new.DeviceID = value.DeviceID
 		new.DeviceUID = value.DeviceUID
 		new.DeviceSN = value.DeviceSN
@@ -758,7 +759,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		for i := len(value.Pms2History) - 1; i > 0; i-- {
 			value.Pms2History[i] = value.Pms2History[i-1]
 		}
-		new := SafecastData{}
+		new := ttdata.SafecastData{}
 		new.DeviceID = value.DeviceID
 		new.DeviceUID = value.DeviceUID
 		new.DeviceSN = value.DeviceSN
@@ -772,7 +773,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		for i := len(value.OpcHistory) - 1; i > 0; i-- {
 			value.OpcHistory[i] = value.OpcHistory[i-1]
 		}
-		new := SafecastData{}
+		new := ttdata.SafecastData{}
 		new.DeviceID = value.DeviceID
 		new.DeviceUID = value.DeviceUID
 		new.DeviceSN = value.DeviceSN
@@ -786,7 +787,7 @@ func WriteDeviceStatus(sc SafecastData) {
 		for i := len(value.GeigerHistory) - 1; i > 0; i-- {
 			value.GeigerHistory[i] = value.GeigerHistory[i-1]
 		}
-		new := SafecastData{}
+		new := ttdata.SafecastData{}
 		new.DeviceID = value.DeviceID
 		new.DeviceUID = value.DeviceUID
 		new.DeviceSN = value.DeviceSN

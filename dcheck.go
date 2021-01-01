@@ -10,6 +10,8 @@ import (
 	"math"
 	"strings"
 	"time"
+
+	"github.com/safecast/ttdata"
 )
 
 // GOALS:
@@ -282,7 +284,7 @@ func NewMeasurementDataset() MeasurementDataset {
 }
 
 // CheckMeasurement verifies an individual measurement
-func CheckMeasurement(sd SafecastData) MeasurementStat {
+func CheckMeasurement(sd ttdata.SafecastData) MeasurementStat {
 	stat := MeasurementStat{}
 
 	// Ignore old-format data that didn't have service_uploaded

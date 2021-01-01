@@ -13,6 +13,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/safecast/ttdata"
 )
 
 // Handle inbound HTTP requests to do a quick analysis of a device's log file
@@ -66,7 +68,7 @@ func CheckJSON(infile string) (success bool, result string) {
 		// Unmarshal it.  Badly-formatted json occasionally occurs because of
 		// concurrent file writes to the log from different process instances,
 		// but this is rare - so no worry.
-		value := SafecastData{}
+		value := ttdata.SafecastData{}
 		err = json.Unmarshal([]byte(clean), &value)
 		if err != nil {
 			fmt.Printf("CHECK: error unmarshaling data: %s\n", err)
