@@ -136,7 +136,8 @@ func main() {
 	// Spawn the broker publisher
 	// DISABLED 2020-08 by Ray because CloudMQTT got rid of their free plan
 	// and it doesn't appear that anyone was using this feature of ttserve.
-	if false {
+	// ENABLED 2021-01 by Ray so that we can try building "safecast audio"
+	if true {
 		go brokerOutboundPublisher()
 	}
 
