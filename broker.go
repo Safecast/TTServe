@@ -63,7 +63,8 @@ func brokerPublish(sd SafecastData) {
 
 	// Marshal the safecast data to json
 	scJSON, _ := json.Marshal(sd)
-	topic := fmt.Sprintf("device/%s", DeviceUIDFilename(sd.DeviceUID))
+	//	topic := fmt.Sprintf("device/%s", DeviceUIDFilename(sd.DeviceUID))
+	topic := fmt.Sprintf("device/%s", sd.DeviceUID)
 	if token := brokerMqttClient.Publish(topic, 0, false, scJSON); token.Wait() && token.Error() != nil {
 		fmt.Printf("broker: %s\n", token.Error())
 	}
