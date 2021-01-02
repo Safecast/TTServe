@@ -138,7 +138,7 @@ func WriteDeviceStatus(sc ttdata.SafecastData) {
 				if si.Custodian != "" {
 					value.DeviceContactName = si.Custodian
 				}
-				if si.CustodianContact == "" {
+				if si.CustodianContact != "" {
 					value.DeviceContactEmail = si.CustodianContact
 				}
 			}
