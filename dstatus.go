@@ -153,6 +153,22 @@ func WriteDeviceStatus(sc ttdata.SafecastData) {
 		}
 	}
 
+	// Generate a synthetic dashboard url
+	notePrefix := "note:dev:"
+	if strings.HasPrefix(value.DeviceUID, notePrefix) {
+		if value.Dev == nil {
+			value.Dev = &(ttdata.Dev{})
+		}
+		if value.Dev.Dashboard == nil {
+			s := ""
+			value.Dev.Dashboard = &s
+		}
+		if *value.Dev.Dashboard == "" {
+			url := "http://qrgo.org/ID/" + strings.TrimPrefix(value.DeviceUID, notePrefix)
+			value.Dev.Dashboard = &url
+		}
+	}
+
 	// Update the current values, but only if modified
 	if sc.Service != nil && sc.Service.UploadedAt != nil {
 		if value.Service == nil {
