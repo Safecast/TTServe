@@ -8,8 +8,8 @@ package main
 import (
 	"fmt"
 
+	ttproto "github.com/Safecast/ttproto/golang"
 	"github.com/golang/protobuf/proto"
-	ttproto "github.com/safecast/ttproto/golang"
 )
 
 // IncomingAppReq is the common request format that we process as a goroutine

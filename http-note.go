@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
+	ttdata "github.com/Safecast/TTDefs"
 	"github.com/blues/note-go/note"
-	"github.com/safecast/ttdata"
 )
 
 // Schemas for the different file types
@@ -217,11 +217,11 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 	sd.DeviceClass = e.ProductUID
 
 	// Optional device contact info, for accountability
-	sd.DeviceContact = e.DeviceContact
-
-	// Optional app source, for accountability on every data point
-	if false {
-		sd.Source = e.App
+	if e.DeviceContact != nil {
+		sd.DeviceContactName = e.DeviceContact.Name
+		sd.DeviceContactOrg = e.DeviceContact.Affiliation
+		sd.DeviceContactRole = e.DeviceContact.Role
+		sd.DeviceContactEmail = e.DeviceContact.Email
 	}
 
 	// When captured on the device

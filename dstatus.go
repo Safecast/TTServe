@@ -15,8 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blues/note-go/note"
-	"github.com/safecast/ttdata"
+	ttdata "github.com/Safecast/TTDefs"
 )
 
 // DeviceStatus is the data structure for the "Device Status" files
@@ -125,23 +124,22 @@ func WriteDeviceStatus(sc ttdata.SafecastData) {
 	value.DeviceUID = sc.DeviceUID
 	value.DeviceClass = sc.DeviceClass
 	value.DeviceSN = sc.DeviceSN
-	value.DeviceContact = sc.DeviceContact
-	value.Source = sc.Source
 	value.DeviceID = sc.DeviceID
+	value.DeviceContactName = sc.DeviceContactName
+	value.DeviceContactOrg = sc.DeviceContactOrg
+	value.DeviceContactRole = sc.DeviceContactRole
+	value.DeviceContactEmail = sc.DeviceContactEmail
 
 	// Copy extra info from the sheet
 	if value.DeviceID != 0 || value.DeviceSN != "" {
 		si, err := sheetDeviceInfo(value.DeviceID, value.DeviceSN)
 		if err == nil {
 			if si.Custodian != "" || si.CustodianContact != "" {
-				if value.DeviceContact == nil {
-					value.DeviceContact = &(note.EventContact{})
-				}
 				if si.Custodian != "" {
-					value.DeviceContact.Name = si.Custodian
+					value.DeviceContactName = si.Custodian
 				}
 				if si.CustodianContact == "" {
-					value.DeviceContact.Email = si.CustodianContact
+					value.DeviceContactEmail = si.CustodianContact
 				}
 			}
 			if si.Dashboard != "" {

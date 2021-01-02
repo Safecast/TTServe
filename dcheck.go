@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/safecast/ttdata"
+	ttdata "github.com/Safecast/TTDefs"
 )
 
 // GOALS:

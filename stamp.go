@@ -16,7 +16,7 @@ import (
 	"os"
 	"sync"
 
-	ttproto "github.com/safecast/ttproto/golang"
+	ttproto "github.com/Safecast/ttproto/golang"
 )
 
 // Debugging

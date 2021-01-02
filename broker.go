@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	ttdata "github.com/Safecast/TTDefs"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/safecast/ttdata"
 )
 
 var brokerConnected bool

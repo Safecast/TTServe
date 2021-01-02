@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/safecast/ttdata"
+	ttdata "github.com/Safecast/TTDefs"
 )
 
 // Handle inbound HTTP requests to do a quick analysis of a device's log file

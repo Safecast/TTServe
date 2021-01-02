@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
+	ttdata "github.com/Safecast/TTDefs"
 	olc "github.com/google/open-location-code/go"
-	"github.com/safecast/ttdata"
 )
 
 // SafecastDeviceIsSolarcastNano determines if this is a Solarcast Nano

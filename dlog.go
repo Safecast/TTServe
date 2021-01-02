@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/safecast/ttdata"
+	ttdata "github.com/Safecast/TTDefs"
 )
 
 // DeviceLogSep is the date/time separator
