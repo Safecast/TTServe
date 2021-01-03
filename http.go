@@ -31,7 +31,6 @@ func HTTPInboundHandler() {
 	// Spin up misc handlers
 	http.HandleFunc(TTServerTopicRoot1, inboundWebRootHandler)
 	http.HandleFunc(TTServerTopicRoot2, inboundWebRootHandler)
-	//	http.HandleFunc(TTServerTopicID, inboundWebIDHandler)
 	http.HandleFunc(TTServerTopicDevices, inboundWebDevicesHandler)
 	http.HandleFunc(TTServerTopicDeviceLog, inboundWebDeviceLogHandler)
 	http.HandleFunc(TTServerTopicDeviceCheck, inboundWebDeviceCheckHandler)
@@ -45,6 +44,7 @@ func HTTPInboundHandler() {
 	http.HandleFunc(TTServerTopicNoteTest, inboundWebNoteHandlerTest)
 	http.HandleFunc(TTServerTopicRedirect1, inboundWebRedirectHandler)
 	http.HandleFunc(TTServerTopicRedirect2, inboundWebRedirectHandler)
+	//	http.HandleFunc(TTServerTopicID, inboundWebIDHandler)
 
 	// Listen on the alternate HTTP port
 	go func() {
