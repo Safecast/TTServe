@@ -137,7 +137,7 @@ const TTServerUDPPort string = ":8081"
 const TTServerTCPPort string = ":8082"
 
 // TTServerTopicDevice (here for golint)
-const TTServerTopicDevice string = "/device/"
+const TTServerTopicDevice string = "/id/"
 
 // TTServerTopicDevices (here for golint)
 const TTServerTopicDevices string = "/devices"
