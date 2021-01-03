@@ -44,16 +44,16 @@ func HTTPInboundHandler() {
 	http.HandleFunc(TTServerTopicNoteTest, inboundWebNoteHandlerTest)
 	http.HandleFunc(TTServerTopicRedirect1, inboundWebRedirectHandler)
 	http.HandleFunc(TTServerTopicRedirect2, inboundWebRedirectHandler)
-	//	http.HandleFunc(TTServerTopicID, inboundWebIDHandler)
+	http.HandleFunc(TTServerTopicID, inboundWebIDHandler)
 
 	// Listen on the alternate HTTP port
 	go func() {
-		fmt.Printf("Now handling inbound HTTP on %s\n", TTServerHTTPPortAlternate)
+		fmt.Printf("Now handling inbound HTTP on %s:%s\n", ThisServerAddressIPv4, TTServerHTTPPortAlternate)
 		http.ListenAndServe(TTServerHTTPPortAlternate, nil)
 	}()
 
 	// Listen on the primary HTTP port
-	fmt.Printf("Now handling inbound HTTP on %s\n", TTServerHTTPPort)
+	fmt.Printf("Now handling inbound HTTP on %s:%s\n", ThisServerAddressIPv4, TTServerHTTPPort)
 	http.ListenAndServe(TTServerHTTPPort, nil)
 
 }
