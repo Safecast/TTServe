@@ -15,7 +15,7 @@ import (
 // TCPInboundHandler kicks off TCP single-upload request server
 func TCPInboundHandler() {
 
-	fmt.Printf("Now handling inbound TCP on %s\n", TTServerTCPPort)
+	fmt.Printf("Now handling inbound TCP on %s%s\n", ThisServerAddressIPv4, TTServerTCPPort)
 
 	ServerAddr, err := net.ResolveTCPAddr("tcp", TTServerTCPPort)
 	if err != nil {
