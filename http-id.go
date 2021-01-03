@@ -12,11 +12,11 @@ import (
 )
 
 // Handle inbound HTTP requests to redirect to a device info page
-func inboundWebDeviceHandler(rw http.ResponseWriter, req *http.Request) {
+func inboundWebIDHandler(rw http.ResponseWriter, req *http.Request) {
 	stats.Count.HTTP++
 
 	// Extract the deviceUID
-	deviceUID := req.RequestURI[len(TTServerTopicDevice):]
+	deviceUID := req.RequestURI[len(TTServerTopicID):]
 
 	// Read the device status
 	isAvail, isReset, ds := ReadDeviceStatus(deviceUID)

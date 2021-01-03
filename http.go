@@ -31,7 +31,7 @@ func HTTPInboundHandler() {
 	// Spin up misc handlers
 	http.HandleFunc(TTServerTopicRoot1, inboundWebRootHandler)
 	http.HandleFunc(TTServerTopicRoot2, inboundWebRootHandler)
-	http.HandleFunc(TTServerTopicDevice, inboundWebDeviceHandler)
+	http.HandleFunc(TTServerTopicID, inboundWebIDHandler)
 	http.HandleFunc(TTServerTopicDevices, inboundWebDevicesHandler)
 	http.HandleFunc(TTServerTopicDeviceLog, inboundWebDeviceLogHandler)
 	http.HandleFunc(TTServerTopicDeviceCheck, inboundWebDeviceCheckHandler)
