@@ -36,8 +36,15 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Extract template
-	template, _ := args["template"]
-	fmt.Printf("template:\n%s\n", template)
+	templateJSON, _ := args["template"]
+	var template map[string]interface{}
+	if templateJSON != "" {
+		err = json.Unmarshal([]byte(templateJSON), &template)
+		if err != nil {
+			io.WriteString(rw, fmt.Sprintf("%s", err))
+			return
+		}
+	}
 
 	// Get the filters
 	filterClass := args["class"]
@@ -51,6 +58,7 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// Generate this array
 	var allStatus []ttdata.SafecastData
+	var allStatusTemplated []map[string]interface{}
 
 	// Iterate over each of the values
 	for _, file := range files {
@@ -88,6 +96,21 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 		// Copy only the "current values" to the output, not the historical data
 		allStatus = append(allStatus, dstatus.SafecastData)
 
+		// If there's a template, convert it
+		if templateJSON != "" {
+			dJSON, _ := json.Marshal(dstatus.SafecastData)
+			var d map[string]interface{}
+			json.Unmarshal(dJSON, &d)
+			t := template
+			for k := range template {
+				n, exists := d[k]
+				if exists {
+					t[k] = n
+				}
+			}
+			allStatusTemplated = append(allStatusTemplated, t)
+		}
+
 		// Stop if we're processing count
 		if count > 0 {
 			count--
@@ -99,12 +122,17 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Marshal it
-	allStatusJSON, _ := json.Marshal(allStatus)
+	var allJSON []byte
+	if templateJSON == "" {
+		allJSON, _ = json.Marshal(allStatus)
+	} else {
+		allJSON, _ = json.Marshal(allStatusTemplated)
+	}
 
 	// Tell the caller that it's JSON
 	rw.Header().Set("Content-Type", "application/json")
 
 	// Output it
-	io.WriteString(rw, string(allStatusJSON))
+	io.WriteString(rw, string(allJSON))
 
 }
