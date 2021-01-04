@@ -41,6 +41,9 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	if templateJSON != "" {
 		err = json.Unmarshal([]byte(templateJSON), &template)
 		if err != nil {
+			fmt.Printf("/////\n")
+			fmt.Printf("%s\n", templateJSON)
+			fmt.Printf("/////\n")
 			io.WriteString(rw, fmt.Sprintf("%s", err))
 			return
 		}
