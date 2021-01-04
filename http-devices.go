@@ -35,6 +35,10 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 		offset = 0
 	}
 
+	// Extract template
+	template, _ := args["template"]
+	fmt.Printf("template:\n%s\n", template)
+
 	// Get the filters
 	filterClass := args["class"]
 
