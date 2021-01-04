@@ -104,7 +104,7 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 			dJSON, _ := json.Marshal(dstatus.SafecastData)
 			var d map[string]interface{}
 			json.Unmarshal(dJSON, &d)
-			var t map[string]interface{}
+			t := map[string]interface{}{}
 			for k, v := range template {
 				n, exists := d[k]
 				if exists {
