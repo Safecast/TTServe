@@ -45,6 +45,7 @@ func HTTPInboundHandler() {
 	http.HandleFunc(TTServerTopicRedirect1, inboundWebRedirectHandler)
 	http.HandleFunc(TTServerTopicRedirect2, inboundWebRedirectHandler)
 	http.HandleFunc(TTServerTopicID, inboundWebIDHandler)
+	http.HandleFunc(TTServerTopicMAP, inboundWebMAPHandler)
 
 	// Listen on the alternate HTTP port
 	go func() {

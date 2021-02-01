@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-// Handle inbound HTTP requests to redirect to a device info page
-func inboundWebIDHandler(rw http.ResponseWriter, req *http.Request) {
+// Handle inbound HTTP requests to redirect to a map page for the class of this device
+func inboundWebMAPHandler(rw http.ResponseWriter, req *http.Request) {
 	stats.Count.HTTP++
 
 	// Extract the deviceUID
-	deviceUID := req.RequestURI[len(TTServerTopicID):]
+	deviceUID := req.RequestURI[len(TTServerTopicMAP):]
 
 	// Read the device status
 	isAvail, isReset, ds := ReadDeviceStatus(deviceUID)
@@ -38,7 +38,7 @@ func inboundWebIDHandler(rw http.ResponseWriter, req *http.Request) {
 	case "ngeigie":
 		fallthrough
 	case "":
-		url = "https://grafana.safecast.cc/d/DFSxrOLWk/safecast-device-details?orgId=1&from=now-7d&to=now&refresh=15m&var-device_urn=" + deviceUID
+		url = "https://map.safecast.org"
 
 	case "product:org.airnote.solar.rad.v1":
 		fallthrough
@@ -47,7 +47,7 @@ func inboundWebIDHandler(rw http.ResponseWriter, req *http.Request) {
 	case "product:com.blues.airnote":
 		fallthrough
 	case "product:org.airnote.solar.v1":
-		url = "https://grafana.safecast.cc/d/7wsttvxGk/airnote-device-details?orgId=1&var-device_urn=" + deviceUID
+		url = "https://grafana.safecast.cc/d/t_Z6DlbGz/safecast-all-airnotes?orgId=1"
 
 	default:
 		io.WriteString(rw, fmt.Sprintf("class %s for device %s is not recognized", ds.DeviceClass, deviceUID))
