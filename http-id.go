@@ -41,7 +41,8 @@ func inboundWebIDHandler(rw http.ResponseWriter, req *http.Request) {
 		url = "https://grafana.safecast.cc/d/DFSxrOLWk/safecast-device-details?orgId=1&from=now-7d&to=now&refresh=15m&var-device_urn=" + deviceUID
 
 	case "product:org.airnote.solar.rad.v1":
-		fallthrough
+		url = "https://grafana.safecast.cc/d/ndnJJuYMk/safecast-radnote?orgId=1&var-device_urn=" + deviceUID
+
 	case "product:org.airnote.solar.air.v1":
 		fallthrough
 	case "product:com.blues.airnote":
