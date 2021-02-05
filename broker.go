@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	ttdata "github.com/Safecast/TTDefs"
+	ttdata "github.com/Safecast/ttdefs"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
 

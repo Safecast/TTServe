@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	ttdata "github.com/Safecast/TTDefs"
+	ttdata "github.com/Safecast/ttdefs"
 	"github.com/blues/note-go/note"
 )
 
@@ -68,6 +68,8 @@ type sensorAIR struct {
 	Press      *float64 `json:"pressure,omitempty"`
 	Charging   *bool    `json:"charging,omitempty"`
 	USB        *bool    `json:"usb,omitempty"`
+	CPM        float64  `json:"cpm,omitempty"`
+	USV        float64  `json:"usv,omitempty"`
 }
 type sensorTRACK struct {
 	Lat      float64 `json:"lat,omitempty"`
@@ -290,20 +292,28 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 		if err != nil {
 			return
 		}
-		var pms ttdata.Pms
-		pms.Pm01_0 = &s.Pm01_0
-		pms.Pm02_5 = &s.Pm02_5
-		pms.Pm10_0 = &s.Pm10_0
-		pms.Count00_30 = &s.Count00_30
-		pms.Count00_50 = &s.Count00_50
-		pms.Count01_00 = &s.Count01_00
-		pms.Count02_50 = &s.Count02_50
-		pms.Count05_00 = &s.Count05_00
-		pms.Count10_00 = &s.Count10_00
-		pms.CountSecs = &s.CountSecs
-		pms.Samples = &s.Samples
-		pms.Model = &s.Model
-		sd.Pms = &pms
+		switch s.Model {
+		case "lnd712":
+			var lnd ttdata.Lnd
+			lnd.U712 = &s.CPM
+			lnd.USv = &s.USV
+			sd.Lnd = &lnd
+		default:
+			var pms ttdata.Pms
+			pms.Pm01_0 = &s.Pm01_0
+			pms.Pm02_5 = &s.Pm02_5
+			pms.Pm10_0 = &s.Pm10_0
+			pms.Count00_30 = &s.Count00_30
+			pms.Count00_50 = &s.Count00_50
+			pms.Count01_00 = &s.Count01_00
+			pms.Count02_50 = &s.Count02_50
+			pms.Count05_00 = &s.Count05_00
+			pms.Count10_00 = &s.Count10_00
+			pms.CountSecs = &s.CountSecs
+			pms.Samples = &s.Samples
+			pms.Model = &s.Model
+			sd.Pms = &pms
+		}
 		if s.Voltage != nil {
 			var bat ttdata.Bat
 			bat.Voltage = s.Voltage

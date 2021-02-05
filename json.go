@@ -10,7 +10,7 @@ import (
 	"io"
 	"os"
 
-	ttdata "github.com/Safecast/TTDefs"
+	ttdata "github.com/Safecast/ttdefs"
 )
 
 func jsonOpen(filename string) (*os.File, error) {

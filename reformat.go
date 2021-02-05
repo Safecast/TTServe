@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	ttdata "github.com/Safecast/TTDefs"
+	ttdata "github.com/Safecast/ttdefs"
 	olc "github.com/google/open-location-code/go"
 )
 

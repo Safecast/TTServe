@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"strings"
 
-	ttdata "github.com/Safecast/TTDefs"
+	ttdata "github.com/Safecast/ttdefs"
 )
 
 // Debugging

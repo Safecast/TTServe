@@ -14,7 +14,7 @@ import (
 	"regexp"
 	"strconv"
 
-	ttdata "github.com/Safecast/TTDefs"
+	ttdata "github.com/Safecast/ttdefs"
 )
 
 // Handle inbound HTTP requests to fetch the entire list of devices
