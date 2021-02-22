@@ -238,19 +238,26 @@ func WriteDeviceStatus(sc ttdata.SafecastData) {
 			value.Service.Transport = sc.Service.Transport
 		}
 	}
-	if sc.Loc != nil {
+	if sc.Loc != nil && sc.Loc.Lat != nil && sc.Loc.Lon != nil {
 		var loc ttdata.Loc
 		if value.Loc == nil {
 			value.Loc = &loc
 		}
+		var lat, lon float64
+		if value.Loc.Lat == nil {
+			value.Loc.Lat = &lat
+		}
+		if value.Loc.Lon == nil {
+			value.Loc.Lon = &lon
+		}
 		// Don't overwrite a good lat/lon with an unsupplied lat/lon
-		if sc.Loc.Lat != nil && sc.Loc.Lon != nil && !(*sc.Loc.Lat == 0.0 && *sc.Loc.Lon == 0.0) {
-			if sc.Loc.Lat != nil && (value.Loc.Lat == nil || *value.Loc.Lat != *sc.Loc.Lat) {
+		if *sc.Loc.Lat != 0.0 || *sc.Loc.Lon != 0.0 {
+			if *value.Loc.Lat != *sc.Loc.Lat || *value.Loc.Lon != *sc.Loc.Lon {
 				value.Loc.Lat = sc.Loc.Lat
-				ChangedLoc = true
-			}
-			if sc.Loc.Lon != nil && (value.Loc.Lon == nil || *value.Loc.Lon != *sc.Loc.Lon) {
 				value.Loc.Lon = sc.Loc.Lon
+				value.Loc.LocName = sc.Loc.LocName
+				value.Loc.LocCountry = sc.Loc.LocCountry
+				value.Loc.LocZone = sc.Loc.LocZone
 				ChangedLoc = true
 			}
 		}
