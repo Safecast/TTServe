@@ -243,13 +243,16 @@ func WriteDeviceStatus(sc ttdata.SafecastData) {
 		if value.Loc == nil {
 			value.Loc = &loc
 		}
-		if sc.Loc.Lat != nil && (value.Loc.Lat == nil || *value.Loc.Lat != *sc.Loc.Lat) {
-			value.Loc.Lat = sc.Loc.Lat
-			ChangedLoc = true
-		}
-		if sc.Loc.Lon != nil && (value.Loc.Lon == nil || *value.Loc.Lon != *sc.Loc.Lon) {
-			value.Loc.Lon = sc.Loc.Lon
-			ChangedLoc = true
+		// Don't overwrite a good lat/lon with an unsupplied lat/lon
+		if sc.Loc.Lat != nil && sc.Loc.Lon != nil && !(*sc.Loc.Lat == 0.0 && *sc.Loc.Lon == 0.0) {
+			if sc.Loc.Lat != nil && (value.Loc.Lat == nil || *value.Loc.Lat != *sc.Loc.Lat) {
+				value.Loc.Lat = sc.Loc.Lat
+				ChangedLoc = true
+			}
+			if sc.Loc.Lon != nil && (value.Loc.Lon == nil || *value.Loc.Lon != *sc.Loc.Lon) {
+				value.Loc.Lon = sc.Loc.Lon
+				ChangedLoc = true
+			}
 		}
 	}
 	if sc.Pms != nil {
