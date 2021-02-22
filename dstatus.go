@@ -250,14 +250,21 @@ func WriteDeviceStatus(sc ttdata.SafecastData) {
 		if value.Loc.Lon == nil {
 			value.Loc.Lon = &lon
 		}
+		var locname string
+		if value.Loc.LocName == nil {
+			value.Loc.LocName = &locname
+		}
 		// Don't overwrite a good lat/lon with an unsupplied lat/lon
 		if *sc.Loc.Lat != 0.0 || *sc.Loc.Lon != 0.0 {
+			value.Loc.Lat = sc.Loc.Lat
+			value.Loc.Lon = sc.Loc.Lon
+			value.Loc.LocName = sc.Loc.LocName
+			value.Loc.LocCountry = sc.Loc.LocCountry
+			value.Loc.LocZone = sc.Loc.LocZone
 			if *value.Loc.Lat != *sc.Loc.Lat || *value.Loc.Lon != *sc.Loc.Lon {
-				value.Loc.Lat = sc.Loc.Lat
-				value.Loc.Lon = sc.Loc.Lon
-				value.Loc.LocName = sc.Loc.LocName
-				value.Loc.LocCountry = sc.Loc.LocCountry
-				value.Loc.LocZone = sc.Loc.LocZone
+				ChangedLoc = true
+			}
+			if sc.Loc.LocName != nil && *value.Loc.LocName != *sc.Loc.LocName {
 				ChangedLoc = true
 			}
 		}
