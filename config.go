@@ -136,11 +136,17 @@ const TTServerUDPPort string = ":8081"
 // TTServerTCPPort (here for golint)
 const TTServerTCPPort string = ":8082"
 
-// TTServerTopicID (here for golint)
+// TTServerTopicID (here for golint) [DEPRECATED]
 const TTServerTopicID string = "/id/"
 
-// TTServerTopicMAP (here for golint)
-const TTServerTopicMAP string = "/map/"
+// TTServerTopicDashboard (here for golint)
+const TTServerTopicDashboard string = "/dashboard/"
+
+// TTServerTopicProfile (here for golint)
+const TTServerTopicProfile string = "/profile/"
+
+// TTServerTopicMap (here for golint)
+const TTServerTopicMap string = "/map/"
 
 // TTServerTopicDevices (here for golint)
 const TTServerTopicDevices string = "/devices"
