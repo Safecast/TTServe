@@ -62,7 +62,7 @@ func webPageRedirectHandler(rw http.ResponseWriter, req *http.Request, deviceUID
 		case deviceMap:
 			url = "https://map.safecast.org"
 		case deviceProfile:
-			url = "https://api.safecast.org/en-US/device_stories/" + deviceUID
+			url = "https://dev.safecast.org/en-US/device_stories/" + deviceUID
 		}
 
 	case "product:org.airnote.solar.rad.v1":
@@ -72,7 +72,7 @@ func webPageRedirectHandler(rw http.ResponseWriter, req *http.Request, deviceUID
 		case deviceMap:
 			url = "https://grafana.safecast.cc/d/t_Z6DlbGz/safecast-all-airnotes?orgId=1"
 		case deviceProfile:
-			url = "https://api.safecast.org/en-US/device_stories/" + deviceUID
+			url = "https://dev.safecast.org/en-US/device_stories/" + deviceUID
 		}
 
 	case "product:org.airnote.solar.air.v1":
@@ -86,7 +86,7 @@ func webPageRedirectHandler(rw http.ResponseWriter, req *http.Request, deviceUID
 		case deviceMap:
 			url = "https://grafana.safecast.cc/d/t_Z6DlbGz/safecast-all-airnotes?orgId=1"
 		case deviceProfile:
-			url = "https://api.safecast.org/en-US/device_stories/" + deviceUID
+			url = "https://dev.safecast.org/en-US/device_stories/" + deviceUID
 		}
 
 	default:
