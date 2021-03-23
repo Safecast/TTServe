@@ -68,6 +68,7 @@ type sensorAIR struct {
 	Press      *float64 `json:"pressure,omitempty"`
 	Charging   *bool    `json:"charging,omitempty"`
 	USB        *bool    `json:"usb,omitempty"`
+	Indoors    *bool    `json:"indoors,omitempty"`
 	CPM        float64  `json:"cpm,omitempty"`
 	USV        float64  `json:"usv,omitempty"`
 }
@@ -313,6 +314,10 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 			pms.Samples = &s.Samples
 			pms.Model = &s.Model
 			sd.Pms = &pms
+		}
+		if s.Indoors != nil {
+			indoors := true
+			sd.Dev.Indoors = &indoors
 		}
 		if s.Voltage != nil {
 			var bat ttdata.Bat
