@@ -53,7 +53,7 @@ echo 'deb http://apt.newrelic.com/debian/ newrelic non-free' | sudo tee /etc/apt
 wget -O- https://download.newrelic.com/548C16BF.gpg | sudo apt-key add -
 sudo apt-get update
 sudo apt-get install newrelic-sysmond
-sudo nrsysmond-config --set license_key=70e02ea3d9998dc1289ae8653d1978c9379cf0e5
+sudo nrsysmond-config --set license_key=<key>
 sudo systemctl start newrelic-sysmond
 
 ## Just make sure everything is up to date
