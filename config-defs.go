@@ -8,19 +8,15 @@ package main
 type TTServeConfig struct {
 
 	// TTN
-	TtnAppAccessKey		string		`json:"ttn_app_access_key,omitempty"`
+	TtnAppAccessKey string `json:"ttn_app_access_key,omitempty"`
 
 	// Slack
-	SlackChannels		string		`json:"slack_channels,omitempty"`
-	SlackInboundTokens	string		`json:"slack_inbound_tokens,omitempty"`
-	SlackOutboundUrls	string		`json:"slack_outbound_urls,omitempty"`
-
-	// Postgres
-	SQLInfo				string		`json:"sqlinfo,omitempty"`
+	SlackChannels      string `json:"slack_channels,omitempty"`
+	SlackInboundTokens string `json:"slack_inbound_tokens,omitempty"`
+	SlackOutboundUrls  string `json:"slack_outbound_urls,omitempty"`
 
 	// AWS IOT MQTT Broker
-	BrokerHost			string		`json:"broker_host,omitempty"`
-	BrokerUsername		string		`json:"broker_username,omitempty"`
-	BrokerPassword		string		`json:"broker_password,omitempty"`
-
+	BrokerHost     string `json:"broker_host,omitempty"`
+	BrokerUsername string `json:"broker_username,omitempty"`
+	BrokerPassword string `json:"broker_password,omitempty"`
 }
