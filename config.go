@@ -80,6 +80,9 @@ const TTConfigPath = "/config/config.json"
 // TTDeviceLogPath (here for golint)
 const TTDeviceLogPath = "/device-log"
 
+// TTFilePath (here for golint)
+const TTFilePath = "/files"
+
 // TTDeviceStampPath (here for golint)
 const TTDeviceStampPath = "/device-stamp"
 
@@ -162,6 +165,9 @@ const TTServerTopicRoot2 string = "/index.htm"
 
 // TTServerTopicDeviceLog (here for golint)
 const TTServerTopicDeviceLog string = "/device-log/"
+
+// TTServerTopicFile (here for golint)
+const TTServerTopicFile string = "/file/"
 
 // TTServerTopicDeviceCheck (here for golint)
 const TTServerTopicDeviceCheck string = "/check/"

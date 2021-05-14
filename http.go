@@ -33,6 +33,7 @@ func HTTPInboundHandler() {
 	http.HandleFunc(TTServerTopicRoot2, inboundWebRootHandler)
 	http.HandleFunc(TTServerTopicDevices, inboundWebDevicesHandler)
 	http.HandleFunc(TTServerTopicDeviceLog, inboundWebDeviceLogHandler)
+	http.HandleFunc(TTServerTopicFile, inboundWebFileHandler)
 	http.HandleFunc(TTServerTopicDeviceCheck, inboundWebDeviceCheckHandler)
 	http.HandleFunc(TTServerTopicDeviceStatus, inboundWebDeviceStatusHandler)
 	http.HandleFunc(TTServerTopicServerLog, inboundWebServerLogHandler)
