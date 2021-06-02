@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 
 	ttdata "github.com/Safecast/ttdefs"
@@ -16,15 +17,19 @@ func aqiCalculate(sd *ttdata.SafecastData) {
 	var pm float64
 	var aqiNotes, aqiLevel string
 
+	fmt.Printf("calc\n")
 	// Perform calculations based on sensor type
 	if sd.Opc != nil && sd.Opc.Pm02_5 != nil {
+		fmt.Printf("calc opc\n")
 		pm, aqiNotes = adjustForHumidity(sd, *sd.Opc.Pm02_5, ttdata.AqiCFEN481)
 		aqi, aqiLevel = pmToAqi(pm)
 		sd.Opc.AqiLevel = &aqiLevel
 		sd.Opc.AqiNotes = &aqiNotes
 		sd.Opc.Aqi = &aqi
+		fmt.Printf("calc %s %s %d\n", aqiNotes, aqiLevel, aqi)
 	}
 	if sd.Pms2 != nil && sd.Pms2.Pm02_5 != nil {
+		fmt.Printf("calc pms2\n")
 		if sd.Pms2.Pm02_5cf1 != nil {
 			pm, aqiNotes = adjustForHumidity(sd, *sd.Pms2.Pm02_5cf1, ttdata.AqiCF1)
 			aqi, aqiLevel = pmToAqi(pm)
@@ -35,8 +40,10 @@ func aqiCalculate(sd *ttdata.SafecastData) {
 		sd.Pms2.AqiNotes = &aqiNotes
 		sd.Pms2.AqiLevel = &aqiLevel
 		sd.Pms2.Aqi = &aqi
+		fmt.Printf("calc %s %s %d\n", aqiNotes, aqiLevel, aqi)
 	}
 	if sd.Pms != nil && sd.Pms.Pm02_5 != nil {
+		fmt.Printf("calc pms\n")
 		if sd.Pms.Pm02_5cf1 != nil {
 			pm, aqiNotes = adjustForHumidity(sd, *sd.Pms.Pm02_5cf1, ttdata.AqiCF1)
 			aqi, aqiLevel = pmToAqi(pm)
@@ -47,6 +54,7 @@ func aqiCalculate(sd *ttdata.SafecastData) {
 		sd.Pms.AqiNotes = &aqiNotes
 		sd.Pms.AqiLevel = &aqiLevel
 		sd.Pms.Aqi = &aqi
+		fmt.Printf("calc %s %s %d\n", aqiNotes, aqiLevel, aqi)
 	}
 
 	// Done

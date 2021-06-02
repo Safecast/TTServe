@@ -57,10 +57,10 @@ type sensorAIR struct {
 	Count05_00 uint32   `json:"c05_00,omitempty"`
 	Count10_00 uint32   `json:"c10_00,omitempty"`
 	CountSecs  uint32   `json:"csecs,omitempty"`
+	Samples    uint32   `json:"csamples,omitempty"`
 	Pm01_0cf1  *float64 `json:"pm01_0cf1,omitempty"`
 	Pm02_5cf1  *float64 `json:"pm02_5cf1,omitempty"`
 	Pm10_0cf1  *float64 `json:"pm10_0cf1,omitempty"`
-	Samples    uint32   `json:"csamples,omitempty"`
 	Model      string   `json:"sensor,omitempty"`
 	Voltage    *float64 `json:"voltage,omitempty"`
 	TempOLD    *float64 `json:"temp,omitempty"`
