@@ -1,5 +1,7 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/Safecast/safecast-go v0.0.0-20210602192847-dcf96c859f9b h1:P1YmWlYx0s+0Oa6I7KCPRj0TsUi0zlf/a9zasbuCKMg=
+github.com/Safecast/safecast-go v0.0.0-20210602192847-dcf96c859f9b/go.mod h1:h/6q2FGDlL5FrWVzK5cBtbw+rQ2ABpfdmGF407I1PAE=
 github.com/Safecast/ttdefs v0.0.0-20210102040726-c6f519e5fa68 h1:DXQbpepDQJNiBs+egUz/SZ36nKi5TzbgqmXKoZDn6dg=
 github.com/Safecast/ttdefs v0.0.0-20210102040726-c6f519e5fa68/go.mod h1:Hzuy6wcNNrN597yb1ht0Lgc6F5EniaWgEsHy1E3/CFk=
 github.com/Safecast/ttdefs v0.0.0-20210205123347-6f82a736a285 h1:588VLD4vH3nphuNNhJzzRicPuOZDDo2R7V0chVG5qIY=

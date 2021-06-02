@@ -3,7 +3,7 @@ module github.com/Safecast/TTServe
 go 1.12
 
 require (
-	github.com/Safecast/ttdefs v0.0.0-20210602180941-0a74c5b80382
+	github.com/Safecast/safecast-go v0.0.0-20210602192847-dcf96c859f9b
 	github.com/Safecast/ttproto v0.0.0-20180220033412-d66a002deafc
 	github.com/blues/note-go v1.4.5
 	github.com/eclipse/paho.mqtt.golang v1.3.4

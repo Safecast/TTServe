@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	ttdata "github.com/Safecast/ttdefs"
+	ttdata "github.com/Safecast/safecast-go"
 )
 
 // DeviceStatus is the data structure for the "Device Status" files

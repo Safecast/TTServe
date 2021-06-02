@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	ttdata "github.com/Safecast/ttdefs"
+	ttdata "github.com/Safecast/safecast-go"
 	"github.com/blues/note-go/note"
 )
 
