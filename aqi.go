@@ -5,8 +5,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"math"
 
 	ttdata "github.com/Safecast/safecast-go"
@@ -18,21 +16,16 @@ func aqiCalculate(sd *ttdata.SafecastData) {
 	var aqiPm float64
 	var aqiNotes, aqiLevel string
 
-	fmt.Printf("calc\n")
 	// Perform calculations based on sensor type
 	if sd.Opc != nil && sd.Opc.Pm02_5 != nil {
-		fmt.Printf("calc opc\n")
 		aqiPm, aqiNotes = adjustForHumidity(sd, *sd.Opc.Pm02_5, ttdata.AqiCFEN481)
 		aqi, aqiLevel = pmToAqi(aqiPm)
 		sd.Opc.AqiLevel = &aqiLevel
 		sd.Opc.AqiNotes = &aqiNotes
 		sd.Opc.AqiPm = &aqiPm
 		sd.Opc.Aqi = &aqi
-		ozzieJSON, _ := json.Marshal(sd.Opc)
-		fmt.Printf("calc %s %s %d %s\n", aqiNotes, aqiLevel, aqi, ozzieJSON)
 	}
 	if sd.Pms2 != nil && sd.Pms2.Pm02_5 != nil {
-		fmt.Printf("calc pms2\n")
 		if sd.Pms2.Pm02_5cf1 != nil {
 			aqiPm, aqiNotes = adjustForHumidity(sd, *sd.Pms2.Pm02_5cf1, ttdata.AqiCF1)
 		} else {
@@ -45,7 +38,6 @@ func aqiCalculate(sd *ttdata.SafecastData) {
 		sd.Pms2.Aqi = &aqi
 	}
 	if sd.Pms != nil && sd.Pms.Pm02_5 != nil {
-		fmt.Printf("calc pms\n")
 		if sd.Pms.Pm02_5cf1 != nil {
 			aqiPm, aqiNotes = adjustForHumidity(sd, *sd.Pms.Pm02_5cf1, ttdata.AqiCF1)
 		} else {
@@ -56,8 +48,6 @@ func aqiCalculate(sd *ttdata.SafecastData) {
 		sd.Pms.AqiLevel = &aqiLevel
 		sd.Pms.AqiPm = &aqiPm
 		sd.Pms.Aqi = &aqi
-		ozzieJSON, _ := json.Marshal(sd.Pms)
-		fmt.Printf("calc %s %s %d %s\n", aqiNotes, aqiLevel, aqi, ozzieJSON)
 	}
 
 	// Done
