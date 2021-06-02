@@ -26,7 +26,7 @@ func aqiCalculate(sd *ttdata.SafecastData) {
 		sd.Opc.AqiLevel = &aqiLevel
 		sd.Opc.AqiNotes = &aqiNotes
 		sd.Opc.Aqi = &aqi
-		fmt.Printf("calc %s %s %d\n", aqiNotes, aqiLevel, aqi)
+		fmt.Printf("calc %s %s %d %v\n", aqiNotes, aqiLevel, aqi, sd.Pms)
 	}
 	if sd.Pms2 != nil && sd.Pms2.Pm02_5 != nil {
 		fmt.Printf("calc pms2\n")
@@ -40,7 +40,7 @@ func aqiCalculate(sd *ttdata.SafecastData) {
 		sd.Pms2.AqiNotes = &aqiNotes
 		sd.Pms2.AqiLevel = &aqiLevel
 		sd.Pms2.Aqi = &aqi
-		fmt.Printf("calc %s %s %d\n", aqiNotes, aqiLevel, aqi)
+		fmt.Printf("calc %s %s %d %v\n", aqiNotes, aqiLevel, aqi, sd.Pms)
 	}
 	if sd.Pms != nil && sd.Pms.Pm02_5 != nil {
 		fmt.Printf("calc pms\n")
@@ -54,7 +54,7 @@ func aqiCalculate(sd *ttdata.SafecastData) {
 		sd.Pms.AqiNotes = &aqiNotes
 		sd.Pms.AqiLevel = &aqiLevel
 		sd.Pms.Aqi = &aqi
-		fmt.Printf("calc %s %s %d\n", aqiNotes, aqiLevel, aqi)
+		fmt.Printf("calc %s %s %d %v\n", aqiNotes, aqiLevel, aqi, sd.Pms)
 	}
 
 	// Done
@@ -68,7 +68,7 @@ func aqiCalculate(sd *ttdata.SafecastData) {
 func adjustForHumidity(sd *ttdata.SafecastData, pmIn float64, notesIn string) (pmOut float64, notesOut string) {
 	if sd.Env != nil && sd.Env.Humid != nil {
 		pmOut = (0.524 * pmIn) - (0.0852 * *sd.Env.Humid) + 5.72
-		notesOut += "," + ttdata.AqiUSEPAHumidity
+		notesOut = notesIn + "," + ttdata.AqiUSEPAHumidity
 	} else {
 		pmOut = pmIn
 		notesOut = notesIn
