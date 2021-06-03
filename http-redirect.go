@@ -204,6 +204,9 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// If this is an air reading, annotate it with AQI if possible
+	aqiCalculate(&sd)
+
 	// Post to V2
 	SafecastUpload(sd)
 	SafecastLog(sd)

@@ -143,6 +143,9 @@ func noteHandler(rw http.ResponseWriter, req *http.Request, testMode bool) {
 	fmt.Printf("\n%s Received payload for %s from %s in %s\n", LogTime(), sd.DeviceUID, transportStr,
 		e.TowerLocation+" "+e.TowerCountry)
 
+	// If this is an air reading, annotate it with AQI if possible
+	aqiCalculate(&sd)
+
 	// Send it to the Ingest service
 	if upload {
 		go SafecastUpload(sd)

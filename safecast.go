@@ -657,6 +657,9 @@ func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
 		sd.Lnd = &lnd
 	}
 
+	// If this is an air reading, annotate it with AQI if possible
+	aqiCalculate(&sd)
+
 	// Send it and log it
 	SafecastUpload(sd)
 	SafecastLog(sd)
@@ -668,9 +671,6 @@ func SafecastUpload(sd ttdata.SafecastData) {
 
 	// Add info about the server instance that actually did the upload
 	sd.Service.Handler = &TTServeInstanceID
-
-	// If this is an air reading, annotate it with AQI if possible
-	aqiCalculate(&sd)
 
 	// Upload
 	Upload(sd)
