@@ -66,6 +66,10 @@ func adjustForHumidity(sd *ttdata.SafecastData, pmIn float64, notesIn string) (p
 		pmOut = pmIn
 		notesOut = notesIn
 	}
+	// PM goes negative at low PMs and high humidity
+	if pmOut < 0 {
+		pmOut = 0
+	}
 	return
 }
 
