@@ -6,20 +6,20 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net"
-    "net/http"
+	"net/http"
 	"strings"
-	"bytes"
 )
 
 // Extract just the IPV4 address, eliminating the port
 func ipv4(Str1 string) string {
-    Str2 := strings.Split(Str1, ":")
-    if len(Str2) > 0 {
-        return Str2[0]
-    }
-    return Str1
+	Str2 := strings.Split(Str1, ":")
+	if len(Str2) > 0 {
+		return Str2[0]
+	}
+	return Str1
 }
 
 // Utility to extract the true IP address of a request forwarded by intermediate
@@ -27,14 +27,14 @@ func ipv4(Str1 string) string {
 // over just calling ipv4(req.RemoteAddr), which returns the internal LB address.
 // Thanks to https://husobee.github.io/golang/ip-address/2015/12/17/remote-ip-go.html
 func getRequestorIPv4(r *http.Request) (IPstr string, isReal bool, isAbusive bool) {
-	if (false) {
+	if false {
 		fmt.Printf("GetRequestorIPv4: \n%v\n", r.Header)
 	}
 	for _, h := range []string{"X-Forwarded-For", "X-Real-Ip"} {
 		addresses := strings.Split(r.Header.Get(h), ",")
 		// march from right to left until we get a public address
 		// that will be the address right before our proxy.
-		for i := len(addresses) -1 ; i >= 0; i-- {
+		for i := len(addresses) - 1; i >= 0; i-- {
 			ip := strings.TrimSpace(addresses[i])
 			// header can contain spaces too, strip those out.
 			realIP := net.ParseIP(ip)
@@ -52,7 +52,7 @@ func getRequestorIPv4(r *http.Request) (IPstr string, isReal bool, isAbusive boo
 // See https://en.wikipedia.org/wiki/Private_network
 type ipRange struct {
 	start net.IP
-	end net.IP
+	end   net.IP
 }
 
 var privateRanges = []ipRange{
@@ -89,7 +89,7 @@ func isPrivateSubnet(ipAddress net.IP) bool {
 		// iterate over all our ranges
 		for _, r := range privateRanges {
 			// check if this ip is in a private range
-			if inRange(r, ipAddress){
+			if inRange(r, ipAddress) {
 				return true
 			}
 		}

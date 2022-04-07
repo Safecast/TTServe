@@ -34,7 +34,7 @@ func AppReqProcess(AppReq IncomingAppReq) {
 	msg := &ttproto.Telecast{}
 	err := proto.Unmarshal(AppReq.Payload, msg)
 	if err != nil {
-		fmt.Printf("*** PB unmarshaling error: ", err)
+		fmt.Printf("*** PB unmarshaling error: %s\n", err)
 		fmt.Printf("*** ")
 		for i := 0; i < len(AppReq.Payload); i++ {
 			fmt.Printf("%02x", AppReq.Payload[i])

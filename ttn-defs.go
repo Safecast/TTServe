@@ -67,7 +67,6 @@ type DownlinkMessage struct {
 	PayloadFields map[string]interface{} `json:"payload_fields,omitempty"`
 }
 
-
 // MarshalText implements the encoding.TextMarshaler interface
 func (t JSONTime) MarshalText() ([]byte, error) {
 	if time.Time(t).IsZero() || time.Time(t).Unix() == 0 {

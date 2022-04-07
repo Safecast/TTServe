@@ -5,37 +5,37 @@
 package main
 
 import (
-    "os"
-    "bufio"
-    "fmt"
+	"bufio"
+	"fmt"
+	"os"
 	"strings"
 )
 
 func inputHandler() {
 
-    // Create a scanner to watch stdin
-    scanner := bufio.NewScanner(os.Stdin)
-    var text string
+	// Create a scanner to watch stdin
+	scanner := bufio.NewScanner(os.Stdin)
+	var text string
 
-    for {
+	for {
 
-        fmt.Print("\n> ")
-        scanner.Scan()
-        text = scanner.Text()
+		fmt.Print("\n> ")
+		scanner.Scan()
+		text = scanner.Text()
 
-        switch strings.ToLower(text) {
+		switch strings.ToLower(text) {
 
 		case "":
 
 		default:
 			fmt.Printf("Unrecognized: '%s'\n", text)
-			
-		case "q":
-	        ServerLog(fmt.Sprintf("*** RESTARTING at console request\n"))
-			os.Exit(0)
-			
-        }
 
-    }
+		case "q":
+			ServerLog(fmt.Sprintf("*** RESTARTING at console request\n"))
+			os.Exit(0)
+
+		}
+
+	}
 
 }

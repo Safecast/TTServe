@@ -167,7 +167,7 @@ func main() {
 
 // Our app's signal handler
 func signalHandler() {
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 5)
 	signal.Notify(ch, syscall.SIGTERM)
 	signal.Notify(ch, syscall.SIGINT)
 	signal.Notify(ch, syscall.SIGSEGV)

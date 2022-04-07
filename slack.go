@@ -25,12 +25,12 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 	// Unpack the request
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		fmt.Printf("Slack webhook: error reading body:", err)
+		fmt.Printf("Slack webhook: error reading body: %s\n", err)
 		return
 	}
 	urlParams, err := url.ParseQuery(string(body))
 	if err != nil {
-		fmt.Printf("Slack webhook: error parsing body:", err)
+		fmt.Printf("Slack webhook: error parsing body: %s\n", err)
 		return
 	}
 

@@ -93,9 +93,9 @@ func DeleteLogs(DeviceUID string) string {
 	}
 
 	if !deleted {
-		return fmt.Sprintf("Nothing for %d to be cleared.", DeviceUID)
+		return fmt.Sprintf("Nothing for %s to be cleared.", DeviceUID)
 	}
 
-	return fmt.Sprintf("Device logs for %d have been deleted.", DeviceUID)
+	return fmt.Sprintf("Device logs for %s have been deleted.", DeviceUID)
 
 }

@@ -23,7 +23,7 @@ func inboundWebDeviceStatusHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// Log it
 	deviceUID := req.RequestURI[len(TTServerTopicDeviceStatus):]
-	fmt.Printf("%s Device information request for %d\n", LogTime(), deviceUID)
+	fmt.Printf("%s Device information request for %s\n", LogTime(), deviceUID)
 
 	// Open the file
 	file := GetDeviceStatusFilePath(deviceUID)

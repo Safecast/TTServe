@@ -81,7 +81,7 @@ func ttnOutboundPublish(devEui string, payload []byte) {
 		jmsg.FPort = 1
 		jdata, jerr := json.Marshal(jmsg)
 		if jerr != nil {
-			fmt.Printf("j marshaling error: ", jerr)
+			fmt.Printf("j marshaling error: %s\n", jerr)
 		}
 		topic := ttnAppID + "/devices/" + devEui + "/down"
 		fmt.Printf("Send %s: %s\n", topic, jdata)
@@ -143,7 +143,7 @@ func mqttSubscriptionMonitor() {
 			// Subscribe to the upstream topic
 			if token := client.Subscribe(ttnTopic, 0, onMqMessageReceived); token.Wait() && token.Error() != nil {
 				// Treat subscription failure as a connection failure
-				fmt.Printf("Error subscribing to topic %s\n", ttnTopic, token.Error())
+				fmt.Printf("Error subscribing to topic %s: %s\n", ttnTopic, token.Error())
 				ttnFullyConnected = false
 				ttnLastDisconnectedTime = time.Now()
 				ttnLastDisconnected = LogTime()

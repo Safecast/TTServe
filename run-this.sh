@@ -19,6 +19,7 @@ go version
 git reset --hard
 git clean -f
 git pull https://github.com/safecast/ttserve
-go get -u
+$ go get -u
+go get
 go build
 sudo ./TTServe $HOME/efs/safecast
