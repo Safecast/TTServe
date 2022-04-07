@@ -36,7 +36,7 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Extract template
-	templateJSON, _ := args["template"]
+	templateJSON := args["template"]
 	var template map[string]interface{}
 	if templateJSON != "" {
 		err = json.Unmarshal([]byte(templateJSON), &template)

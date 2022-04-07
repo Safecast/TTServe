@@ -1261,23 +1261,23 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	hasNano := false
 
 	// High-level stats
-	s += fmt.Sprintf("Checkup:\n")
+	s += "Checkup:\n"
 	if len(ds.DeviceUID) != 0 {
-		s += fmt.Sprintf("  id ")
+		s += "  id "
 		for i, d := range ds.DeviceUID {
 			if i != 0 {
 				s += ","
 			}
-			s += fmt.Sprintf("%s", d)
+			s += d
 			if ds.IsSolarcastNano[i] {
 				hasNano = true
-				s += fmt.Sprintf(" (SCNANO)")
+				s += " (SCNANO)"
 			}
 		}
 		if time.Now().Sub(ds.NewestUpload)/time.Minute > 90 {
-			s += fmt.Sprintf(" (OFFLINE)")
+			s += " (OFFLINE)"
 		}
-		s += fmt.Sprintf("\n")
+		s += "\n"
 	}
 	s += fmt.Sprintf("  at %s\n", time.Now().Format("2006-01-02 15:04 UTC"))
 	if ds.Firmware != "" {
@@ -1286,32 +1286,32 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	if ds.UniqueMotionBegans != 0 {
 		s += fmt.Sprintf("  in %d unique runs of in-motion measurements\n", ds.UniqueMotionBegans)
 	}
-	s += fmt.Sprintf("\n")
+	s += "\n"
 
 	if ds.Boots == 1 {
 		if ds.MaxUptimeMinutes != 0 {
-			s += fmt.Sprintf("Uptime:\n")
+			s += "Uptime:\n"
 			s += fmt.Sprintf("  %s\n", AgoMinutes(ds.MaxUptimeMinutes))
-			s += fmt.Sprintf("\n")
+			s += "\n"
 		}
 	} else {
-		s += fmt.Sprintf("Uptime:\n")
+		s += "Uptime:\n"
 		s += fmt.Sprintf("  %s maximum found in %d sessions\n", AgoMinutes(ds.MaxUptimeMinutes), ds.Boots)
-		s += fmt.Sprintf("\n")
+		s += "\n"
 	}
 
-	s += fmt.Sprintf("Uploads:\n")
+	s += "Uploads:\n"
 	s += fmt.Sprintf("  Total  %d over the course of %s\n", ds.Measurements, AgoMinutes(uint32(ds.NewestUpload.Sub(ds.OldestUpload)/time.Minute)))
 	if ds.TestMeasurements != 0 {
 		if ds.Measurements == ds.TestMeasurements {
-			s += fmt.Sprintf("         (All of those are TEST measurements)\n")
+			s += "         (All of those are TEST measurements)\n"
 		} else {
 			s += fmt.Sprintf("         (%d of those are TEST measurements)\n", ds.TestMeasurements)
 		}
 	}
 	s += fmt.Sprintf("  Oldest %s\n", ds.OldestUpload.Format("2006-01-02 15:04 UTC"))
 	s += fmt.Sprintf("  Newest %s\n", ds.NewestUpload.Format("2006-01-02 15:04 UTC"))
-	s += fmt.Sprintf("\n")
+	s += "\n"
 
 	// Network
 	s += fmt.Sprintf("Communications:\n  over  %s\n", ds.Transports)
@@ -1323,7 +1323,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 			s += fmt.Sprintf("  using%4.0f%% (%d) %s\n", 100*float64(ds.FonaTransports)/float64(ds.Measurements), ds.FonaTransports, ds.FonaModule)
 		}
 	}
-	s += fmt.Sprintf("\n")
+	s += "\n"
 
 	// Timing
 	if ds.Measurements == 0 {
@@ -1332,7 +1332,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	if ds.Measurements > 1 {
 		s += fmt.Sprintf("Inter-upload Gaps: (%s to %s)\n", AgoMinutes(ds.MinUploadGapSecs/60), AgoMinutes(ds.MaxUploadGapSecs/60))
 		if ds.GapsGt0m == 0 {
-			s += fmt.Sprintf("  None\n")
+			s += "  None\n"
 		} else {
 			f := 100 * float64(ds.GapsGt1week) / float64(ds.GapsGt0m)
 			if f != 0 {
@@ -1424,13 +1424,13 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 				s += fmt.Sprintf("    1-4m  %3.0f%% (%d)\n", f, g)
 			}
 		}
-		s += fmt.Sprintf("\n")
+		s += "\n"
 	}
 
 	// Connect errors
-	s += fmt.Sprintf("Connection errors:\n")
+	s += "Connection errors:\n"
 	if ds.ConnectErrors == 0 {
-		s += fmt.Sprintf("  None\n")
+		s += "  None\n"
 	} else {
 		if ds.PrevErrorsConnectLora > 0 {
 			s += fmt.Sprintf("  Lora Module  %d\n", ds.PrevErrorsConnectLora)
@@ -1451,17 +1451,17 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 			s += fmt.Sprintf("  Cell Service %d\n", ds.PrevErrorsConnectService)
 		}
 	}
-	s += fmt.Sprintf("\n")
+	s += "\n"
 
 	// Sensors
-	s += fmt.Sprintf("Measurement Counts:\n")
+	s += "Measurement Counts:\n"
 	if ds.BatWarningCount == 0 {
 		s += fmt.Sprintf("  Bat %6d", ds.BatCount)
 	} else {
 		s += fmt.Sprintf("  Bat %6d  [%d OOR %s]", ds.BatCount, ds.BatWarningCount, ds.BatWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
 	}
 	if ds.BatCount == 0 {
-		s += fmt.Sprintf("\n")
+		s += "\n"
 	} else {
 		s += fmt.Sprintf("  (%.2f-%.2fV, %.1f to %.1fmA, %.0f-%.0f%%)\n", ds.LoBatV, ds.HiBatV, ds.LoBatI, ds.HiBatI, ds.LoBatS, ds.HiBatS)
 	}
@@ -1472,7 +1472,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 			s += fmt.Sprintf("  Env %6d  [%d OOR %s]", ds.EnvCount, ds.EnvWarningCount, ds.EnvWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
 		}
 		if ds.EnvCount == 0 {
-			s += fmt.Sprintf("\n")
+			s += "\n"
 		} else {
 			s += fmt.Sprintf("  (%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEnvT, ds.HiEnvT, ds.LoEnvH, ds.HiEnvH, ds.LoEnvP, ds.HiEnvP)
 		}
@@ -1482,7 +1482,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 			s += fmt.Sprintf("  Enc %6d  [%d OOR %s]", ds.EncCount, ds.EncWarningCount, ds.EncWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
 		}
 		if ds.EncCount == 0 {
-			s += fmt.Sprintf("\n")
+			s += "\n"
 		} else {
 			s += fmt.Sprintf("  (%.1f-%.1fC, %.1f-%.1f%%, %.0f-%.0fPa)\n", ds.LoEncT, ds.HiEncT, ds.LoEncH, ds.HiEncH, ds.LoEncP, ds.HiEncP)
 		}
@@ -1492,7 +1492,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 			s += fmt.Sprintf("  Pms %6d  [%d OOR %s]", ds.PmsCount, ds.PmsWarningCount, ds.PmsWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
 		}
 		if ds.PmsCount == 0 {
-			s += fmt.Sprintf("\n")
+			s += "\n"
 		} else {
 			s += fmt.Sprintf("  (%.0f-%.0fpm1, %.0f-%.0fpm2.5, %.0f-%.0fpm10)\n", ds.LoPms010, ds.HiPms010, ds.LoPms025, ds.HiPms025, ds.LoPms100, ds.HiPms100)
 		}
@@ -1502,7 +1502,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 			s += fmt.Sprintf("  Pms2 %6d  [%d OOR %s]", ds.Pms2Count, ds.Pms2WarningCount, ds.Pms2WarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
 		}
 		if ds.Pms2Count == 0 {
-			s += fmt.Sprintf("\n")
+			s += "\n"
 		} else {
 			s += fmt.Sprintf("  (%.0f-%.0fpm1, %.0f-%.0fpm2.5, %.0f-%.0fpm10)\n", ds.LoPms2010, ds.HiPms2010, ds.LoPms2025, ds.HiPms2025, ds.LoPms2100, ds.HiPms2100)
 		}
@@ -1512,7 +1512,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 			s += fmt.Sprintf("  Opc %6d  [%d OOR %s]", ds.OpcCount, ds.OpcWarningCount, ds.OpcWarningFirst.UTC().Format("2006-01-02T15:04:05Z"))
 		}
 		if ds.OpcCount == 0 {
-			s += fmt.Sprintf("\n")
+			s += "\n"
 		} else {
 			s += fmt.Sprintf("  (%.4f-%.4fpm1, %.4f-%.4fpm2.5, %.4f-%.4fpm10)\n", ds.LoOpc010, ds.HiOpc010, ds.LoOpc025, ds.HiOpc025, ds.LoOpc100, ds.HiOpc100)
 		}
@@ -1537,16 +1537,16 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 		s += fmt.Sprintf("  LndW %5d%s  (%.0f-%.0fcpm)\n", ds.LndW78017Count, geigerWarning, ds.LoLndW, ds.HiLndW)
 	}
 
-	s += fmt.Sprintf("\n")
+	s += "\n"
 
 	// Errors
 	if ds.Boots == 1 {
-		s += fmt.Sprintf("Device errors:\n")
+		s += "Device errors:\n"
 	} else {
 		s += fmt.Sprintf("Device errors across %d sessions:\n", ds.Boots)
 	}
 	if !ds.AnyErrors {
-		s += fmt.Sprintf("  None\n")
+		s += "  None\n"
 	} else {
 		if ds.PrevErrorsOpc > 0 {
 			s += fmt.Sprintf("  Opc          %d\n", ds.PrevErrorsOpc)
@@ -1600,7 +1600,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 			s += fmt.Sprintf("  Overcurrent  %d\n", ds.PrevErrorsOvercurrentEvents)
 		}
 	}
-	s += fmt.Sprintf("\n")
+	s += "\n"
 
 	// Pointcast
 	if ds.AnyPointcastErrors {
@@ -1609,7 +1609,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 		s += fmt.Sprintf("  CommsFailures   %d new / %d total\n", j, ds.PrevErrorsCommsFailures)
 		j = ds.PrevErrorsDeviceRestarts - ds.MinErrorsDeviceRestarts
 		s += fmt.Sprintf("  DeviceRestarts  %d new / %d total\n", j, ds.PrevErrorsDeviceRestarts)
-		s += fmt.Sprintf("\n")
+		s += "\n"
 	}
 
 	// That's all if we're not solarcast
@@ -1623,29 +1623,29 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 	}
 
 	// Solarcast summary
-	s += fmt.Sprintf("Solarcast Checklist:\n")
+	s += "Solarcast Checklist:\n"
 
 	goalHours := 72
 	if ds.MaxUptimeMinutes > uint32(goalHours)*60 {
-		s += fmt.Sprintf("  PASS  ")
+		s += "  PASS  "
 	} else {
-		s += fmt.Sprintf("   --   ")
+		s += "   --   "
 	}
 	s += fmt.Sprintf("At least one continuous measurable session of >%d hours.\n", goalHours)
 
 	if !ds.MultiFirmware {
-		s += fmt.Sprintf("  PASS  ")
+		s += "  PASS  "
 	} else {
-		s += fmt.Sprintf("   --   ")
+		s += "   --   "
 	}
-	s += fmt.Sprintf("One version of firmware used for the entire run.\n")
+	s += "One version of firmware used for the entire run.\n"
 
 	if !ds.AnyErrors {
-		s += fmt.Sprintf("  PASS  ")
+		s += "  PASS  "
 	} else {
-		s += fmt.Sprintf("   --   ")
+		s += "   --   "
 	}
-	s += fmt.Sprintf("No device errors.\n")
+	s += "No device errors.\n"
 
 	SubstantiveConnectErrors := ds.ConnectErrors != 0
 	// If the only connect errors were wireless, look at the number of them
@@ -1656,68 +1656,68 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 		}
 	}
 	if !SubstantiveConnectErrors {
-		s += fmt.Sprintf("  PASS  ")
+		s += "  PASS  "
 	} else {
-		s += fmt.Sprintf("   --   ")
+		s += "   --   "
 	}
-	s += fmt.Sprintf("No substantive connection errors.\n")
+	s += "No substantive connection errors.\n"
 
 	if !hasNano {
 		diff := math.Abs(float64(ds.LoraTransports) - float64(ds.FonaTransports))
 		pct := diff / float64(ds.Measurements)
 		goal := 0.25
 		if pct <= goal {
-			s += fmt.Sprintf("  PASS  ")
+			s += "  PASS  "
 		} else {
-			s += fmt.Sprintf("   --   ")
+			s += "   --   "
 		}
 		s += fmt.Sprintf("Less than %.0f%% variation between transports. (%.0f%% actual)\n", goal*100, pct*100)
 
 		if ds.GapsGt10m == 0 {
-			s += fmt.Sprintf("  PASS  ")
+			s += "  PASS  "
 		} else {
-			s += fmt.Sprintf("   --   ")
+			s += "   --   "
 		}
-		s += fmt.Sprintf("No communications gaps of more than 10m.\n")
+		s += "No communications gaps of more than 10m.\n"
 	}
 	if !hasNano {
 		if ds.LndU7318Count != 0 && ds.LndC7318Count != 0 {
-			s += fmt.Sprintf("  PASS  ")
+			s += "  PASS  "
 		} else {
-			s += fmt.Sprintf("   --   ")
+			s += "   --   "
 		}
-		s += fmt.Sprintf("Both pancake tubes measured data.\n")
+		s += "Both pancake tubes measured data.\n"
 	} else {
 		if ds.LndU7318Count != 0 && ds.LndEC7128Count != 0 {
-			s += fmt.Sprintf("  PASS  ")
+			s += "  PASS  "
 		} else {
-			s += fmt.Sprintf("   --   ")
+			s += "   --   "
 		}
-		s += fmt.Sprintf("Both pancake and EC tubes measured data.\n")
+		s += "Both pancake and EC tubes measured data.\n"
 	}
 	if !hasNano {
 		if ds.BatCount != 0 && ds.EnvCount != 0 && ds.EncCount != 0 && ds.PmsCount != 0 && ds.OpcCount != 0 && ds.LndU7318Count != 0 && ds.LndC7318Count != 0 {
-			s += fmt.Sprintf("  PASS  ")
+			s += "  PASS  "
 		} else {
-			s += fmt.Sprintf("   --   ")
+			s += "   --   "
 		}
-		s += fmt.Sprintf("All sensors measured data.\n")
+		s += "All sensors measured data.\n"
 	} else {
 		if ds.BatCount != 0 && ds.LndU7318Count != 0 && ds.LndEC7128Count != 0 {
-			s += fmt.Sprintf("  PASS  ")
+			s += "  PASS  "
 		} else {
-			s += fmt.Sprintf("   --   ")
+			s += "   --   "
 		}
-		s += fmt.Sprintf("All sensors measured data.\n")
+		s += "All sensors measured data.\n"
 	}
 	if ds.BatWarningCount == 0 && ds.EnvWarningCount == 0 && ds.EncWarningCount == 0 && ds.PmsWarningCount == 0 && ds.OpcWarningCount == 0 && ds.GeigerWarningCount == 0 {
-		s += fmt.Sprintf("  PASS  ")
+		s += "  PASS  "
 	} else {
-		s += fmt.Sprintf("   --   ")
+		s += "   --   "
 	}
-	s += fmt.Sprintf("All measured data was within valid ranges.\n")
+	s += "All measured data was within valid ranges.\n"
 
-	s += fmt.Sprintf("\n")
+	s += "\n"
 
 	// Done
 	return s

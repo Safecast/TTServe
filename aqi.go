@@ -50,9 +50,6 @@ func aqiCalculate(sd *ttdata.SafecastData) {
 		sd.Pms.Aqi = &aqi
 	}
 
-	// Done
-	return
-
 }
 
 // Adjust humidity according to US EPA PM2.5 adjustment factor
@@ -85,65 +82,70 @@ func pmToAqi(concIn float64) (aqi uint32, aqiLevel string) {
 	concIn = float64(itemp) / 10
 
 	// Calculate level
-	for {
+	if aqiLevel == "" {
 		concLo = 0.0
 		concHi = 12.0
 		if concIn >= concLo && concIn <= concHi {
 			aqiLo = 0
 			aqiHi = 50
 			aqiLevel = ttdata.AqiLevelGood
-			break
 		}
+	}
+	if aqiLevel == "" {
 		concLo = concHi
 		concHi = 35.4
 		if concIn >= concLo && concIn <= concHi {
 			aqiLo = 51
 			aqiHi = 100
 			aqiLevel = ttdata.AqiLevelModerate
-			break
 		}
+	}
+	if aqiLevel == "" {
 		concLo = concHi
 		concHi = 55.4
 		if concIn >= concLo && concIn <= concHi {
 			aqiLo = 101
 			aqiHi = 150
 			aqiLevel = ttdata.AqiLevelUnhealthyIfSensitive
-			break
 		}
+	}
+	if aqiLevel == "" {
 		concLo = concHi
 		concHi = 150.4
 		if concIn >= concLo && concIn <= concHi {
 			aqiLo = 151
 			aqiHi = 200
 			aqiLevel = ttdata.AqiLevelUnhealthy
-			break
 		}
+	}
+	if aqiLevel == "" {
 		concLo = concHi
 		concHi = 250.4
 		if concIn >= concLo && concIn <= concHi {
 			aqiLo = 201
 			aqiHi = 300
 			aqiLevel = ttdata.AqiLevelVeryUnhealthy
-			break
 		}
+	}
+	if aqiLevel == "" {
 		concLo = concHi
 		concHi = 500.4
 		if concIn >= concLo && concIn <= concHi {
 			aqiLo = 301
 			aqiHi = 500
 			aqiLevel = ttdata.AqiLevelHazardous
-			break
 		}
+	}
+	if aqiLevel == "" {
 		// Level is higher than the top of the table.  Luckily,
 		// the AQI stops at the same level as the concentration,
 		// so we can return a number that looks meaningful.
 		aqiLevel = ttdata.AqiLevelVeryHazardous
 		aqi = uint32(math.Round(concIn))
-		return
+	} else {
+		// Compute the AQI according to the equation
+		aqi = uint32(math.Round((((aqiHi - aqiLo) / (concHi - concLo)) * (concIn - concLo)) + aqiLo))
 	}
-
-	// Compute the AQI according to the equation
-	aqi = uint32(math.Round((((aqiHi - aqiLo) / (concHi - concLo)) * (concIn - concLo)) + aqiLo))
 
 	// Done
 	return

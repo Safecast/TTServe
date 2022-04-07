@@ -51,9 +51,6 @@ type cachedDevice struct {
 var cacheLock sync.RWMutex
 var cachedDevices []cachedDevice
 
-// Statics
-var substituteCapturedAt string
-
 // Construct the path of a command file
 func stpFilename(DeviceID uint32) string {
 	directory := SafecastDirectory()

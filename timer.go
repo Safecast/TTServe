@@ -110,7 +110,7 @@ func RandomRestart() {
 	time.Sleep(minutes * time.Minute)
 
 	// Log
-	ServerLog(fmt.Sprintf("*** RESTARTING because of Slack 'restart' command\n"))
+	ServerLog("*** RESTARTING because of Slack 'restart' command\n")
 
 	// Exit
 	os.Exit(0)

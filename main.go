@@ -66,7 +66,7 @@ func main() {
 	}
 
 	TTServeInstanceID = stats.AWSInstance.InstanceID
-	ServerLog(fmt.Sprintf("*** STARTUP\n"))
+	ServerLog("*** STARTUP\n")
 	fmt.Printf("\n%s *** AWS %s %s\n", LogTime(), stats.AWSInstance.Region, stats.AWSInstance.InstanceID)
 
 	// Init our utility packages, but only after we've got our server instance ID
@@ -158,6 +158,7 @@ func main() {
 
 	// Spawn timer tasks, assuming the role of one of them
 	go timer12h()
+	go timer1h()
 	go timer1m()
 	go timer15m()
 	go timer5m()
@@ -177,7 +178,7 @@ func signalHandler() {
 			fmt.Printf("*** Exiting %s because of SIGNAL \n", LogTime())
 			os.Exit(0)
 		case syscall.SIGTERM:
-			break
+			return
 		}
 	}
 }

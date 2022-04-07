@@ -978,7 +978,7 @@ func doUploadToSafecast(sd ttdata.SafecastData, url string) bool {
 		fmt.Printf("...ingested as...\n%s\n", scJSON)
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(scJSON))
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(scJSON))
 	req.Header.Set("User-Agent", "TTSERVE")
 	req.Header.Set("Content-Type", "application/json")
 	httpclient := &http.Client{

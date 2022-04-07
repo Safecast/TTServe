@@ -24,7 +24,7 @@ type UplinkMessage struct {
 
 // Metadata contains metadata of a message
 type Metadata struct {
-	Time       JSONTime          `json:"time,omitempty,omitempty"`
+	Time       JSONTime          `json:"time,omitempty"`
 	Frequency  float64           `json:"frequency,omitempty"`
 	Modulation string            `json:"modulation,omitempty"`
 	DataRate   string            `json:"data_rate,omitempty"`

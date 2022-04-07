@@ -81,9 +81,7 @@ func HTTPArgs(req *http.Request, topic string) (target string, args map[string]s
 	}
 
 	// Make sure that the prefix is "/", else the pattern matcher is matching something we don't want
-	if strings.HasPrefix(target, "/") {
-		target = strings.TrimPrefix(target, "/")
-	}
+	target = strings.TrimPrefix(target, "/")
 
 	// See if there is a query, and if so process it
 	str := strings.SplitN(target, "?", 2)

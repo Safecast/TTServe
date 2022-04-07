@@ -111,7 +111,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
 		}
 
-		io.WriteString(rw, fmt.Sprintf("Live Free or Die.\n"))
+		io.WriteString(rw, "Live Free or Die.\n")
 		return
 
 	}

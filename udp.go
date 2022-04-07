@@ -64,7 +64,7 @@ func UploadToWebLoadBalancer(data []byte, datalen int, transport string) {
 
 	url := "http://" + TTServerHTTPAddress + TTServerHTTPPort + TTServerTopicSend
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(data))
 	req.Header.Set("User-Agent", "TTSERVE")
 	req.Header.Set("Content-Type", "text/plain")
 	httpclient := &http.Client{

@@ -22,10 +22,8 @@ const TTNMQTTMode = false
 
 // TTN service info
 const ttnAppID string = "ttserve"
-const ttnProcessID string = "ttserve"
 const ttnServer string = "tcp://eu.thethings.network:1883"
 const ttnTopic string = "+/devices/+/up"
-const ttnDownlinkURL = "https://integrations.thethingsnetwork.org/ttn-eu/api/v2/down/%s/%s?key=%s"
 
 // Google Sheets ID of published (File/Publish to Web) doc, as CSV
 const sheetsSolarcastTracker = "https://docs.google.com/spreadsheets/d/1lvB_0XFFSwON4PQFoC8NdDv6INJTCw2f_KBZuMTZhZA/export?format=csv"

@@ -174,7 +174,7 @@ func sendSafecastGatewaySummaryToSlack(header string) {
 		summary, _ := GetGatewaySummary(gatewayID, "    ")
 		if summary != "" {
 			if s != "" {
-				s += fmt.Sprintf("\n")
+				s += "\n"
 			}
 			s += fmt.Sprintf("<http://%s%s%s|%s>", TTServerHTTPAddress, TTServerTopicGatewayStatus, gatewayID, gatewayID)
 			if summary != "" {

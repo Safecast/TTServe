@@ -166,7 +166,7 @@ func sendSafecastServerSummaryToSlack(header string) {
 		summary := GetServerSummary(serverID, "    ")
 		if summary != "" {
 			if s != "" {
-				s += fmt.Sprintf("\n")
+				s += "\n"
 			}
 			s += fmt.Sprintf("<http://%s%s%s|%s>", TTServerHTTPAddress, TTServerTopicServerStatus, serverID, serverID)
 			s += " "

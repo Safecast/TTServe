@@ -124,9 +124,9 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
 	case "reboot-all":
 	case "restart-all":
-		sendToSafecastOps(fmt.Sprintf("Restarting all service instances."), SlackMsgReply)
+		sendToSafecastOps("Restarting all service instances.", SlackMsgReply)
 		time.Sleep(2 * time.Second)
-		ServerLog(fmt.Sprintf("*** RESTARTING because of Slack 'restart-all' command\n"))
+		ServerLog("*** RESTARTING because of Slack 'restart-all' command\n")
 		ControlFileTime(TTServerRestartAllControlFile, user)
 		sendToSafecastOps(fmt.Sprintf("** %s restarting **", TTServeInstanceID), SlackMsgUnsolicitedOps)
 		time.Sleep(3 * time.Second)
@@ -134,7 +134,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 
 	case "reboot":
 	case "restart":
-		sendToSafecastOps(fmt.Sprintf("Restarting non-monitor service instances."), SlackMsgReply)
+		sendToSafecastOps("Restarting non-monitor service instances.", SlackMsgReply)
 		ControlFileTime(TTServerRestartAllControlFile, user)
 
 	case "hello":
@@ -187,7 +187,7 @@ func sendToOpsViaSlack(msg string, SlackOpsPostURL string) {
 	m.Message = msg
 
 	mJSON, _ := json.Marshal(m)
-	req, err := http.NewRequest("POST", SlackOpsPostURL, bytes.NewBuffer(mJSON))
+	req, _ := http.NewRequest("POST", SlackOpsPostURL, bytes.NewBuffer(mJSON))
 	req.Header.Set("User-Agent", "TTSERVE")
 	req.Header.Set("Content-Type", "application/json")
 

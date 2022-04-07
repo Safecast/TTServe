@@ -41,8 +41,6 @@ func brokerOutboundPublisher() {
 		brokerConnected = true
 	}
 
-	return
-
 }
 
 // Send to anyone/everyone listening on that MQTT topic

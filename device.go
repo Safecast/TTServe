@@ -168,14 +168,11 @@ func sendSafecastDeviceSummaryToSlack(user string, header string, fOffline bool)
 
 		// Add it to the summary
 		if s != "" {
-			s += fmt.Sprintf("\n")
+			s += "\n"
 		}
 
 		id := sortedDevices[i].deviceUID
-		label := sortedDevices[i].label
-		gps := ""
-		summary := ""
-		label, gps, _, _, summary = GetDeviceStatusSummary(id)
+		label, gps, _, _, summary := GetDeviceStatusSummary(id)
 		// Refresh cached label
 		sortedDevices[i].label = label
 

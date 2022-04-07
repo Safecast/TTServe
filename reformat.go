@@ -325,6 +325,8 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 					var LastFailure = field[1]
 					dev.LastFailure = &LastFailure
 					dodev = true
+				case "DeviceID":
+				case "Temperature":
 				default:
 					if unrecognized == "" {
 						unrecognized = "{"
@@ -332,8 +334,6 @@ func SafecastReformatFromV1(v1 *SafecastDataV1, isTestMeasurement bool) (devicei
 						unrecognized = unrecognized + ","
 					}
 					unrecognized = unrecognized + "\"" + field[0] + "\":\"" + field[1] + "\""
-				case "DeviceID":
-				case "Temperature":
 				}
 			}
 

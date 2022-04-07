@@ -27,12 +27,12 @@ func inputHandler() {
 
 		case "":
 
+		case "q":
+			ServerLog("*** RESTARTING at console request\n")
+			os.Exit(0)
+
 		default:
 			fmt.Printf("Unrecognized: '%s'\n", text)
-
-		case "q":
-			ServerLog(fmt.Sprintf("*** RESTARTING at console request\n"))
-			os.Exit(0)
 
 		}
 

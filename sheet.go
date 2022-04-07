@@ -42,9 +42,9 @@ func sheetDeviceIDToSN(DeviceID uint32) (sn string, infoStr string) {
 	}
 	sn = info.SN
 	if info.Custodian == "" && info.Location != "" {
-		infoStr = fmt.Sprintf("%s", info.Location)
+		infoStr = info.Location
 	} else if info.Custodian != "" && info.Location == "" {
-		infoStr = fmt.Sprintf("%s", info.Custodian)
+		infoStr = info.Custodian
 	} else {
 		infoStr = fmt.Sprintf("%s, %s", info.Custodian, info.Location)
 	}

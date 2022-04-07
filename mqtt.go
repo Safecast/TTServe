@@ -73,22 +73,6 @@ func MQTTInboundHandler() {
 
 }
 
-// Send to a ttn device outbound
-func ttnOutboundPublish(devEui string, payload []byte) {
-	if ttnFullyConnected {
-		jmsg := &DownlinkMessage{}
-		jmsg.PayloadRaw = payload
-		jmsg.FPort = 1
-		jdata, jerr := json.Marshal(jmsg)
-		if jerr != nil {
-			fmt.Printf("j marshaling error: %s\n", jerr)
-		}
-		topic := ttnAppID + "/devices/" + devEui + "/down"
-		fmt.Printf("Send %s: %s\n", topic, jdata)
-		ttnMqttClient.Publish(topic, 0, false, jdata)
-	}
-}
-
 // MQTTSubscriptionNotifier notifies Slack if there is an outage
 func MQTTSubscriptionNotifier() {
 	if ttnEverConnected {
