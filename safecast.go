@@ -27,7 +27,7 @@ import (
 const v1UploadDebug bool = false
 const v1UploadSolarcast bool = true
 const v1UploadSolarcastDebug bool = true
-const verboseTransactions bool = false
+const verboseTransactions bool = true
 
 // Synchronous vs asynchronous V1 API requests
 const v1UploadAsyncFakeResults bool = false
