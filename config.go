@@ -31,17 +31,17 @@ const sheetsSolarcastTracker = "https://docs.google.com/spreadsheets/d/1lvB_0XFF
 // Safecast service info
 
 // SafecastV1UploadDomainDev is developer API server
-const SafecastV1UploadDomainDev = "dev.safecast.org"
+const SafecastV1UploadDomainDev = "dev.safecast.cc"
 
 // SafecastV1UploadDomain is production API server
-const SafecastV1UploadDomain = "api.safecast.org"
+const SafecastV1UploadDomain = "api.safecast.cc"
 
 // SafecastV1UploadPattern is the pattern of the URL for both
 const SafecastV1UploadPattern = "http://%s/measurements.json?%s"
 
 // SafecastUploadURLs are the places we should upload V2 measurements
 var SafecastUploadURLs = [...]string{
-	"http://ingest.safecast.org/v1/measurements",
+	"http://ingest.safecast.cc/v1/measurements",
 }
 
 // Slack service info
@@ -117,10 +117,10 @@ var TTServeInstanceID = ""
 // TTSERVE's address and ports
 
 // TTServerHTTPAddress (here for golint)
-const TTServerHTTPAddress = "tt.safecast.org"
+const TTServerHTTPAddress = "tt.safecast.cc"
 
 // TTServerUDPAddress (here for golint)
-const TTServerUDPAddress = "tt-udp.safecast.org"
+const TTServerUDPAddress = "tt-udp.safecast.cc"
 
 // TTServerUDPAddressIPv4 (here for golint)
 var TTServerUDPAddressIPv4 = "" // Looked up dynamically
