@@ -24,7 +24,7 @@ import (
 )
 
 // Debugging
-const v1UploadDebug bool = false
+const v1UploadDebug bool = true
 const v1UploadSolarcast bool = true
 const v1UploadSolarcastDebug bool = true
 const verboseTransactions bool = true
