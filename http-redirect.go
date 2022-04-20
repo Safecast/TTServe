@@ -18,7 +18,7 @@ import (
 )
 
 // Debugging
-const redirectDebug bool = false
+const redirectDebug bool = true
 
 // Handle inbound HTTP requests from the Teletype Gateway
 func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
