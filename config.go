@@ -39,6 +39,9 @@ const SafecastV1UploadDomain = "api.safecast.cc"
 // SafecastV1UploadPattern is the pattern of the URL for both
 const SafecastV1UploadPattern = "https://%s/measurements.json?%s"
 
+// SafecastV1SolarcastUploadURL is the url where to upload solarcast data
+const SafecastV1SolarcastUploadURL = "https://api.safecast.cc/measurements.json?api_key=z3sHhgousVDDrCVXhzMT"
+
 // SafecastUploadURLs are the places we should upload V2 measurements
 var SafecastUploadURLs = [...]string{
 	"http://ingest.safecast.cc/v1/measurements",

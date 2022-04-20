@@ -904,8 +904,7 @@ func doSolarcastV1Upload(sdV1Emit *SafecastDataV1ToEmit) {
 		fmt.Printf("$$$ Uploading Solarcast to V1 service:\n%s\n", sdV1EmitJSON)
 	}
 
-	requestURI := "https://api.safecast.cc/measurements.json?api_key=z3sHhgousVDDrCVXhzMT"
-	req, _ := http.NewRequest("POST", requestURI, bytes.NewBuffer(sdV1EmitJSON))
+	req, _ := http.NewRequest("POST", SafecastV1SolarcastUploadURL, bytes.NewBuffer(sdV1EmitJSON))
 	req.Header.Set("User-Agent", "TTSERVE")
 	req.Header.Set("Content-Type", "application/json")
 	httpclient := &http.Client{
