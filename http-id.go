@@ -99,11 +99,8 @@ func webPageRedirectHandler(rw http.ResponseWriter, req *http.Request, deviceUID
 
 	}
 
-	if true { // OZZIE
-		fmt.Printf("REDIRECTING %s to %s\n", ds.DeviceClass, url)
-	}
-
 	// Perform the redirect
+	fmt.Printf("REDIRECTING %s to %s\n", ds.DeviceClass, url)
 	http.Redirect(rw, req, url, http.StatusTemporaryRedirect)
 
 }
