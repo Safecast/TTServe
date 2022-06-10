@@ -92,9 +92,15 @@ func webPageRedirectHandler(rw http.ResponseWriter, req *http.Request, deviceUID
 		}
 
 	default:
-		io.WriteString(rw, fmt.Sprintf("class %s for device %s is not recognized", ds.DeviceClass, deviceUID))
+		errMsg := fmt.Sprintf("class %s for device %s is not recognized", ds.DeviceClass, deviceUID)
+		fmt.Printf("%s\n", errMsg)
+		io.WriteString(rw, errMsg)
 		return
 
+	}
+
+	if true { // OZZIE
+		fmt.Printf("REDIRECTING %s to %s\n", ds.DeviceClass, url)
 	}
 
 	// Perform the redirect

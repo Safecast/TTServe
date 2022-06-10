@@ -300,9 +300,14 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 			return
 		}
 		switch s.Model {
-		case "lnd712":
+		case "lnd712": // Airnote Radiation
 			var lnd ttdata.Lnd
 			lnd.U712 = &s.CPM
+			lnd.USv = &s.USV
+			sd.Lnd = &lnd
+		case "lnd7317": // Radnote, which is covered/shielded by default
+			var lnd ttdata.Lnd
+			lnd.C7318 = &s.CPM
 			lnd.USv = &s.USV
 			sd.Lnd = &lnd
 		default:
