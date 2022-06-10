@@ -39,9 +39,6 @@ func ReadDeviceStatus(deviceUID string) (isAvail bool, isReset bool, sv DeviceSt
 
 	// If the file doesn't exist, don't even try
 	_, err := os.Stat(filename)
-	// OZZIE
-	fmt.Printf("READ '%s' from '%s': %s\n", deviceUID, filename, err)
-	// OZZIE
 	if err != nil {
 		if os.IsNotExist(err) {
 			// We did not reinitialize it - it's truly empty.
@@ -56,12 +53,10 @@ func ReadDeviceStatus(deviceUID string) (isAvail bool, isReset bool, sv DeviceSt
 
 		// Read the file and unmarshall if no error
 		contents, errRead := ioutil.ReadFile(filename)
-		fmt.Printf("READFile: %s\n", errRead) // OZZIE
 		if errRead == nil {
 			valueToRead := DeviceStatus{}
 			errRead = json.Unmarshal(contents, &valueToRead)
 			if errRead == nil {
-				fmt.Printf("READFile unmarshalled: %+v\n", valueToRead) // OZZIE
 				return true, false, valueToRead
 			}
 			// Malformed JSON can easily occur because of multiple concurrent

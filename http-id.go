@@ -39,11 +39,9 @@ func webPageRedirectHandler(rw http.ResponseWriter, req *http.Request, deviceUID
 
 	// Because it came from an URL, decode the deviceUID string
 	decodedDeviceUID, decodeErr := url.QueryUnescape(deviceUID)
-	fmt.Printf("OZZIE %s %s\n", decodeErr, decodedDeviceUID)
 	if decodeErr == nil {
 		deviceUID = decodedDeviceUID
 	}
-	fmt.Printf("OZZIE %s\n", deviceUID)
 
 	// Read the device status
 	isAvail, isReset, ds := ReadDeviceStatus(deviceUID)
