@@ -61,8 +61,8 @@ func ReadDeviceStatus(deviceUID string) (isAvail bool, isReset bool, sv DeviceSt
 			}
 			// Malformed JSON can easily occur because of multiple concurrent
 			// writers, and so this self-corrects the situation.
-			if false {
-				fmt.Printf("*** %s appears to be corrupt ***\n", filename)
+			if true {
+				fmt.Printf("*** %s appears to be corrupt *** (%s)\n", filename, errRead)
 			}
 			return true, true, valueEmpty
 		}
