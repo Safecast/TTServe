@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 // Types of redirect page
@@ -35,6 +36,12 @@ func inboundWebProfileHandler(rw http.ResponseWriter, req *http.Request) {
 // Handle inbound HTTP requests to redirect to a certain page
 func webPageRedirectHandler(rw http.ResponseWriter, req *http.Request, deviceUID string, pageType int) {
 	stats.Count.HTTP++
+
+	// Because it came from an URL, decode the deviceUID string
+	decodedDeviceUID, decodeErr := url.QueryUnescape(deviceUID)
+	if decodeErr == nil {
+		deviceUID = decodedDeviceUID
+	}
 
 	// Read the device status
 	isAvail, isReset, ds := ReadDeviceStatus(deviceUID)
