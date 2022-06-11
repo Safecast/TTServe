@@ -20,7 +20,9 @@ import (
 
 // Schemas for the different file types
 type sensorTRACKER struct {
+	Model       string  `json:"sensor,omitempty"`
 	CPM         float64 `json:"cpm,omitempty"`
+	USV         float64 `json:"usv,omitempty"`
 	Temperature float64 `json:"temperature,omitempty"`
 	Humidity    float64 `json:"humidity,omitempty"`
 	Pressure    float64 `json:"pressure,omitempty"`
@@ -374,9 +376,20 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 		}
 		sd.Env = &env
 		if s.CPM > 0 {
-			var lnd ttdata.Lnd
-			lnd.U7318 = &s.CPM
-			sd.Lnd = &lnd
+			switch s.Model {
+			default: // Airnote Radiation had no model field
+				fallthrough
+			case "lnd712": // Airnote Radiation
+				var lnd ttdata.Lnd
+				lnd.U712 = &s.CPM
+				lnd.USv = &s.USV
+				sd.Lnd = &lnd
+			case "lnd7317": // Radnote, which is covered/shielded by default
+				var lnd ttdata.Lnd
+				lnd.C7318 = &s.CPM
+				lnd.USv = &s.USV
+				sd.Lnd = &lnd
+			}
 		}
 		var track ttdata.Track
 		track.Distance = &s.Distance
