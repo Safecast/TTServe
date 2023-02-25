@@ -9,11 +9,7 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/golang/protobuf v1.5.2
 	github.com/google/open-location-code/go v0.0.0-20220120191843-cafb35c0d74d
-	github.com/google/uuid v1.1.1 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
-	golang.org/x/crypto v0.0.0-20201203163018-be400aefbc4c // indirect
-	golang.org/x/net v0.0.0-20220403103023-749bd193bc2b // indirect
-	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
-	gopkg.in/yaml.v2 v2.2.2 // indirect
 )
