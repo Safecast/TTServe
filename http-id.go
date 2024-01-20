@@ -72,6 +72,8 @@ func webPageRedirectHandler(rw http.ResponseWriter, req *http.Request, deviceUID
 			url = "https://api.safecast.org/en-US/device_stories/" + deviceUID
 		}
 
+	case "product:com.blues.radnote":
+		fallthrough
 	case "product:net.ozzie.ray:radnote":
 		fallthrough
 	case "product:org.airnote.solar.rad.v1":
