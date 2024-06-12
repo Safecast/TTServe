@@ -56,6 +56,8 @@ func webPageRedirectHandler(rw http.ResponseWriter, req *http.Request, deviceUID
 
 	case "geigiecast":
 		fallthrough
+	case "geigiecast-zen":
+		fallthrough
 	case "pointcast":
 		fallthrough
 	case "safecast-air":
