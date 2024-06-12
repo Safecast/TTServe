@@ -54,10 +54,21 @@ func SafecastDeviceType(deviceid uint32) (programmatic string, display string) {
 		return "safecast-air", "Safecast Air"
 	}
 
+	// // GeigieCast
+	// if deviceid >= 60000 && deviceid <= 69999 {
+	// 	return "geigiecast", "bGeigiecast"
+	// }
+
 	// GeigieCast
-	if deviceid >= 60000 && deviceid <= 69999 {
-		return "geigiecast", "bGeigiecast"
+	if deviceid >= 62000 && deviceid <= 64999 {
+		return "geigiecast", "bGeigiecast", deviceid
 	}
+
+		// GeigieZen
+	if deviceid >= 65000 && deviceid <= 69999 {
+		return "geigieZen", "bGeigieZen", deviceid
+	}
+
 
 	// nGeigie
 	if deviceid > 0 && deviceid <= 999 {
