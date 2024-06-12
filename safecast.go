@@ -703,7 +703,7 @@ func beginTransaction(version string, message1 string, message2 string) int {
 // End transaction and issue warnings
 func endTransaction(transaction int, url string, errstr string) {
 	httpTransactionsInProgress--
-	duration := int(time.Now().Sub(httpTransactionTimes[transaction]) / time.Second)
+	duration := int(time.Since(httpTransactionTimes[transaction]) / time.Second)
 	httpTransactionDurations[transaction] = duration
 
 	if errstr != "" {

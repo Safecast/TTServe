@@ -77,7 +77,7 @@ func MQTTInboundHandler() {
 func MQTTSubscriptionNotifier() {
 	if ttnEverConnected {
 		if !ttnFullyConnected {
-			minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
+			minutesOffline := int64(time.Since(ttnLastDisconnectedTime) / time.Minute)
 			if minutesOffline > 15 {
 				sendToSafecastOps(fmt.Sprintf("TTN has been unavailable for %s (outage began at %s UTC)", AgoMinutes(uint32(minutesOffline)), ttnLastDisconnected), SlackMsgUnsolicitedOps)
 			}
@@ -136,7 +136,7 @@ func mqttSubscriptionMonitor() {
 				ttnFullyConnected = true
 				ttnLastConnected = LogTime()
 				if ttnEverConnected {
-					minutesOffline := int64(time.Now().Sub(ttnLastDisconnectedTime) / time.Minute)
+					minutesOffline := int64(time.Since(ttnLastDisconnectedTime) / time.Minute)
 					// Don't bother reporting quick outages, generally caused by server restarts
 					if minutesOffline >= 5 {
 						sendToSafecastOps(fmt.Sprintf("TTN returned (%d-minute outage began at %s UTC)", minutesOffline, ttnLastDisconnected), SlackMsgUnsolicitedOps)

@@ -17,7 +17,6 @@ import (
 // As of 2017-02 we're now operating in "HTTP Integration" TTN mode, largely
 // so that we can serve incoming requests through our load balancer rather than
 // having a single server that pulls MQTT requests.
-//
 const TTNMQTTMode = false
 
 // TTN service info

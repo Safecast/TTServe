@@ -58,12 +58,12 @@ func trackDevice(DeviceUID string, DeviceID uint32, whenSeen time.Time) {
 	for i := 0; i < len(seenDevices); i++ {
 		if dev.deviceUID == seenDevices[i].deviceUID {
 			// Only pay attention to things that have truly recently come or gone
-			minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
+			minutesAgo := int64(time.Since(whenSeen) / time.Minute)
 			if minutesAgo < deviceWarningAfterMinutes(dev.deviceUID) {
 				seenDevices[i].everRecentlySeen = true
 				// Notify when the device comes back
 				if seenDevices[i].notifiedAsUnseen {
-					message := AgoMinutes(uint32(time.Now().Sub(seenDevices[i].seen) / time.Minute))
+					message := AgoMinutes(uint32(time.Since(seenDevices[i].seen) / time.Minute))
 					sendToSafecastOps(fmt.Sprintf("** NOTE ** Device %s has returned after %s", seenDevices[i].deviceUID, message), SlackMsgUnsolicitedOps)
 				}
 				// Mark as having been seen on the latest date of any file having that time
@@ -81,7 +81,7 @@ func trackDevice(DeviceUID string, DeviceID uint32, whenSeen time.Time) {
 	// Add a new array entry if necessary
 	if !found {
 		dev.seen = whenSeen
-		dev.minutesAgo = int64(time.Now().Sub(dev.seen) / time.Minute)
+		dev.minutesAgo = int64(time.Since(dev.seen) / time.Minute)
 		dev.everRecentlySeen = dev.minutesAgo < deviceWarningAfterMinutes(dev.deviceUID)
 		dev.notifiedAsUnseen = false
 		dev.label = SafecastDeviceUIDType(dev.deviceUID)
@@ -100,7 +100,7 @@ func sendExpiredSafecastDevicesToSlack() {
 
 		// Update when we've last seen the device
 		expiration := time.Now().Add(-(time.Duration(deviceWarningAfterMinutes(seenDevices[i].deviceUID)) * time.Minute))
-		seenDevices[i].minutesAgo = int64(time.Now().Sub(seenDevices[i].seen) / time.Minute)
+		seenDevices[i].minutesAgo = int64(time.Since(seenDevices[i].seen) / time.Minute)
 
 		// Notify Slack once and only once when a device has expired
 		if !seenDevices[i].notifiedAsUnseen && seenDevices[i].everRecentlySeen {

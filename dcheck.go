@@ -1274,7 +1274,7 @@ func GenerateDatasetSummary(ds MeasurementDataset) string {
 				s += " (SCNANO)"
 			}
 		}
-		if time.Now().Sub(ds.NewestUpload)/time.Minute > 90 {
+		if time.Since(ds.NewestUpload)/time.Minute > 90 {
 			s += " (OFFLINE)"
 		}
 		s += "\n"

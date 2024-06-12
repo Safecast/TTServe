@@ -54,21 +54,15 @@ func SafecastDeviceType(deviceid uint32) (programmatic string, display string) {
 		return "safecast-air", "Safecast Air"
 	}
 
-	// // GeigieCast
-	// if deviceid >= 60000 && deviceid <= 69999 {
-	// 	return "geigiecast", "bGeigiecast"
-	// }
-
 	// GeigieCast
-	if deviceid >= 62000 && deviceid <= 64999 {
-		return "geigiecast", "bGeigiecast", deviceid
+	if deviceid >= 60000 && deviceid <= 64999 {
+		return "geigiecast", "bGeigiecast"
 	}
 
-		// GeigieZen
+	// GeigieCastZen (sub-divided GeigeiCast namespace on 12-Jun-2024)
 	if deviceid >= 65000 && deviceid <= 69999 {
-		return "geigiecast-zen", "bGeigiecast-zen", deviceid
+		return "geigiecast-zen", "bGeigiecast-zen"
 	}
-
 
 	// nGeigie
 	if deviceid > 0 && deviceid <= 999 {
@@ -100,8 +94,13 @@ func SafecastV1DeviceType(deviceid uint32) (devicetype string, devicename string
 	}
 
 	// GeigieCast
-	if deviceid >= 60000 && deviceid <= 69999 {
+	if deviceid >= 60000 && deviceid <= 64999 {
 		return "geigiecast", "bGeigiecast", deviceid
+	}
+
+	// GeigieCast Zen (sub-divided GeigeiCast namespace on 12-Jun-2024)
+	if deviceid >= 65000 && deviceid <= 69999 {
+		return "geigiecast-zen", "bGeigiecast-zen", deviceid
 	}
 
 	// nGeigie

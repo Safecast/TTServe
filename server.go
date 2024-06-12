@@ -60,12 +60,12 @@ func trackServer(ServerID string, whenSeen time.Time) {
 	for i := 0; i < len(seenServers); i++ {
 		if dev.serverid == seenServers[i].serverid {
 			// Only pay attention to things that have truly recently come or gone
-			minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
+			minutesAgo := int64(time.Since(whenSeen) / time.Minute)
 			if minutesAgo < serverWarningAfterMinutes {
 				seenServers[i].everRecentlySeen = true
 				// Notify when the device comes back
 				if seenServers[i].notifiedAsUnseen {
-					message := AgoMinutes(uint32(time.Now().Sub(seenServers[i].seen) / time.Minute))
+					message := AgoMinutes(uint32(time.Since(seenServers[i].seen) / time.Minute))
 					sendToSafecastOps(fmt.Sprintf("** NOTE ** Server %s has returned after %s", seenServers[i].serverid, message), SlackMsgUnsolicitedOps)
 				}
 				// Mark as having been seen on the latest date of any file having that time
@@ -83,7 +83,7 @@ func trackServer(ServerID string, whenSeen time.Time) {
 	// Add a new array entry if necessary
 	if !found {
 		dev.seen = whenSeen
-		minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
+		minutesAgo := int64(time.Since(dev.seen) / time.Minute)
 		dev.everRecentlySeen = minutesAgo < serverWarningAfterMinutes
 		dev.notifiedAsUnseen = false
 		seenServers = append(seenServers, dev)
@@ -130,7 +130,7 @@ func sendExpiredSafecastServersToSlack() {
 	for i := 0; i < len(seenServers); i++ {
 
 		// Update when we've last seen the device
-		seenServers[i].minutesAgo = int64(time.Now().Sub(seenServers[i].seen) / time.Minute)
+		seenServers[i].minutesAgo = int64(time.Since(seenServers[i].seen) / time.Minute)
 
 		// Notify Slack once and only once when a device has expired
 		if !seenServers[i].notifiedAsUnseen && seenServers[i].everRecentlySeen {

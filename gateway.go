@@ -61,12 +61,12 @@ func trackGateway(GatewayID string, whenSeen time.Time) {
 	for i := 0; i < len(seenGateways); i++ {
 		if dev.gatewayid == seenGateways[i].gatewayid {
 			// Only pay attention to things that have truly recently come or gone
-			minutesAgo := int64(time.Now().Sub(whenSeen) / time.Minute)
+			minutesAgo := int64(time.Since(whenSeen) / time.Minute)
 			if minutesAgo < gatewayWarningAfterMinutes {
 				seenGateways[i].everRecentlySeen = true
 				// Notify when the device comes back
 				if seenGateways[i].notifiedAsUnseen {
-					message := AgoMinutes(uint32(time.Now().Sub(seenGateways[i].seen) / time.Minute))
+					message := AgoMinutes(uint32(time.Since(seenGateways[i].seen) / time.Minute))
 					if seenGateways[i].label != "" {
 						sendToSafecastOps(fmt.Sprintf("** NOTE ** Gateway %s \"%s\" has returned after %s", seenGateways[i].gatewayid, seenGateways[i].label, message), SlackMsgUnsolicitedOps)
 					} else {
@@ -89,7 +89,7 @@ func trackGateway(GatewayID string, whenSeen time.Time) {
 	if !found {
 		_, dev.label = GetGatewaySummary(dev.gatewayid, "")
 		dev.seen = whenSeen
-		minutesAgo := int64(time.Now().Sub(dev.seen) / time.Minute)
+		minutesAgo := int64(time.Since(dev.seen) / time.Minute)
 		dev.everRecentlySeen = minutesAgo < gatewayWarningAfterMinutes
 		dev.notifiedAsUnseen = false
 		seenGateways = append(seenGateways, dev)
@@ -136,7 +136,7 @@ func sendExpiredSafecastGatewaysToSlack() {
 	for i := 0; i < len(seenGateways); i++ {
 
 		// Update when we've last seen the device
-		seenGateways[i].minutesAgo = int64(time.Now().Sub(seenGateways[i].seen) / time.Minute)
+		seenGateways[i].minutesAgo = int64(time.Since(seenGateways[i].seen) / time.Minute)
 
 		// Notify Slack once and only once when a device has expired
 		if !seenGateways[i].notifiedAsUnseen && seenGateways[i].everRecentlySeen {

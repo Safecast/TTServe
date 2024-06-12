@@ -55,7 +55,7 @@ func sheetDeviceIDToSN(DeviceID uint32) (sn string, infoStr string) {
 func sheetDeviceInfo(DeviceID uint32, DeviceSN string) (info sheetInfo, err error) {
 
 	// Cache for some time, for performance
-	if (time.Now().Sub(lastRetrieved) / time.Minute) > 15 {
+	if (time.Since(lastRetrieved) / time.Minute) > 15 {
 		fRetrieve = true
 	}
 

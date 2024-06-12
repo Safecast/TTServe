@@ -85,7 +85,7 @@ func AgoMinutes(minutesAgo uint32) string {
 
 // Ago is like AgoMinutes, but with a time.Time
 func Ago(when time.Time) string {
-	return AgoMinutes(uint32(int64(time.Now().Sub(when) / time.Minute)))
+	return AgoMinutes(uint32(int64(time.Since(when) / time.Minute)))
 }
 
 // GetWhenFromOffset takes a GPS-formatted base date and time, plus offset, and returns a UTC string
