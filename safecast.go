@@ -985,7 +985,7 @@ func doUploadToSafecast(sd ttdata.SafecastData, url string) bool {
 	req.Header.Set("User-Agent", "TTSERVE")
 	req.Header.Set("Content-Type", "application/json")
 	httpclient := &http.Client{
-		Timeout: time.Second * 15,
+		Timeout: time.Second * 60,
 	}
 	resp, err := httpclient.Do(req)
 
