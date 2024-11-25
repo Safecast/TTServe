@@ -696,6 +696,7 @@ func notehubWebookEventFromSD(sd ttdata.SafecastData) (deviceUID string, eventJS
 
 	event.DeviceUID = sd.DeviceUID
 	event.DeviceSN = sd.DeviceSN
+	event.NotefileID = "_air.qo"
 
 	bodyObj, _ := note.ObjectToBody(body)
 	event.Body = &bodyObj
