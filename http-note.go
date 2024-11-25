@@ -576,10 +576,6 @@ func notehubWebookEventFromSD(sd ttdata.SafecastData) (deviceUID string, eventJS
 		} else if usvConversionFactor != 0 {
 			body.USV = body.CPM / float64(usvConversionFactor)
 		}
-		if body.Model != "" && body.CPM == 0 {
-			// malfunctioning device
-			body.Model = ""
-		}
 	}
 
 	if sd.Pms != nil {
