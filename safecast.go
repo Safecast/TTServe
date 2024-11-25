@@ -972,6 +972,11 @@ func Upload(sd ttdata.SafecastData) bool {
 // Upload a Safecast data structure to the Notehub service
 func doUploadToNotehub(sd ttdata.SafecastData) {
 
+	// Exit if not configured
+	if ServiceConfig.NotehubURL == "" || ServiceConfig.NotehubToken == "" {
+		return
+	}
+
 	// Do NOT, under any circumstances, send Notehub-originated data back to Notehub
 	// else we will be in a circular loop of data that will never end.
 	if safecastDeviceUIDIsFromNotehub(sd.DeviceUID) {

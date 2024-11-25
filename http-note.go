@@ -575,7 +575,10 @@ func notehubWebookEventFromSD(sd ttdata.SafecastData) (deviceUID string, eventJS
 			body.USV = *sd.Lnd.USv
 		} else if usvConversionFactor != 0 {
 			body.USV = body.CPM / float64(usvConversionFactor)
-
+		}
+		if body.Model != "" && body.CPM == 0 {
+			// malfunctioning device
+			body.Model = ""
 		}
 	}
 
@@ -698,7 +701,20 @@ func notehubWebookEventFromSD(sd ttdata.SafecastData) (deviceUID string, eventJS
 	event.DeviceSN = sd.DeviceSN
 	event.NotefileID = "_air.qo"
 
-	bodyObj, _ := note.ObjectToBody(body)
+	var bodyJSON []byte
+	bodyJSON, err = json.Marshal(body)
+	if err != nil {
+		return
+	}
+	if string(bodyJSON) == "{}" {
+		err = fmt.Errorf("no data")
+		return
+	}
+	var bodyObj map[string]interface{}
+	err = json.Unmarshal(bodyJSON, &bodyObj)
+	if err != nil {
+		return
+	}
 	event.Body = &bodyObj
 
 	eventJSON, err = json.Marshal(event)
