@@ -19,4 +19,8 @@ type TTServeConfig struct {
 	BrokerHost     string `json:"broker_host,omitempty"`
 	BrokerUsername string `json:"broker_username,omitempty"`
 	BrokerPassword string `json:"broker_password,omitempty"`
+
+	// Notehub URL
+	NotehubURL   string `json:"notehub_url,omitempty"`
+	NotehubToken string `json:"notehub_token,omitempty"`
 }

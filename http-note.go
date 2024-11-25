@@ -539,7 +539,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 }
 
 // notehubWebookEventFromSD converts an SD to a Notehub webhook event
-func notehubWebookEventFromSD(sd ttdata.SafecastData) (eventJSON []byte, err error) {
+func notehubWebookEventFromSD(sd ttdata.SafecastData) (deviceUID string, eventJSON []byte, err error) {
 
 	// Form the body and event structures
 	var body sensorAIR
@@ -702,6 +702,7 @@ func notehubWebookEventFromSD(sd ttdata.SafecastData) (eventJSON []byte, err err
 
 	eventJSON, err = json.Marshal(event)
 
+	deviceUID = event.DeviceUID
 	return
 
 }

@@ -978,14 +978,28 @@ func doUploadToNotehub(sd ttdata.SafecastData) {
 		return
 	}
 
-	eventJSON, err := notehubWebookEventFromSD(sd)
+	// Convert the Safecast data structure to a Notehub webhook event
+	deviceUID, eventJSON, err := notehubWebookEventFromSD(sd)
 	if err != nil {
 		fmt.Printf("can't upload event to notehub: %s\n", err)
 		return
 	}
 
-	// OZZIE
-	fmt.Printf("\nTO NOTEHUB:\n%s\n\n", string(eventJSON))
+	// Construct the request
+	url := strings.ReplaceAll(ServiceConfig.NotehubURL, "{deviceUID}", deviceUID)
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(eventJSON))
+	req.Header.Set("User-Agent", "TTSERVE")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Session-Token", ServiceConfig.NotehubToken)
+	httpclient := &http.Client{
+		Timeout: time.Second * 10,
+	}
+	resp, err := httpclient.Do(req)
+	if err != nil {
+		fmt.Printf("can't upload event to notehub: %s\n", err)
+		return
+	}
+	defer resp.Body.Close()
 
 }
 
