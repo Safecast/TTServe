@@ -546,28 +546,36 @@ func notehubWebookEventFromSD(sd ttdata.SafecastData) (eventJSON []byte, err err
 	var event note.Event
 
 	if sd.Lnd != nil {
-		if sd.Lnd.USv != nil {
-			body.USV = *sd.Lnd.USv
-		}
+		usvConversionFactor := 0
 		if sd.Lnd.U7318 != nil {
 			body.Model = "lnd7317"
 			body.CPM = *sd.Lnd.U7318
+			usvConversionFactor = 334
 		}
 		if sd.Lnd.C7318 != nil {
 			body.Model = "lnd7317"
 			body.CPM = *sd.Lnd.C7318
+			usvConversionFactor = 334
 		}
 		if sd.Lnd.EC7128 != nil {
 			body.Model = "lnd7128"
 			body.CPM = *sd.Lnd.EC7128
+			usvConversionFactor = 108
 		}
 		if sd.Lnd.U712 != nil {
 			body.Model = "lnd712"
 			body.CPM = *sd.Lnd.U712
+			usvConversionFactor = 108
 		}
 		if sd.Lnd.W78017 != nil {
 			body.Model = "lnd78017"
 			body.CPM = *sd.Lnd.W78017
+		}
+		if sd.Lnd.USv != nil {
+			body.USV = *sd.Lnd.USv
+		} else if usvConversionFactor != 0 {
+			body.USV = body.CPM / float64(usvConversionFactor)
+
 		}
 	}
 
