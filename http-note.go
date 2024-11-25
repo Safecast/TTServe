@@ -689,7 +689,11 @@ func notehubWebookEventFromSD(sd ttdata.SafecastData) (eventJSON []byte, err err
 	event.DeviceUID = sd.DeviceUID
 	event.DeviceSN = sd.DeviceSN
 
+	bodyObj, _ := note.ObjectToBody(body)
+	event.Body = &bodyObj
+
 	eventJSON, err = json.Marshal(event)
+
 	return
 
 }
