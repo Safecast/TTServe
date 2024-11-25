@@ -138,6 +138,6 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
 	// Output it
-	io.WriteString(rw, string(allJSON))
+	io.Writer.Write(rw, allJSON)
 
 }

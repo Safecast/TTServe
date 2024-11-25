@@ -887,7 +887,7 @@ func HashSafecastData(sd ttdata.SafecastData) string {
 
 	// Compute the hash
 	h := md5.New()
-	io.WriteString(h, string(scJSON))
+	io.Writer.Write(h, scJSON)
 	hexHash := fmt.Sprintf("%x", h.Sum(nil))
 
 	// Return the CRC
@@ -963,7 +963,30 @@ func Upload(sd ttdata.SafecastData) bool {
 	// Upload safecast data to those listening on MQTT
 	go brokerPublish(sd)
 
+	// Upload data to the notehub that didn't actually come from notehub
+	go doUploadToNotehub(sd)
+
 	return true
+}
+
+// Upload a Safecast data structure to the Notehub service
+func doUploadToNotehub(sd ttdata.SafecastData) {
+
+	// Do NOT, under any circumstances, send Notehub-originated data back to Notehub
+	// else we will be in a circular loop of data that will never end.
+	if safecastDeviceUIDIsFromNotehub(sd.DeviceUID) {
+		return
+	}
+
+	eventJSON, err := notehubWebookEventFromSD(sd)
+	if err != nil {
+		fmt.Printf("can't upload event to notehub: %s\n", err)
+		return
+	}
+
+	// OZZIE
+	fmt.Printf("\nTO NOTEHUB:\n%s\n\n", string(eventJSON))
+
 }
 
 // Upload a Safecast data structure to the Safecast service

@@ -74,6 +74,7 @@ type sensorAIR struct {
 	Charging   *bool    `json:"charging,omitempty"`
 	USB        *bool    `json:"usb,omitempty"`
 	Indoors    *bool    `json:"indoors,omitempty"`
+	CPMCount   int      `json:"cpm_count,omitempty"`
 	CPM        float64  `json:"cpm,omitempty"`
 	USV        float64  `json:"usv,omitempty"`
 }
@@ -165,6 +166,11 @@ func noteHandler(rw http.ResponseWriter, req *http.Request, testMode bool) {
 
 }
 
+// Determines whether or not this deviceUID came from notehub
+func safecastDeviceUIDIsFromNotehub(deviceUID string) bool {
+	return strings.HasPrefix(deviceUID, "note:")
+}
+
 // Deterministic way to convert a Notecard DeviceUID to a Safecast DeviceID, in a way that
 // reserves the low 2^20 addresses for fixed allocation as per Rob agreement (see ttnode/src/io.c)
 func notecardDeviceUIDToSafecastDeviceID(notecardDeviceUID string) (safecastDeviceURN string, safecastDeviceID uint32) {
@@ -227,14 +233,6 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 	}
 	sd.DeviceClass = e.ProductUID
 
-	// Optional device contact info, for accountability
-	if e.DeviceContact != nil {
-		sd.DeviceContactName = e.DeviceContact.Name
-		sd.DeviceContactOrg = e.DeviceContact.Affiliation
-		sd.DeviceContactRole = e.DeviceContact.Role
-		sd.DeviceContactEmail = e.DeviceContact.Email
-	}
-
 	// When captured on the device
 	if e.When != 0 {
 		capturedAt := time.Unix(e.When, 0).Format("2006-01-02T15:04:05Z")
@@ -245,13 +243,8 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 	var svc ttdata.Service
 	sd.Service = &svc
 	svc.Transport = &transport
-	if e.Routed != 0 {
-		uploadedAt := time.Unix(e.Routed, 0).Format("2006-01-02T15:04:05Z")
-		sd.UploadedAt = &uploadedAt
-	} else {
-		uploadedAt := NowInUTC()
-		svc.UploadedAt = &uploadedAt
-	}
+	uploadedAt := NowInUTC()
+	svc.UploadedAt = &uploadedAt
 
 	// Where captured
 	if e.Where != "" {
@@ -541,6 +534,162 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 	}
 
 	// Done
+	return
+
+}
+
+// notehubWebookEventFromSD converts an SD to a Notehub webhook event
+func notehubWebookEventFromSD(sd ttdata.SafecastData) (eventJSON []byte, err error) {
+
+	// Form the body and event structures
+	var body sensorAIR
+	var event note.Event
+
+	if sd.Lnd != nil {
+		if sd.Lnd.USv != nil {
+			body.USV = *sd.Lnd.USv
+		}
+		if sd.Lnd.U7318 != nil {
+			body.Model = "lnd7317"
+			body.CPM = *sd.Lnd.U7318
+		}
+		if sd.Lnd.C7318 != nil {
+			body.Model = "lnd7317"
+			body.CPM = *sd.Lnd.C7318
+		}
+		if sd.Lnd.EC7128 != nil {
+			body.Model = "lnd7128"
+			body.CPM = *sd.Lnd.EC7128
+		}
+		if sd.Lnd.U712 != nil {
+			body.Model = "lnd712"
+			body.CPM = *sd.Lnd.U712
+		}
+		if sd.Lnd.W78017 != nil {
+			body.Model = "lnd78017"
+			body.CPM = *sd.Lnd.W78017
+		}
+	}
+
+	if sd.Pms != nil {
+		if sd.Pms.Pm01_0 != nil {
+			body.Pm01_0 = *sd.Pms.Pm01_0
+		}
+		if sd.Pms.Pm02_5 != nil {
+			body.Pm02_5 = *sd.Pms.Pm02_5
+		}
+		if sd.Pms.Pm10_0 != nil {
+			body.Pm10_0 = *sd.Pms.Pm10_0
+		}
+		if sd.Pms.Count00_30 != nil {
+			body.Count00_30 = *sd.Pms.Count00_30
+		}
+		if sd.Pms.Count00_50 != nil {
+			body.Count00_50 = *sd.Pms.Count00_50
+		}
+		if sd.Pms.Count01_00 != nil {
+			body.Count01_00 = *sd.Pms.Count01_00
+		}
+		if sd.Pms.Count02_50 != nil {
+			body.Count02_50 = *sd.Pms.Count02_50
+		}
+		if sd.Pms.Count05_00 != nil {
+			body.Count05_00 = *sd.Pms.Count05_00
+		}
+		if sd.Pms.Count10_00 != nil {
+			body.Count10_00 = *sd.Pms.Count10_00
+		}
+		if sd.Pms.CountSecs != nil {
+			body.CountSecs = *sd.Pms.CountSecs
+		}
+	}
+
+	if sd.Env != nil {
+		if sd.Env.Temp != nil {
+			body.Temp = sd.Env.Temp
+		}
+		if sd.Env.Humid != nil {
+			body.Humid = sd.Env.Humid
+		}
+		if sd.Env.Press != nil {
+			body.Press = sd.Env.Press
+		}
+	}
+
+	if sd.Bat != nil {
+		if sd.Bat.Voltage != nil {
+			body.Voltage = sd.Bat.Voltage
+		}
+		if sd.Bat.Charging != nil {
+			body.Charging = sd.Bat.Charging
+		}
+		if sd.Bat.Line != nil {
+			body.USB = sd.Bat.Line
+		}
+	}
+
+	if sd.Loc != nil {
+		if sd.Loc.Lat != nil {
+			event.WhereLat = float64(*sd.Loc.Lat)
+		}
+		if sd.Loc.Lon != nil {
+			event.WhereLon = float64(*sd.Loc.Lon)
+		}
+		if sd.Loc.Lat != nil && sd.Loc.Lon != nil {
+			event.WhereWhen = time.Now().UTC().Unix()
+		}
+	}
+
+	if sd.Dev != nil {
+		if sd.Dev.Indoors != nil {
+			body.Indoors = sd.Dev.Indoors
+		}
+		if sd.Dev.Temp != nil {
+			body.Temp = sd.Dev.Temp
+		}
+		if sd.Dev.Humid != nil {
+			body.Humid = sd.Dev.Humid
+		}
+		if sd.Dev.Press != nil {
+			body.Press = sd.Dev.Press
+		}
+		if sd.Dev.Rat != nil {
+			event.Rat = *sd.Dev.Rat
+		}
+		if sd.Dev.Bars != nil {
+			event.Bars = *sd.Dev.Bars
+		}
+	}
+
+	event.When = time.Now().UTC().Unix()
+	if sd.CapturedAt != nil {
+		parsedTime, err := time.Parse(time.RFC3339, *sd.CapturedAt)
+		if err == nil {
+			event.When = parsedTime.Unix()
+		}
+	}
+
+	if sd.DeviceContactName != "" || sd.DeviceContactOrg != "" || sd.DeviceContactRole != "" || sd.DeviceContactEmail != "" {
+		details := map[string]interface{}{}
+		if sd.DeviceContactName != "" {
+			details["name"] = sd.DeviceContactName
+		}
+		if sd.DeviceContactOrg != "" {
+			details["org"] = sd.DeviceContactOrg
+		}
+		if sd.DeviceContactRole != "" {
+			details["role"] = sd.DeviceContactRole
+		}
+		if sd.DeviceContactEmail != "" {
+			details["email"] = sd.DeviceContactEmail
+		}
+		event.Details = &details
+	}
+
+	event.DeviceUID = sd.DeviceUID
+	event.DeviceSN = sd.DeviceSN
+
+	eventJSON, err = json.Marshal(event)
 	return
 
 }
