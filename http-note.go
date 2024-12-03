@@ -220,6 +220,14 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 		dev.Bars = &e.Bars
 	}
 
+	// For loopback protection, make sure that the notecard deviceUID only has
+	// a single colon in it, indicating that it's a notecard and not a notehub "webhook"
+	// deviceUID that *we* may have sent it.
+	if strings.Count(e.DeviceUID, ":") > 1 {
+		err = fmt.Errorf("note: can't process a notehub 'webhook' event")
+		return
+	}
+
 	// Convert to safecast device ID
 	sd.DeviceUID, sd.DeviceID = notecardDeviceUIDToSafecastDeviceID(e.DeviceUID)
 
