@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -23,7 +23,7 @@ func inboundWebSlackHandler(rw http.ResponseWriter, req *http.Request) {
 	stats.Count.HTTPSlack++
 
 	// Unpack the request
-	body, err := ioutil.ReadAll(req.Body)
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		fmt.Printf("Slack webhook: error reading body: %s\n", err)
 		return

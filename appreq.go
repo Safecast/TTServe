@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	ttproto "github.com/Safecast/ttproto/golang"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 // IncomingAppReq is the common request format that we process as a goroutine
@@ -65,7 +65,7 @@ func AppReqProcess(AppReq IncomingAppReq) {
 
 	// Do various things based upon the message type
 	if msg.DeviceType == nil {
-		SendSafecastMessage(AppReq, *msg)
+		SendSafecastMessage(AppReq, msg)
 	} else {
 		switch msg.GetDeviceType() {
 
@@ -75,7 +75,7 @@ func AppReqProcess(AppReq IncomingAppReq) {
 		case ttproto.Telecast_UNKNOWN_DEVICE_TYPE:
 			fallthrough
 		case ttproto.Telecast_SOLARCAST:
-			SendSafecastMessage(AppReq, *msg)
+			SendSafecastMessage(AppReq, msg)
 
 		}
 	}

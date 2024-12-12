@@ -12,7 +12,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"sync"
 
@@ -198,7 +197,7 @@ func stpApply(message *ttproto.Telecast, DeviceID uint32, CacheEntry int) (isVal
 	if !cachedDevices[CacheEntry].valid || (cachedDevices[CacheEntry].valid && cachedDevices[CacheEntry].cache.Stamp != message.GetStamp()) {
 
 		// Read the file and delete it
-		file, err := ioutil.ReadFile(stpFilename(DeviceID))
+		file, err := os.ReadFile(stpFilename(DeviceID))
 		if err != nil {
 			cachedDevices[CacheEntry].valid = false
 		} else {

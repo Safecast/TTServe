@@ -9,7 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -46,7 +46,7 @@ func newAppReqFromGateway(ttg *TTGateReq, Transport string) IncomingAppReq {
 func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 	stats.Count.HTTP++
 
-	body, err := ioutil.ReadAll(req.Body)
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		fmt.Printf("Error reading HTTP request body: \n%v\n", req)
 		return

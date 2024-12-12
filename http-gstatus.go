@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 )
@@ -19,7 +18,7 @@ func inboundWebGatewayUpdateHandler(rw http.ResponseWriter, req *http.Request) {
 	stats.Count.HTTP++
 
 	// We have an update request
-	body, err := ioutil.ReadAll(req.Body)
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		fmt.Printf("GW: Error reading HTTP request body: \n%v\n", req)
 		return

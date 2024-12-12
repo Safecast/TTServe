@@ -8,7 +8,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 )
@@ -269,7 +268,7 @@ var stats TTServeStatus
 func ServiceReadConfig() TTServeConfig {
 
 	// Read the file and unmarshall if no error
-	contents, err := ioutil.ReadFile(SafecastDirectory() + TTConfigPath)
+	contents, err := os.ReadFile(SafecastDirectory() + TTConfigPath)
 	if err != nil {
 		fmt.Printf("Can't start service: %s %v\n", TTConfigPath, err)
 		os.Exit(0)

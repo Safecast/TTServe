@@ -9,7 +9,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -51,7 +51,7 @@ func ReadGatewayStatus(gatewayID string) (isAvail bool, isReset bool, sv Gateway
 	for i := 0; i < 5; i++ {
 
 		// Read the file and unmarshall if no error
-		contents, errRead := ioutil.ReadFile(filename)
+		contents, errRead := os.ReadFile(filename)
 		if errRead == nil {
 			valueToRead := GatewayStatus{}
 			errRead = json.Unmarshal(contents, &valueToRead)
@@ -127,7 +127,7 @@ func WriteGatewayStatus(ttg TTGateReq, IP string) {
 		response, err := http.Get("http://ip-api.com/json/" + IP)
 		if err == nil {
 			defer response.Body.Close()
-			contents, err := ioutil.ReadAll(response.Body)
+			contents, err := io.ReadAll(response.Body)
 			if err == nil {
 				var info IPInfoData
 				err = json.Unmarshal(contents, &info)

@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -46,7 +46,7 @@ func inboundWebDeviceCheckHandler(rw http.ResponseWriter, req *http.Request) {
 func CheckJSON(infile string) (success bool, result string) {
 
 	// Read the log
-	contents, err := ioutil.ReadFile(infile)
+	contents, err := os.ReadFile(infile)
 	if err != nil {
 		return false, ErrorString(err)
 	}

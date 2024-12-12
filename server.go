@@ -7,7 +7,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -95,7 +95,7 @@ func trackServer(ServerID string, whenSeen time.Time) {
 func trackAllServers() {
 
 	// Loop over the file system, tracking all devices
-	files, err := ioutil.ReadDir(SafecastDirectory() + TTServerStatusPath)
+	files, err := os.ReadDir(SafecastDirectory() + TTServerStatusPath)
 	if err == nil {
 
 		// Iterate over each of the values
@@ -109,7 +109,10 @@ func trackAllServers() {
 
 				// Track the device
 				if serverID != "" {
-					trackServer(serverID, file.ModTime())
+					info, err := file.Info()
+					if err == nil {
+						trackServer(serverID, info.ModTime())
+					}
 				}
 
 			}

@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash/crc32"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -117,7 +117,7 @@ func noteHandler(rw http.ResponseWriter, req *http.Request, testMode bool) {
 	transportStr := "notehub:" + remoteAddr
 
 	// Read the body as a byte array
-	body, err = ioutil.ReadAll(req.Body)
+	body, err = io.ReadAll(req.Body)
 	if err != nil {
 		return
 

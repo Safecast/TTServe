@@ -8,7 +8,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 )
@@ -43,7 +42,7 @@ func ReadServerStatus(serverID string) (isAvail bool, isReset bool, sv ServerSta
 	}
 
 	// Read the file
-	contents, errRead := ioutil.ReadFile(filename)
+	contents, errRead := os.ReadFile(filename)
 	if errRead != nil {
 		return false, true, valueEmpty
 	}

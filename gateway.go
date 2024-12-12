@@ -7,7 +7,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -101,7 +101,7 @@ func trackGateway(GatewayID string, whenSeen time.Time) {
 func trackAllGateways() {
 
 	// Loop over the file system, tracking all devices
-	files, err := ioutil.ReadDir(SafecastDirectory() + TTGatewayStatusPath)
+	files, err := os.ReadDir(SafecastDirectory() + TTGatewayStatusPath)
 	if err == nil {
 
 		// Iterate over each of the values
@@ -115,7 +115,10 @@ func trackAllGateways() {
 
 				// Track the device
 				if gatewayID != "" {
-					trackGateway(gatewayID, file.ModTime())
+					info, err := file.Info()
+					if err == nil {
+						trackGateway(gatewayID, info.ModTime())
+					}
 				}
 
 			}

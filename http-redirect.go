@@ -10,8 +10,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
 	ttdata "github.com/Safecast/safecast-go"
@@ -72,7 +72,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	} else {
 
 		// Read the body as a byte array
-		body, err = ioutil.ReadAll(req.Body)
+		body, err = io.ReadAll(req.Body)
 		if err != nil {
 			stats.Count.HTTP++
 			fmt.Printf("Error reading HTTP request body: \n%v\n", req)
@@ -101,7 +101,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 			// See if this is nothing but a device ID
 			deviceUID := req.RequestURI[len("/"):]
 			file := GetDeviceStatusFilePath(deviceUID)
-			contents, err := ioutil.ReadFile(file)
+			contents, err := os.ReadFile(file)
 			if err == nil {
 				GenerateDeviceSummaryWebPage(rw, contents)
 				return

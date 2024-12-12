@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 
@@ -53,7 +53,7 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 	filterClass := args["class"]
 
 	// Loop over the file system, tracking all devices
-	files, err := ioutil.ReadDir(SafecastDirectory() + TTDeviceStatusPath)
+	files, err := os.ReadDir(SafecastDirectory() + TTDeviceStatusPath)
 	if err != nil {
 		io.WriteString(rw, fmt.Sprintf("%s", err))
 		return
@@ -78,7 +78,7 @@ func inboundWebDevicesHandler(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		// Read the file
-		contents, err := ioutil.ReadFile(SafecastDirectory() + TTDeviceStatusPath + "/" + file.Name())
+		contents, err := os.ReadFile(SafecastDirectory() + TTDeviceStatusPath + "/" + file.Name())
 		if err != nil {
 			continue
 		}

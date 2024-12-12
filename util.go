@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"hash/crc32"
 	"math/rand"
 	"os"
 	"strconv"
@@ -16,10 +15,6 @@ import (
 
 // UtilInit initializes the utility package
 func UtilInit() {
-
-	// Initialize the random number generator
-	rand.Seed(time.Now().Unix() + int64(crc32.ChecksumIEEE([]byte(TTServeInstanceID))))
-
 }
 
 // Random gets a random number in a range

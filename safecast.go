@@ -11,7 +11,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -48,10 +47,10 @@ var httpTransactionErrors int
 var httpTransactionErrorFirst = true
 
 // SendSafecastMessage processes an inbound Safecast message as an asynchronous goroutine
-func SendSafecastMessage(req IncomingAppReq, msg ttproto.Telecast) {
+func SendSafecastMessage(req IncomingAppReq, msg *ttproto.Telecast) {
 
 	// Process stamps by adding or removing fields from the message
-	if !stampSetOrApply(&msg) {
+	if !stampSetOrApply(msg) {
 		fmt.Printf("%s DISCARDING un-stampable message\n", LogTime())
 		return
 	}
@@ -829,7 +828,7 @@ func doSafecastV1Upload(body []byte, url string, isDev bool, unit string, value 
 	resp, err := httpclient.Do(req)
 	errString := ""
 	if err == nil {
-		buf, err := ioutil.ReadAll(resp.Body)
+		buf, err := io.ReadAll(resp.Body)
 		if err == nil {
 			if v1UploadDebug {
 				fmt.Printf("*** Response:\n%s\n", string(buf))
@@ -914,7 +913,7 @@ func doSolarcastV1Upload(sdV1Emit *SafecastDataV1ToEmit) {
 	if err != nil {
 		fmt.Printf("$$$ httpclient.Do error: %s\n", err)
 	} else {
-		buf, err := ioutil.ReadAll(resp.Body)
+		buf, err := io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Printf("$$$ readAll error: %s\n", err)
 		} else {

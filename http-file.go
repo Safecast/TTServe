@@ -9,8 +9,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 // Handle inbound HTTP requests to fetch log files
@@ -23,7 +23,7 @@ func inboundWebFileHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// Open the file
 	file := SafecastDirectory() + TTFilePath + "/" + filename
-	contents, err := ioutil.ReadFile(file)
+	contents, err := os.ReadFile(file)
 	if err != nil {
 		http.Error(rw, fmt.Sprintf("%s", err), http.StatusNotFound)
 		return

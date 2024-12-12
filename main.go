@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -37,7 +37,7 @@ func main() {
 		os.Exit(0)
 	}
 	defer rsp.Body.Close()
-	buf, err := ioutil.ReadAll(rsp.Body)
+	buf, err := io.ReadAll(rsp.Body)
 	if err != nil {
 		fmt.Printf("Error fetching IP addr: %v\n", err)
 		os.Exit(0)
@@ -53,7 +53,7 @@ func main() {
 		os.Exit(0)
 	}
 	defer rsp.Body.Close()
-	buf, errread := ioutil.ReadAll(rsp.Body)
+	buf, errread := io.ReadAll(rsp.Body)
 	if errread != nil {
 		fmt.Printf("Error fetching instance info: %v\n", errread)
 		os.Exit(0)

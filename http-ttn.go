@@ -8,7 +8,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 )
@@ -20,7 +20,7 @@ func inboundWebTTNHandler(rw http.ResponseWriter, req *http.Request) {
 
 	stats.Count.HTTP++
 
-	body, err := ioutil.ReadAll(req.Body)
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		fmt.Printf("Error reading HTTP request body: \n%v\n", req)
 		return
