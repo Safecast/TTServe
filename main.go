@@ -137,7 +137,8 @@ func main() {
 	// DISABLED 2020-08 by Ray because CloudMQTT got rid of their free plan
 	// and it doesn't appear that anyone was using this feature of ttserve.
 	// ENABLED 2021-01 by Ray so that we can try building "safecast audio"
-	if true {
+	// DISABLED 2024-12 by Ray because CloudMQTT is gone forever
+	if false {
 		go brokerOutboundPublisher()
 	}
 
