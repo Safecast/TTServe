@@ -984,7 +984,7 @@ func doUploadToNotehub(sd ttdata.SafecastData) {
 	}
 
 	// Convert the Safecast data structure to a Notehub webhook event
-	deviceUID, eventJSON, err := notehubWebookEventFromSD(sd)
+	deviceUID, eventJSON, err := notehubWebhookEventFromSD(sd)
 	if err != nil {
 		fmt.Printf("can't upload event to notehub: %s\n", err)
 		return
