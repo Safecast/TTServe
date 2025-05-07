@@ -1,0 +1,12 @@
+{
+  "ttn_app_access_key": "",
+  "slack_channels": "",
+  "slack_inbound_tokens": "",
+  "slack_outbound_urls": "",
+  "broker_host": "",
+  "broker_username": "",
+  "broker_password": "",
+  "notehub_url": "",
+  "notehub_token": "",
+  "use_external_endpoints": false
+}

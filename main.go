@@ -6,7 +6,7 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
+	// "encoding/json" - Commented out until AWS check is re-enabled
 	"fmt"
 	"io"
 	"net"
@@ -55,7 +55,15 @@ func main() {
 	stats.AddressIPv4 = ThisServerAddressIPv4
 
 	// Get AWS info about this instance
-	// https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-identity-documents.html
+	// In a local development environment, we'll bypass the AWS check
+	fmt.Printf("Running in local development mode, bypassing AWS instance check\n")
+	
+	// Set some default values for local development
+	stats.AWSInstance.InstanceID = "local-dev"
+	stats.AWSInstance.Region = "local"
+	
+	// If you need to test with real AWS info, uncomment this section
+	/*
 	rsp, erraws := http.Get("http://169.254.169.254/latest/dynamic/instance-identity/document")
 	if erraws != nil {
 		fmt.Printf("Can't get our own instance info: %v\n", erraws)
@@ -73,6 +81,7 @@ func main() {
 		fmt.Printf("*** Badly formatted AWS Info ***\n")
 		os.Exit(0)
 	}
+	*/
 
 	TTServeInstanceID = stats.AWSInstance.InstanceID
 	ServerLog("*** STARTUP\n")

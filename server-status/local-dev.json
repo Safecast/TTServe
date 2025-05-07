@@ -1,0 +1,13 @@
+{
+    "when_updated": "2025-05-07T14:47:58Z",
+    "current_values": {
+        "started": "2025-05-07T23:47:57.564426094+09:00",
+        "publicIp": "206.83.109.149",
+        "services": "HTTP, TCP",
+        "aws": {
+            "region": "local",
+            "instanceId": "local-dev"
+        },
+        "counts": {}
+    }
+}

@@ -895,7 +895,8 @@ func HashSafecastData(sd ttdata.SafecastData) string {
 }
 
 // Do a single solarcast v1 upload - now stores in DuckDB API database
-func doSolarcastV1Upload(sdV1Emit *SafecastDataV1ToEmit) {
+// Returns the measurement ID if successful
+func doSolarcastV1Upload(sdV1Emit *SafecastDataV1ToEmit) (int64, error) {
 	sdV1EmitJSON, _ := json.Marshal(sdV1Emit)
 
 	if v1UploadSolarcastDebug {
@@ -903,13 +904,14 @@ func doSolarcastV1Upload(sdV1Emit *SafecastDataV1ToEmit) {
 	}
 
 	// Store in DuckDB API database
-	err := StoreInAPIDatabase(sdV1Emit)
+	id, err := StoreInAPIDatabase(sdV1Emit)
 	if err != nil {
 		fmt.Printf("$$$ Error storing in API database: %s\n", err)
+		return 0, err
 	} else if v1UploadSolarcastDebug {
-		fmt.Printf("$$$ Successfully stored in API database\n")
+		fmt.Printf("$$$ Successfully stored in API database with ID: %d\n", id)
 	}
-
+	
 	// If external endpoints are enabled, also send to the original API
 	if ServiceConfig.UseExternalEndpoints {
 		req, _ := http.NewRequest("POST", SafecastV1SolarcastUploadURL, bytes.NewBuffer(sdV1EmitJSON))
@@ -936,36 +938,83 @@ func doSolarcastV1Upload(sdV1Emit *SafecastDataV1ToEmit) {
 		// Don't overload the server
 		time.Sleep(1 * time.Second)
 	}
+	
+	// Return the measurement ID
+	return id, nil
 }
 
 // Process solarcast uploads to v1, for "realtime" support
-func doSolarcastV1Uploads(sd ttdata.SafecastData) {
+// Returns the measurement IDs for each upload (up to 3 IDs)
+func doSolarcastV1Uploads(sd ttdata.SafecastData) ([]int64, error) {
+	var ids []int64
+	
 	sd1, sd2, sd9, err := SafecastReformatToV1(sd)
 	if err != nil {
-		return
+		return nil, err
 	}
+	
 	if sd1 != nil {
-		doSolarcastV1Upload(sd1)
+		id, err := doSolarcastV1Upload(sd1)
+		if err == nil {
+			ids = append(ids, id)
+		}
 	}
+	
 	if sd2 != nil {
-		doSolarcastV1Upload(sd2)
+		id, err := doSolarcastV1Upload(sd2)
+		if err == nil {
+			ids = append(ids, id)
+		}
 	}
+	
 	if sd9 != nil {
-		doSolarcastV1Upload(sd9)
+		id, err := doSolarcastV1Upload(sd9)
+		if err == nil {
+			ids = append(ids, id)
+		}
 	}
+	
+	return ids, nil
 }
 
 // Upload uploads a Safecast data structure to the DuckDB databases
-func Upload(sd ttdata.SafecastData) bool {
+// Returns a map of measurement IDs for both Ingest and API databases
+func Upload(sd ttdata.SafecastData) (map[string]interface{}, error) {
+	// Create a response map to hold all measurement IDs
+	response := make(map[string]interface{})
+	
 	// Store data in the Ingest database (DuckDB)
-	err := StoreInIngestDatabase(sd)
+	ingestID, err := StoreInIngestDatabase(sd)
 	if err != nil {
 		fmt.Printf("Error storing data in Ingest database: %v\n", err)
+		response["error_ingest"] = err.Error()
+	} else {
+		response["ingest_id"] = ingestID
 	}
 
 	// Upload Safecast data to the v1 production server (now DuckDB)
 	if v1UploadSolarcast {
-		go doSolarcastV1Uploads(sd)
+		// Use a channel to get the results from the goroutine
+		ch := make(chan struct {
+			ids []int64
+			err error
+		})
+		
+		go func() {
+			ids, err := doSolarcastV1Uploads(sd)
+			ch <- struct {
+				ids []int64
+				err error
+			}{ids, err}
+		}()
+		
+		// Wait for the results
+		result := <-ch
+		if result.err != nil {
+			response["error_api"] = result.err.Error()
+		} else {
+			response["api_ids"] = result.ids
+		}
 	}
 
 	// Upload safecast data to those listening on MQTT
@@ -983,7 +1032,7 @@ func Upload(sd ttdata.SafecastData) bool {
 		go doUploadToNotehub(sd)
 	}
 
-	return true
+	return response, nil
 }
 
 // Upload a Safecast data structure to the Notehub service

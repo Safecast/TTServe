@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 // Unpack common AppReq fields from an incoming TTGateReq
@@ -52,6 +53,11 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Create a channel to receive measurement IDs
+	resultChan := make(chan map[string]interface{})
+	// Flag to track if we're processing the request asynchronously
+	asyncProcessing := false
+
 	switch req.UserAgent() {
 
 	// UDP messages that were relayed to the TTSERVE HTTP load balancer, JSON-formatted
@@ -68,8 +74,12 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 			// Use the TTGateReq to initialize a new AppReq
 			AppReq := newAppReqFromGateway(&ttg, ttg.Transport)
 
-			// Process it.  Note there is no possibility of a reply.
-			go AppReqPushPayload(AppReq, ttg.Payload, "device directly")
+			// Process it and get the measurement IDs
+			go func() {
+				ids := AppReqPushPayloadWithIDs(AppReq, ttg.Payload, "device directly")
+				resultChan <- ids
+			}()
+			asyncProcessing = true
 			stats.Count.HTTPRelay++
 
 		}
@@ -97,8 +107,12 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 			// Use the TTGateReq to initialize a new AppReq
 			AppReq := newAppReqFromGateway(&ttg, Transport)
 
-			// Process it
-			go AppReqPushPayload(AppReq, ttg.Payload, "Lora gateway")
+			// Process it and get the measurement IDs
+			go func() {
+				ids := AppReqPushPayloadWithIDs(AppReq, ttg.Payload, "Lora gateway")
+				resultChan <- ids
+			}()
+			asyncProcessing = true
 			stats.Count.HTTPGateway++
 
 		}
@@ -122,20 +136,49 @@ func inboundWebSendHandler(rw http.ResponseWriter, req *http.Request) {
 			}
 			AppReq.SvTransport = "device-http:" + requestor
 
-			// Push it
-			go AppReqPushPayload(AppReq, buf, "device directly")
+			// Process it and get the measurement IDs
+			go func() {
+				ids := AppReqPushPayloadWithIDs(AppReq, buf, "device directly")
+				resultChan <- ids
+			}()
+			asyncProcessing = true
 			stats.Count.HTTPDevice++
 
 		}
 
 	default:
 		{
-
 			// A web crawler, etc.
+			// Return an error response
+			rw.Header().Set("Content-Type", "application/json")
+			rw.WriteHeader(http.StatusBadRequest)
+			response := map[string]interface{}{
+				"error": "Unsupported User-Agent",
+			}
+			json.NewEncoder(rw).Encode(response)
 			return
-
 		}
 
+	}
+
+	// If we're processing the request asynchronously, wait for the result
+	if asyncProcessing {
+		// Wait for the result with a timeout
+		select {
+		case result := <-resultChan:
+			// Return the measurement IDs to the client
+			rw.Header().Set("Content-Type", "application/json")
+			rw.WriteHeader(http.StatusOK)
+			json.NewEncoder(rw).Encode(result)
+		case <-time.After(10 * time.Second):
+			// Timeout - return an error
+			rw.Header().Set("Content-Type", "application/json")
+			rw.WriteHeader(http.StatusRequestTimeout)
+			response := map[string]interface{}{
+				"error": "Request timed out",
+			}
+			json.NewEncoder(rw).Encode(response)
+		}
 	}
 
 }
