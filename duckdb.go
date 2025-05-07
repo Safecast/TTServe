@@ -9,8 +9,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
-	"os"
 	"path/filepath"
 	"sync"
 	"time"
@@ -94,6 +92,14 @@ func initAPIDatabase() error {
 		return err
 	}
 
+	// Create sequence for auto-increment if it doesn't exist
+	_, err = apiDB.Exec(`
+		CREATE SEQUENCE IF NOT EXISTS api_id_seq START WITH 10001
+	`)
+	if err != nil {
+		return err
+	}
+
 	apiDBInitialized = true
 	return nil
 }
@@ -131,6 +137,14 @@ func initIngestDatabase() error {
 		return err
 	}
 
+	// Create sequence for auto-increment if it doesn't exist
+	_, err = ingestDB.Exec(`
+		CREATE SEQUENCE IF NOT EXISTS ingest_id_seq START WITH 10001
+	`)
+	if err != nil {
+		return err
+	}
+
 	ingestDBInitialized = true
 	return nil
 }
@@ -145,10 +159,10 @@ func CloseDuckDB() {
 	}
 }
 
-// StoreInAPIDatabase stores SafecastDataV1 in the API database
-func StoreInAPIDatabase(data *SafecastDataV1ToEmit) error {
+// StoreInAPIDatabase stores SafecastDataV1 in the API database and returns the generated ID
+func StoreInAPIDatabase(data *SafecastDataV1ToEmit) (int64, error) {
 	if !apiDBInitialized {
-		return fmt.Errorf("API database not initialized")
+		return 0, fmt.Errorf("API database not initialized")
 	}
 
 	apiMutex.Lock()
@@ -219,12 +233,14 @@ func StoreInAPIDatabase(data *SafecastDataV1ToEmit) error {
 		}
 	}
 
-	// Insert data into the database
-	_, err := apiDB.Exec(`
+	// Insert data into the database and get the generated ID
+	var id int64
+	err := apiDB.QueryRow(`
 		INSERT INTO measurements (
-			captured_at, device_id, value, unit, latitude, longitude, height,
+			id, captured_at, device_id, value, unit, latitude, longitude, height,
 			location_name, channel_id, original_id, sensor_id, station_id, user_id, devicetype_id
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (nextval('api_id_seq'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		RETURNING id
 	`,
 		capturedAt,
 		deviceID,
@@ -240,15 +256,15 @@ func StoreInAPIDatabase(data *SafecastDataV1ToEmit) error {
 		stationID,
 		userID,
 		data.DeviceTypeID,
-	)
+	).Scan(&id)
 
-	return err
+	return id, err
 }
 
-// StoreInIngestDatabase stores ttdata.SafecastData in the Ingest database
-func StoreInIngestDatabase(data ttdata.SafecastData) error {
+// StoreInIngestDatabase stores ttdata.SafecastData in the Ingest database and returns the generated ID
+func StoreInIngestDatabase(data ttdata.SafecastData) (int64, error) {
 	if !ingestDBInitialized {
-		return fmt.Errorf("Ingest database not initialized")
+		return 0, fmt.Errorf("Ingest database not initialized")
 	}
 
 	ingestMutex.Lock()
@@ -257,10 +273,9 @@ func StoreInIngestDatabase(data ttdata.SafecastData) error {
 	// Convert data to JSON for storage
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return err
+		return 0, fmt.Errorf("Error marshaling data to JSON: %v", err)
 	}
 
-	// Parse captured_at
 	var capturedAt *time.Time
 	if data.CapturedAt != nil {
 		t, err := time.Parse(time.RFC3339, *data.CapturedAt)
@@ -278,12 +293,14 @@ func StoreInIngestDatabase(data ttdata.SafecastData) error {
 		}
 	}
 
-	// Insert data into the database
-	_, err = ingestDB.Exec(`
+	// Insert data into the database and get the generated ID
+	var id int64
+	err = ingestDB.QueryRow(`
 		INSERT INTO measurements (
-			device_urn, device_class, device_sn, device_id, when_captured,
+			id, device_urn, device_class, device_sn, device_id, when_captured,
 			service_uploaded, service_transport, service_handler, data
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (nextval('ingest_id_seq'), ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		RETURNING id
 	`,
 		data.DeviceUID,
 		data.DeviceClass,
@@ -294,9 +311,9 @@ func StoreInIngestDatabase(data ttdata.SafecastData) error {
 		getServiceTransport(data),
 		getServiceHandler(data),
 		string(jsonData),
-	)
+	).Scan(&id)
 
-	return err
+	return id, err
 }
 
 // Helper functions for parsing values
