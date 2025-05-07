@@ -8,8 +8,8 @@ Safecast TTServe is a data ingestion and processing server for Safecast environm
 - Supports multiple device types and ID schemes
 - Stores data in three main databases:
   - Flat file database (device logs, status as JSON)
-  - API database (radiation measurements for Safecast)
-  - Ingest database (all incoming data)
+  - DuckDB API database (radiation measurements for Safecast)
+  - DuckDB Ingest database (all incoming data)
 - Prevents circular data flows (e.g., Notehub data is not sent back to Notehub)
 - Tracks device status and history
 
@@ -26,14 +26,15 @@ Safecast TTServe is a data ingestion and processing server for Safecast environm
 2. **Metadata Augmentation:** Adds device, location, and sensor metadata.
 3. **Routing:**
    - Flat file: Device logs/status as JSON
-   - API: Radiation data (SafecastDataV1)
-   - Ingest: All data (ttdata.SafecastData)
+   - DuckDB API: Radiation data (SafecastDataV1)
+   - DuckDB Ingest: All data (ttdata.SafecastData)
 4. **Device Tracking:** Maintains device status and history.
 
 ## Running TTServe
 
 ### Prerequisites
 - Go 1.16+
+- DuckDB (automatically installed via Go dependency)
 - (Optional) MQTT broker for real-time data
 - (Optional) Notehub credentials for Blues device integration
 
@@ -48,6 +49,7 @@ TTServe reads its configuration from a config file or environment variables. See
 
 ## Key Files
 - `safecast.go`: Main data processing and upload logic
+- `duckdb.go`: DuckDB database implementation for local data storage
 - `http-send.go`, `http-ttn.go`, `http-note.go`: HTTP handlers for various sources
 - `dlog.go`, `dstatus.go`: Device logging and status tracking
 - `reformat.go`, `sc-v1-defs.go`: Data format conversion and definitions

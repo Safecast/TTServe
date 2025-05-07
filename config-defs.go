@@ -23,4 +23,7 @@ type TTServeConfig struct {
 	// Notehub URL
 	NotehubURL   string `json:"notehub_url,omitempty"`
 	NotehubToken string `json:"notehub_token,omitempty"`
+
+	// Database options
+	UseExternalEndpoints bool `json:"use_external_endpoints,omitempty"`
 }

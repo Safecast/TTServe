@@ -23,6 +23,15 @@ func main() {
 	// Read our service config file
 	ServiceConfig = ServiceReadConfig()
 
+	// Initialize DuckDB databases
+	dataDir := SafecastDirectory()
+	err := InitDuckDB(dataDir)
+	if err != nil {
+		fmt.Printf("Error initializing DuckDB databases: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("DuckDB databases initialized successfully\n")
+
 	// Spawn our signal handler
 	go signalHandler()
 
@@ -165,6 +174,8 @@ func main() {
 	go timer5m()
 	timer1m()
 
+	// Register a deferred function to close the DuckDB connections on exit
+	defer CloseDuckDB()
 }
 
 // Our app's signal handler

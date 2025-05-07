@@ -894,39 +894,48 @@ func HashSafecastData(sd ttdata.SafecastData) string {
 
 }
 
-// Do a single solarcast v1 upload
+// Do a single solarcast v1 upload - now stores in DuckDB API database
 func doSolarcastV1Upload(sdV1Emit *SafecastDataV1ToEmit) {
-
 	sdV1EmitJSON, _ := json.Marshal(sdV1Emit)
 
 	if v1UploadSolarcastDebug {
-		fmt.Printf("$$$ Uploading Solarcast to V1 service:\n%s\n", sdV1EmitJSON)
+		fmt.Printf("$$$ Storing Solarcast data in DuckDB API database:\n%s\n", sdV1EmitJSON)
 	}
 
-	req, _ := http.NewRequest("POST", SafecastV1SolarcastUploadURL, bytes.NewBuffer(sdV1EmitJSON))
-	req.Header.Set("User-Agent", "TTSERVE")
-	req.Header.Set("Content-Type", "application/json")
-	httpclient := &http.Client{
-		Timeout: time.Second * 15,
-	}
-	resp, err := httpclient.Do(req)
+	// Store in DuckDB API database
+	err := StoreInAPIDatabase(sdV1Emit)
 	if err != nil {
-		fmt.Printf("$$$ httpclient.Do error: %s\n", err)
-	} else {
-		buf, err := io.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Printf("$$$ readAll error: %s\n", err)
-		} else {
-			if v1UploadSolarcastDebug {
-				fmt.Printf("$$$ V1 service response:\n%s\n", string(buf))
-			}
-		}
-		resp.Body.Close()
+		fmt.Printf("$$$ Error storing in API database: %s\n", err)
+	} else if v1UploadSolarcastDebug {
+		fmt.Printf("$$$ Successfully stored in API database\n")
 	}
 
-	// Don't overload the server
-	time.Sleep(1 * time.Second)
+	// If external endpoints are enabled, also send to the original API
+	if ServiceConfig.UseExternalEndpoints {
+		req, _ := http.NewRequest("POST", SafecastV1SolarcastUploadURL, bytes.NewBuffer(sdV1EmitJSON))
+		req.Header.Set("User-Agent", "TTSERVE")
+		req.Header.Set("Content-Type", "application/json")
+		httpclient := &http.Client{
+			Timeout: time.Second * 15,
+		}
+		resp, err := httpclient.Do(req)
+		if err != nil {
+			fmt.Printf("$$$ httpclient.Do error: %s\n", err)
+		} else {
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Printf("$$$ readAll error: %s\n", err)
+			} else {
+				if v1UploadSolarcastDebug {
+					fmt.Printf("$$$ V1 service response:\n%s\n", string(buf))
+				}
+			}
+			resp.Body.Close()
+		}
 
+		// Don't overload the server
+		time.Sleep(1 * time.Second)
+	}
 }
 
 // Process solarcast uploads to v1, for "realtime" support
@@ -946,15 +955,15 @@ func doSolarcastV1Uploads(sd ttdata.SafecastData) {
 	}
 }
 
-// Upload uploads a Safecast data structure to the Safecast service, either serially or massively in parallel
+// Upload uploads a Safecast data structure to the DuckDB databases
 func Upload(sd ttdata.SafecastData) bool {
-
-	// Upload to all URLs
-	for _, url := range SafecastUploadURLs {
-		go doUploadToSafecast(sd, url)
+	// Store data in the Ingest database (DuckDB)
+	err := StoreInIngestDatabase(sd)
+	if err != nil {
+		fmt.Printf("Error storing data in Ingest database: %v\n", err)
 	}
 
-	// Upload Safecast data to the v1 production server
+	// Upload Safecast data to the v1 production server (now DuckDB)
 	if v1UploadSolarcast {
 		go doSolarcastV1Uploads(sd)
 	}
@@ -962,8 +971,17 @@ func Upload(sd ttdata.SafecastData) bool {
 	// Upload safecast data to those listening on MQTT
 	go brokerPublish(sd)
 
-	// Upload data to the notehub that didn't actually come from notehub
-	go doUploadToNotehub(sd)
+	// We're no longer uploading to external endpoints
+	// But we'll keep the Notehub upload for compatibility if needed
+	if ServiceConfig.UseExternalEndpoints {
+		// Upload to all URLs
+		for _, url := range SafecastUploadURLs {
+			go doUploadToSafecast(sd, url)
+		}
+
+		// Upload data to the notehub that didn't actually come from notehub
+		go doUploadToNotehub(sd)
+	}
 
 	return true
 }
@@ -1009,8 +1027,8 @@ func doUploadToNotehub(sd ttdata.SafecastData) {
 }
 
 // Upload a Safecast data structure to the Safecast service
+// This is kept for backward compatibility but will only be used if UseExternalEndpoints is true
 func doUploadToSafecast(sd ttdata.SafecastData, url string) bool {
-
 	var CapturedAt string
 	if sd.CapturedAt != nil {
 		CapturedAt = *sd.CapturedAt
