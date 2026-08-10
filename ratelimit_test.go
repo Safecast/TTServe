@@ -55,11 +55,19 @@ func latMetersNorth(meters float64) float64 {
 	return baseLat + (meters/6371008.8)*180/math.Pi
 }
 
+// The CPM that accept() records and that v1() reports, so that by default a
+// probe reads exactly the same as the reference and is not treated as a spike
+const baseCPM = 47.0
+
 // Record an accepted measurement the way the ingestion pipeline eventually does,
 // by writing the device status file that rateLimitReference reads.  This is
-// WriteDeviceStatus without its random 0-30s delay and its merge of every other
-// field, neither of which these tests care about.
+// WriteDeviceStatus without its merge of every other field, which these tests do
+// not care about.
 func accept(deviceUID string, deviceClass string, capturedAt string, lat *float64, lon *float64) {
+	acceptCPM(deviceUID, deviceClass, capturedAt, lat, lon, baseCPM)
+}
+
+func acceptCPM(deviceUID string, deviceClass string, capturedAt string, lat *float64, lon *float64, cpm float64) {
 	var ds DeviceStatus
 	ds.DeviceUID = deviceUID
 	ds.DeviceClass = deviceClass
@@ -67,6 +75,7 @@ func accept(deviceUID string, deviceClass string, capturedAt string, lat *float6
 	if lat != nil && lon != nil {
 		ds.Loc = &ttdata.Loc{Lat: lat, Lon: lon}
 	}
+	ds.Lnd = &ttdata.Lnd{U7318: &cpm}
 	contents, err := json.Marshal(ds)
 	if err != nil {
 		panic(err)
@@ -74,6 +83,16 @@ func accept(deviceUID string, deviceClass string, capturedAt string, lat *float6
 	if err = os.WriteFile(GetDeviceStatusFilePath(deviceUID), contents, 0666); err != nil {
 		panic(err)
 	}
+}
+
+// An inbound V1 measurement, as SafecastV1Decode would have produced it
+func v1(capturedAt string, lat *float64, lon *float64) *SafecastDataV1 {
+	return v1cpm(capturedAt, lat, lon, baseCPM)
+}
+
+func v1cpm(capturedAt string, lat *float64, lon *float64, cpm float64) *SafecastDataV1 {
+	unit := "cpm"
+	return &SafecastDataV1{CapturedAt: &capturedAt, Latitude: lat, Longitude: lon, Unit: &unit, Value: &cpm}
 }
 
 func f(v float64) *float64 {
@@ -97,7 +116,7 @@ func TestRateLimitedDeviceClass(t *testing.T) {
 
 func TestRateLimitFirstMeasurementIsAccepted(t *testing.T) {
 	uid := "geigiecast:60001"
-	exceeded, _ := RateLimitExceeded(uid, "geigiecast", at(0), f(baseLat), f(baseLon))
+	exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1(at(0), f(baseLat), f(baseLon)))
 	if exceeded {
 		t.Fatal("the first measurement from a device must be accepted")
 	}
@@ -107,7 +126,7 @@ func TestRateLimitParkedDeviceIsRejected(t *testing.T) {
 	uid := "geigiecast:60002"
 	accept(uid, "geigiecast", at(0), f(baseLat), f(baseLon))
 
-	exceeded, retryAfter := RateLimitExceeded(uid, "geigiecast", at(10), f(baseLat), f(baseLon))
+	exceeded, retryAfter := RateLimitExceeded(uid, "geigiecast", v1(at(10), f(baseLat), f(baseLon)))
 	if !exceeded {
 		t.Fatal("a measurement 10s later from the same spot must be rejected")
 	}
@@ -121,12 +140,12 @@ func TestRateLimitWindowBoundary(t *testing.T) {
 	accept(uid, "geigiecast-zen", at(0), f(baseLat), f(baseLon))
 
 	// Less than RateLimitSeconds after the accepted measurement: rejected
-	if exceeded, _ := RateLimitExceeded(uid, "geigiecast-zen", at(RateLimitSeconds-1), f(baseLat), f(baseLon)); !exceeded {
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast-zen", v1(at(RateLimitSeconds-1), f(baseLat), f(baseLon))); !exceeded {
 		t.Errorf("%ds after must be rejected", RateLimitSeconds-1)
 	}
 
 	// Exactly RateLimitSeconds after: accepted, since it is not LESS than the window
-	if exceeded, _ := RateLimitExceeded(uid, "geigiecast-zen", at(RateLimitSeconds), f(baseLat), f(baseLon)); exceeded {
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast-zen", v1(at(RateLimitSeconds), f(baseLat), f(baseLon))); exceeded {
 		t.Errorf("exactly %ds after must be accepted", RateLimitSeconds)
 	}
 }
@@ -136,12 +155,12 @@ func TestRateLimitDistanceBoundary(t *testing.T) {
 	accept(uid, "geigiecast", at(0), f(baseLat), f(baseLon))
 
 	// Well inside the radius and inside the window: rejected
-	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", at(10), f(latMetersNorth(RateLimitMeters-1)), f(baseLon)); !exceeded {
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1(at(10), f(latMetersNorth(RateLimitMeters-1)), f(baseLon))); !exceeded {
 		t.Errorf("%dm away must be rejected", RateLimitMeters-1)
 	}
 
 	// Outside the radius, even well inside the window: accepted
-	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", at(10), f(latMetersNorth(RateLimitMeters+1)), f(baseLon)); exceeded {
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1(at(10), f(latMetersNorth(RateLimitMeters+1)), f(baseLon))); exceeded {
 		t.Errorf("%dm away must be accepted", RateLimitMeters+1)
 	}
 }
@@ -154,7 +173,7 @@ func TestRateLimitMovingDeviceIsAccepted(t *testing.T) {
 	for i := 1; i <= 10; i++ {
 		capturedAt := at(i * 10)
 		lat := latMetersNorth(float64(i) * 150)
-		if exceeded, _ := RateLimitExceeded(uid, "geigiecast", capturedAt, f(lat), f(baseLon)); exceeded {
+		if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1(capturedAt, f(lat), f(baseLon))); exceeded {
 			t.Fatalf("a moving device must never be rejected (sample %d)", i)
 		}
 		accept(uid, "geigiecast", capturedAt, f(lat), f(baseLon))
@@ -168,7 +187,7 @@ func TestRateLimitOneSamplePerWindowWhileParked(t *testing.T) {
 	// A parked device uploading every 10s for an hour
 	for secs := 0; secs <= 3600; secs += 10 {
 		capturedAt := at(secs)
-		exceeded, _ := RateLimitExceeded(uid, "geigiecast-zen", capturedAt, f(baseLat), f(baseLon))
+		exceeded, _ := RateLimitExceeded(uid, "geigiecast-zen", v1(capturedAt, f(baseLat), f(baseLon)))
 		if !exceeded {
 			accepted++
 			accept(uid, "geigiecast-zen", capturedAt, f(baseLat), f(baseLon))
@@ -182,24 +201,152 @@ func TestRateLimitOneSamplePerWindowWhileParked(t *testing.T) {
 	}
 }
 
+// The first whole CPM that clears, and the last that does not clear, the spike
+// threshold above a given reference
+func justAboveSpike(ref float64) float64 { return math.Floor(RateLimitSpikeThreshold(ref)) + 1 }
+func justBelowSpike(ref float64) float64 { return math.Floor(RateLimitSpikeThreshold(ref)) }
+
+func TestRateLimitSpikeThresholdScalesWithTheReading(t *testing.T) {
+	// Poisson noise grows as sqrt, so the bar must too.  A margin generous at
+	// background has to be proportionally generous in a hot spot.
+	for _, ref := range []float64{20, 37, 100, 500, 2000} {
+		margin := RateLimitSpikeThreshold(ref) - ref
+		sigmas := margin / math.Sqrt(ref)
+		if math.Abs(sigmas-RateLimitSpikeSigmas) > 0.001 {
+			t.Errorf("at %.0f CPM the margin is %.1f sigma, expected %.1f", ref, sigmas, RateLimitSpikeSigmas)
+		}
+	}
+
+	// Going from nothing to something is always a spike
+	if RateLimitSpikeThreshold(0) != 0 {
+		t.Error("a zero reference must admit anything above zero")
+	}
+}
+
+func TestRateLimitSpikeAlwaysGoesThrough(t *testing.T) {
+	uid := "geigiecast:60008"
+	accept(uid, "geigiecast", at(0), f(baseLat), f(baseLon))
+
+	// Same place, one second later, but the reading has risen past the threshold
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(1), f(baseLat), f(baseLon), justAboveSpike(baseCPM))); exceeded {
+		t.Error("a reading above the spike threshold must never be rejected")
+	}
+
+	// A dramatic one, likewise
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(1), f(baseLat), f(baseLon), baseCPM*100)); exceeded {
+		t.Error("a large spike must never be rejected")
+	}
+
+	// A rise that is only counting noise is not a spike
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(1), f(baseLat), f(baseLon), justBelowSpike(baseCPM))); !exceeded {
+		t.Error("a rise within the noise must be rejected inside the window")
+	}
+
+	// Nor is an unchanged or falling reading
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(1), f(baseLat), f(baseLon), baseCPM)); !exceeded {
+		t.Error("an unchanged reading must be rejected inside the window")
+	}
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(1), f(baseLat), f(baseLon), baseCPM-1)); !exceeded {
+		t.Error("a lower reading must be rejected inside the window")
+	}
+}
+
+func TestRateLimitSpikeResetsTheWindow(t *testing.T) {
+	uid := "geigiecast:60009"
+	accept(uid, "geigiecast", at(0), f(baseLat), f(baseLon))
+
+	// A spike at t=1 is accepted, and becomes the new reference
+	spike := justAboveSpike(baseCPM)
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(1), f(baseLat), f(baseLon), spike)); exceeded {
+		t.Fatal("the spike must be accepted")
+	}
+	acceptCPM(uid, "geigiecast", at(1), f(baseLat), f(baseLon), spike)
+
+	// So the window now runs from t=1, not from t=0
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(RateLimitSeconds), f(baseLat), f(baseLon), baseCPM)); !exceeded {
+		t.Error("the window must restart from the spike, so t=300 is still inside it")
+	}
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(RateLimitSeconds+1), f(baseLat), f(baseLon), baseCPM)); exceeded {
+		t.Error("t=301 is outside the window that restarted at t=1")
+	}
+
+	// And the bar for the next spike has risen with it
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(2), f(baseLat), f(baseLon), justBelowSpike(spike))); !exceeded {
+		t.Error("a reading below the new threshold must be rejected")
+	}
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(2), f(baseLat), f(baseLon), justAboveSpike(spike))); exceeded {
+		t.Error("a reading above the new threshold must be accepted")
+	}
+}
+
+func TestRateLimitClimbIntoAHotAreaIsFullyReported(t *testing.T) {
+	uid := "geigiecast:60010"
+	accept(uid, "geigiecast", at(0), f(baseLat), f(baseLon))
+
+	// A device driving into a hot area, uploading every second.  Every step of
+	// the climb must be reported even though it never moves.
+	cpm := baseCPM
+	for i := 1; i <= 12; i++ {
+		cpm = justAboveSpike(cpm)
+		if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(i), f(baseLat), f(baseLon), cpm)); exceeded {
+			t.Fatalf("step %d of a climb was dropped at %.0f CPM", i, cpm)
+		}
+		acceptCPM(uid, "geigiecast", at(i), f(baseLat), f(baseLon), cpm)
+	}
+
+	// Twelve seconds of minimum-sized steps is enough to go from background to
+	// well into hot-spot territory, with every step reported
+	if cpm < 500 {
+		t.Errorf("the climb only reached %.0f CPM", cpm)
+	}
+
+	// Once it plateaus, rate limiting resumes even though it is now sitting hot
+	for i := 13; i <= 22; i++ {
+		if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(i), f(baseLat), f(baseLon), cpm)); !exceeded {
+			t.Fatalf("a plateau at %.0f CPM must be rate-limited (sample %d)", cpm, i)
+		}
+	}
+
+	// And at that elevated level the bar is proportionally higher, so ordinary
+	// counting noise on top of it does not get through
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1cpm(at(23), f(baseLat), f(baseLon), cpm+math.Sqrt(cpm))); !exceeded {
+		t.Error("a one-sigma wobble in a hot spot must still be rate-limited")
+	}
+}
+
+func TestRateLimitNonCPMUnitIsNotASpike(t *testing.T) {
+	uid := "geigiecast:60011"
+	accept(uid, "geigiecast", at(0), f(baseLat), f(baseLon))
+
+	// A "status" measurement carries a temperature in value, not a count, so it
+	// must not be mistaken for a rising reading
+	unit := "status"
+	value := baseCPM + 1000
+	sd := &SafecastDataV1{CapturedAt: func() *string { s := at(10); return &s }(),
+		Latitude: f(baseLat), Longitude: f(baseLon), Unit: &unit, Value: &value}
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", sd); !exceeded {
+		t.Error("a non-CPM unit must not bypass the limit")
+	}
+}
+
 func TestRateLimitMissingLocationCountsAsSameLocation(t *testing.T) {
 	uid := "geigiecast:60005"
 	accept(uid, "geigiecast", at(0), f(baseLat), f(baseLon))
 
 	// No fix on the incoming measurement
-	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", at(10), nil, nil); !exceeded {
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1(at(10), nil, nil)); !exceeded {
 		t.Error("a measurement with no location must be rejected inside the window")
 	}
 
 	// A 0,0 "no fix" is treated the same way as an absent one
-	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", at(10), f(0), f(0)); !exceeded {
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1(at(10), f(0), f(0))); !exceeded {
 		t.Error("a measurement located at 0,0 must be rejected inside the window")
 	}
 
 	// And likewise when it is the reference that has no location
 	uid2 := "geigiecast:60006"
 	accept(uid2, "geigiecast", at(0), nil, nil)
-	if exceeded, _ := RateLimitExceeded(uid2, "geigiecast", at(10), f(baseLat), f(baseLon)); !exceeded {
+	if exceeded, _ := RateLimitExceeded(uid2, "geigiecast", v1(at(10), f(baseLat), f(baseLon))); !exceeded {
 		t.Error("a reference with no location must still rate-limit inside the window")
 	}
 }
@@ -209,12 +356,12 @@ func TestRateLimitReplayedMeasurementIsRejected(t *testing.T) {
 	accept(uid, "geigiecast", at(600), f(baseLat), f(baseLon))
 
 	// An older measurement arriving late, still inside the window
-	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", at(590), f(baseLat), f(baseLon)); !exceeded {
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1(at(590), f(baseLat), f(baseLon))); !exceeded {
 		t.Error("a replayed measurement inside the window must be rejected")
 	}
 
 	// An older measurement from well outside the window is not our concern
-	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", at(0), f(baseLat), f(baseLon)); exceeded {
+	if exceeded, _ := RateLimitExceeded(uid, "geigiecast", v1(at(0), f(baseLat), f(baseLon))); exceeded {
 		t.Error("a measurement outside the window must be accepted")
 	}
 }
@@ -222,14 +369,14 @@ func TestRateLimitReplayedMeasurementIsRejected(t *testing.T) {
 func TestRateLimitOtherDeviceClassesAreUntouched(t *testing.T) {
 	uid := "pointcast:10001"
 	accept(uid, "pointcast", at(0), f(baseLat), f(baseLon))
-	if exceeded, _ := RateLimitExceeded(uid, "pointcast", at(1), f(baseLat), f(baseLon)); exceeded {
+	if exceeded, _ := RateLimitExceeded(uid, "pointcast", v1(at(1), f(baseLat), f(baseLon))); exceeded {
 		t.Error("pointcast must never be rate-limited")
 	}
 }
 
 func TestRateLimitPolicy(t *testing.T) {
 	// The wording is what a rejected device's operator reads, so pin it
-	want := "maximum of 1 update every 5 min from a given location (+- 100m)"
+	want := "maximum of 1 update every 5 min from a given location (+- 100m) unless the reading rises sharply"
 	if got := RateLimitPolicy(); got != want {
 		t.Errorf("policy reads %q, expected %q", got, want)
 	}

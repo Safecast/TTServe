@@ -146,7 +146,7 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 		deviceClass, _, v2DeviceID := SafecastV1DeviceType(*sdV1.DeviceID)
 		if RateLimitedDeviceClass(deviceClass) {
 			deviceUID := fmt.Sprintf("%s:%d", deviceClass, v2DeviceID)
-			exceeded, retryAfterSecs := RateLimitExceeded(deviceUID, deviceClass, *sdV1.CapturedAt, sdV1.Latitude, sdV1.Longitude)
+			exceeded, retryAfterSecs := RateLimitExceeded(deviceUID, deviceClass, sdV1)
 			if exceeded {
 				requestor, _, _ := getRequestorIPv4(req)
 				fmt.Printf("\n%s Rejecting payload for %s from %s:%s\n%s\n", LogTime(), deviceUID, deviceClass, requestor, string(cleanBody))
