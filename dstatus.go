@@ -12,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -88,17 +89,13 @@ func WriteDeviceStatus(sc ttdata.SafecastData) {
 	var ChangedGeiger = false
 	var value DeviceStatus
 
-	// Delay a random amount just in case we get called very quickly
-	// with two sequential values by the same device.  While no guarantee,
-	// this reduces the chance that we will overwrite each other.
-	// This happens ALL THE TIME when there are multiple LoRa gateways
-	// that receive and upload the same message from the same device,
-	// and are typically received by different TTSERVE instances because
-	// of load balancing.  This simply reduces the possibility of
-	// file corruption due to multiple concurrent writers.  (The corruption
-	// is self-correcting, but it's still good to avoid.)
-	sleepSeconds := Random(0, 30)
-	time.Sleep(time.Duration(sleepSeconds) * time.Second)
+	// This used to delay a random 0-30s before doing anything, to scatter the
+	// concurrent writers that arrived when several LoRa gateways relayed one
+	// device's message to different TTSERVE instances at once.  That delay is
+	// gone: the LoRa/TTN devices are retired, the write below is now atomic so
+	// concurrent writers can no longer expose a half-written file, and devices
+	// uploading once a second cannot afford to have their status be half a
+	// minute stale.
 
 	// Use the supplied upload time as our modification time
 	if sc.Service == nil {
@@ -851,29 +848,46 @@ func WriteDeviceStatus(sc ttdata.SafecastData) {
 		value.IPInfo = ipInfo
 	}
 
-	// Write it to the file until it's written correctly, to allow for concurrency
+	// Write the value to a uniquely-named temp file alongside the real one, then
+	// rename it into place.  Rename is atomic, so a concurrent reader always sees
+	// either the complete previous file or the complete new one, never the
+	// half-written file that O_TRUNC used to expose.  That was the only failure
+	// this needed to defend against, so the write-then-verify-then-rewrite loop
+	// that used to be here is gone too.  A concurrent writer can still land its
+	// own complete file on top of ours, but losing one sample's merged fields is
+	// harmless -- the next write restores them.
 	filename := GetDeviceStatusFilePath(sc.DeviceUID)
 	valueJSON, _ := json.MarshalIndent(value, "", "    ")
 
-	for {
+	tempfile, errTemp := os.CreateTemp(filepath.Dir(filename), filepath.Base(filename)+".tmp")
+	if errTemp != nil {
+		fmt.Printf("*** Unable to create a temp file for %s: %v\n", filename, errTemp)
+		return
+	}
+	tempname := tempfile.Name()
 
-		// Write the value
-		fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
-		if err != nil {
-			fmt.Printf("*** Unable to write %s: %v\n", filename, err)
-			break
-		}
-		fd.WriteString(string(valueJSON))
-		fd.Close()
+	_, errWrite := tempfile.Write(valueJSON)
+	if errWrite == nil {
+		errWrite = tempfile.Sync()
+	}
+	errClose := tempfile.Close()
+	if errWrite == nil {
+		errWrite = errClose
+	}
 
-		// Delay, to increase the chance that we will catch a concurrent update/overwrite
-		time.Sleep(time.Duration(Random(1, 6)) * time.Second)
+	// CreateTemp makes a file readable only by its owner, but these are shared
+	// among all the server instances, as O_CREATE with 0666 used to make them
+	if errWrite == nil {
+		errWrite = os.Chmod(tempname, 0666)
+	}
 
-		// Do an integrity check, and re-write the value if necessary
-		_, isEmpty, _ := ReadDeviceStatus(sc.DeviceUID)
-		if !isEmpty {
-			break
-		}
+	if errWrite == nil {
+		errWrite = os.Rename(tempname, filename)
+	}
+
+	if errWrite != nil {
+		fmt.Printf("*** Unable to write %s: %v\n", filename, errWrite)
+		os.Remove(tempname)
 	}
 
 }

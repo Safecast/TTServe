@@ -228,10 +228,6 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	// If this is an air reading, annotate it with AQI if possible
 	aqiCalculate(&sd)
 
-	// Remember this as the measurement against which the next one from this
-	// device will be rate-limited
-	RateLimitAccepted(sd)
-
 	// Post to V2
 	SafecastUpload(sd)
 	SafecastLog(sd)

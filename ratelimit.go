@@ -13,10 +13,7 @@ import (
 	"fmt"
 	"math"
 	"strings"
-	"sync"
 	"time"
-
-	ttdata "github.com/Safecast/safecast-go"
 )
 
 // Debugging
@@ -30,26 +27,6 @@ const RateLimitSeconds = 300
 // RateLimitMeters is how far a device must travel from the location of its last
 // accepted measurement in order to be exempted from RateLimitSeconds.
 const RateLimitMeters = 100
-
-// How long an unheard-from device is kept in the in-memory cache below
-const rateLimitCacheExpiration = 24 * time.Hour
-
-// The last measurement that this instance accepted from a device.  The device
-// status file is the shared and durable record of that same thing, however it is
-// written asynchronously after a deliberate delay of up to 30s (see
-// WriteDeviceStatus), and so for up to 30s after an upload it still describes the
-// PRIOR measurement.  Without this cache in front of it, a device uploading every
-// few seconds would slip several measurements through each window.
-type rateLimitEntry struct {
-	capturedAt time.Time
-	hasLoc     bool
-	lat        float64
-	lon        float64
-	accepted   time.Time
-}
-
-var rateLimitLock sync.Mutex
-var rateLimitCache = map[string]rateLimitEntry{}
 
 // The formats in which a captured_at may reach us.  Devices are inconsistent
 // about this, and safecast-air is known to emit dates such as 2017-9-7T2:3:4Z.
@@ -138,68 +115,30 @@ func RateLimitExceeded(deviceUID string, deviceClass string, capturedAt string, 
 
 }
 
-// RateLimitAccepted records a measurement that has just been accepted, making it
-// the reference against which the next measurement from that device is judged.
-func RateLimitAccepted(sd ttdata.SafecastData) {
+// Fetch the last measurement accepted for a device.  The device status file is
+// the only state shared by every TTSERVE instance behind the load balancer, and
+// it is written by the normal ingestion pipeline (SafecastLog -> WriteToLogs ->
+// WriteDeviceStatus) for accepted measurements only, which is exactly the
+// reference this wants.  Note that WriteDeviceStatus deliberately delays up to
+// 30s before writing, so for that long after an upload this still describes the
+// PRIOR measurement, and a device uploading rapidly slips a few measurements
+// through each window.
+func rateLimitReference(deviceUID string) (when time.Time, lat float64, lon float64, hasLoc bool, found bool) {
 
-	if !RateLimitedDeviceClass(sd.DeviceClass) || sd.DeviceUID == "" || sd.CapturedAt == nil {
+	isAvail, isReset, ds := ReadDeviceStatus(deviceUID)
+	if !isAvail || isReset || ds.CapturedAt == nil {
 		return
 	}
 
-	when, ok := rateLimitParseTime(*sd.CapturedAt)
+	t, ok := rateLimitParseTime(*ds.CapturedAt)
 	if !ok {
 		return
 	}
 
-	entry := rateLimitEntry{capturedAt: when, accepted: time.Now()}
-	if sd.Loc != nil {
-		entry.lat, entry.lon, entry.hasLoc = rateLimitLoc(sd.Loc.Lat, sd.Loc.Lon)
-	}
-
-	rateLimitLock.Lock()
-	rateLimitCache[sd.DeviceUID] = entry
-
-	// Discard devices we haven't heard from in a very long time, so that the
-	// cache can't grow without bound.  There are only ever hundreds of entries,
-	// so a full sweep on each accepted measurement costs nothing.
-	for uid, e := range rateLimitCache {
-		if time.Since(e.accepted) > rateLimitCacheExpiration {
-			delete(rateLimitCache, uid)
-		}
-	}
-	rateLimitLock.Unlock()
-
-}
-
-// Fetch the last measurement accepted for a device, preferring whichever of the
-// shared device status file and our own in-memory record is more recent
-func rateLimitReference(deviceUID string) (when time.Time, lat float64, lon float64, hasLoc bool, found bool) {
-
-	// The device status file is the record shared by all TTSERVE instances, and
-	// it survives a restart of any of them
-	isAvail, isReset, ds := ReadDeviceStatus(deviceUID)
-	if isAvail && !isReset && ds.CapturedAt != nil {
-		t, ok := rateLimitParseTime(*ds.CapturedAt)
-		if ok {
-			when = t
-			found = true
-			if ds.Loc != nil {
-				lat, lon, hasLoc = rateLimitLoc(ds.Loc.Lat, ds.Loc.Lon)
-			}
-		}
-	}
-
-	// That file lags what this instance has accepted by up to 30s, so use our
-	// own record of it whenever it is the newer of the two
-	rateLimitLock.Lock()
-	entry, present := rateLimitCache[deviceUID]
-	rateLimitLock.Unlock()
-	if present && (!found || entry.capturedAt.After(when)) {
-		when = entry.capturedAt
-		lat = entry.lat
-		lon = entry.lon
-		hasLoc = entry.hasLoc
-		found = true
+	when = t
+	found = true
+	if ds.Loc != nil {
+		lat, lon, hasLoc = rateLimitLoc(ds.Loc.Lat, ds.Loc.Lon)
 	}
 
 	return

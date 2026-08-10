@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"math"
@@ -16,13 +17,16 @@ import (
 )
 
 // SafecastDirectory() reads os.Args[1], and exits the process if it is empty, so
-// point it at an empty scratch directory for the duration of the tests.  With no
-// device status files present, the last-accepted reference comes entirely from
-// the in-memory cache, which is what these tests exercise.
+// point it at a scratch directory for the duration of the tests.  The rate
+// limiter reads device status files out of it, and accept() below writes them.
 func TestMain(m *testing.M) {
 	dir, err := os.MkdirTemp("", "ttserve-ratelimit")
 	if err != nil {
 		fmt.Printf("can't create scratch directory: %s\n", err)
+		os.Exit(1)
+	}
+	if err = os.Mkdir(dir+TTDeviceStatusPath, 0777); err != nil {
+		fmt.Printf("can't create device status directory: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -51,13 +55,25 @@ func latMetersNorth(meters float64) float64 {
 	return baseLat + (meters/6371008.8)*180/math.Pi
 }
 
-// Record an accepted measurement, as the ingestion path does
+// Record an accepted measurement the way the ingestion pipeline eventually does,
+// by writing the device status file that rateLimitReference reads.  This is
+// WriteDeviceStatus without its random 0-30s delay and its merge of every other
+// field, neither of which these tests care about.
 func accept(deviceUID string, deviceClass string, capturedAt string, lat *float64, lon *float64) {
-	sd := ttdata.SafecastData{DeviceUID: deviceUID, DeviceClass: deviceClass, CapturedAt: &capturedAt}
+	var ds DeviceStatus
+	ds.DeviceUID = deviceUID
+	ds.DeviceClass = deviceClass
+	ds.CapturedAt = &capturedAt
 	if lat != nil && lon != nil {
-		sd.Loc = &ttdata.Loc{Lat: lat, Lon: lon}
+		ds.Loc = &ttdata.Loc{Lat: lat, Lon: lon}
 	}
-	RateLimitAccepted(sd)
+	contents, err := json.Marshal(ds)
+	if err != nil {
+		panic(err)
+	}
+	if err = os.WriteFile(GetDeviceStatusFilePath(deviceUID), contents, 0666); err != nil {
+		panic(err)
+	}
 }
 
 func f(v float64) *float64 {
