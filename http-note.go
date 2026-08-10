@@ -195,7 +195,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 
 	// Device movement
 	if e.Moved != 0 {
-		deviceMovedAt := time.Unix(e.Moved, 0).Format("2006-01-02T15:04:05Z")
+		deviceMovedAt := time.Unix(e.Moved, 0).UTC().Format("2006-01-02T15:04:05Z")
 		dev.Moved = &deviceMovedAt
 	}
 	if e.Orientation != "" {
@@ -243,7 +243,7 @@ func noteToSD(e note.Event, transport string, testMode bool) (sd ttdata.Safecast
 
 	// When captured on the device
 	if e.When != 0 {
-		capturedAt := time.Unix(e.When, 0).Format("2006-01-02T15:04:05Z")
+		capturedAt := time.Unix(e.When, 0).UTC().Format("2006-01-02T15:04:05Z")
 		sd.CapturedAt = &capturedAt
 	}
 

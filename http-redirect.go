@@ -137,6 +137,27 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 		sdV1Emit.CapturedAt = &capturedAt
 	}
 
+	// Reject measurements from devices that are uploading far more frequently
+	// than they are moving.  This must happen here, before the V1 upload below,
+	// because that upload is the first point at which the measurement would
+	// leave the building.  Only geigiecast-class devices are rate-limited, so
+	// the Pointcast reboot-loop hazard described below is not a concern.
+	if sdV1.DeviceID != nil {
+		deviceClass, _, v2DeviceID := SafecastV1DeviceType(*sdV1.DeviceID)
+		if RateLimitedDeviceClass(deviceClass) {
+			deviceUID := fmt.Sprintf("%s:%d", deviceClass, v2DeviceID)
+			exceeded, retryAfterSecs := RateLimitExceeded(deviceUID, deviceClass, *sdV1.CapturedAt, sdV1.Latitude, sdV1.Longitude)
+			if exceeded {
+				requestor, _, _ := getRequestorIPv4(req)
+				fmt.Printf("\n%s Rejecting payload for %s from %s:%s\n%s\n", LogTime(), deviceUID, deviceClass, requestor, string(cleanBody))
+				fmt.Printf("%s *** Rate-limited (%s); retry after %ds\n", LogTime(), RateLimitPolicy(), retryAfterSecs)
+				rw.Header().Set("Retry-After", fmt.Sprintf("%d", retryAfterSecs))
+				http.Error(rw, "too many measurements: "+RateLimitPolicy(), http.StatusTooManyRequests)
+				return
+			}
+		}
+	}
+
 	// Debugging on 2017-06-24 with Rob; feel free to delete after 2017-07-01 if it's still here
 	if false {
 		if sdV1.DeviceID != nil {
@@ -206,6 +227,10 @@ func inboundWebRedirectHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// If this is an air reading, annotate it with AQI if possible
 	aqiCalculate(&sd)
+
+	// Remember this as the measurement against which the next one from this
+	// device will be rate-limited
+	RateLimitAccepted(sd)
 
 	// Post to V2
 	SafecastUpload(sd)
