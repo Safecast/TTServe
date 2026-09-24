@@ -27,6 +27,7 @@ const v1UploadDebug bool = true
 const v1UploadSolarcast bool = true
 const v1UploadSolarcastDebug bool = true
 const verboseTransactions bool = true
+const notehubUploadDebug bool = true
 
 // Synchronous vs asynchronous V1 API requests
 const v1UploadAsyncFakeResults bool = false
@@ -1005,6 +1006,18 @@ func doUploadToNotehub(sd ttdata.SafecastData) {
 		return
 	}
 	defer resp.Body.Close()
+
+	// A non-2xx reply means notehub rejected the event.  Say so, because otherwise
+	// the measurement silently vanishes with no indication of what went wrong.
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		errBody, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+		fmt.Printf("notehub rejected event for %s: %s %s\n", deviceUID, resp.Status, strings.TrimSpace(string(errBody)))
+		return
+	}
+
+	if notehubUploadDebug {
+		fmt.Printf("notehub: uploaded event for %s\n%s\n", deviceUID, eventJSON)
+	}
 
 }
 
